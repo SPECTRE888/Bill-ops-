@@ -161,6 +161,9 @@ async function checkAndUpdate() {
       `cp -R "$NEWAPP" "${appPath}"`,
       `xattr -cr "${appPath}"`,
       `codesign --force --deep --sign - --timestamp=none "${appPath}" 2>/dev/null || true`,
+      `touch "${appPath}"`,
+      `/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f "${appPath}" >/dev/null 2>&1 || true`,
+      `killall Dock >/dev/null 2>&1 || true`,
       `open "${appPath}"`,
       `echo "Done."`,
     ].join('\n')
