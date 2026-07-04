@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Générateur de Facture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808;--surface:#0f0f0f;--surface2:#141414;--surface3:#1c1c1c;
+  --border:#222222;--border2:#2a2a2a;
+  --text:#ede8e0;--text2:#a09890;--text3:#585450;
+  --gold:#c4a46b;--gold2:#d4b47a;--gold3:#e8d4a8;
+  --gold-bg:rgba(196,164,107,0.07);--gold-border:rgba(196,164,107,0.20);
+  --red:#c47070;--green:#6aaa88;
+  --radius:5px;--radius-lg:8px;
+  --font-display:'Cormorant Garamond',serif;--font-body:'Jost',sans-serif;
+}
+[data-theme="light"]{
+  --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
+  --border:#ddd9d2;--border2:#ccc8c0;
+  --text:#1a1814;--text2:#6b6560;--text3:#a09890;
+  --gold:#9a7a3a;--gold2:#b08840;--gold3:#7a5e28;
+  --gold-bg:rgba(154,122,58,0.08);--gold-border:rgba(154,122,58,0.22);
+  --red:#b84444;--green:#3a7a58;
+}
+@media(prefers-color-scheme:light){
+  [data-theme="auto"]{
+    --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
+    --border:#ddd9d2;--border2:#ccc8c0;
+    --text:#1a1814;--text2:#6b6560;--text3:#a09890;
+    --gold:#9a7a3a;--gold2:#b08840;--gold3:#7a5e28;
+    --gold-bg:rgba(154,122,58,0.08);--gold-border:rgba(154,122,58,0.22);
+    --red:#b84444;--green:#3a7a58;
+  }
+}
+*{box-sizing:border-box;font-family:var(--font-body);}
+body{margin:0;background:var(--bg);color:var(--text);transition:background .2s,color .2s;}
+.app{display:grid;grid-template-columns:220px 340px 1fr;min-height:100vh;}
+.app.no-preview{grid-template-columns:220px 1fr;}
+.nav{background:var(--surface);border-right:1px solid var(--border);padding:28px 0;display:flex;flex-direction:column;}
+.nav .brand{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--gold);letter-spacing:.06em;padding:0 24px 26px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px 24px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:500;border-left:2px solid transparent;transition:.15s;}
+.nav button:hover{color:var(--text);background:var(--gold-bg);}
+.nav button.active{color:var(--gold);border-left:2px solid var(--gold);background:var(--gold-bg);}
+.nav button .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.6;}
+.theme-switch{display:flex;gap:0;margin:18px 24px 0;}
+.theme-switch button{all:unset;font-size:11px;padding:5px 10px;border:1px solid var(--border2);cursor:pointer;color:var(--text3);text-align:center;flex:1;}
+.theme-switch button:first-child{border-radius:3px 0 0 3px;border-right:none;}
+.theme-switch button:last-child{border-radius:0 3px 3px 0;border-left:none;}
+.theme-switch button.active{color:var(--gold);border-color:var(--gold-border);background:var(--gold-bg);}
+.panel{background:var(--surface);padding:24px;border-right:1px solid var(--border);overflow-y:auto;}
+.tab{display:none;} .tab.active{display:block;}
+h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:600;}
+h2:first-child{margin-top:0;}
+label{display:block;font-size:12px;color:var(--text2);margin:8px 0 3px;}
+input,select,textarea{width:100%;padding:8px;border:1px solid var(--border2);border-radius:4px;font-size:13px;background:var(--surface2);color:var(--text);}
+button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:13px;font-weight:600;}
+.btn-gold{background:var(--gold);color:var(--bg);}
+.btn-line{background:transparent;border:1px solid var(--border2);color:var(--text);margin-top:6px;}
+.row{display:flex;gap:6px;}
+.row>*{flex:1;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+.item-row{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;}
+.item-row .i-desc{display:block;width:100%;min-height:44px;resize:vertical;margin-bottom:8px;}
+.item-row .row2{display:flex;flex-direction:column;gap:6px;}
+.item-row .row2 .rline{display:grid;gap:6px;}
+.item-row .row2 .rline-time{grid-template-columns:1fr 1fr;}
+.item-row .row2 .rline-calc{grid-template-columns:1fr auto;align-items:center;}
+.item-row .row2 .rline-calc .amtDisplay{text-align:right;font-weight:600;color:var(--gold);font-size:14px;}
+.item-row .row2 .rline-actions{grid-template-columns:1fr 1fr;}
+.item-row .row2 button{padding:8px 10px;font-size:12px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:4px;}
+.item-row .row2 button:hover{border-color:var(--gold-border);color:var(--gold);}
+.client-list{margin-top:10px;}
+.client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
+.client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:default;position:relative;}
+.cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
+.cal-day.empty{background:transparent;}
+.cal-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);margin-top:2px;}
+.client-card b{color:var(--text);}
+.client-card .tag{color:var(--gold);font-weight:700;}
+.preview-wrap{padding:40px;display:none;justify-content:center;background:var(--bg);}
+.preview-wrap.active{display:flex;}
+#invoice{background:var(--surface);color:var(--text);width:210mm;min-height:297mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
+.inv-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--gold);padding-bottom:20px;}
+.inv-head h1{font-family:var(--font-display);font-size:30px;letter-spacing:.05em;margin:0;font-weight:700;}
+.gold{color:var(--gold);}
+.from-to{display:flex;justify-content:space-between;margin:30px 0;font-size:13px;}
+.from-to h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:0 0 6px;}
+table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px;}
+th{text-align:left;border-bottom:2px solid var(--gold);padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);}
+td{padding:10px 4px;border-bottom:1px solid var(--border);}
+.num{text-align:right;}
+.totals{margin-top:20px;margin-left:auto;width:260px;font-size:13px;}
+.totals div{display:flex;justify-content:space-between;padding:5px 0;}
+.totals .final{font-weight:700;font-size:16px;border-top:2px solid var(--gold);margin-top:6px;padding-top:10px;color:var(--gold)}
+.meta{margin-top:40px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:14px;}
+@media print{.nav,.panel{display:none;}.app{display:block;}.preview-wrap{padding:0;}#invoice{box-shadow:none;width:auto;}}
+</style>
+</head>
+<body>
+<div class="app no-preview" id="appRoot">
+  <div class="nav">
+    <div class="brand">FACTURATION</div>
+    <button id="nav-accueil" class="active" onclick="showTab('accueil')"><span class="dot"></span>Accueil</button>
+    <button id="nav-facture" onclick="showTab('facture')"><span class="dot"></span>Facture</button>
+    <button id="nav-clients" onclick="showTab('clients')"><span class="dot"></span>Mes clients</button>
+    <button id="nav-historique" onclick="showTab('historique')"><span class="dot"></span>Historique</button>
+    <button id="nav-planning" onclick="showTab('planning')"><span class="dot"></span>Planning</button>
+    <button id="nav-ca" onclick="showTab('ca')"><span class="dot"></span>CA</button>
+    <button id="nav-entreprise" onclick="showTab('entreprise')"><span class="dot"></span>Mon entreprise</button>
+    <div class="theme-switch">
+      <button onclick="setTheme('dark')" id="theme-dark" title="Sombre">●</button>
+      <button onclick="setTheme('auto')" id="theme-auto" title="Auto">A</button>
+      <button onclick="setTheme('light')" id="theme-light" title="Clair">○</button>
+    </div>
+  </div>
+
+  <div class="panel">
+
+    <div class="tab" id="tab-entreprise">
+      <h2>Mon entreprise</h2>
+      <label>Nom</label><input id="fromName">
+      <label>Adresse</label><input id="fromAddr">
+      <label>Email / Tel</label><input id="fromContact">
+      <label>SIRET</label><input id="fromSiret">
+      <label>Régime TVA</label>
+      <select id="fromTva">
+        <option value="TVA non applicable, art. 293 B du CGI">Franchise en base (auto-entrepreneur)</option>
+        <option value="">TVA applicable</option>
+      </select>
+      <label>Mention RCS/RM</label><input id="fromRcs" value="Dispensé d'immatriculation au RCS et au RM">
+      <label>Mode de règlement</label><input id="fromPay" value="Virement bancaire">
+      <label>RIB / IBAN</label><textarea id="fromRib" rows="2" placeholder="IBAN + BIC"></textarea>
+      <button class="btn-gold" onclick="saveFrom()">Enregistrer mes infos</button>
+      <div id="fromStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+
+      <h2>Envoi (SendGrid)</h2>
+      <label>Clé API SendGrid</label><input id="sgKey" type="password" placeholder="SG.xxxxx">
+      <label>Endpoint proxy serveur</label><input id="sgEndpoint" placeholder="https://ton-serveur.com/send-invoice">
+      <button class="btn-line" onclick="saveSg()">Enregistrer</button>
+    </div>
+
+    <div class="tab" id="tab-clients">
+      <h2>Ajouter / modifier un client</h2>
+      <input type="hidden" id="cliIdx" value="">
+      <label>Nom société</label><input id="cliName" oninput="suggestPrefix()">
+      <label>Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase">
+      <label>Email</label><input id="cliEmail">
+      <label>Adresse</label><input id="cliAddr">
+      <button class="btn-gold" onclick="saveClient()">Enregistrer le client</button>
+      <button class="btn-line" onclick="resetClientForm()">Nouveau client</button>
+
+      <h2>Clients enregistrés</h2>
+      <div class="client-list" id="clientList"></div>
+    </div>
+
+    <div class="tab active" id="tab-accueil">
+      <h2>Prestas à venir</h2>
+      <div id="accList"></div>
+    </div>
+
+    <div class="tab" id="tab-facture">
+      <h2>Client</h2>
+      <label>Nom société</label>
+      <input id="clientSelect" list="clientNames" oninput="pickClient()" onchange="pickClient()" placeholder="Tape le nom du client...">
+      <datalist id="clientNames"></datalist>
+
+      <h2>Facture</h2>
+      <div class="row">
+        <div><label>N° facture</label><input id="invNum" readonly></div>
+        <div><label>Date</label><input id="invDate" type="date" oninput="render()"></div>
+      </div>
+      <label>Date d'échéance</label><input id="invDue" type="date" oninput="render()">
+      <label>TVA (%)</label><input id="tva" type="number" value="0" oninput="render()">
+
+      <h2>Offert</h2>
+      <div class="row">
+        <div><label>Type</label>
+          <select id="offType" onchange="render()">
+            <option value="pct">%</option>
+            <option value="amt">€</option>
+          </select>
+        </div>
+        <div><label>Valeur</label><input id="offVal" type="number" value="0" oninput="render()"></div>
+      </div>
+
+      <h2>Frais déplacement</h2>
+      <label>Km parcourus</label><input id="km" type="number" value="0" oninput="render()">
+      <label>Péages</label>
+      <div id="peages"></div>
+      <button class="btn-line" onclick="addPeage();render()">+ Ajouter un péage</button>
+
+      <h2>Prestations</h2>
+      <div id="items"></div>
+      <button class="btn-line" onclick="addItem()">+ Ajouter une ligne</button>
+
+      <button class="btn-gold" onclick="render()" style="width:100%;margin-top:14px;">Générer l'aperçu</button>
+      <button class="btn-line" onclick="window.print()" style="width:100%;">Exporter en PDF</button>
+      <button class="btn-line" onclick="sendInvoice()" style="width:100%;">Envoyer au client</button>
+      <div id="status" style="font-size:11px;margin-top:8px;color:var(--gray);"></div>
+    </div>
+
+    <div class="tab" id="tab-historique">
+      <h2>Factures émises</h2>
+      <input id="histSearch" placeholder="Rechercher un client..." oninput="renderHistory()" style="margin-bottom:10px;">
+      <div id="histList"></div>
+    </div>
+
+    <div class="tab" id="tab-ca">
+      <h2>CA par client</h2>
+      <div id="caList"></div>
+    </div>
+
+    <div class="tab" id="tab-planning">
+      <h2>Nouveau booking</h2>
+      <label>Client</label><input id="bkClient" list="clientNames">
+      <label>Date prestation</label><input id="bkDate" type="date">
+      <div class="row">
+        <div><label>De</label><input id="bkFrom" type="time"></div>
+        <div><label>À</label><input id="bkTo" type="time"></div>
+        <div><label>Taux €/h</label><input id="bkRate" type="number"></div>
+      </div>
+      <button class="btn-gold" onclick="addBooking()" style="width:100%;margin-top:10px;">Ajouter au planning</button>
+
+      <h2>Prévisionnel du mois</h2>
+      <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:16px;"></div>
+
+      <h2>Calendrier</h2>
+      <div id="bkCalHead" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(-1)">‹</button>
+        <span id="bkCalLabel" style="font-family:var(--font-display);font-size:15px;color:var(--gold);"></span>
+        <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(1)">›</button>
+      </div>
+      <div id="bkCal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px;"></div>
+
+      <h2>Bookings à facturer</h2>
+      <div id="bkList"></div>
+    </div>
+
+  </div>
+
+  <div class="preview-wrap" id="previewWrap">
+    <div id="invoice">
+      <div class="inv-head">
+        <div><h1>FACTURE</h1><div class="gold" id="pInvNum"></div></div>
+        <div style="text-align:right;font-size:12px;" id="pDate"></div>
+      </div>
+      <div class="from-to">
+        <div><h3>Émetteur</h3><div id="pFrom"></div></div>
+        <div><h3>Client</h3><div id="pTo"></div></div>
+      </div>
+      <table>
+        <thead><tr><th>Prestation</th><th class="num">Heures/Qté</th><th class="num">Taux (€)</th><th class="num">Montant</th></tr></thead>
+        <tbody id="pItems"></tbody>
+      </table>
+      <div class="totals">
+        <div><span>Sous-total</span><span id="pSub"></span></div>
+        <div><span>TVA</span><span id="pTvaLine"></span></div>
+        <div id="pOffertRow" style="display:none;"><span>Offert</span><span id="pOffertLine" class="gold"></span></div>
+        <div class="final"><span>Total</span><span id="pTotal"></span></div>
+      </div>
+      <div class="meta" id="pLegal"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setTheme(t){
+  localStorage.setItem('inv_theme',t);
+  applyTheme();
+}
+function applyTheme(){
+  const theme = localStorage.getItem('inv_theme')||'auto';
+  document.documentElement.setAttribute('data-theme', theme);
+  ['dark','auto','light'].forEach(t=>{
+    const btn = document.getElementById('theme-'+t);
+    if(btn) btn.classList.toggle('active', t===theme);
+  });
+}
+applyTheme();
+
+const store = k => JSON.parse(localStorage.getItem(k) || '{}');
+const storeArr = k => JSON.parse(localStorage.getItem(k) || '[]');
+const set = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+function showTab(name){
+  const showPreview = name==='facture';
+  previewWrap.classList.toggle('active', showPreview);
+  appRoot.classList.toggle('no-preview', !showPreview);
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='clients') renderClientList();
+  if(name==='facture') refreshClientSelect();
+  if(name==='accueil') renderAccueil();
+  if(name==='historique') renderHistory();
+  if(name==='ca') renderCA();
+  if(name==='planning') renderPlanning();
+}
+
+function saveFrom(){
+  set('from', {name:fromName.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value,tva:fromTva.value,rcs:fromRcs.value,pay:fromPay.value,rib:fromRib.value});
+  fromStatus.textContent = '✔ Infos enregistrées';
+  setTimeout(()=>fromStatus.textContent='',2000);
+}
+function loadFrom(){
+  const f = store('from');
+  fromName.value=f.name||''; fromAddr.value=f.addr||''; fromContact.value=f.contact||''; fromSiret.value=f.siret||'';
+  fromTva.value=f.tva??'TVA non applicable, art. 293 B du CGI'; fromRcs.value=f.rcs||"Dispensé d'immatriculation au RCS et au RM"; fromPay.value=f.pay||'Virement bancaire';
+  fromRib.value=f.rib||'';
+}
+function saveSg(){ set('sg', {key:sgKey.value, endpoint:sgEndpoint.value}); }
+function loadSg(){ const s=store('sg'); sgKey.value=s.key||''; sgEndpoint.value=s.endpoint||''; }
+
+function suggestPrefix(){
+  if(cliPrefix.value) return;
+  const words = cliName.value.trim().split(/\s+/).filter(Boolean);
+  let p = words.length>1 ? words.map(w=>w[0]).join('') : cliName.value.slice(0,2);
+  cliPrefix.value = p.toUpperCase().slice(0,3);
+}
+function resetClientForm(){
+  cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliAddr.value='';
+}
+function saveClient(){
+  const clients = storeArr('clients');
+  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, addr:cliAddr.value};
+  if(cliIdx.value!=='') clients[cliIdx.value]=c; else clients.push(c);
+  set('clients', clients);
+  resetClientForm(); renderClientList(); refreshClientSelect();
+}
+function editClient(i){
+  const c = storeArr('clients')[i];
+  cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliAddr.value=c.addr;
+}
+function deleteClient(i){
+  const clients = storeArr('clients'); clients.splice(i,1); set('clients',clients);
+  renderClientList(); refreshClientSelect();
+}
+function renderClientList(){
+  const clients = storeArr('clients');
+  clientList.innerHTML = clients.map((c,i)=>`
+    <div class="client-card">
+      <b>${c.name}</b> <span class="tag">[${c.prefix}]</span><br>
+      ${c.email}<br>${c.addr}<br>
+      <button class="btn-line" onclick="editClient(${i})">Modifier</button>
+      <button class="btn-line" onclick="deleteClient(${i})">Supprimer</button>
+    </div>`).join('') || '<p style="color:var(--gray);font-size:12px;">Aucun client.</p>';
+}
+function refreshClientSelect(){
+  const clients = storeArr('clients');
+  clientNames.innerHTML = clients.map(c=>`<option value="${c.name}">`).join('');
+}
+let lastNumberedClient = '';
+function pickClient(){
+  const c = currentClient();
+  if(!c) return;
+  if(lastNumberedClient !== c.name){
+    invNum.value = nextInvoiceNumber(c.prefix);
+    lastNumberedClient = c.name;
+  }
+  render();
+}
+function notify(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--gold);color:var(--bg);padding:12px 18px;border-radius:6px;font-size:13px;font-weight:600;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3);';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+function saveToHistory(status){
+  const c = currentClient();
+  if(!c || !invNum.value) return;
+  const invoices = storeArr('invoices');
+  const idx = invoices.findIndex(i=>i.num===invNum.value);
+  const entry = {
+    num: invNum.value,
+    client: c.name,
+    date: invDate.value,
+    due: invDue.value,
+    total: pTotal.textContent,
+    status,
+    html: document.getElementById('invoice').outerHTML
+  };
+  if(idx>=0) invoices[idx]=entry; else invoices.push(entry);
+  set('invoices', invoices);
+  notify(status==='Envoyée' ? '✔ Facture '+invNum.value+' envoyée' : '✔ Facture '+invNum.value+' générée');
+}
+function viewInvoice(num){
+  const inv = storeArr('invoices').find(i=>i.num===num);
+  if(!inv) return;
+  const w = window.open('', '_blank');
+  w.document.write('<html><head><title>'+inv.num+'</title></head><body style="margin:0;background:#f4f3f0;display:flex;justify-content:center;padding:40px;">'+inv.html+'</body></html>');
+  w.document.close();
+}
+function downloadInvoicePdf(num){
+  viewInvoice(num);
+  setTimeout(()=>notify('Utilise Cmd/Ctrl+P → Enregistrer en PDF dans l\'onglet ouvert'), 400);
+}
+async function resendInvoice(num){
+  const inv = storeArr('invoices').find(i=>i.num===num);
+  const c = storeArr('clients').find(cl=>cl.name===inv.client);
+  const endpoint = sgEndpoint.value.trim();
+  if(!endpoint || !c){ notify('⚠ Config SendGrid ou client manquant'); return; }
+  try{
+    const res = await fetch(endpoint, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({apiKey: sgKey.value, to: c.email, subject:'Facture '+inv.num, html: inv.html})
+    });
+    notify(res.ok ? '✔ Renvoyée à '+c.email : '✕ Échec renvoi');
+    if(res.ok){
+      const invoices = storeArr('invoices');
+      invoices.find(i=>i.num===num).status='Envoyée';
+      set('invoices', invoices);
+      renderHistory();
+    }
+  }catch(e){ notify('✕ Erreur : '+e.message); }
+}
+function renderHistory(){
+  const q = (histSearch?.value||'').trim().toLowerCase();
+  let invoices = storeArr('invoices').slice().reverse();
+  if(q) invoices = invoices.filter(i=>i.client.toLowerCase().includes(q));
+  histList.innerHTML = invoices.length ? `
+    <table><thead><tr><th>N°</th><th>Client</th><th>Date</th><th>Total</th><th>Statut</th><th>Actions</th></tr></thead>
+    <tbody>${invoices.map(i=>`<tr>
+      <td>${i.num}</td><td>${i.client}</td><td>${i.date||''}</td><td class="num">${i.total}</td>
+      <td><span style="color:${i.status==='Envoyée'?'var(--green)':'var(--gold)'};font-weight:600;">${i.status}</span></td>
+      <td>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="viewInvoice('${i.num}')">Voir</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="downloadInvoicePdf('${i.num}')">PDF</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0;" onclick="resendInvoice('${i.num}')">Renvoyer</button>
+      </td>
+    </tr>`).join('')}</tbody></table>
+  ` : '<p style="color:var(--text3);font-size:12px;">Aucune facture émise.</p>';
+}
+function renderCA(){
+  const invoices = storeArr('invoices');
+  const byClient = {};
+  invoices.forEach(i=>{
+    const amt = parseFloat((i.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
+    byClient[i.client] = (byClient[i.client]||0) + amt;
+  });
+  const rows = Object.entries(byClient).sort((a,b)=>b[1]-a[1]);
+  const totalCA = rows.reduce((s,r)=>s+r[1],0);
+  caList.innerHTML = rows.length ? `
+    <div style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:16px;">${totalCA.toFixed(2)} € CA total</div>
+    <table><thead><tr><th>Client</th><th class="num">CA généré</th></tr></thead>
+    <tbody>${rows.map(([c,v])=>`<tr><td>${c}</td><td class="num">${v.toFixed(2)} €</td></tr>`).join('')}</tbody></table>
+  ` : '<p style="color:var(--text3);font-size:12px;">Aucune donnée.</p>';
+}
+function nextInvoiceNumber(prefix){
+  if(!prefix) prefix='FA';
+  const counters = store('invCounters');
+  const year = new Date().getFullYear();
+  const key = prefix+'-'+year;
+  const next = (counters[key]||0)+1;
+  counters[key]=next;
+  set('invCounters', counters);
+  return `${prefix}${year}-${String(next).padStart(3,'0')}`;
+}
+
+let calDate = new Date();
+function calShift(n){ calDate.setMonth(calDate.getMonth()+n); renderPlanning(); }
+function renderCalendar(){
+  const bookings = storeArr('bookings');
+  const y = calDate.getFullYear(), m = calDate.getMonth();
+  bkCalLabel.textContent = calDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  const first = new Date(y,m,1);
+  const startOffset = (first.getDay()+6)%7; // lundi=0
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const byDay = {};
+  bookings.forEach(b=>{ if(b.date){ const d=new Date(b.date); if(d.getFullYear()===y&&d.getMonth()===m) byDay[d.getDate()]=(byDay[d.getDate()]||0)+1; }});
+  let html = ['L','M','M','J','V','S','D'].map(d=>`<div style="font-size:10px;color:var(--text3);text-align:center;">${d}</div>`).join('');
+  for(let i=0;i<startOffset;i++) html += `<div class="cal-day empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const has = byDay[d];
+    html += `<div class="cal-day${has?' has-booking':''}">${d}${has?'<div class="cal-dot"></div>':''}</div>`;
+  }
+  bkCal.innerHTML = html;
+}
+
+function addBooking(){
+  let hours = 0;
+  if(bkFrom.value && bkTo.value){
+    const [h1,m1]=bkFrom.value.split(':').map(Number);
+    const [h2,m2]=bkTo.value.split(':').map(Number);
+    let mins=(h2*60+m2)-(h1*60+m1);
+    if(mins<0) mins+=24*60;
+    hours = mins/60;
+  }
+  const bookings = storeArr('bookings');
+  bookings.push({id:Date.now(),client:bkClient.value,date:bkDate.value,from:bkFrom.value,to:bkTo.value,hours,rate:parseFloat(bkRate.value)||0,status:'à facturer'});
+  set('bookings',bookings);
+  bkClient.value='';bkDate.value='';bkFrom.value='';bkTo.value='';bkRate.value='';
+  renderPlanning();
+}
+function invoiceBooking(id){
+  const bookings = storeArr('bookings');
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  clientSelect.value = b.client;
+  pickClient();
+  document.querySelectorAll('.item-row').forEach(r=>r.remove());
+  addItem('Prestation du '+(b.date||''), b.hours, b.rate);
+  b.status='facturé';
+  set('bookings',bookings);
+  showTab('facture');
+}
+function deleteBooking(id){
+  set('bookings', storeArr('bookings').filter(x=>x.id!==id));
+  renderPlanning();
+}
+function renderAccueil(){
+  const today = new Date().toISOString().slice(0,10);
+  const bookings = storeArr('bookings')
+    .filter(b=>b.status==='à facturer' && b.date >= today)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  accList.innerHTML = bookings.length ? bookings.map(b=>`
+    <div class="client-card">
+      <b>${b.client}</b> — ${new Date(b.date).toLocaleDateString('fr-FR')}${b.from&&b.to?' de '+b.from+' à '+b.to:''}<br>
+      ${b.hours.toFixed(2)}h × ${b.rate}€ = <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span><br>
+      <button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>
+    </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à venir.</p>';
+}
+function renderPlanning(){
+  renderCalendar();
+  const bookings = storeArr('bookings');
+  const now = new Date();
+  const monthKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const forecast = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey))
+    .reduce((s,b)=>s+b.hours*b.rate,0);
+  bkForecast.textContent = forecast.toFixed(2)+' € à facturer ce mois-ci';
+  const pending = bookings.filter(b=>b.status==='à facturer');
+  bkList.innerHTML = pending.length ? pending.map(b=>`
+    <div class="client-card">
+      <b>${b.client}</b> — ${b.date||'sans date'}${b.from&&b.to?' de '+b.from+' à '+b.to:''}<br>
+      ${b.hours}h × ${b.rate}€ = <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span><br>
+      <button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>
+      <button class="btn-line" onclick="deleteBooking(${b.id})">Supprimer</button>
+    </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucun booking en attente.</p>';
+}
+
+function updateAmt(input){
+  const row = input.closest('.item-row');
+  const qty = parseFloat(row.querySelector('.i-qty').value)||0;
+  const rate = parseFloat(row.querySelector('.i-rate').value)||0;
+  row.querySelector('.i-amt').textContent = (qty*rate).toFixed(2)+' €';
+}
+function calcRange(input){
+  const row = input.closest('.item-row');
+  const t1 = row.querySelector('.i-from').value;
+  const t2 = row.querySelector('.i-to').value;
+  if(t1 && t2){
+    const [h1,m1] = t1.split(':').map(Number);
+    const [h2,m2] = t2.split(':').map(Number);
+    let mins = (h2*60+m2) - (h1*60+m1);
+    if(mins < 0) mins += 24*60;
+    row.querySelector('.i-qty').value = (mins/60).toFixed(2);
+  }
+  const qty2 = parseFloat(row.querySelector('.i-qty').value)||0;
+  const rate2 = parseFloat(row.querySelector('.i-rate').value)||0;
+  row.querySelector('.i-amt').textContent = (qty2*rate2).toFixed(2)+' €';
+  render();
+}
+function addItem(desc='',qty='',rate='',from='',to=''){
+  const div = document.createElement('div');
+  div.className='item-row';
+  const amt = (parseFloat(qty)||0)*(parseFloat(rate)||0);
+  div.innerHTML = `<textarea placeholder="Description" class="i-desc" oninput="render()">${desc}</textarea>
+    <div class="row2">
+      <div class="rline rline-time">
+        <input type="time" class="i-from" title="Début" value="${from}" onchange="calcRange(this)">
+        <input type="time" class="i-to" title="Fin" value="${to}" onchange="calcRange(this)">
+      </div>
+      <input type="hidden" class="i-qty" value="${qty}">
+      <div class="rline rline-calc">
+        <input placeholder="Taux €/h" type="number" class="i-rate" value="${rate}" oninput="updateAmt(this);render()">
+        <span class="amtDisplay i-amt">${amt.toFixed(2)} €</span>
+      </div>
+      <div class="rline rline-actions">
+        <button class="btn-line" onclick="duplicateItem(this)">Dupliquer</button>
+        <button class="btn-line" onclick="this.closest('.item-row').remove();render()">Supprimer</button>
+      </div>
+    </div>`;
+  items.appendChild(div);
+  render();
+}
+function duplicateItem(btn){
+  const row = btn.closest('.item-row');
+  addItem(row.querySelector('.i-desc').value, row.querySelector('.i-qty').value, row.querySelector('.i-rate').value, row.querySelector('.i-from').value, row.querySelector('.i-to').value);
+  render();
+}
+addItem();
+
+function addPeage(val=''){
+  const div = document.createElement('div');
+  div.className='row';
+  div.innerHTML = `<input type="number" class="i-peage" placeholder="€" value="${val}" oninput="render()">
+    <button onclick="this.parentElement.remove();render()" style="flex:0;background:#eee;color:#900;">✕</button>`;
+  peages.appendChild(div);
+  render();
+}
+addPeage();
+
+function currentClient(){
+  const name = clientSelect.value.trim().toLowerCase();
+  if(!name) return null;
+  return storeArr('clients').find(c=>c.name.trim().toLowerCase()===name) || null;
+}
+
+function render(){
+  const f = {name:fromName.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value};
+  pFrom.innerHTML = `${f.name}<br>${f.addr}<br>${f.contact}<br>${f.siret}`;
+  const c = currentClient();
+  pTo.innerHTML = c ? `${c.name}<br>${c.addr}<br>${c.email}` : '';
+  pInvNum.textContent = 'N° ' + (invNum.value||'---');
+  pDate.textContent = 'Date : ' + (invDate.value||'');
+
+  let sub=0; pItems.innerHTML='';
+  document.querySelectorAll('.item-row').forEach(r=>{
+    const desc=r.querySelector('.i-desc').value;
+    const qty=parseFloat(r.querySelector('.i-qty').value)||0;
+    const rate=parseFloat(r.querySelector('.i-rate').value)||0;
+    const amt=qty*rate;
+    sub+=amt;
+    pItems.innerHTML += `<tr><td>${desc}</td><td class="num">${qty||''}</td><td class="num">${rate?rate.toFixed(2)+' €':'-'}</td><td class="num">${amt.toFixed(2)} €</td></tr>`;
+  });
+  const kmVal = parseFloat(km.value)||0;
+  if(kmVal>0){
+    const kmAmt = kmVal*0.5; sub+=kmAmt;
+    pItems.innerHTML += `<tr><td>Frais kilométriques</td><td class="num">${kmVal} km</td><td class="num">0.50 €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
+  }
+  let peageTotal = 0;
+  document.querySelectorAll('.i-peage').forEach(p=>{ peageTotal += parseFloat(p.value)||0; });
+  if(peageTotal>0){
+    sub+=peageTotal;
+    pItems.innerHTML += `<tr><td>Péages</td><td class="num">-</td><td class="num">-</td><td class="num">${peageTotal.toFixed(2)} €</td></tr>`;
+  }
+  const offVal_ = parseFloat(offVal.value)||0;
+  const offType_ = offType.value;
+  const offAmt = offVal_>0 ? (offType_==='pct' ? sub*offVal_/100 : offVal_) : 0;
+  if(offAmt>0){
+    sub -= offAmt;
+    pOffertRow.style.display='flex';
+    pOffertLine.textContent = '-'+offAmt.toFixed(2)+' €'+(offType_==='pct'?' ('+offVal_+'%)':'');
+  } else {
+    pOffertRow.style.display='none';
+  }
+  const tvaPct = parseFloat(tva.value)||0;
+  const tvaAmt = sub*tvaPct/100;
+  pSub.textContent = sub.toFixed(2)+' €';
+  pTvaLine.textContent = tvaAmt.toFixed(2)+' € ('+tvaPct+'%)';
+  pTotal.textContent = (sub+tvaAmt).toFixed(2)+' €';
+
+  const due = invDue.value ? new Date(invDue.value).toLocaleDateString('fr-FR') : '30 jours';
+  pLegal.innerHTML = `SIRET : ${f.siret} — ${fromRcs.value}<br>
+    ${fromTva.value}<br>
+    Mode de règlement : ${fromPay.value} — Échéance : ${due}<br>
+    ${fromRib.value ? 'RIB : '+fromRib.value.replace(/\n/g,' / ')+'<br>' : ''}
+    En cas de retard de paiement : pénalité de 3× le taux d'intérêt légal + indemnité forfaitaire de recouvrement de 40 €.`;
+  saveToHistory('Générée');
+}
+
+async function sendInvoice(){
+  render();
+  const c = currentClient();
+  const endpoint = sgEndpoint.value.trim();
+  if(!endpoint){ status.textContent="⚠ Renseigne l'URL de ton serveur proxy."; return; }
+  if(!c){ status.textContent='⚠ Sélectionne un client.'; return; }
+  status.textContent='Envoi...';
+  try{
+    const res = await fetch(endpoint, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        apiKey: sgKey.value,
+        to: c.email,
+        subject: 'Facture ' + invNum.value,
+        html: document.getElementById('invoice').outerHTML
+      })
+    });
+    status.textContent = res.ok ? '✔ Facture envoyée à '+c.email : '✕ Échec envoi (voir serveur)';
+    if(res.ok) saveToHistory('Envoyée');
+  }catch(e){ status.textContent='✕ Erreur : '+e.message; }
+}
+
+loadFrom(); loadSg(); renderClientList(); refreshClientSelect(); render();
+</script>
+</body>
+</html>
