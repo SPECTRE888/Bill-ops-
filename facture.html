@@ -141,6 +141,23 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <label>Clé API SendGrid</label><input id="sgKey" type="password" placeholder="SG.xxxxx">
       <label>Endpoint proxy serveur</label><input id="sgEndpoint" placeholder="https://ton-serveur.com/send-invoice">
       <button class="btn-line" onclick="saveSg()">Enregistrer</button>
+
+      <h2>Synchronisation</h2>
+      <div id="syncNotConnected">
+        <p style="font-size:12px;color:var(--text2);">Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.</p>
+        <button class="btn-gold" onclick="genSyncCode()">Générer un code de synchro</button>
+        <label style="margin-top:10px;">Ou coller un code existant</label>
+        <input id="syncCodeInput" placeholder="Code de synchro">
+        <button class="btn-line" onclick="connectSyncCode()">Connecter</button>
+      </div>
+      <div id="syncConnected" style="display:none;">
+        <p style="font-size:12px;color:var(--text2);">Code de synchro (à coller sur l'autre appareil) :</p>
+        <div id="syncCodeBox" style="font-family:monospace;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:8px;word-break:break-all;font-size:12px;"></div>
+        <button class="btn-line" onclick="copySyncCode()">Copier le code</button>
+        <button class="btn-line" onclick="pullSync(true)">Forcer la synchro</button>
+        <button class="btn-line" onclick="disconnectSync()" style="color:var(--red);">Déconnecter cet appareil</button>
+      </div>
+      <div id="syncStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
     </div>
 
     <div class="tab" id="tab-clients">
@@ -267,10 +284,102 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = 'https://chlmqnrvnrgeaihryreb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobG1xbnJ2bnJnZWFpaHJ5cmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNTQ1MjMsImV4cCI6MjA5ODczMDUyM30.ErgkAYc0mVv6iyEeIDtJ8kKaX6ExyNi4ribi_rvqX6s';
+const SYNC_TABLE = 'billops_sync';
+const SYNC_KEYS = { from:'{}', sg:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}' };
+let sb = null;
+function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); return sb; }
+function getSyncCode(){ return localStorage.getItem('syncCode') || ''; }
+
+function collectSyncPayload(){
+  const data = {};
+  Object.keys(SYNC_KEYS).forEach(k=>{ data[k] = JSON.parse(localStorage.getItem(k) || SYNC_KEYS[k]); });
+  data.inv_theme = localStorage.getItem('inv_theme') || 'auto';
+  return data;
+}
+function applySyncPayload(data){
+  Object.keys(SYNC_KEYS).forEach(k=>{ if(data[k]!==undefined) localStorage.setItem(k, JSON.stringify(data[k])); });
+  if(data.inv_theme) localStorage.setItem('inv_theme', data.inv_theme);
+}
+function updateSyncStatus(msg){ const el=document.getElementById('syncStatus'); if(el) el.textContent = msg; }
+function renderSyncUI(){
+  const code = getSyncCode();
+  const box = document.getElementById('syncCodeBox');
+  if(box) box.textContent = code || '—';
+  const c = document.getElementById('syncConnected'), n = document.getElementById('syncNotConnected');
+  if(c) c.style.display = code ? 'block' : 'none';
+  if(n) n.style.display = code ? 'none' : 'block';
+}
+
+let syncTimer=null, syncBusy=false;
+function queueSync(){
+  if(syncBusy || !getSyncCode()) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushSync, 1200);
+}
+async function pushSync(){
+  const code = getSyncCode();
+  if(!code) return;
+  try{
+    const { data, error } = await getSb().from(SYNC_TABLE)
+      .upsert({ sync_code: code, data: collectSyncPayload(), updated_at: new Date().toISOString() })
+      .select('updated_at').single();
+    if(error){ updateSyncStatus('✕ Erreur sync : '+error.message); return; }
+    localStorage.setItem('syncLastAppliedAt', data.updated_at);
+    updateSyncStatus('✔ Synchronisé');
+  }catch(e){ updateSyncStatus('✕ Erreur sync : '+e.message); }
+}
+async function pullSync(force){
+  const code = getSyncCode();
+  if(!code) return;
+  try{
+    const { data: row, error } = await getSb().from(SYNC_TABLE).select('data,updated_at').eq('sync_code', code).maybeSingle();
+    if(error){ updateSyncStatus('✕ Erreur sync : '+error.message); return; }
+    if(!row){ if(force) await pushSync(); return; }
+    const lastApplied = localStorage.getItem('syncLastAppliedAt');
+    if(!force && lastApplied===row.updated_at) return;
+    syncBusy = true;
+    applySyncPayload(row.data);
+    localStorage.setItem('syncLastAppliedAt', row.updated_at);
+    syncBusy = false;
+    if(lastApplied!==row.updated_at) location.reload();
+  }catch(e){ updateSyncStatus('✕ Erreur sync : '+e.message); syncBusy=false; }
+}
+function genSyncCode(){
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  const code = Array.from(bytes, b=>b.toString(16).padStart(2,'0')).join('');
+  localStorage.setItem('syncCode', code);
+  renderSyncUI();
+  pushSync();
+}
+function connectSyncCode(){
+  const code = (document.getElementById('syncCodeInput').value||'').trim();
+  if(!code){ updateSyncStatus('⚠ Colle un code valide'); return; }
+  localStorage.setItem('syncCode', code);
+  localStorage.removeItem('syncLastAppliedAt');
+  renderSyncUI();
+  pullSync(true);
+}
+function disconnectSync(){
+  localStorage.removeItem('syncCode');
+  localStorage.removeItem('syncLastAppliedAt');
+  renderSyncUI();
+  updateSyncStatus('');
+}
+function copySyncCode(){
+  const code = getSyncCode();
+  if(!code) return;
+  navigator.clipboard?.writeText(code);
+  updateSyncStatus('✔ Code copié');
+}
+
 function setTheme(t){
   localStorage.setItem('inv_theme',t);
   applyTheme();
+  queueSync();
 }
 function applyTheme(){
   const theme = localStorage.getItem('inv_theme')||'auto';
@@ -284,7 +393,7 @@ applyTheme();
 
 const store = k => JSON.parse(localStorage.getItem(k) || '{}');
 const storeArr = k => JSON.parse(localStorage.getItem(k) || '[]');
-const set = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueSync(); };
 
 function showTab(name){
   const showPreview = name==='facture';
@@ -688,6 +797,10 @@ async function sendInvoice(){
 }
 
 loadFrom(); loadSg(); renderClientList(); refreshClientSelect(); render();
+renderSyncUI();
+if(getSyncCode()) pullSync(false);
+setInterval(()=>{ if(getSyncCode()) pullSync(false); }, 60000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && getSyncCode()) pullSync(false); });
 </script>
 </body>
 </html>
