@@ -130,6 +130,10 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 #accList{margin-bottom:4px;}
 .tab#tab-facture.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 .facture-scroll{flex:1;min-height:0;overflow-y:auto;}
+.facture-actionbar{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:10px 24px;border-top:1px solid var(--border);flex-shrink:0;}
+.facture-actionbar h2{grid-column:1/-1;}
+.facture-actionbar button{width:100%;margin:0;padding:8px 6px;font-size:11.5px;}
+.facture-actionbar #status{grid-column:1/-1;font-size:10.5px;color:var(--text2);}
 .facture-fixed-top h2:first-child{margin-top:0;}
 #tab-facture h2{margin:12px 0 6px;}
 #tab-facture .facture-fixed-top h2:first-child{margin-top:0;}
@@ -262,17 +266,24 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           <div><label>Date</label><input id="invDate" type="date" oninput="render()"></div>
         </div>
         <div id="tvaFieldWrap" style="display:none;"><label>TVA (%)</label><input id="tva" type="number" value="0" oninput="render()"></div>
-        <div id="tvaFranchiseInfo" style="font-size:10.5px;margin-top:3px;color:var(--text2);"></div>
 
         <h2>Frais déplacement</h2>
         <div class="row">
           <div><label>Km parcourus</label><input id="km" type="number" value="0" oninput="render()"></div>
-          <div><label>Parking</label><div id="parkings"></div></div>
+          <div><label>Péage</label><input id="peage" type="number" value="0" oninput="render()"></div>
+          <div><label>Parking</label><input id="parking" type="number" value="0" oninput="render()"></div>
         </div>
-        <button class="btn-line" onclick="addParking();render()" style="margin-top:4px;">+ Ajouter un parking</button>
+      </div>
 
-        <h2>Offert</h2>
-        <div class="row">
+      <h2 style="margin:12px 0 6px;flex-shrink:0;">Prestations</h2>
+      <div class="facture-scroll">
+        <div id="items"></div>
+      </div>
+      <button class="btn-line" onclick="addItem()" style="margin:6px 0 0;flex-shrink:0;">+ Ajouter une ligne</button>
+
+      <div class="facture-actionbar">
+        <h2 style="margin:0 0 6px;">Offert</h2>
+        <div class="row" style="grid-column:1/-1;margin-bottom:8px;">
           <div><label>Type</label>
             <select id="offType" onchange="render()">
               <option value="pct">%</option>
@@ -281,22 +292,11 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           </div>
           <div><label>Valeur</label><input id="offVal" type="number" value="0" oninput="render()"></div>
         </div>
-
-        <div class="row" style="margin-top:10px;">
-          <button class="btn-gold" onclick="render()" style="width:100%;">Générer l'aperçu</button>
-          <button class="btn-gold" onclick="saveInvoice()" style="width:100%;">Enregistrer</button>
-        </div>
-        <div class="row" style="margin-top:6px;">
-          <button class="btn-line" onclick="window.print()" style="width:100%;margin-top:0;">Exporter en PDF</button>
-          <button class="btn-line" onclick="sendInvoice()" style="width:100%;margin-top:0;">Envoyer au client</button>
-        </div>
-        <div id="status" style="font-size:11px;margin-top:6px;color:var(--text2);"></div>
-      </div>
-
-      <div class="facture-scroll">
-        <h2>Prestations</h2>
-        <div id="items"></div>
-        <button class="btn-line" onclick="addItem()">+ Ajouter une ligne</button>
+        <button class="btn-gold" onclick="render()">Générer l'aperçu</button>
+        <button class="btn-gold" onclick="saveInvoice()">Enregistrer</button>
+        <button class="btn-line" onclick="window.print()">Exporter en PDF</button>
+        <button class="btn-line" onclick="sendInvoice()">Envoyer au client</button>
+        <div id="status"></div>
       </div>
     </div>
 
@@ -655,7 +655,8 @@ function collectInvoiceState(){
     offType: offType.value,
     offVal: offVal.value,
     km: km.value,
-    parkings: [...document.querySelectorAll('.i-parking')].map(p=>p.value),
+    peage: peage.value,
+    parking: parking.value,
     items: [...document.querySelectorAll('.item-row')].map(r=>({
       desc: r.querySelector('.i-desc').value,
       qty: r.querySelector('.i-qty').value,
@@ -678,8 +679,8 @@ function editInvoice(num){
   offType.value = s.offType||'pct';
   offVal.value = s.offVal||0;
   km.value = s.km||0;
-  parkings.innerHTML = '';
-  (s.parkings||[]).forEach(v=>addParking(v));
+  peage.value = s.peage||0;
+  parking.value = s.parking||0;
   document.querySelectorAll('.item-row').forEach(r=>r.remove());
   (s.items&&s.items.length ? s.items : [{}]).forEach(it=>addItem(it.desc||'', it.qty||'', it.rate||'', it.from||'', it.to||'', (it.dates&&it.dates.length) ? it.dates : (it.date ? [it.date] : [])));
   render();
@@ -770,11 +771,16 @@ function renderCA(){
   const totalCA = invoices.reduce((s,i)=>s+amt(i),0);
   const caYear = invoices.filter(i=>(i.date||'').startsWith(yearKey)).reduce((s,i)=>s+amt(i),0);
   const caMonth = invoices.filter(i=>(i.date||'').startsWith(monthKey)).reduce((s,i)=>s+amt(i),0);
+  const SEUIL_FRANCHISE_TVA = 32000;
+  const franchiseDepassee = caYear > SEUIL_FRANCHISE_TVA;
   caStats.innerHTML = `
     <div class="stat-row">
       <div class="stat-mini"><div class="stat-mini-value">${caMonth.toFixed(2)} €</div><div class="stat-mini-label">Ce mois</div></div>
       <div class="stat-mini"><div class="stat-mini-value">${caYear.toFixed(2)} €</div><div class="stat-mini-label">Cette année</div></div>
       <div class="stat-mini"><div class="stat-mini-value">${totalCA.toFixed(2)} €</div><div class="stat-mini-label">Total</div></div>
+    </div>
+    <div style="font-size:11px;margin-bottom:14px;color:${franchiseDepassee?'var(--red)':'var(--text2)'};">
+      ${franchiseDepassee ? '⚠' : ''} CA ${yearKey} cumulé : ${caYear.toFixed(2)} € / ${SEUIL_FRANCHISE_TVA} € ${franchiseDepassee ? '— seuil de franchise dépassé, TVA applicable.' : '(franchise en base active).'}
     </div>`;
   const byClient = {};
   invoices.forEach(i=>{ byClient[i.client] = (byClient[i.client]||0) + amt(i); });
@@ -1088,15 +1094,6 @@ function duplicateItem(btn){
 }
 addItem();
 
-function addParking(val=''){
-  const div = document.createElement('div');
-  div.className='row';
-  div.innerHTML = `<input type="number" class="i-parking" placeholder="€" value="${val}" oninput="render()">
-    <button onclick="this.parentElement.remove();render()" style="flex:0;background:#eee;color:#900;">✕</button>`;
-  parkings.appendChild(div);
-  render();
-}
-
 function currentClient(){
   const name = clientSelect.value.trim().toLowerCase();
   if(!name) return null;
@@ -1124,8 +1121,7 @@ function render(){
     const rate=parseFloat(r.querySelector('.i-rate').value)||0;
     const amt=qty*rate;
     sub+=amt;
-    const dateTimeLine = [dates.length ? `<b>${formatFrDatesGrouped(dates)}</b>` : '', (from&&to) ? `${from} – ${to}` : ''].filter(Boolean).join(' · ');
-    const descCell = [dateTimeLine, desc].filter(Boolean).join('<br>');
+    const descCell = [dates.length ? `<b>${formatFrDatesGrouped(dates)}</b>` : '', (from&&to) ? `${from} – ${to}` : '', desc].filter(Boolean).join(' · ');
     pItems.innerHTML += `<tr><td>${descCell}</td><td class="num">${qty||''}</td><td class="num">${rate?rate.toFixed(2)+' €':'-'}</td><td class="num">${amt.toFixed(2)} €</td></tr>`;
   });
   const kmVal = parseFloat(km.value)||0;
@@ -1133,11 +1129,15 @@ function render(){
     const kmAmt = kmVal*0.5; sub+=kmAmt;
     pItems.innerHTML += `<tr><td>Frais kilométriques</td><td class="num">${kmVal} km</td><td class="num">0.50 €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
   }
-  let parkingTotal = 0;
-  document.querySelectorAll('.i-parking').forEach(p=>{ parkingTotal += parseFloat(p.value)||0; });
-  if(parkingTotal>0){
-    sub+=parkingTotal;
-    pItems.innerHTML += `<tr><td>Parking</td><td class="num">-</td><td class="num">-</td><td class="num">${parkingTotal.toFixed(2)} €</td></tr>`;
+  const peageVal = parseFloat(peage.value)||0;
+  if(peageVal>0){
+    sub+=peageVal;
+    pItems.innerHTML += `<tr><td>Péage</td><td class="num">-</td><td class="num">-</td><td class="num">${peageVal.toFixed(2)} €</td></tr>`;
+  }
+  const parkingVal = parseFloat(parking.value)||0;
+  if(parkingVal>0){
+    sub+=parkingVal;
+    pItems.innerHTML += `<tr><td>Parking</td><td class="num">-</td><td class="num">-</td><td class="num">${parkingVal.toFixed(2)} €</td></tr>`;
   }
   const offVal_ = parseFloat(offVal.value)||0;
   const offType_ = offType.value;
@@ -1161,15 +1161,11 @@ function render(){
     tva.disabled = false;
     tvaFieldWrap.style.display = 'block';
     if(parseFloat(tva.value)===0) tva.value = 20;
-    tvaFranchiseInfo.textContent = `⚠ CA ${caYear} cumulé : ${(caCumulAvant+sub).toFixed(2)} € — seuil de franchise (32 000 €) dépassé, TVA applicable.`;
-    tvaFranchiseInfo.style.color = 'var(--red)';
   } else {
     fromTva.value = 'TVA non applicable, art. 293 B du CGI';
     tva.value = 0;
     tva.disabled = true;
     tvaFieldWrap.style.display = 'none';
-    tvaFranchiseInfo.textContent = `CA ${caYear} cumulé : ${(caCumulAvant+sub).toFixed(2)} € / 32 000 € (franchise en base active).`;
-    tvaFranchiseInfo.style.color = 'var(--text2)';
   }
   const tvaMention = franchiseDepassee
     ? 'TVA applicable au taux en vigueur (franchise en base dépassée, CA cumulé > 32 000 €)'
