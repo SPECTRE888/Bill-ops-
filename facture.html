@@ -84,20 +84,42 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .preview-wrap{padding:40px;display:none;justify-content:center;background:var(--bg);}
 .preview-wrap.active{display:flex;}
 #invoice{background:var(--surface);color:var(--text);width:210mm;min-height:297mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
-.inv-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--gold);padding-bottom:20px;}
-.inv-head h1{font-family:var(--font-display);font-size:30px;letter-spacing:.05em;margin:0;font-weight:700;}
 .gold{color:var(--gold);}
-.from-to{display:flex;justify-content:space-between;margin:30px 0;font-size:13px;}
-.from-to h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:0 0 6px;}
+.inv-brand{text-align:center;padding-bottom:22px;}
+.inv-diamond{width:64px;height:64px;margin-bottom:14px;}
+.inv-diamond polygon{fill:none;stroke:var(--text);stroke-width:2;}
+.inv-diamond .inv-diamond-inner{stroke:var(--gold);}
+.inv-diamond circle{fill:var(--gold);}
+.inv-brandname{font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;display:inline-block;padding-bottom:10px;border-bottom:1px solid var(--gold-border);min-width:200px;}
+.inv-tagline{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-top:10px;}
+.inv-title-rule{display:flex;align-items:center;gap:14px;margin:26px 0;color:var(--text3);font-size:12px;letter-spacing:.35em;text-transform:uppercase;}
+.inv-title-rule::before,.inv-title-rule::after{content:'';flex:1;border-top:1px solid var(--border2);}
+.inv-meta-row{display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:24px;}
+.inv-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+.inv-value{font-weight:700;font-size:14px;}
+.from-to{display:flex;justify-content:space-between;margin:0 0 30px;font-size:13px;line-height:1.7;}
+.from-to h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin:0 0 6px;}
 table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px;}
 th{text-align:left;border-bottom:2px solid var(--gold);padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);}
 td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .num{text-align:right;}
-.totals{margin-top:20px;margin-left:auto;width:260px;font-size:13px;}
+.totals{margin-top:20px;margin-left:auto;width:280px;font-size:13px;}
 .totals div{display:flex;justify-content:space-between;padding:5px 0;}
-.totals .final{font-weight:700;font-size:16px;border-top:2px solid var(--gold);margin-top:6px;padding-top:10px;color:var(--gold)}
-.meta{margin-top:40px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:14px;}
-@media print{.nav,.panel{display:none;}.app{display:block;}.preview-wrap{padding:0;}#invoice{box-shadow:none;width:auto;}}
+.totals .final{font-weight:700;font-size:22px;border-top:2px solid var(--gold);margin-top:6px;padding-top:12px;color:var(--gold)}
+.inv-reglement{margin-top:30px;font-size:12.5px;line-height:1.8;color:var(--text2);}
+.inv-reglement h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:0 0 8px;}
+.meta{margin-top:20px;font-size:10.5px;color:var(--text3);line-height:1.6;font-style:italic;}
+.inv-footer{margin-top:40px;text-align:center;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);border-top:1px solid var(--border);padding-top:16px;}
+.inv-footer-tag{display:block;margin-top:4px;color:var(--gold);letter-spacing:.15em;}
+@media print{.nav,.panel{display:none;}.app{display:block;}.preview-wrap{padding:0;}#invoice{box-shadow:none;width:auto;}
+  :root,[data-theme]{
+    --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
+    --border:#ddd9d2;--border2:#ccc8c0;
+    --text:#1a1814;--text2:#6b6560;--text3:#a09890;
+    --gold:#9a7a3a;--gold2:#b08840;--gold3:#7a5e28;
+    --red:#b84444;--green:#3a7a58;
+  }
+}
 </style>
 </head>
 <body>
@@ -123,6 +145,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
     <div class="tab" id="tab-entreprise">
       <h2>Mon entreprise</h2>
       <label>Nom</label><input id="fromName">
+      <label>Sous-titre (optionnel, ex. villes)</label><input id="fromTagline" placeholder="Paris · Lyon · Marseille">
       <label>Adresse</label><input id="fromAddr">
       <label>Email / Tel</label><input id="fromContact">
       <label>SIRET</label><input id="fromSiret">
@@ -261,25 +284,40 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 
   <div class="preview-wrap" id="previewWrap">
     <div id="invoice">
-      <div class="inv-head">
-        <div><h1>FACTURE</h1><div class="gold" id="pInvNum"></div></div>
-        <div style="text-align:right;font-size:12px;" id="pDate"></div>
+      <div class="inv-brand">
+        <svg class="inv-diamond" viewBox="0 0 100 100">
+          <polygon points="50,4 96,50 50,96 4,50"/>
+          <polygon class="inv-diamond-inner" points="50,24 76,50 50,76 24,50"/>
+          <circle cx="50" cy="50" r="3"/>
+        </svg>
+        <div class="inv-brandname" id="pBrandName"></div>
+        <div class="inv-tagline" id="pTagline"></div>
+      </div>
+      <div class="inv-title-rule"><span>Facture</span></div>
+      <div class="inv-meta-row">
+        <div><div class="inv-label">N° de facture</div><div class="inv-value" id="pInvNum"></div></div>
+        <div style="text-align:right;"><div class="inv-label">Date</div><div class="inv-value" id="pDate"></div></div>
       </div>
       <div class="from-to">
-        <div><h3>Émetteur</h3><div id="pFrom"></div></div>
-        <div><h3>Client</h3><div id="pTo"></div></div>
+        <div><h3>De</h3><div id="pFrom"></div></div>
+        <div style="text-align:right;"><h3>À</h3><div id="pTo"></div></div>
       </div>
       <table>
-        <thead><tr><th>Prestation</th><th class="num">Heures/Qté</th><th class="num">Taux (€)</th><th class="num">Montant</th></tr></thead>
+        <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Unitaire</th><th class="num">Montant</th></tr></thead>
         <tbody id="pItems"></tbody>
       </table>
       <div class="totals">
         <div><span>Sous-total</span><span id="pSub"></span></div>
         <div><span>TVA</span><span id="pTvaLine"></span></div>
         <div id="pOffertRow" style="display:none;"><span>Offert</span><span id="pOffertLine" class="gold"></span></div>
-        <div class="final"><span>Total</span><span id="pTotal"></span></div>
+        <div class="final"><span>Total à régler</span><span id="pTotal"></span></div>
+      </div>
+      <div class="inv-reglement">
+        <h3>Règlement</h3>
+        <div id="pReglement"></div>
       </div>
       <div class="meta" id="pLegal"></div>
+      <div class="inv-footer" id="pFooter"></div>
     </div>
   </div>
 </div>
@@ -412,15 +450,22 @@ function showTab(name){
 }
 
 function saveFrom(){
-  set('from', {name:fromName.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value,tva:fromTva.value,rcs:fromRcs.value,pay:fromPay.value,rib:fromRib.value});
+  set('from', {name:fromName.value,tagline:fromTagline.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value,tva:fromTva.value,rcs:fromRcs.value,pay:fromPay.value,rib:fromRib.value});
   fromStatus.textContent = '✔ Infos enregistrées';
   setTimeout(()=>fromStatus.textContent='',2000);
 }
 function loadFrom(){
   const f = store('from');
-  fromName.value=f.name||''; fromAddr.value=f.addr||''; fromContact.value=f.contact||''; fromSiret.value=f.siret||'';
+  fromName.value=f.name||''; fromTagline.value=f.tagline||''; fromAddr.value=f.addr||''; fromContact.value=f.contact||''; fromSiret.value=f.siret||'';
   fromTva.value=f.tva??'TVA non applicable, art. 293 B du CGI'; fromRcs.value=f.rcs||"Dispensé d'immatriculation au RCS et au RM"; fromPay.value=f.pay||'Virement bancaire';
   fromRib.value=f.rib||'';
+}
+function formatFrDate(d){
+  if(!d) return '';
+  const dt = new Date(d+'T00:00:00');
+  const day = String(dt.getDate()).padStart(2,'0');
+  const month = dt.toLocaleDateString('fr-FR',{month:'long'});
+  return `${day} ${month.charAt(0).toUpperCase()+month.slice(1)} ${dt.getFullYear()}`;
 }
 function saveSg(){ set('sg', {key:sgKey.value, endpoint:sgEndpoint.value}); }
 function loadSg(){ const s=store('sg'); sgKey.value=s.key||''; sgEndpoint.value=s.endpoint||''; }
@@ -501,8 +546,9 @@ function saveToHistory(status){
 function viewInvoice(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   if(!inv) return;
+  const styles = document.querySelector('style').outerHTML;
   const w = window.open('', '_blank');
-  w.document.write('<html><head><title>'+inv.num+'</title></head><body style="margin:0;background:#f4f3f0;display:flex;justify-content:center;padding:40px;">'+inv.html+'</body></html>');
+  w.document.write('<html data-theme="light"><head><title>'+inv.num+'</title>'+styles+'</head><body style="margin:0;background:var(--bg);display:flex;justify-content:center;padding:40px;">'+inv.html+'</body></html>');
   w.document.close();
 }
 function downloadInvoicePdf(num){
@@ -721,12 +767,15 @@ function currentClient(){
 }
 
 function render(){
-  const f = {name:fromName.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value};
-  pFrom.innerHTML = `${f.name}<br>${f.addr}<br>${f.contact}<br>${f.siret}`;
+  const f = {name:fromName.value,tagline:fromTagline.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value};
+  pBrandName.textContent = f.name || 'Votre entreprise';
+  pTagline.textContent = f.tagline || '';
+  pTagline.style.display = f.tagline ? 'block' : 'none';
+  pFrom.innerHTML = `<b>${f.name}</b><br>${f.addr}<br>${f.contact}${f.siret?'<br>SIRET '+f.siret:''}`;
   const c = currentClient();
-  pTo.innerHTML = c ? `${c.name}<br>${c.addr}<br>${c.email}` : '';
-  pInvNum.textContent = 'N° ' + (invNum.value||'---');
-  pDate.textContent = 'Date : ' + (invDate.value||'');
+  pTo.innerHTML = c ? `<b>${c.name}</b><br>${c.addr}<br>${c.email}` : '';
+  pInvNum.textContent = invNum.value||'---';
+  pDate.textContent = formatFrDate(invDate.value);
 
   let sub=0; pItems.innerHTML='';
   document.querySelectorAll('.item-row').forEach(r=>{
@@ -764,12 +813,14 @@ function render(){
   pTvaLine.textContent = tvaAmt.toFixed(2)+' € ('+tvaPct+'%)';
   pTotal.textContent = (sub+tvaAmt).toFixed(2)+' €';
 
-  const due = invDue.value ? new Date(invDue.value).toLocaleDateString('fr-FR') : '30 jours';
-  pLegal.innerHTML = `SIRET : ${f.siret} — ${fromRcs.value}<br>
-    ${fromTva.value}<br>
-    Mode de règlement : ${fromPay.value} — Échéance : ${due}<br>
-    ${fromRib.value ? 'RIB : '+fromRib.value.replace(/\n/g,' / ')+'<br>' : ''}
+  const due = invDue.value ? formatFrDate(invDue.value) : '30 jours';
+  pReglement.innerHTML = `
+    Titulaire : ${f.name}<br>
+    ${fromRib.value ? fromRib.value.replace(/\n/g,'<br>')+'<br>' : ''}
+    <b>${fromPay.value} — Paiement à réception de facture, échéance : ${due}.</b>`;
+  pLegal.innerHTML = `SIRET : ${f.siret} — ${fromRcs.value}. ${fromTva.value}.<br>
     En cas de retard de paiement : pénalité de 3× le taux d'intérêt légal + indemnité forfaitaire de recouvrement de 40 €.`;
+  pFooter.innerHTML = `${(f.name||'').toUpperCase()}${f.tagline ? '<br><span class="inv-footer-tag">'+f.tagline+'</span>' : ''}`;
   saveToHistory('Générée');
 }
 
