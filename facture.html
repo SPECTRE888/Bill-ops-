@@ -78,11 +78,13 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .client-list{margin-top:10px;}
 .client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
 .client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
-.cal-day{height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;font-size:10px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.1;}
+.cal-day{min-height:54px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:10px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.15;padding:4px 5px;text-align:left;}
 .cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
 .cal-day.selected{outline:2px solid var(--gold);}
 .cal-day.empty{background:transparent;cursor:default;}
-.cal-day .cal-ca{font-size:8px;color:var(--gold);font-weight:600;}
+.cal-day .cal-daynum{font-size:11px;}
+.cal-day .cal-names{font-size:8.5px;font-weight:400;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+.cal-day .cal-ca{font-size:8.5px;color:var(--gold);font-weight:700;margin-top:auto;align-self:flex-end;}
 .cal-day-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:14px;font-size:12px;max-height:180px;overflow-y:auto;}
 .cal-day-panel .cal-b-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);gap:6px;}
 .cal-day-panel .cal-b-row:last-child{border-bottom:none;}
@@ -116,6 +118,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .meta{margin-top:20px;font-size:10.5px;color:var(--text3);line-height:1.6;font-style:italic;}
 .inv-footer{margin-top:40px;text-align:center;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);border-top:1px solid var(--border);padding-top:16px;}
 .inv-footer-tag{display:block;margin-top:4px;color:var(--gold);letter-spacing:.15em;}
+.planning-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;align-items:start;}
 .acc-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:5px;font-size:11.5px;}
 .acc-row .acc-info{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .acc-row button{padding:4px 8px;font-size:10.5px;margin:0;flex-shrink:0;}
@@ -255,7 +258,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
         </div>
         <div class="row">
           <div><label>Échéance</label><input id="invDue" type="date" oninput="render()"></div>
-          <div><label>TVA (%)</label><input id="tva" type="number" value="0" oninput="render()"></div>
+          <div id="tvaFieldWrap" style="display:none;"><label>TVA (%)</label><input id="tva" type="number" value="0" oninput="render()"></div>
         </div>
         <div id="tvaFranchiseInfo" style="font-size:10.5px;margin-top:3px;color:var(--text2);"></div>
 
@@ -340,24 +343,16 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
     </div>
 
     <div class="tab" id="tab-planning">
-      <h2>Prestas à venir</h2>
-      <div id="accList"></div>
-
-      <h2 id="bkFormTitle">Nouveau booking</h2>
-      <input type="hidden" id="bkEditId" value="">
-      <label>Client</label><input id="bkClient" list="clientNames">
-      <label>Nom de la prestation</label><input id="bkLabel" placeholder="Ex. Prestation Barman">
-      <label>Date prestation</label><input id="bkDate" type="date">
-      <div class="row">
-        <div><label>De</label><input id="bkFrom" type="time"></div>
-        <div><label>À</label><input id="bkTo" type="time"></div>
-        <div><label>Taux €/h</label><input id="bkRate" type="number"></div>
+      <div class="planning-cols">
+        <div>
+          <h2>Prestas à venir</h2>
+          <div id="accList"></div>
+        </div>
+        <div>
+          <h2>Bookings à facturer</h2>
+          <div id="bkList"></div>
+        </div>
       </div>
-      <button class="btn-gold" id="bkSubmitBtn" onclick="addBooking()" style="width:100%;margin-top:10px;">Ajouter au planning</button>
-      <button class="btn-line" id="bkCancelBtn" onclick="cancelEditBooking()" style="width:100%;display:none;">Annuler la modification</button>
-
-      <h2>Bookings à facturer</h2>
-      <div id="bkList"></div>
     </div>
 
     <div class="tab" id="tab-calendrier">
@@ -372,6 +367,19 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 
       <h2>Prévisionnel du mois</h2>
       <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:16px;"></div>
+
+      <h2 id="bkFormTitle">Nouveau booking</h2>
+      <input type="hidden" id="bkEditId" value="">
+      <label>Client</label><input id="bkClient" list="clientNames">
+      <label>Nom de la prestation</label><input id="bkLabel" placeholder="Ex. Prestation Barman">
+      <label>Date prestation</label><input id="bkDate" type="date">
+      <div class="row">
+        <div><label>De</label><input id="bkFrom" type="time"></div>
+        <div><label>À</label><input id="bkTo" type="time"></div>
+        <div><label>Taux €/h</label><input id="bkRate" type="number"></div>
+      </div>
+      <button class="btn-gold" id="bkSubmitBtn" onclick="addBooking()" style="width:100%;margin-top:10px;">Ajouter au planning</button>
+      <button class="btn-line" id="bkCancelBtn" onclick="cancelEditBooking()" style="width:100%;display:none;">Annuler la modification</button>
     </div>
 
   </div>
@@ -826,18 +834,24 @@ function renderCalendar(){
     const d = new Date(b.date);
     if(d.getFullYear()!==y||d.getMonth()!==m) return;
     const day = d.getDate();
-    if(!byDay[day]) byDay[day] = {count:0, ca:0};
+    if(!byDay[day]) byDay[day] = {count:0, ca:0, names:[]};
     byDay[day].count++;
     byDay[day].ca += b.hours*b.rate;
+    byDay[day].names.push(b.label ? b.client+' — '+b.label : b.client);
   });
   let html = ['L','M','M','J','V','S','D'].map(d=>`<div style="font-size:10px;color:var(--text3);text-align:center;">${d}</div>`).join('');
   for(let i=0;i<startOffset;i++) html += `<div class="cal-day empty"></div>`;
   for(let d=1;d<=daysInMonth;d++){
     const info = byDay[d];
     const sel = selectedCalDay===d ? ' selected' : '';
-    html += info
-      ? `<div class="cal-day has-booking${sel}" onclick="selectCalDay(${d})">${d}<span class="cal-ca">${info.ca.toFixed(0)}€</span></div>`
-      : `<div class="cal-day${sel}" onclick="selectCalDay(${d})">${d}</div>`;
+    if(info){
+      const shown = info.names.slice(0,2);
+      const extra = info.names.length - shown.length;
+      const namesHtml = shown.map(n=>`<div class="cal-names">${n}</div>`).join('') + (extra>0 ? `<div class="cal-names">+${extra} autre${extra>1?'s':''}</div>` : '');
+      html += `<div class="cal-day has-booking${sel}" onclick="selectCalDay(${d})"><span class="cal-daynum">${d}</span>${namesHtml}<span class="cal-ca">${info.ca.toFixed(0)}€</span></div>`;
+    } else {
+      html += `<div class="cal-day${sel}" onclick="selectCalDay(${d})"><span class="cal-daynum">${d}</span></div>`;
+    }
   }
   bkCal.innerHTML = html;
   renderCalDayPanel();
@@ -868,8 +882,12 @@ function addBookingForDay(day){
   const dateKey = y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
   cancelEditBooking();
   bkDate.value = dateKey;
-  showTab('planning');
   bkClient.focus();
+  bkClient.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function canInvoiceBooking(b){
+  const today = new Date().toISOString().slice(0,10);
+  return !b.date || b.date <= today;
 }
 
 function addBooking(){
@@ -908,7 +926,8 @@ function editBooking(id){
   bkFormTitle.textContent = 'Modifier le booking';
   bkSubmitBtn.textContent = 'Enregistrer les modifications';
   bkCancelBtn.style.display = 'block';
-  showTab('planning');
+  showTab('calendrier');
+  bkClient.scrollIntoView({behavior:'smooth', block:'center'});
 }
 function cancelEditBooking(){
   bkEditId.value='';
@@ -942,7 +961,9 @@ function renderAccueil(){
   accList.innerHTML = bookings.length ? bookings.map(b=>`
     <div class="acc-row">
       <div class="acc-info"><b>${b.client}</b>${b.label?' — '+b.label:''} · ${new Date(b.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}${b.from&&b.to?' '+b.from+'-'+b.to:''} · <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span></div>
-      <button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>
+      ${canInvoiceBooking(b) ? `<button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>` : ''}
+      <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
+      <button class="btn-line" onclick="deleteBooking(${b.id})">Suppr.</button>
     </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à venir.</p>';
 }
 function renderCalendarTab(){
@@ -962,7 +983,9 @@ function renderPlanning(){
     <div class="client-card">
       <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date||'sans date'}${b.from&&b.to?' de '+b.from+' à '+b.to:''}<br>
       ${b.hours}h × ${b.rate}€ = <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span><br>
-      <button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>
+      ${canInvoiceBooking(b) ? '' : `<div style="font-size:10px;color:var(--text3);margin-top:4px;">Facturable après le ${formatFrDate(b.date)}</div>`}
+      ${canInvoiceBooking(b) ? `<button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>` : ''}
+      <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
       <button class="btn-line" onclick="deleteBooking(${b.id})">Supprimer</button>
     </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucun booking en attente.</p>';
 }
@@ -1043,7 +1066,7 @@ function render(){
   pBrandName.textContent = f.name || 'Votre entreprise';
   pTagline.textContent = f.tagline || '';
   pTagline.style.display = f.tagline ? 'block' : 'none';
-  pFrom.innerHTML = `<b>${f.name}</b><br>${f.addr}<br>${f.contact}${f.siret?'<br>SIRET '+f.siret:''}`;
+  pFrom.innerHTML = `<b>${f.name}</b><br>${f.addr}<br>${f.contact}`;
   const c = currentClient();
   pTo.innerHTML = c ? `<b>${c.name}</b><br>${c.addr}<br>${c.email}` : '';
   pInvNum.textContent = invNum.value||'---';
@@ -1091,6 +1114,7 @@ function render(){
   if(franchiseDepassee){
     fromTva.value = '';
     tva.disabled = false;
+    tvaFieldWrap.style.display = 'block';
     if(parseFloat(tva.value)===0) tva.value = 20;
     tvaFranchiseInfo.textContent = `⚠ CA ${caYear} cumulé : ${(caCumulAvant+sub).toFixed(2)} € — seuil de franchise (32 000 €) dépassé, TVA applicable.`;
     tvaFranchiseInfo.style.color = 'var(--red)';
@@ -1098,6 +1122,7 @@ function render(){
     fromTva.value = 'TVA non applicable, art. 293 B du CGI';
     tva.value = 0;
     tva.disabled = true;
+    tvaFieldWrap.style.display = 'none';
     tvaFranchiseInfo.textContent = `CA ${caYear} cumulé : ${(caCumulAvant+sub).toFixed(2)} € / 32 000 € (franchise en base active).`;
     tvaFranchiseInfo.style.color = 'var(--text2)';
   }
