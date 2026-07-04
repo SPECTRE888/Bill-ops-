@@ -272,6 +272,10 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           <div><label>Péages</label><div id="peages"></div></div>
         </div>
         <button class="btn-line" onclick="addPeage();render()" style="margin-top:4px;">+ Ajouter un péage</button>
+        <div class="row" style="margin-top:8px;">
+          <div><label>Parking</label><div id="parkings"></div></div>
+        </div>
+        <button class="btn-line" onclick="addParking();render()" style="margin-top:4px;">+ Ajouter un parking</button>
       </div>
 
       <div class="facture-scroll">
@@ -661,6 +665,7 @@ function collectInvoiceState(){
     offVal: offVal.value,
     km: km.value,
     peages: [...document.querySelectorAll('.i-peage')].map(p=>p.value),
+    parkings: [...document.querySelectorAll('.i-parking')].map(p=>p.value),
     items: [...document.querySelectorAll('.item-row')].map(r=>({
       desc: r.querySelector('.i-desc').value,
       qty: r.querySelector('.i-qty').value,
@@ -685,6 +690,8 @@ function editInvoice(num){
   km.value = s.km||0;
   peages.innerHTML = '';
   (s.peages||[]).forEach(v=>addPeage(v));
+  parkings.innerHTML = '';
+  (s.parkings||[]).forEach(v=>addParking(v));
   document.querySelectorAll('.item-row').forEach(r=>r.remove());
   (s.items&&s.items.length ? s.items : [{}]).forEach(it=>addItem(it.desc||'', it.qty||'', it.rate||'', it.from||'', it.to||'', (it.dates&&it.dates.length) ? it.dates : (it.date ? [it.date] : [])));
   render();
@@ -1101,6 +1108,14 @@ function addPeage(val=''){
   peages.appendChild(div);
   render();
 }
+function addParking(val=''){
+  const div = document.createElement('div');
+  div.className='row';
+  div.innerHTML = `<input type="number" class="i-parking" placeholder="€" value="${val}" oninput="render()">
+    <button onclick="this.parentElement.remove();render()" style="flex:0;background:#eee;color:#900;">✕</button>`;
+  parkings.appendChild(div);
+  render();
+}
 addPeage();
 
 function currentClient(){
@@ -1124,11 +1139,15 @@ function render(){
   document.querySelectorAll('.item-row').forEach(r=>{
     const desc=r.querySelector('.i-desc').value;
     const dates=JSON.parse(r.querySelector('.i-dates').value||'[]');
+    const from=r.querySelector('.i-from').value;
+    const to=r.querySelector('.i-to').value;
     const qty=parseFloat(r.querySelector('.i-qty').value)||0;
     const rate=parseFloat(r.querySelector('.i-rate').value)||0;
     const amt=qty*rate;
     sub+=amt;
-    const descCell = dates.length ? `<b>${formatFrDatesGrouped(dates)}</b><br>${desc}` : desc;
+    const dateLine = dates.length ? `<b>${formatFrDatesGrouped(dates)}</b>` : '';
+    const timeLine = (from&&to) ? `${from} – ${to} (${qty}h)` : (qty ? `${qty}h` : '');
+    const descCell = [dateLine, timeLine, desc].filter(Boolean).join('<br>');
     pItems.innerHTML += `<tr><td>${descCell}</td><td class="num">${qty||''}</td><td class="num">${rate?rate.toFixed(2)+' €':'-'}</td><td class="num">${amt.toFixed(2)} €</td></tr>`;
   });
   const kmVal = parseFloat(km.value)||0;
@@ -1141,6 +1160,12 @@ function render(){
   if(peageTotal>0){
     sub+=peageTotal;
     pItems.innerHTML += `<tr><td>Péages</td><td class="num">-</td><td class="num">-</td><td class="num">${peageTotal.toFixed(2)} €</td></tr>`;
+  }
+  let parkingTotal = 0;
+  document.querySelectorAll('.i-parking').forEach(p=>{ parkingTotal += parseFloat(p.value)||0; });
+  if(parkingTotal>0){
+    sub+=parkingTotal;
+    pItems.innerHTML += `<tr><td>Parking</td><td class="num">-</td><td class="num">-</td><td class="num">${parkingTotal.toFixed(2)} €</td></tr>`;
   }
   const offVal_ = parseFloat(offVal.value)||0;
   const offType_ = offType.value;
