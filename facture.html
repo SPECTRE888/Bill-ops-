@@ -86,18 +86,17 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .client-list{margin-top:10px;}
 .client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
 .client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
-.cal-day{min-height:54px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:10px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.15;padding:4px 5px;text-align:left;}
+.cal-day{min-height:66px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
 .cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
 .cal-day.selected{outline:2px solid var(--gold);}
 .cal-day.empty{background:transparent;cursor:default;}
-.cal-day .cal-daynum{font-size:11px;}
-.cal-day .cal-names{font-size:8.5px;font-weight:400;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
-.cal-day .cal-ca{font-size:8.5px;color:var(--gold);font-weight:700;margin-top:auto;align-self:flex-end;}
+.cal-day .cal-daynum{font-size:13px;}
+.cal-day .cal-names{font-size:10px;font-weight:400;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+.cal-day .cal-ca{font-size:10px;color:var(--gold);font-weight:700;margin-top:auto;align-self:flex-end;}
 .cal-day-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:14px;font-size:12px;max-height:180px;overflow-y:auto;}
 .cal-day-panel .cal-b-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);gap:6px;}
 .cal-day-panel .cal-b-row:last-child{border-bottom:none;}
 .cal-day-panel .cal-b-row button{padding:3px 7px;font-size:10px;margin:0 0 0 3px;}
-#bkList{max-height:180px;overflow-y:auto;}
 .client-card b{color:var(--text);}
 .client-card .tag{color:var(--gold);font-weight:700;}
 .preview-wrap{padding:40px;display:none;justify-content:center;background:var(--bg);height:100%;overflow-y:auto;}
@@ -863,7 +862,7 @@ function renderCalendar(){
     if(!byDay[day]) byDay[day] = {count:0, ca:0, names:[]};
     byDay[day].count++;
     byDay[day].ca += b.hours*b.rate;
-    const timePrefix = b.from ? b.from+' ' : '';
+    const timePrefix = b.from ? (b.from+(b.to?'-'+b.to:'')+' ') : '';
     byDay[day].names.push(timePrefix + (b.label ? b.client+' — '+b.label : b.client));
   });
   let html = ['L','M','M','J','V','S','D'].map(d=>`<div style="font-size:10px;color:var(--text3);text-align:center;">${d}</div>`).join('');
@@ -911,10 +910,6 @@ function addBookingForDay(day){
   bkDate.value = dateKey;
   bkClient.focus();
   bkClient.scrollIntoView({behavior:'smooth', block:'center'});
-}
-function canInvoiceBooking(b){
-  const today = new Date().toISOString().slice(0,10);
-  return !b.date || b.date <= today;
 }
 
 function addBooking(){
@@ -988,7 +983,6 @@ function renderAccueil(){
   accList.innerHTML = bookings.length ? bookings.map(b=>`
     <div class="acc-row">
       <div class="acc-info"><b>${b.client}</b>${b.label?' — '+b.label:''} · ${new Date(b.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}${b.from&&b.to?' '+b.from+'-'+b.to:''} · <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span></div>
-      ${canInvoiceBooking(b) ? `<button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>` : ''}
       <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
       <button class="btn-line" onclick="deleteBooking(${b.id})">Suppr.</button>
     </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à venir.</p>';
@@ -1004,17 +998,17 @@ function renderCalendarTab(){
 }
 function renderPlanning(){
   renderAccueil();
+  const today = new Date().toISOString().slice(0,10);
   const bookings = storeArr('bookings');
-  const pending = bookings.filter(b=>b.status==='à facturer');
+  const pending = bookings.filter(b=>b.status==='à facturer' && (!b.date || b.date < today));
   bkList.innerHTML = pending.length ? pending.map(b=>`
     <div class="client-card">
       <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date||'sans date'}${b.from&&b.to?' de '+b.from+' à '+b.to:''}<br>
       ${b.hours}h × ${b.rate}€ = <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span><br>
-      ${canInvoiceBooking(b) ? '' : `<div style="font-size:10px;color:var(--text3);margin-top:4px;">Facturable après le ${formatFrDate(b.date)}</div>`}
-      ${canInvoiceBooking(b) ? `<button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>` : ''}
+      <button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>
       <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
       <button class="btn-line" onclick="deleteBooking(${b.id})">Supprimer</button>
-    </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucun booking en attente.</p>';
+    </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à facturer.</p>';
 }
 
 function updateAmt(input){
@@ -1049,7 +1043,7 @@ function addItem(desc='',qty='',rate='',from='',to='',dates=[]){
         <div class="i-dates-chips"></div>
         <input type="hidden" class="i-dates" value="${JSON.stringify(dates).replace(/"/g,'&quot;')}">
         <div class="rline-add-date">
-          <input type="date" class="i-date-input" title="Ajouter une date de prestation">
+          <input type="date" class="i-date-input" title="Ajouter une date de prestation" onchange="addDateChip(this)">
           <button type="button" class="btn-line" onclick="addDateChip(this)">+ Date</button>
         </div>
       </div>
