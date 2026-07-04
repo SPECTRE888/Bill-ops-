@@ -263,10 +263,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           <div><label>N° facture</label><input id="invNum" readonly></div>
           <div><label>Date</label><input id="invDate" type="date" oninput="render()"></div>
         </div>
-        <div class="row">
-          <div><label>Échéance</label><input id="invDue" type="date" oninput="render()"></div>
-          <div id="tvaFieldWrap" style="display:none;"><label>TVA (%)</label><input id="tva" type="number" value="0" oninput="render()"></div>
-        </div>
+        <div id="tvaFieldWrap" style="display:none;"><label>TVA (%)</label><input id="tva" type="number" value="0" oninput="render()"></div>
         <div id="tvaFranchiseInfo" style="font-size:10.5px;margin-top:3px;color:var(--text2);"></div>
 
         <h2>Frais déplacement</h2>
@@ -659,7 +656,6 @@ function collectInvoiceState(){
   return {
     client: clientSelect.value,
     invDate: invDate.value,
-    invDue: invDue.value,
     tva: tva.value,
     offType: offType.value,
     offVal: offVal.value,
@@ -683,7 +679,6 @@ function editInvoice(num){
   lastNumberedClient = s.client;
   invNum.value = num;
   invDate.value = s.invDate||'';
-  invDue.value = s.invDue||'';
   tva.value = s.tva||0;
   offType.value = s.offType||'pct';
   offVal.value = s.offVal||0;
@@ -705,7 +700,6 @@ function saveToHistory(status){
     num: invNum.value,
     client: c.name,
     date: invDate.value,
-    due: invDue.value,
     total: pTotal.textContent,
     status,
     state: collectInvoiceState(),
@@ -1040,10 +1034,11 @@ function addItem(desc='',qty='',rate='',from='',to='',dates=[]){
   div.innerHTML = `<textarea placeholder="Description" class="i-desc" oninput="render()">${desc}</textarea>
     <div class="row2">
       <div class="rline rline-date">
+        <label style="margin:0 0 4px;">Dates de prestation (ajoute plusieurs jours ici)</label>
         <div class="i-dates-chips"></div>
         <input type="hidden" class="i-dates" value="${JSON.stringify(dates).replace(/"/g,'&quot;')}">
         <div class="rline-add-date">
-          <input type="date" class="i-date-input" title="Ajouter une date de prestation" onchange="addDateChip(this)">
+          <input type="date" class="i-date-input" title="Choisis une date puis clique + Date pour l'ajouter à la liste">
           <button type="button" class="btn-line" onclick="addDateChip(this)">+ Date</button>
         </div>
       </div>
@@ -1189,7 +1184,7 @@ function render(){
   pTvaLine.textContent = tvaAmt.toFixed(2)+' € ('+tvaPct+'%)';
   pTotal.textContent = (sub+tvaAmt).toFixed(2)+' €';
 
-  const due = invDue.value ? formatFrDate(invDue.value) : '30 jours';
+  const due = '30 jours';
   pReglement.innerHTML = `
     Titulaire : ${f.name}<br>
     ${fromRib.value ? fromRib.value.replace(/\n/g,'<br>')+'<br>' : ''}
