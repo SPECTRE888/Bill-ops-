@@ -36,9 +36,9 @@
 }
 *{box-sizing:border-box;font-family:var(--font-body);}
 body{margin:0;background:var(--bg);color:var(--text);transition:background .2s,color .2s;}
-.app{display:grid;grid-template-columns:220px 340px 1fr;min-height:100vh;}
+.app{display:grid;grid-template-columns:220px 340px 1fr;grid-template-rows:100vh;height:100vh;overflow:hidden;}
 .app.no-preview{grid-template-columns:220px 1fr;}
-.nav{background:var(--surface);border-right:1px solid var(--border);padding:28px 0;display:flex;flex-direction:column;}
+.nav{background:var(--surface);border-right:1px solid var(--border);padding:28px 0;display:flex;flex-direction:column;height:100%;overflow-y:auto;}
 .nav .brand{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--gold);letter-spacing:.06em;padding:0 24px 26px;border-bottom:1px solid var(--border);margin-bottom:14px;}
 .nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px 24px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:500;border-left:2px solid transparent;transition:.15s;}
 .nav button:hover{color:var(--text);background:var(--gold-bg);}
@@ -51,7 +51,7 @@ body{margin:0;background:var(--bg);color:var(--text);transition:background .2s,c
 .theme-switch button:first-child{border-radius:3px 0 0 3px;border-right:none;}
 .theme-switch button:last-child{border-radius:0 3px 3px 0;border-left:none;}
 .theme-switch button.active{color:var(--gold);border-color:var(--gold-border);background:var(--gold-bg);}
-.panel{background:var(--surface);padding:24px;border-right:1px solid var(--border);overflow-y:auto;}
+.panel{background:var(--surface);padding:24px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
 .tab{display:none;} .tab.active{display:block;}
 h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:600;}
 h2:first-child{margin-top:0;}
@@ -78,10 +78,10 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .client-list{margin-top:10px;}
 .client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
 .client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
-.cal-day{height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;font-size:10px;background:var(--surface2);color:var(--text3);cursor:default;position:relative;line-height:1.1;}
-.cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;cursor:pointer;}
+.cal-day{height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;font-size:10px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.1;}
+.cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
 .cal-day.selected{outline:2px solid var(--gold);}
-.cal-day.empty{background:transparent;}
+.cal-day.empty{background:transparent;cursor:default;}
 .cal-day .cal-ca{font-size:8px;color:var(--gold);font-weight:600;}
 .cal-day-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:14px;font-size:12px;max-height:180px;overflow-y:auto;}
 .cal-day-panel .cal-b-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);gap:6px;}
@@ -90,7 +90,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 #bkList{max-height:180px;overflow-y:auto;}
 .client-card b{color:var(--text);}
 .client-card .tag{color:var(--gold);font-weight:700;}
-.preview-wrap{padding:40px;display:none;justify-content:center;background:var(--bg);}
+.preview-wrap{padding:40px;display:none;justify-content:center;background:var(--bg);height:100%;overflow-y:auto;}
 .preview-wrap.active{display:flex;}
 #invoice{background:var(--surface);color:var(--text);width:210mm;min-height:297mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
 .gold{color:var(--gold);}
@@ -116,6 +116,18 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .meta{margin-top:20px;font-size:10.5px;color:var(--text3);line-height:1.6;font-style:italic;}
 .inv-footer{margin-top:40px;text-align:center;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);border-top:1px solid var(--border);padding-top:16px;}
 .inv-footer-tag{display:block;margin-top:4px;color:var(--gold);letter-spacing:.15em;}
+.acc-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:5px;font-size:11.5px;}
+.acc-row .acc-info{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.acc-row button{padding:4px 8px;font-size:10.5px;margin:0;flex-shrink:0;}
+#accList{max-height:220px;overflow-y:auto;margin-bottom:4px;}
+.tab#tab-facture.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
+.facture-scroll{flex:1;min-height:0;overflow-y:auto;}
+.facture-fixed-top h2:first-child{margin-top:0;}
+#tab-facture h2{margin:12px 0 6px;}
+#tab-facture .facture-fixed-top h2:first-child{margin-top:0;}
+#tab-facture label{margin:5px 0 2px;font-size:11px;}
+#tab-facture input,#tab-facture select,#tab-facture textarea{padding:6px 8px;font-size:12.5px;}
+#tab-facture .row{gap:6px;}
 .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:6px;}
 .dash-card{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:18px 16px;}
 .dash-card-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
@@ -135,7 +147,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .toast-card{background:var(--surface);border:1px solid var(--gold-border);border-left:3px solid var(--gold);border-radius:6px;padding:12px 16px;min-width:260px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:13px;color:var(--text);animation:toast-in .2s ease-out;}
 .toast-card b{color:var(--gold);font-family:var(--font-display);font-size:14px;display:block;margin-bottom:2px;}
 @keyframes toast-in{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
-@media print{.nav,.panel{display:none;}.app{display:block;}.preview-wrap{padding:0;}#invoice{box-shadow:none;width:auto;}
+@media print{.nav,.panel{display:none;}.app{display:block;height:auto;overflow:visible;}.preview-wrap{padding:0;height:auto;overflow:visible;}#invoice{box-shadow:none;width:auto;}
   :root,[data-theme]{
     --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
     --border:#ddd9d2;--border2:#ccc8c0;
@@ -156,6 +168,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 
     <div class="nav-section">Planning</div>
     <button id="nav-planning" onclick="showTab('planning')"><span class="dot"></span>Planning</button>
+    <button id="nav-calendrier" onclick="showTab('calendrier')"><span class="dot"></span>Calendrier</button>
 
     <div class="nav-section">Facturation</div>
     <button id="nav-facture" onclick="showTab('facture')"><span class="dot"></span>Facture</button>
@@ -229,46 +242,59 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
     </div>
 
     <div class="tab" id="tab-facture">
-      <h2>Client</h2>
-      <label>Nom société</label>
-      <input id="clientSelect" list="clientNames" oninput="pickClient()" onchange="pickClient()" placeholder="Tape le nom du client...">
-      <datalist id="clientNames"></datalist>
+      <div class="facture-fixed-top">
+        <h2>Client</h2>
+        <label>Nom société</label>
+        <input id="clientSelect" list="clientNames" oninput="pickClient()" onchange="pickClient()" placeholder="Tape le nom du client...">
+        <datalist id="clientNames"></datalist>
 
-      <h2>Facture</h2>
-      <div class="row">
-        <div><label>N° facture</label><input id="invNum" readonly></div>
-        <div><label>Date</label><input id="invDate" type="date" oninput="render()"></div>
-      </div>
-      <label>Date d'échéance</label><input id="invDue" type="date" oninput="render()">
-      <label>TVA (%)</label><input id="tva" type="number" value="0" oninput="render()">
-      <div id="tvaFranchiseInfo" style="font-size:11px;margin-top:4px;color:var(--text2);"></div>
-
-      <h2>Frais déplacement</h2>
-      <label>Km parcourus</label><input id="km" type="number" value="0" oninput="render()">
-      <label>Péages</label>
-      <div id="peages"></div>
-      <button class="btn-line" onclick="addPeage();render()">+ Ajouter un péage</button>
-
-      <h2>Prestations</h2>
-      <div id="items"></div>
-      <button class="btn-line" onclick="addItem()">+ Ajouter une ligne</button>
-
-      <h2>Offert</h2>
-      <div class="row">
-        <div><label>Type</label>
-          <select id="offType" onchange="render()">
-            <option value="pct">%</option>
-            <option value="amt">€</option>
-          </select>
+        <h2>Facture</h2>
+        <div class="row">
+          <div><label>N° facture</label><input id="invNum" readonly></div>
+          <div><label>Date</label><input id="invDate" type="date" oninput="render()"></div>
         </div>
-        <div><label>Valeur</label><input id="offVal" type="number" value="0" oninput="render()"></div>
+        <div class="row">
+          <div><label>Échéance</label><input id="invDue" type="date" oninput="render()"></div>
+          <div><label>TVA (%)</label><input id="tva" type="number" value="0" oninput="render()"></div>
+        </div>
+        <div id="tvaFranchiseInfo" style="font-size:10.5px;margin-top:3px;color:var(--text2);"></div>
+
+        <h2>Frais déplacement</h2>
+        <div class="row">
+          <div><label>Km parcourus</label><input id="km" type="number" value="0" oninput="render()"></div>
+          <div><label>Péages</label><div id="peages"></div></div>
+        </div>
+        <button class="btn-line" onclick="addPeage();render()" style="margin-top:4px;">+ Ajouter un péage</button>
       </div>
 
-      <button class="btn-gold" onclick="render()" style="width:100%;margin-top:14px;">Générer l'aperçu</button>
-      <button class="btn-gold" onclick="saveInvoice()" style="width:100%;">Enregistrer la facture</button>
-      <button class="btn-line" onclick="window.print()" style="width:100%;">Exporter en PDF</button>
-      <button class="btn-line" onclick="sendInvoice()" style="width:100%;">Envoyer au client</button>
-      <div id="status" style="font-size:11px;margin-top:8px;color:var(--text2);"></div>
+      <div class="facture-scroll">
+        <h2>Prestations</h2>
+        <div id="items"></div>
+        <button class="btn-line" onclick="addItem()">+ Ajouter une ligne</button>
+      </div>
+
+      <div class="facture-fixed-bottom">
+        <h2>Offert</h2>
+        <div class="row">
+          <div><label>Type</label>
+            <select id="offType" onchange="render()">
+              <option value="pct">%</option>
+              <option value="amt">€</option>
+            </select>
+          </div>
+          <div><label>Valeur</label><input id="offVal" type="number" value="0" oninput="render()"></div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <button class="btn-gold" onclick="render()" style="width:100%;">Générer l'aperçu</button>
+          <button class="btn-gold" onclick="saveInvoice()" style="width:100%;">Enregistrer</button>
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <button class="btn-line" onclick="window.print()" style="width:100%;margin-top:0;">Exporter en PDF</button>
+          <button class="btn-line" onclick="sendInvoice()" style="width:100%;margin-top:0;">Envoyer au client</button>
+        </div>
+        <div id="status" style="font-size:11px;margin-top:6px;color:var(--text2);"></div>
+      </div>
     </div>
 
     <div class="tab" id="tab-historique">
@@ -317,18 +343,6 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <h2>Prestas à venir</h2>
       <div id="accList"></div>
 
-      <h2>Calendrier</h2>
-      <div id="bkCalHead" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(-1)">‹</button>
-        <span id="bkCalLabel" style="font-family:var(--font-display);font-size:15px;color:var(--gold);"></span>
-        <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(1)">›</button>
-      </div>
-      <div id="bkCal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;"></div>
-      <div id="bkDayPanel"></div>
-
-      <h2>Prévisionnel du mois</h2>
-      <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:16px;"></div>
-
       <h2 id="bkFormTitle">Nouveau booking</h2>
       <input type="hidden" id="bkEditId" value="">
       <label>Client</label><input id="bkClient" list="clientNames">
@@ -344,6 +358,20 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 
       <h2>Bookings à facturer</h2>
       <div id="bkList"></div>
+    </div>
+
+    <div class="tab" id="tab-calendrier">
+      <h2>Calendrier</h2>
+      <div id="bkCalHead" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(-1)">‹</button>
+        <span id="bkCalLabel" style="font-family:var(--font-display);font-size:15px;color:var(--gold);"></span>
+        <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(1)">›</button>
+      </div>
+      <div id="bkCal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;"></div>
+      <div id="bkDayPanel"></div>
+
+      <h2>Prévisionnel du mois</h2>
+      <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:16px;"></div>
     </div>
 
   </div>
@@ -521,6 +549,7 @@ function showTab(name){
   if(name==='facture') refreshClientSelect();
   if(name==='historique'){ renderHistory(); renderCA(); }
   if(name==='planning') renderPlanning();
+  if(name==='calendrier') renderCalendarTab();
   if(name==='accueil') renderDashboard();
 }
 
@@ -697,10 +726,18 @@ function renderHistory(){
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="viewInvoice('${i.num}')">Voir</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="editInvoice('${i.num}')">Modifier</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="downloadInvoicePdf('${i.num}')">PDF</button>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0;" onclick="resendInvoice('${i.num}')">Renvoyer</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="resendInvoice('${i.num}')">Renvoyer</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0;color:var(--red);" onclick="deleteInvoice('${i.num}')">Supprimer</button>
       </td>
     </tr>`).join('')}</tbody></table>
   ` : '<p style="color:var(--text3);font-size:12px;">Aucune facture émise.</p>';
+}
+function deleteInvoice(num){
+  if(!confirm('Supprimer définitivement la facture '+num+' ?')) return;
+  set('invoices', storeArr('invoices').filter(i=>i.num!==num));
+  renderHistory();
+  renderCA();
+  showToast('✔ Facture '+num+' supprimée.');
 }
 function renderCA(){
   const invoices = storeArr('invoices');
@@ -775,7 +812,7 @@ function nextInvoiceNumber(prefix){
 
 let calDate = new Date();
 let selectedCalDay = null;
-function calShift(n){ calDate.setMonth(calDate.getMonth()+n); selectedCalDay=null; renderPlanning(); }
+function calShift(n){ calDate.setMonth(calDate.getMonth()+n); selectedCalDay=null; renderCalendarTab(); }
 function renderCalendar(){
   const bookings = storeArr('bookings');
   const y = calDate.getFullYear(), m = calDate.getMonth();
@@ -800,7 +837,7 @@ function renderCalendar(){
     const sel = selectedCalDay===d ? ' selected' : '';
     html += info
       ? `<div class="cal-day has-booking${sel}" onclick="selectCalDay(${d})">${d}<span class="cal-ca">${info.ca.toFixed(0)}€</span></div>`
-      : `<div class="cal-day${sel}">${d}</div>`;
+      : `<div class="cal-day${sel}" onclick="selectCalDay(${d})">${d}</div>`;
   }
   bkCal.innerHTML = html;
   renderCalDayPanel();
@@ -814,15 +851,25 @@ function renderCalDayPanel(){
   const y = calDate.getFullYear(), m = calDate.getMonth();
   const dateKey = y+'-'+String(m+1).padStart(2,'0')+'-'+String(selectedCalDay).padStart(2,'0');
   const bookings = storeArr('bookings').filter(b=>b.date===dateKey);
-  if(!bookings.length){ bkDayPanel.innerHTML=''; return; }
-  bkDayPanel.innerHTML = `<div class="cal-day-panel">` + bookings.map(b=>`
+  const rows = bookings.map(b=>`
     <div class="cal-b-row">
       <span><b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' '+b.from+'-'+b.to:''} — <span class="gold">${(b.hours*b.rate).toFixed(2)} €</span></span>
       <span>
         <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
         <button class="btn-line" onclick="deleteBooking(${b.id})">Suppr.</button>
       </span>
-    </div>`).join('') + `</div>`;
+    </div>`).join('');
+  bkDayPanel.innerHTML = `<div class="cal-day-panel">${rows || '<p style="color:var(--text3);font-size:11px;margin:2px 0;">Aucune prestation ce jour.</p>'}
+    <button class="btn-gold" style="width:100%;margin-top:8px;" onclick="addBookingForDay(${selectedCalDay})">+ Ajouter une prestation</button>
+  </div>`;
+}
+function addBookingForDay(day){
+  const y = calDate.getFullYear(), m = calDate.getMonth();
+  const dateKey = y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+  cancelEditBooking();
+  bkDate.value = dateKey;
+  showTab('planning');
+  bkClient.focus();
 }
 
 function addBooking(){
@@ -846,6 +893,7 @@ function addBooking(){
   set('bookings',bookings);
   cancelEditBooking();
   renderPlanning();
+  renderCalendarTab();
 }
 function editBooking(id){
   const b = storeArr('bookings').find(x=>x.id===id);
@@ -860,6 +908,7 @@ function editBooking(id){
   bkFormTitle.textContent = 'Modifier le booking';
   bkSubmitBtn.textContent = 'Enregistrer les modifications';
   bkCancelBtn.style.display = 'block';
+  showTab('planning');
 }
 function cancelEditBooking(){
   bkEditId.value='';
@@ -883,6 +932,7 @@ function invoiceBooking(id){
 function deleteBooking(id){
   set('bookings', storeArr('bookings').filter(x=>x.id!==id));
   renderPlanning();
+  renderCalendarTab();
 }
 function renderAccueil(){
   const today = new Date().toISOString().slice(0,10);
@@ -890,14 +940,12 @@ function renderAccueil(){
     .filter(b=>b.status==='à facturer' && b.date >= today)
     .sort((a,b)=>a.date.localeCompare(b.date));
   accList.innerHTML = bookings.length ? bookings.map(b=>`
-    <div class="client-card">
-      <b>${b.client}</b>${b.label?' — '+b.label:''} — ${new Date(b.date).toLocaleDateString('fr-FR')}${b.from&&b.to?' de '+b.from+' à '+b.to:''}<br>
-      ${b.hours.toFixed(2)}h × ${b.rate}€ = <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span><br>
+    <div class="acc-row">
+      <div class="acc-info"><b>${b.client}</b>${b.label?' — '+b.label:''} · ${new Date(b.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}${b.from&&b.to?' '+b.from+'-'+b.to:''} · <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span></div>
       <button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>
     </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à venir.</p>';
 }
-function renderPlanning(){
-  renderAccueil();
+function renderCalendarTab(){
   renderCalendar();
   const bookings = storeArr('bookings');
   const now = new Date();
@@ -905,6 +953,10 @@ function renderPlanning(){
   const forecast = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey))
     .reduce((s,b)=>s+b.hours*b.rate,0);
   bkForecast.textContent = forecast.toFixed(2)+' € à facturer ce mois-ci';
+}
+function renderPlanning(){
+  renderAccueil();
+  const bookings = storeArr('bookings');
   const pending = bookings.filter(b=>b.status==='à facturer');
   bkList.innerHTML = pending.length ? pending.map(b=>`
     <div class="client-card">
