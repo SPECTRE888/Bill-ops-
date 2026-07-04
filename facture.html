@@ -123,8 +123,6 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .inv-reglement{margin-top:30px;font-size:12.5px;line-height:1.8;color:var(--text2);}
 .inv-reglement h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:0 0 8px;}
 .meta{margin-top:20px;font-size:10.5px;color:var(--text3);line-height:1.6;font-style:italic;}
-.inv-footer{margin-top:40px;text-align:center;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);border-top:1px solid var(--border);padding-top:16px;}
-.inv-footer-tag{display:block;margin-top:4px;color:var(--gold);letter-spacing:.15em;}
 .planning-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;align-items:start;}
 .acc-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:5px;font-size:11.5px;}
 .acc-row .acc-info{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -269,22 +267,10 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
         <h2>Frais déplacement</h2>
         <div class="row">
           <div><label>Km parcourus</label><input id="km" type="number" value="0" oninput="render()"></div>
-          <div><label>Péages</label><div id="peages"></div></div>
-        </div>
-        <button class="btn-line" onclick="addPeage();render()" style="margin-top:4px;">+ Ajouter un péage</button>
-        <div class="row" style="margin-top:8px;">
           <div><label>Parking</label><div id="parkings"></div></div>
         </div>
         <button class="btn-line" onclick="addParking();render()" style="margin-top:4px;">+ Ajouter un parking</button>
-      </div>
 
-      <div class="facture-scroll">
-        <h2>Prestations</h2>
-        <div id="items"></div>
-        <button class="btn-line" onclick="addItem()">+ Ajouter une ligne</button>
-      </div>
-
-      <div class="facture-fixed-bottom">
         <h2>Offert</h2>
         <div class="row">
           <div><label>Type</label>
@@ -305,6 +291,12 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           <button class="btn-line" onclick="sendInvoice()" style="width:100%;margin-top:0;">Envoyer au client</button>
         </div>
         <div id="status" style="font-size:11px;margin-top:6px;color:var(--text2);"></div>
+      </div>
+
+      <div class="facture-scroll">
+        <h2>Prestations</h2>
+        <div id="items"></div>
+        <button class="btn-line" onclick="addItem()">+ Ajouter une ligne</button>
       </div>
     </div>
 
@@ -413,7 +405,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       </table>
       <div class="totals">
         <div><span>Sous-total</span><span id="pSub"></span></div>
-        <div><span>TVA</span><span id="pTvaLine"></span></div>
+        <div id="pTvaRow" style="display:none;"><span>TVA</span><span id="pTvaLine"></span></div>
         <div id="pOffertRow" style="display:none;"><span>Offert</span><span id="pOffertLine" class="gold"></span></div>
         <div class="final"><span>Total à régler</span><span id="pTotal"></span></div>
       </div>
@@ -422,7 +414,6 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
         <div id="pReglement"></div>
       </div>
       <div class="meta" id="pLegal"></div>
-      <div class="inv-footer" id="pFooter"></div>
     </div>
   </div>
 </div>
@@ -664,7 +655,6 @@ function collectInvoiceState(){
     offType: offType.value,
     offVal: offVal.value,
     km: km.value,
-    peages: [...document.querySelectorAll('.i-peage')].map(p=>p.value),
     parkings: [...document.querySelectorAll('.i-parking')].map(p=>p.value),
     items: [...document.querySelectorAll('.item-row')].map(r=>({
       desc: r.querySelector('.i-desc').value,
@@ -688,8 +678,6 @@ function editInvoice(num){
   offType.value = s.offType||'pct';
   offVal.value = s.offVal||0;
   km.value = s.km||0;
-  peages.innerHTML = '';
-  (s.peages||[]).forEach(v=>addPeage(v));
   parkings.innerHTML = '';
   (s.parkings||[]).forEach(v=>addParking(v));
   document.querySelectorAll('.item-row').forEach(r=>r.remove());
@@ -1100,14 +1088,6 @@ function duplicateItem(btn){
 }
 addItem();
 
-function addPeage(val=''){
-  const div = document.createElement('div');
-  div.className='row';
-  div.innerHTML = `<input type="number" class="i-peage" placeholder="€" value="${val}" oninput="render()">
-    <button onclick="this.parentElement.remove();render()" style="flex:0;background:#eee;color:#900;">✕</button>`;
-  peages.appendChild(div);
-  render();
-}
 function addParking(val=''){
   const div = document.createElement('div');
   div.className='row';
@@ -1116,7 +1096,6 @@ function addParking(val=''){
   parkings.appendChild(div);
   render();
 }
-addPeage();
 
 function currentClient(){
   const name = clientSelect.value.trim().toLowerCase();
@@ -1145,21 +1124,14 @@ function render(){
     const rate=parseFloat(r.querySelector('.i-rate').value)||0;
     const amt=qty*rate;
     sub+=amt;
-    const dateLine = dates.length ? `<b>${formatFrDatesGrouped(dates)}</b>` : '';
-    const timeLine = (from&&to) ? `${from} – ${to} (${qty}h)` : (qty ? `${qty}h` : '');
-    const descCell = [dateLine, timeLine, desc].filter(Boolean).join('<br>');
+    const dateTimeLine = [dates.length ? `<b>${formatFrDatesGrouped(dates)}</b>` : '', (from&&to) ? `${from} – ${to}` : ''].filter(Boolean).join(' · ');
+    const descCell = [dateTimeLine, desc].filter(Boolean).join('<br>');
     pItems.innerHTML += `<tr><td>${descCell}</td><td class="num">${qty||''}</td><td class="num">${rate?rate.toFixed(2)+' €':'-'}</td><td class="num">${amt.toFixed(2)} €</td></tr>`;
   });
   const kmVal = parseFloat(km.value)||0;
   if(kmVal>0){
     const kmAmt = kmVal*0.5; sub+=kmAmt;
     pItems.innerHTML += `<tr><td>Frais kilométriques</td><td class="num">${kmVal} km</td><td class="num">0.50 €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
-  }
-  let peageTotal = 0;
-  document.querySelectorAll('.i-peage').forEach(p=>{ peageTotal += parseFloat(p.value)||0; });
-  if(peageTotal>0){
-    sub+=peageTotal;
-    pItems.innerHTML += `<tr><td>Péages</td><td class="num">-</td><td class="num">-</td><td class="num">${peageTotal.toFixed(2)} €</td></tr>`;
   }
   let parkingTotal = 0;
   document.querySelectorAll('.i-parking').forEach(p=>{ parkingTotal += parseFloat(p.value)||0; });
@@ -1206,6 +1178,7 @@ function render(){
   const tvaPct = parseFloat(tva.value)||0;
   const tvaAmt = sub*tvaPct/100;
   pSub.textContent = sub.toFixed(2)+' €';
+  pTvaRow.style.display = franchiseDepassee ? 'flex' : 'none';
   pTvaLine.textContent = tvaAmt.toFixed(2)+' € ('+tvaPct+'%)';
   pTotal.textContent = (sub+tvaAmt).toFixed(2)+' €';
 
@@ -1216,7 +1189,6 @@ function render(){
     <b>${fromPay.value} — Paiement à réception de facture, échéance : ${due}.</b>`;
   pLegal.innerHTML = `SIRET : ${f.siret} — ${fromRcs.value}. ${tvaMention}.<br>
     En cas de retard de paiement : pénalité de 3× le taux d'intérêt légal + indemnité forfaitaire de recouvrement de 40 €.`;
-  pFooter.innerHTML = `${(f.name||'').toUpperCase()}${f.tagline ? '<br><span class="inv-footer-tag">'+f.tagline+'</span>' : ''}`;
 }
 function saveInvoice(){
   render();
