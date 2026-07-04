@@ -6,8 +6,10 @@ Fichiers : `facture.html` (app complète, single-file), `send-invoice-server.js`
 HTML/CSS/JS vanilla, localStorage (from, clients, invoices, bookings, invCounters, sg, inv_theme).
 Thème dark/light/auto (tokens BAR OPS), fonts Cormorant Garamond + Jost.
 
-## Onglets (nav gauche)
-Accueil (prestas à venir) → Facture (preview visible seulement ici) → Mes clients → Historique (recherche + Voir/PDF/Renvoyer) → CA (par client) → Planning (calendrier + prévisionnel) → Mon entreprise (bas de nav).
+## Onglets (nav gauche, groupés par catégorie)
+Catégorie Planning : Planning (prestas à venir + calendrier avec CA/jour + prévisionnel + booking, onglet par défaut).
+Catégorie Facturation : Facture (preview visible seulement ici) → Mes clients → Historique (recherche + Voir/Modifier/PDF/Renvoyer) → CA (par client).
+Bas de nav : Mon entreprise + sélecteur de thème.
 
 ## Repo cible
 https://github.com/SPECTRE888/Bill-ops-.git (branche main, vide actuellement)

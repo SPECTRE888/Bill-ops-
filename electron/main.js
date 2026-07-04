@@ -10,6 +10,22 @@ let mainWin = null
 
 ipcMain.handle('open-external', (_e, u) => shell.openExternal(u))
 
+ipcMain.handle('open-invoice-window', (_e, { html, title }) => {
+  const fs = require('fs')
+  const os = require('os')
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bill-ops-inv-'))
+  const filePath = path.join(tmpDir, 'invoice.html')
+  fs.writeFileSync(filePath, html, 'utf8')
+  const win = new BrowserWindow({
+    width: 900,
+    height: 1000,
+    title: title || 'Facture',
+    webPreferences: { nodeIntegration: false, contextIsolation: true },
+  })
+  win.loadFile(filePath)
+  return true
+})
+
 function createWindow() {
   mainWin = new BrowserWindow({
     width: 1280,

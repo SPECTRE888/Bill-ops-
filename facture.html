@@ -44,6 +44,8 @@ body{margin:0;background:var(--bg);color:var(--text);transition:background .2s,c
 .nav button:hover{color:var(--text);background:var(--gold-bg);}
 .nav button.active{color:var(--gold);border-left:2px solid var(--gold);background:var(--gold-bg);}
 .nav button .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.6;}
+.nav-section{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);padding:16px 24px 6px;font-weight:600;}
+.nav-spacer{flex:1;}
 .theme-switch{display:flex;gap:0;margin:18px 24px 0;}
 .theme-switch button{all:unset;font-size:11px;padding:5px 10px;border:1px solid var(--border2);cursor:pointer;color:var(--text3);text-align:center;flex:1;}
 .theme-switch button:first-child{border-radius:3px 0 0 3px;border-right:none;}
@@ -132,13 +134,18 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 <body>
 <div class="app no-preview" id="appRoot">
   <div class="nav">
-    <div class="brand">FACTURATION</div>
-    <button id="nav-accueil" class="active" onclick="showTab('accueil')"><span class="dot"></span>Accueil</button>
+    <div class="brand">BILL OPS</div>
+
+    <div class="nav-section">Planning</div>
+    <button id="nav-planning" class="active" onclick="showTab('planning')"><span class="dot"></span>Planning</button>
+
+    <div class="nav-section">Facturation</div>
     <button id="nav-facture" onclick="showTab('facture')"><span class="dot"></span>Facture</button>
     <button id="nav-clients" onclick="showTab('clients')"><span class="dot"></span>Mes clients</button>
     <button id="nav-historique" onclick="showTab('historique')"><span class="dot"></span>Historique</button>
-    <button id="nav-planning" onclick="showTab('planning')"><span class="dot"></span>Planning</button>
     <button id="nav-ca" onclick="showTab('ca')"><span class="dot"></span>CA</button>
+
+    <div class="nav-spacer"></div>
     <button id="nav-entreprise" onclick="showTab('entreprise')"><span class="dot"></span>Mon entreprise</button>
     <div class="theme-switch">
       <button onclick="setTheme('dark')" id="theme-dark" title="Sombre">●</button>
@@ -204,11 +211,6 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <div class="client-list" id="clientList"></div>
     </div>
 
-    <div class="tab active" id="tab-accueil">
-      <h2>Prestas à venir</h2>
-      <div id="accList"></div>
-    </div>
-
     <div class="tab" id="tab-facture">
       <h2>Client</h2>
       <label>Nom société</label>
@@ -263,7 +265,22 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <div id="caList"></div>
     </div>
 
-    <div class="tab" id="tab-planning">
+    <div class="tab active" id="tab-planning">
+      <h2>Prestas à venir</h2>
+      <div id="accList"></div>
+
+      <h2>Calendrier</h2>
+      <div id="bkCalHead" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(-1)">‹</button>
+        <span id="bkCalLabel" style="font-family:var(--font-display);font-size:15px;color:var(--gold);"></span>
+        <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(1)">›</button>
+      </div>
+      <div id="bkCal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;"></div>
+      <div id="bkDayPanel"></div>
+
+      <h2>Prévisionnel du mois</h2>
+      <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:16px;"></div>
+
       <h2 id="bkFormTitle">Nouveau booking</h2>
       <input type="hidden" id="bkEditId" value="">
       <label>Client</label><input id="bkClient" list="clientNames">
@@ -276,18 +293,6 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       </div>
       <button class="btn-gold" id="bkSubmitBtn" onclick="addBooking()" style="width:100%;margin-top:10px;">Ajouter au planning</button>
       <button class="btn-line" id="bkCancelBtn" onclick="cancelEditBooking()" style="width:100%;display:none;">Annuler la modification</button>
-
-      <h2>Prévisionnel du mois</h2>
-      <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:16px;"></div>
-
-      <h2>Calendrier</h2>
-      <div id="bkCalHead" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(-1)">‹</button>
-        <span id="bkCalLabel" style="font-family:var(--font-display);font-size:15px;color:var(--gold);"></span>
-        <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(1)">›</button>
-      </div>
-      <div id="bkCal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;"></div>
-      <div id="bkDayPanel"></div>
 
       <h2>Bookings à facturer</h2>
       <div id="bkList"></div>
@@ -466,7 +471,6 @@ function showTab(name){
   document.getElementById('nav-'+name).classList.add('active');
   if(name==='clients') renderClientList();
   if(name==='facture') refreshClientSelect();
-  if(name==='accueil') renderAccueil();
   if(name==='historique') renderHistory();
   if(name==='ca') renderCA();
   if(name==='planning') renderPlanning();
@@ -800,6 +804,7 @@ function renderAccueil(){
     </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à venir.</p>';
 }
 function renderPlanning(){
+  renderAccueil();
   renderCalendar();
   const bookings = storeArr('bookings');
   const now = new Date();
@@ -1001,7 +1006,7 @@ async function sendInvoice(){
   }catch(e){ setStatusMsg(status, '✕ Erreur : '+e.message); }
 }
 
-loadFrom(); loadSg(); renderClientList(); refreshClientSelect(); render();
+loadFrom(); loadSg(); renderClientList(); refreshClientSelect(); render(); renderPlanning();
 renderSyncUI();
 if(getSyncCode()) pullSync(false);
 setInterval(()=>{ if(getSyncCode()) pullSync(false); }, 60000);
