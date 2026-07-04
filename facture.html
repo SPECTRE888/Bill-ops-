@@ -75,6 +75,14 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .item-row .row2 .rline-actions{grid-template-columns:1fr 1fr;}
 .item-row .row2 button{padding:8px 10px;font-size:12px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:4px;}
 .item-row .row2 button:hover{border-color:var(--gold-border);color:var(--gold);}
+.i-dates-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;}
+.i-dates-chips:empty{margin-bottom:0;}
+.date-chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface3);border:1px solid var(--border2);border-radius:12px;padding:2px 4px 2px 8px;font-size:11px;color:var(--text);}
+.date-chip button{all:unset;cursor:pointer;font-size:13px;line-height:1;color:var(--text3);padding:0 4px;}
+.date-chip button:hover{color:var(--red);}
+.rline-add-date{display:flex;gap:6px;}
+.rline-add-date input{flex:1;}
+.rline-add-date button{flex-shrink:0;white-space:nowrap;}
 .client-list{margin-top:10px;}
 .client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
 .client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
@@ -122,7 +130,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .acc-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:5px;font-size:11.5px;}
 .acc-row .acc-info{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .acc-row button{padding:4px 8px;font-size:10.5px;margin:0;flex-shrink:0;}
-#accList{max-height:220px;overflow-y:auto;margin-bottom:4px;}
+#accList{margin-bottom:4px;}
 .tab#tab-facture.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 .facture-scroll{flex:1;min-height:0;overflow-y:auto;}
 .facture-fixed-top h2:first-child{margin-top:0;}
@@ -349,7 +357,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           <div id="accList"></div>
         </div>
         <div>
-          <h2>Bookings à facturer</h2>
+          <h2>Prestas à facturer</h2>
           <div id="bkList"></div>
         </div>
       </div>
@@ -579,6 +587,24 @@ function formatFrDate(d){
   const month = dt.toLocaleDateString('fr-FR',{month:'long'});
   return `${day} ${month.charAt(0).toUpperCase()+month.slice(1)} ${dt.getFullYear()}`;
 }
+function formatFrDateShort(d){
+  const dt = new Date(d+'T00:00:00');
+  return String(dt.getDate()).padStart(2,'0')+'/'+String(dt.getMonth()+1).padStart(2,'0');
+}
+function formatFrDatesGrouped(dates){
+  if(!dates || !dates.length) return '';
+  const sorted = dates.slice().sort();
+  const parsed = sorted.map(d=>new Date(d+'T00:00:00'));
+  const sameMonth = parsed.every(dt=>dt.getMonth()===parsed[0].getMonth() && dt.getFullYear()===parsed[0].getFullYear());
+  if(sameMonth){
+    const days = parsed.map(dt=>dt.getDate());
+    const monthName = parsed[0].toLocaleDateString('fr-FR',{month:'long'});
+    const monthCap = monthName.charAt(0).toUpperCase()+monthName.slice(1);
+    const daysStr = days.length===1 ? String(days[0]) : days.slice(0,-1).join(', ')+' et '+days[days.length-1];
+    return `${daysStr} ${monthCap} ${parsed[0].getFullYear()}`;
+  }
+  return parsed.map(dt=>formatFrDate(dt.toISOString().slice(0,10))).join(', ');
+}
 function saveSg(){ set('sg', {key:sgKey.value, endpoint:sgEndpoint.value}); }
 function loadSg(){ const s=store('sg'); sgKey.value=s.key||''; sgEndpoint.value=s.endpoint||''; }
 
@@ -646,7 +672,7 @@ function collectInvoiceState(){
       rate: r.querySelector('.i-rate').value,
       from: r.querySelector('.i-from').value,
       to: r.querySelector('.i-to').value,
-      date: r.querySelector('.i-date').value
+      dates: JSON.parse(r.querySelector('.i-dates').value||'[]')
     }))
   };
 }
@@ -666,7 +692,7 @@ function editInvoice(num){
   peages.innerHTML = '';
   (s.peages||[]).forEach(v=>addPeage(v));
   document.querySelectorAll('.item-row').forEach(r=>r.remove());
-  (s.items&&s.items.length ? s.items : [{}]).forEach(it=>addItem(it.desc||'', it.qty||'', it.rate||'', it.from||'', it.to||'', it.date||''));
+  (s.items&&s.items.length ? s.items : [{}]).forEach(it=>addItem(it.desc||'', it.qty||'', it.rate||'', it.from||'', it.to||'', (it.dates&&it.dates.length) ? it.dates : (it.date ? [it.date] : [])));
   render();
   showTab('facture');
   showToast('✎ Facture '+num+' chargée pour modification.');
@@ -837,7 +863,8 @@ function renderCalendar(){
     if(!byDay[day]) byDay[day] = {count:0, ca:0, names:[]};
     byDay[day].count++;
     byDay[day].ca += b.hours*b.rate;
-    byDay[day].names.push(b.label ? b.client+' — '+b.label : b.client);
+    const timePrefix = b.from ? b.from+' ' : '';
+    byDay[day].names.push(timePrefix + (b.label ? b.client+' — '+b.label : b.client));
   });
   let html = ['L','M','M','J','V','S','D'].map(d=>`<div style="font-size:10px;color:var(--text3);text-align:center;">${d}</div>`).join('');
   for(let i=0;i<startOffset;i++) html += `<div class="cal-day empty"></div>`;
@@ -943,7 +970,7 @@ function invoiceBooking(id){
   clientSelect.value = b.client;
   pickClient();
   document.querySelectorAll('.item-row').forEach(r=>r.remove());
-  addItem(b.label||'Prestation', b.hours, b.rate, b.from||'', b.to||'', b.date||'');
+  addItem(b.label||'Prestation', b.hours, b.rate, b.from||'', b.to||'', b.date ? [b.date] : []);
   b.status='facturé';
   set('bookings',bookings);
   showTab('facture');
@@ -1012,14 +1039,19 @@ function calcRange(input){
   row.querySelector('.i-amt').textContent = (qty2*rate2).toFixed(2)+' €';
   render();
 }
-function addItem(desc='',qty='',rate='',from='',to='',date=''){
+function addItem(desc='',qty='',rate='',from='',to='',dates=[]){
   const div = document.createElement('div');
   div.className='item-row';
   const amt = (parseFloat(qty)||0)*(parseFloat(rate)||0);
   div.innerHTML = `<textarea placeholder="Description" class="i-desc" oninput="render()">${desc}</textarea>
     <div class="row2">
       <div class="rline rline-date">
-        <input type="date" class="i-date" title="Date de la prestation" value="${date}" onchange="render()">
+        <div class="i-dates-chips"></div>
+        <input type="hidden" class="i-dates" value="${JSON.stringify(dates).replace(/"/g,'&quot;')}">
+        <div class="rline-add-date">
+          <input type="date" class="i-date-input" title="Ajouter une date de prestation">
+          <button type="button" class="btn-line" onclick="addDateChip(this)">+ Date</button>
+        </div>
       </div>
       <div class="rline rline-time">
         <input type="time" class="i-from" title="Début" value="${from}" onchange="calcRange(this)">
@@ -1036,11 +1068,38 @@ function addItem(desc='',qty='',rate='',from='',to='',date=''){
       </div>
     </div>`;
   items.appendChild(div);
+  renderDateChips(div);
+  render();
+}
+function renderDateChips(row){
+  const hidden = row.querySelector('.i-dates');
+  const arr = JSON.parse(hidden.value||'[]');
+  row.querySelector('.i-dates-chips').innerHTML = arr.map(d=>`<span class="date-chip">${formatFrDateShort(d)}<button type="button" onclick="removeDateChip(this,'${d}')">×</button></span>`).join('');
+}
+function addDateChip(btn){
+  const row = btn.closest('.item-row');
+  const input = row.querySelector('.i-date-input');
+  if(!input.value) return;
+  const hidden = row.querySelector('.i-dates');
+  const arr = JSON.parse(hidden.value||'[]');
+  if(!arr.includes(input.value)) arr.push(input.value);
+  arr.sort();
+  hidden.value = JSON.stringify(arr);
+  input.value = '';
+  renderDateChips(row);
+  render();
+}
+function removeDateChip(btn, dateStr){
+  const row = btn.closest('.item-row');
+  const hidden = row.querySelector('.i-dates');
+  const arr = JSON.parse(hidden.value||'[]').filter(d=>d!==dateStr);
+  hidden.value = JSON.stringify(arr);
+  renderDateChips(row);
   render();
 }
 function duplicateItem(btn){
   const row = btn.closest('.item-row');
-  addItem(row.querySelector('.i-desc').value, row.querySelector('.i-qty').value, row.querySelector('.i-rate').value, row.querySelector('.i-from').value, row.querySelector('.i-to').value, row.querySelector('.i-date').value);
+  addItem(row.querySelector('.i-desc').value, row.querySelector('.i-qty').value, row.querySelector('.i-rate').value, row.querySelector('.i-from').value, row.querySelector('.i-to').value, JSON.parse(row.querySelector('.i-dates').value||'[]'));
   render();
 }
 addItem();
@@ -1075,12 +1134,12 @@ function render(){
   let sub=0; pItems.innerHTML='';
   document.querySelectorAll('.item-row').forEach(r=>{
     const desc=r.querySelector('.i-desc').value;
-    const date=r.querySelector('.i-date').value;
+    const dates=JSON.parse(r.querySelector('.i-dates').value||'[]');
     const qty=parseFloat(r.querySelector('.i-qty').value)||0;
     const rate=parseFloat(r.querySelector('.i-rate').value)||0;
     const amt=qty*rate;
     sub+=amt;
-    const descCell = date ? `<b>${formatFrDate(date)}</b><br>${desc}` : desc;
+    const descCell = dates.length ? `<b>${formatFrDatesGrouped(dates)}</b><br>${desc}` : desc;
     pItems.innerHTML += `<tr><td>${descCell}</td><td class="num">${qty||''}</td><td class="num">${rate?rate.toFixed(2)+' €':'-'}</td><td class="num">${amt.toFixed(2)} €</td></tr>`;
   });
   const kmVal = parseFloat(km.value)||0;
