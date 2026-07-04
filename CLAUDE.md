@@ -7,8 +7,9 @@ HTML/CSS/JS vanilla, localStorage (from, clients, invoices, bookings, invCounter
 Thème dark/light/auto (tokens BAR OPS), fonts Cormorant Garamond + Jost.
 
 ## Onglets (nav gauche, groupés par catégorie)
-Catégorie Planning : Planning (prestas à venir + calendrier avec CA/jour + prévisionnel + booking, onglet par défaut).
-Catégorie Facturation : Facture (preview visible seulement ici) → Mes clients → Historique (recherche + Voir/Modifier/PDF/Renvoyer) → CA (par client).
+Accueil : tableau de bord (CA du mois, prestas à venir, factures en attente, heures prévues, prochaine presta, actions rapides), onglet par défaut.
+Catégorie Planning : Planning (prestas à venir + calendrier avec CA/jour + prévisionnel + booking).
+Catégorie Facturation : Facture (preview visible seulement ici) → Mes clients → Historique (recherche + Voir/Modifier/PDF/Renvoyer + stats CA mois/année/total/par client).
 Bas de nav : Mon entreprise + sélecteur de thème.
 
 ## Repo cible

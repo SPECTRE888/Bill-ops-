@@ -116,6 +116,21 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .meta{margin-top:20px;font-size:10.5px;color:var(--text3);line-height:1.6;font-style:italic;}
 .inv-footer{margin-top:40px;text-align:center;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);border-top:1px solid var(--border);padding-top:16px;}
 .inv-footer-tag{display:block;margin-top:4px;color:var(--gold);letter-spacing:.15em;}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:6px;}
+.dash-card{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:18px 16px;}
+.dash-card-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.dash-card-value{font-family:var(--font-display);font-size:28px;color:var(--gold);font-weight:600;}
+.dash-next-box{background:var(--surface2);border:1px solid var(--gold-border);border-radius:8px;padding:16px 18px;}
+.dash-next-date{font-family:var(--font-display);font-size:18px;color:var(--gold);text-transform:capitalize;}
+.dash-next-time{font-size:13px;color:var(--text2);margin-top:2px;}
+.dash-next-client{font-size:14px;font-weight:600;margin-top:8px;}
+.dash-next-lieu{font-size:12px;color:var(--text2);margin-top:2px;}
+.dash-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.dash-actions button{flex:1;min-width:160px;}
+.stat-row{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
+.stat-mini{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;text-align:center;}
+.stat-mini-value{font-family:var(--font-display);font-size:20px;color:var(--gold);font-weight:600;}
+.stat-mini-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-top:4px;}
 .toast-stack{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
 .toast-card{background:var(--surface);border:1px solid var(--gold-border);border-left:3px solid var(--gold);border-radius:6px;padding:12px 16px;min-width:260px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:13px;color:var(--text);animation:toast-in .2s ease-out;}
 .toast-card b{color:var(--gold);font-family:var(--font-display);font-size:14px;display:block;margin-bottom:2px;}
@@ -136,14 +151,16 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
   <div class="nav">
     <div class="brand">BILL OPS</div>
 
+    <div class="nav-section">Accueil</div>
+    <button id="nav-accueil" class="active" onclick="showTab('accueil')"><span class="dot"></span>Accueil</button>
+
     <div class="nav-section">Planning</div>
-    <button id="nav-planning" class="active" onclick="showTab('planning')"><span class="dot"></span>Planning</button>
+    <button id="nav-planning" onclick="showTab('planning')"><span class="dot"></span>Planning</button>
 
     <div class="nav-section">Facturation</div>
     <button id="nav-facture" onclick="showTab('facture')"><span class="dot"></span>Facture</button>
     <button id="nav-clients" onclick="showTab('clients')"><span class="dot"></span>Mes clients</button>
     <button id="nav-historique" onclick="showTab('historique')"><span class="dot"></span>Historique</button>
-    <button id="nav-ca" onclick="showTab('ca')"><span class="dot"></span>CA</button>
 
     <div class="nav-spacer"></div>
     <button id="nav-entreprise" onclick="showTab('entreprise')"><span class="dot"></span>Mon entreprise</button>
@@ -258,14 +275,45 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <h2>Factures émises</h2>
       <input id="histSearch" placeholder="Rechercher un client..." oninput="renderHistory()" style="margin-bottom:10px;">
       <div id="histList"></div>
-    </div>
 
-    <div class="tab" id="tab-ca">
-      <h2>CA par client</h2>
+      <h2>Chiffre d'affaires</h2>
+      <div id="caStats"></div>
       <div id="caList"></div>
     </div>
 
-    <div class="tab active" id="tab-planning">
+    <div class="tab active" id="tab-accueil">
+      <h2>Vue d'ensemble</h2>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dash-card-label">CA du mois</div>
+          <div class="dash-card-value" id="dashCA">0 €</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-label">Prestations à venir</div>
+          <div class="dash-card-value" id="dashUpcoming">0</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-label">Factures en attente</div>
+          <div class="dash-card-value" id="dashPending">0</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-label">Heures prévues ce mois</div>
+          <div class="dash-card-value" id="dashHours">0 h</div>
+        </div>
+      </div>
+
+      <h2>Prochaine prestation</h2>
+      <div class="dash-next-box" id="dashNext"></div>
+
+      <h2>Actions rapides</h2>
+      <div class="dash-actions">
+        <button class="btn-gold" onclick="dashNewBooking()">+ Nouvelle prestation</button>
+        <button class="btn-gold" onclick="dashNewInvoice()">+ Nouvelle facture</button>
+        <button class="btn-line" onclick="dashNewClient()">+ Ajouter un client</button>
+      </div>
+    </div>
+
+    <div class="tab" id="tab-planning">
       <h2>Prestas à venir</h2>
       <div id="accList"></div>
 
@@ -471,9 +519,9 @@ function showTab(name){
   document.getElementById('nav-'+name).classList.add('active');
   if(name==='clients') renderClientList();
   if(name==='facture') refreshClientSelect();
-  if(name==='historique') renderHistory();
-  if(name==='ca') renderCA();
+  if(name==='historique'){ renderHistory(); renderCA(); }
   if(name==='planning') renderPlanning();
+  if(name==='accueil') renderDashboard();
 }
 
 function saveFrom(){
@@ -656,19 +704,64 @@ function renderHistory(){
 }
 function renderCA(){
   const invoices = storeArr('invoices');
+  const amt = i => parseFloat((i.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
+  const now = new Date();
+  const yearKey = String(now.getFullYear());
+  const monthKey = yearKey+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const totalCA = invoices.reduce((s,i)=>s+amt(i),0);
+  const caYear = invoices.filter(i=>(i.date||'').startsWith(yearKey)).reduce((s,i)=>s+amt(i),0);
+  const caMonth = invoices.filter(i=>(i.date||'').startsWith(monthKey)).reduce((s,i)=>s+amt(i),0);
+  caStats.innerHTML = `
+    <div class="stat-row">
+      <div class="stat-mini"><div class="stat-mini-value">${caMonth.toFixed(2)} €</div><div class="stat-mini-label">Ce mois</div></div>
+      <div class="stat-mini"><div class="stat-mini-value">${caYear.toFixed(2)} €</div><div class="stat-mini-label">Cette année</div></div>
+      <div class="stat-mini"><div class="stat-mini-value">${totalCA.toFixed(2)} €</div><div class="stat-mini-label">Total</div></div>
+    </div>`;
   const byClient = {};
-  invoices.forEach(i=>{
-    const amt = parseFloat((i.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
-    byClient[i.client] = (byClient[i.client]||0) + amt;
-  });
+  invoices.forEach(i=>{ byClient[i.client] = (byClient[i.client]||0) + amt(i); });
   const rows = Object.entries(byClient).sort((a,b)=>b[1]-a[1]);
-  const totalCA = rows.reduce((s,r)=>s+r[1],0);
   caList.innerHTML = rows.length ? `
-    <div style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:16px;">${totalCA.toFixed(2)} € CA total</div>
     <table><thead><tr><th>Client</th><th class="num">CA généré</th></tr></thead>
     <tbody>${rows.map(([c,v])=>`<tr><td>${c}</td><td class="num">${v.toFixed(2)} €</td></tr>`).join('')}</tbody></table>
   ` : '<p style="color:var(--text3);font-size:12px;">Aucune donnée.</p>';
 }
+function renderDashboard(){
+  const bookings = storeArr('bookings');
+  const invoices = storeArr('invoices');
+  const clients = storeArr('clients');
+  const today = new Date().toISOString().slice(0,10);
+  const now = new Date();
+  const monthKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+
+  const caMois = invoices.filter(i=>(i.date||'').startsWith(monthKey))
+    .reduce((s,i)=>s+(parseFloat((i.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0),0);
+  dashCA.textContent = caMois.toFixed(2)+' €';
+
+  const upcoming = bookings.filter(b=>b.status==='à facturer' && b.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
+  dashUpcoming.textContent = upcoming.length;
+
+  const facturesEnAttente = invoices.filter(i=>i.status!=='Envoyée').length;
+  dashPending.textContent = facturesEnAttente;
+
+  const heuresMois = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey))
+    .reduce((s,b)=>s+b.hours,0);
+  dashHours.textContent = heuresMois.toFixed(1)+' h';
+
+  const next = upcoming[0];
+  if(next){
+    const c = clients.find(cl=>cl.name===next.client);
+    dashNext.innerHTML = `
+      <div class="dash-next-date">${new Date(next.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div>
+      ${next.from&&next.to ? `<div class="dash-next-time">${next.from} – ${next.to}</div>` : ''}
+      <div class="dash-next-client">${next.client}${next.label?' — '+next.label:''}</div>
+      ${c&&c.addr ? `<div class="dash-next-lieu">${c.addr}</div>` : ''}`;
+  } else {
+    dashNext.innerHTML = '<p style="color:var(--text3);font-size:12px;">Aucune prestation programmée.</p>';
+  }
+}
+function dashNewBooking(){ showTab('planning'); cancelEditBooking(); bkClient.focus(); }
+function dashNewInvoice(){ showTab('facture'); clientSelect.focus(); }
+function dashNewClient(){ showTab('clients'); resetClientForm(); cliName.focus(); }
 function nextInvoiceNumber(prefix){
   if(!prefix) prefix='FA';
   const counters = store('invCounters');
@@ -1006,7 +1099,7 @@ async function sendInvoice(){
   }catch(e){ setStatusMsg(status, '✕ Erreur : '+e.message); }
 }
 
-loadFrom(); loadSg(); renderClientList(); refreshClientSelect(); render(); renderPlanning();
+loadFrom(); loadSg(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
 renderSyncUI();
 if(getSyncCode()) pullSync(false);
 setInterval(()=>{ if(getSyncCode()) pullSync(false); }, 60000);
