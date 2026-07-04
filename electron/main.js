@@ -1,0 +1,204 @@
+/*!
+ * Bill Ops — Electron main process
+ */
+const { app, BrowserWindow, shell, ipcMain } = require('electron')
+const path = require('path')
+
+const APP_FILE = path.join(__dirname, '..', 'facture.html')
+
+let mainWin = null
+
+ipcMain.handle('open-external', (_e, u) => shell.openExternal(u))
+
+function createWindow() {
+  mainWin = new BrowserWindow({
+    width: 1280,
+    height: 800,
+    minWidth: 900,
+    minHeight: 600,
+    title: 'Bill Ops',
+    icon: path.join(__dirname, 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.icns'),
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  })
+
+  mainWin.maximize()
+  mainWin.loadFile(APP_FILE)
+
+  mainWin.webContents.setWindowOpenHandler(({ url: u }) => {
+    if (u.startsWith('file://')) return { action: 'allow' }
+    shell.openExternal(u)
+    return { action: 'deny' }
+  })
+
+  mainWin.webContents.on('will-navigate', (event, u) => {
+    if (!u.startsWith('file://')) {
+      event.preventDefault()
+      shell.openExternal(u)
+    }
+  })
+}
+
+// ─── Single instance ──────────────────────────────────────────────────────
+const gotLock = app.requestSingleInstanceLock()
+if (!gotLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    if (mainWin) { mainWin.show(); mainWin.focus() }
+  })
+}
+
+// ─── Auto-updater custom (bypass Squirrel.Mac — app non signée) ──────────
+const https    = require('https')
+const fs       = require('fs')
+const os       = require('os')
+const { spawn } = require('child_process')
+
+const GH_OWNER = 'SPECTRE888'
+const GH_REPO  = 'Bill-ops-'
+
+function toast(msg) {
+  const safe = JSON.stringify(String(msg ?? ''))
+  mainWin?.webContents.executeJavaScript(
+    `if(typeof showToast==='function') showToast(${safe}); else console.warn('[updater]', ${safe});`
+  ).catch(() => {})
+}
+
+function get(url) {
+  return new Promise((resolve, reject) => {
+    const follow = (u) => {
+      https.get(u, { headers: { 'User-Agent': 'Bill-Ops-Updater' } }, (res) => {
+        if (res.statusCode === 301 || res.statusCode === 302)
+          return follow(res.headers.location)
+        let d = ''
+        res.on('data', c => d += c)
+        res.on('end', () => resolve(d))
+      }).on('error', reject)
+    }
+    follow(url)
+  })
+}
+
+function download(url, dest) {
+  return new Promise((resolve, reject) => {
+    const follow = (u, redirects) => {
+      if (redirects > 10) return reject(new Error('Trop de redirections'))
+      https.get(u, { headers: { 'User-Agent': 'Bill-Ops-Updater' } }, (res) => {
+        if ([301, 302, 303, 307, 308].includes(res.statusCode)) {
+          res.resume()
+          return follow(res.headers.location, redirects + 1)
+        }
+        if (res.statusCode !== 200) {
+          res.resume()
+          return reject(new Error(`HTTP ${res.statusCode} lors du téléchargement`))
+        }
+        const f = fs.createWriteStream(dest)
+        res.pipe(f)
+        f.on('finish', () => f.close(() => resolve()))
+        f.on('error', reject)
+      }).on('error', reject)
+    }
+    follow(url, 0)
+  })
+}
+
+function semverGt(a, b) {
+  const pa = a.replace(/^v/, '').split('.').map(Number)
+  const pb = b.replace(/^v/, '').split('.').map(Number)
+  for (let i = 0; i < 3; i++) {
+    if (pa[i] > pb[i]) return true
+    if (pa[i] < pb[i]) return false
+  }
+  return false
+}
+
+async function checkAndUpdate() {
+  try {
+    const raw     = await get(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/releases/latest`)
+    const release = JSON.parse(raw)
+    if (!release.tag_name) return // pas de release publiée
+
+    const latest  = release.tag_name.replace(/^v/, '')
+    const current = app.getVersion()
+
+    if (!semverGt(latest, current)) return
+
+    toast(`Mise à jour v${latest} disponible — téléchargement…`)
+
+    const asset = release.assets.find(a => a.name.match(/arm64-mac\.zip$/) && !a.name.endsWith('.blockmap'))
+    if (!asset) throw new Error('Asset ZIP introuvable dans la release')
+
+    const tmpDir  = fs.mkdtempSync(path.join(os.tmpdir(), 'bill-ops-upd-'))
+    const zipPath = path.join(tmpDir, 'update.zip')
+
+    await download(asset.browser_download_url, zipPath)
+    toast('Installation en cours…')
+
+    const appPath    = process.execPath.split('.app/Contents/')[0] + '.app'
+    const extractDir = path.join(tmpDir, 'ext')
+    fs.mkdirSync(extractDir)
+
+    const logFile = path.join(tmpDir, 'update.log')
+    const script = [
+      `exec > "${logFile}" 2>&1`,
+      `set -ex`,
+      `echo "=== Bill Ops update script ==="`,
+      `sleep 5`,
+      `for i in $(seq 1 20); do`,
+      `  pgrep -f "Bill Ops" >/dev/null 2>&1 || break`,
+      `  sleep 1`,
+      `done`,
+      `cd "${extractDir}"`,
+      `unzip -q "${zipPath}"`,
+      `NEWAPP=$(find "${extractDir}" -maxdepth 2 -name "*.app" -type d | head -1)`,
+      `if [ -z "$NEWAPP" ]; then echo "ERROR: no .app found"; exit 1; fi`,
+      `xattr -cr "$NEWAPP"`,
+      `rm -rf "${appPath}"`,
+      `cp -R "$NEWAPP" "${appPath}"`,
+      `xattr -cr "${appPath}"`,
+      `codesign --force --deep --sign - --timestamp=none "${appPath}" 2>/dev/null || true`,
+      `open "${appPath}"`,
+      `echo "Done."`,
+    ].join('\n')
+
+    toast('Mise à jour prête — redémarrage dans 3s…')
+    setTimeout(() => {
+      spawn('bash', ['-c', script], { detached: true, stdio: 'ignore' }).unref()
+      app.quit()
+    }, 3000)
+
+  } catch (err) {
+    console.error('[updater]', err?.message || err)
+  }
+}
+
+function setupUpdater() {
+  setTimeout(checkAndUpdate, 10000)
+  setInterval(checkAndUpdate, 30 * 60 * 1000)
+}
+
+// ─── Boot ───────────────────────────────────────────────────────────────
+app.whenReady().then(() => {
+  if (process.platform === 'darwin' && app.isPackaged) {
+    try {
+      const { execSync } = require('child_process')
+      const appPath = process.execPath.split('.app/Contents/')[0] + '.app'
+      execSync(`xattr -cr "${appPath}"`)
+    } catch (e) {}
+  }
+
+  createWindow()
+  if (app.isPackaged) setupUpdater()
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit()
+})

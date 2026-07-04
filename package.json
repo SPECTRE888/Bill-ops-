@@ -1,0 +1,66 @@
+{
+  "name": "bill-ops",
+  "version": "1.0.0",
+  "description": "Bill Ops — application de facturation",
+  "author": "Jérôme Jarrige <Jarrige.jerome@hotmail.fr>",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "electron": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:ci": "electron-builder --mac -c.mac.target=zip",
+    "build:win": "electron-builder --win",
+    "build:all": "electron-builder --mac --win"
+  },
+  "build": {
+    "appId": "com.billops.app",
+    "productName": "Bill Ops",
+    "afterPack": "scripts/afterPack.js",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/main.js",
+      "electron/preload.js",
+      "electron/assets/icon.*",
+      "facture.html"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "SPECTRE888",
+      "repo": "Bill-ops-",
+      "releaseType": "release"
+    },
+    "artifactName": "BillOps-${version}-${arch}-mac.${ext}",
+    "mac": {
+      "icon": "electron/assets/icon.icns",
+      "identity": null,
+      "hardenedRuntime": false,
+      "entitlements": "electron/entitlements.mac.plist",
+      "entitlementsInherit": "electron/entitlements.mac.plist",
+      "target": [
+        { "target": "dmg", "arch": ["arm64"] },
+        { "target": "zip", "arch": ["arm64"] }
+      ],
+      "category": "public.app-category.business"
+    },
+    "win": {
+      "icon": "electron/assets/icon.ico",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ]
+    },
+    "dmg": {
+      "title": "Bill Ops"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^39.8.10",
+    "electron-builder": "^26.15.0"
+  }
+}
