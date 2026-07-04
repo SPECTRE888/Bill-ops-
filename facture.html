@@ -456,9 +456,9 @@ function saveFrom(){
 }
 function loadFrom(){
   const f = store('from');
-  fromName.value=f.name||''; fromTagline.value=f.tagline||''; fromAddr.value=f.addr||''; fromContact.value=f.contact||''; fromSiret.value=f.siret||'';
+  fromName.value=f.name||'Jerome Jarrige'; fromTagline.value=f.tagline||'Paris · Monaco · Cannes · Saint-Tropez'; fromAddr.value=f.addr||'Intelligence Spotlighted\n63, avenue Pasteur — 93100 Montreuil'; fromContact.value=f.contact||'contact@intelligencespotlighted.fr — www.intelligencespotlighted.fr'; fromSiret.value=f.siret||'';
   fromTva.value=f.tva??'TVA non applicable, art. 293 B du CGI'; fromRcs.value=f.rcs||"Dispensé d'immatriculation au RCS et au RM"; fromPay.value=f.pay||'Virement bancaire';
-  fromRib.value=f.rib||'';
+  fromRib.value=f.rib||'IBAN : FR76 1741 8000 0100 0110 3467 090\nBIC : SNNNFR22XXX';
 }
 function formatFrDate(d){
   if(!d) return '';
