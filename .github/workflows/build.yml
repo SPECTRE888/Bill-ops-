@@ -1,0 +1,76 @@
+name: Release Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Clean existing release
+      continue-on-error: true
+      run: gh release delete "$GITHUB_REF_NAME" --yes
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Electron app
+      run: npx electron-builder --mac --arm64 --publish=never
+      env:
+        CSC_IDENTITY_AUTO_DISCOVERY: false
+
+    - name: List dist output
+      run: ls -lh dist/ || true
+
+    - name: Ad-hoc sign app
+      run: |
+        codesign --force --deep --sign - --timestamp=none "dist/mac-arm64/Bill Ops.app"
+
+    - name: Create release & upload assets
+      run: |
+        VERSION="${GITHUB_REF_NAME#v}"
+        TAG="$GITHUB_REF_NAME"
+
+        echo "=== dist/ contents ==="
+        ls -lh dist/
+
+        FILES=()
+        for f in \
+          "dist/BillOps-${VERSION}-arm64-mac.zip" \
+          "dist/BillOps-${VERSION}-arm64-mac.zip.blockmap" \
+          "dist/BillOps-${VERSION}-arm64-mac.dmg" \
+          "dist/BillOps-${VERSION}-arm64-mac.dmg.blockmap"
+        do
+          if [ -f "$f" ]; then
+            FILES+=("$f")
+            echo "✅ Found: $f"
+          else
+            echo "⚠️  Missing: $f"
+          fi
+        done
+
+        gh release create "$TAG" \
+          --title "$TAG" \
+          --notes "Bill Ops ${TAG}" \
+          "${FILES[@]}"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
