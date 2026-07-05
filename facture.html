@@ -68,21 +68,15 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .item-row .i-desc{display:block;width:100%;min-height:44px;resize:vertical;margin-bottom:8px;}
 .item-row .row2{display:flex;flex-direction:column;gap:6px;}
 .item-row .row2 .rline{display:grid;gap:6px;}
-.item-row .row2 .rline-date{grid-template-columns:1fr;margin-bottom:6px;}
-.item-row .row2 .rline-time{grid-template-columns:1fr 1fr;}
-.item-row .row2 .rline-calc{grid-template-columns:1fr auto;align-items:center;}
-.item-row .row2 .rline-calc .amtDisplay{text-align:right;font-weight:600;color:var(--gold);font-size:14px;}
 .item-row .row2 .rline-actions{grid-template-columns:1fr 1fr;}
 .item-row .row2 button{padding:8px 10px;font-size:12px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:4px;}
 .item-row .row2 button:hover{border-color:var(--gold-border);color:var(--gold);}
-.i-dates-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;}
-.i-dates-chips:empty{margin-bottom:0;}
+.rline-compact{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.i-dates-chips{display:flex;flex-wrap:wrap;gap:4px;}
+.i-dates-chips:empty{display:none;}
 .date-chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface3);border:1px solid var(--border2);border-radius:12px;padding:2px 4px 2px 8px;font-size:11px;color:var(--text);}
 .date-chip button{all:unset;cursor:pointer;font-size:13px;line-height:1;color:var(--text3);padding:0 4px;}
 .date-chip button:hover{color:var(--red);}
-.rline-add-date{display:flex;gap:6px;}
-.rline-add-date input{flex:1;}
-.rline-add-date button{flex-shrink:0;white-space:nowrap;}
 .client-list{margin-top:10px;}
 .client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
 .client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
@@ -99,8 +93,12 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .cal-day-panel .cal-b-row button{padding:3px 7px;font-size:10px;margin:0 0 0 3px;}
 .client-card b{color:var(--text);}
 .client-card .tag{color:var(--gold);font-weight:700;}
-.preview-wrap{padding:40px;display:none;justify-content:center;background:var(--bg);height:100%;overflow-y:auto;}
-.preview-wrap.active{display:flex;}
+.preview-wrap{display:none;background:var(--bg);height:100%;}
+.preview-wrap.active{display:flex;flex-direction:column;}
+.preview-scroll{flex:1;min-height:0;overflow-y:auto;padding:40px;display:flex;justify-content:center;}
+.preview-actionbar{flex-shrink:0;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:14px 40px;border-top:1px solid var(--border);background:var(--surface);}
+.preview-actionbar button{width:100%;margin:0;}
+.preview-actionbar #status{grid-column:1/-1;font-size:11px;color:var(--text2);}
 #invoice{background:var(--surface);color:var(--text);width:210mm;min-height:297mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
 .gold{color:var(--gold);}
 .inv-brand{text-align:center;padding-bottom:22px;}
@@ -130,10 +128,6 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 #accList{margin-bottom:4px;}
 .tab#tab-facture.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 .facture-scroll{flex:1;min-height:0;overflow-y:auto;}
-.facture-actionbar{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:10px 24px;border-top:1px solid var(--border);flex-shrink:0;}
-.facture-actionbar h2{grid-column:1/-1;}
-.facture-actionbar button{width:100%;margin:0;padding:8px 6px;font-size:11.5px;}
-.facture-actionbar #status{grid-column:1/-1;font-size:10.5px;color:var(--text2);}
 .facture-fixed-top h2:first-child{margin-top:0;}
 #tab-facture h2{margin:12px 0 6px;}
 #tab-facture .facture-fixed-top h2:first-child{margin-top:0;}
@@ -159,7 +153,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .toast-card{background:var(--surface);border:1px solid var(--gold-border);border-left:3px solid var(--gold);border-radius:6px;padding:12px 16px;min-width:260px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:13px;color:var(--text);animation:toast-in .2s ease-out;}
 .toast-card b{color:var(--gold);font-family:var(--font-display);font-size:14px;display:block;margin-bottom:2px;}
 @keyframes toast-in{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
-@media print{.nav,.panel{display:none;}.app{display:block;height:auto;overflow:visible;}.preview-wrap{padding:0;height:auto;overflow:visible;}#invoice{box-shadow:none;width:auto;}
+@media print{.nav,.panel,.preview-actionbar{display:none;}.app{display:block;height:auto;overflow:visible;}.preview-wrap{height:auto;}.preview-scroll{padding:0;height:auto;overflow:visible;}#invoice{box-shadow:none;width:auto;}
   :root,[data-theme]{
     --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
     --border:#ddd9d2;--border2:#ccc8c0;
@@ -273,17 +267,9 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           <div><label>Péage</label><input id="peage" type="number" value="0" oninput="render()"></div>
           <div><label>Parking</label><input id="parking" type="number" value="0" oninput="render()"></div>
         </div>
-      </div>
 
-      <h2 style="margin:12px 0 6px;flex-shrink:0;">Prestations</h2>
-      <div class="facture-scroll">
-        <div id="items"></div>
-      </div>
-      <button class="btn-line" onclick="addItem()" style="margin:6px 0 0;flex-shrink:0;">+ Ajouter une ligne</button>
-
-      <div class="facture-actionbar">
-        <h2 style="margin:0 0 6px;">Offert</h2>
-        <div class="row" style="grid-column:1/-1;margin-bottom:8px;">
+        <h2>Offert</h2>
+        <div class="row">
           <div><label>Type</label>
             <select id="offType" onchange="render()">
               <option value="pct">%</option>
@@ -292,12 +278,13 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           </div>
           <div><label>Valeur</label><input id="offVal" type="number" value="0" oninput="render()"></div>
         </div>
-        <button class="btn-gold" onclick="render()">Générer l'aperçu</button>
-        <button class="btn-gold" onclick="saveInvoice()">Enregistrer</button>
-        <button class="btn-line" onclick="window.print()">Exporter en PDF</button>
-        <button class="btn-line" onclick="sendInvoice()">Envoyer au client</button>
-        <div id="status"></div>
       </div>
+
+      <h2 style="margin:12px 0 6px;flex-shrink:0;">Prestations</h2>
+      <div class="facture-scroll">
+        <div id="items"></div>
+      </div>
+      <button class="btn-line" onclick="addItem()" style="margin:6px 0 0;flex-shrink:0;">+ Ajouter une ligne</button>
     </div>
 
     <div class="tab" id="tab-historique">
@@ -368,52 +355,63 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <h2>Prévisionnel du mois</h2>
       <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:16px;"></div>
 
-      <h2 id="bkFormTitle">Nouveau booking</h2>
-      <input type="hidden" id="bkEditId" value="">
-      <label>Client</label><input id="bkClient" list="clientNames">
-      <label>Nom de la prestation</label><input id="bkLabel" placeholder="Ex. Prestation Barman">
-      <label>Date prestation</label><input id="bkDate" type="date">
-      <div class="row">
-        <div><label>De</label><input id="bkFrom" type="time"></div>
-        <div><label>À</label><input id="bkTo" type="time"></div>
-        <div><label>Taux €/h</label><input id="bkRate" type="number"></div>
+      <div id="bkFormWrap" style="display:none;">
+        <h2 id="bkFormTitle">Nouveau booking</h2>
+        <input type="hidden" id="bkEditId" value="">
+        <label>Client</label><input id="bkClient" list="clientNames">
+        <label>Nom de la prestation</label><input id="bkLabel" placeholder="Ex. Prestation Barman">
+        <label>Date prestation</label><input id="bkDate" type="date">
+        <div class="row">
+          <div><label>De</label><input id="bkFrom" type="time"></div>
+          <div><label>À</label><input id="bkTo" type="time"></div>
+          <div><label>Taux €/h</label><input id="bkRate" type="number"></div>
+        </div>
+        <button class="btn-gold" id="bkSubmitBtn" onclick="addBooking()" style="width:100%;margin-top:10px;">Ajouter au planning</button>
+        <button class="btn-line" id="bkCancelBtn" onclick="cancelEditBooking()" style="width:100%;">Annuler</button>
       </div>
-      <button class="btn-gold" id="bkSubmitBtn" onclick="addBooking()" style="width:100%;margin-top:10px;">Ajouter au planning</button>
-      <button class="btn-line" id="bkCancelBtn" onclick="cancelEditBooking()" style="width:100%;display:none;">Annuler la modification</button>
     </div>
 
   </div>
 
   <div class="preview-wrap" id="previewWrap">
-    <div id="invoice">
-      <div class="inv-brand">
-        <div class="inv-brandname" id="pBrandName"></div>
-        <div class="inv-tagline" id="pTagline"></div>
+    <div class="preview-scroll">
+      <div id="invoice">
+        <div class="inv-brand">
+          <div class="inv-brandname" id="pBrandName"></div>
+          <div class="inv-tagline" id="pTagline"></div>
+        </div>
+        <div class="inv-title-rule"><span>Facture</span></div>
+        <div class="inv-meta-row">
+          <div><div class="inv-label">N° de facture</div><div class="inv-value" id="pInvNum"></div></div>
+          <div style="text-align:right;"><div class="inv-label">Date</div><div class="inv-value" id="pDate"></div></div>
+        </div>
+        <div class="from-to">
+          <div><h3>De</h3><div id="pFrom"></div></div>
+          <div style="text-align:right;"><h3>À</h3><div id="pTo"></div></div>
+        </div>
+        <table>
+          <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Unitaire</th><th class="num">Montant</th></tr></thead>
+          <tbody id="pItems"></tbody>
+        </table>
+        <div class="totals">
+          <div><span>Sous-total</span><span id="pSub"></span></div>
+          <div id="pTvaRow" style="display:none;"><span>TVA</span><span id="pTvaLine"></span></div>
+          <div id="pOffertRow" style="display:none;"><span>Offert</span><span id="pOffertLine" class="gold"></span></div>
+          <div class="final"><span>Total à régler</span><span id="pTotal"></span></div>
+        </div>
+        <div class="inv-reglement">
+          <h3>Règlement</h3>
+          <div id="pReglement"></div>
+        </div>
+        <div class="meta" id="pLegal"></div>
       </div>
-      <div class="inv-title-rule"><span>Facture</span></div>
-      <div class="inv-meta-row">
-        <div><div class="inv-label">N° de facture</div><div class="inv-value" id="pInvNum"></div></div>
-        <div style="text-align:right;"><div class="inv-label">Date</div><div class="inv-value" id="pDate"></div></div>
-      </div>
-      <div class="from-to">
-        <div><h3>De</h3><div id="pFrom"></div></div>
-        <div style="text-align:right;"><h3>À</h3><div id="pTo"></div></div>
-      </div>
-      <table>
-        <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Unitaire</th><th class="num">Montant</th></tr></thead>
-        <tbody id="pItems"></tbody>
-      </table>
-      <div class="totals">
-        <div><span>Sous-total</span><span id="pSub"></span></div>
-        <div id="pTvaRow" style="display:none;"><span>TVA</span><span id="pTvaLine"></span></div>
-        <div id="pOffertRow" style="display:none;"><span>Offert</span><span id="pOffertLine" class="gold"></span></div>
-        <div class="final"><span>Total à régler</span><span id="pTotal"></span></div>
-      </div>
-      <div class="inv-reglement">
-        <h3>Règlement</h3>
-        <div id="pReglement"></div>
-      </div>
-      <div class="meta" id="pLegal"></div>
+    </div>
+    <div class="preview-actionbar">
+      <button class="btn-gold" onclick="render()">Générer l'aperçu</button>
+      <button class="btn-gold" onclick="saveInvoice()">Enregistrer</button>
+      <button class="btn-line" onclick="window.print()">Exporter en PDF</button>
+      <button class="btn-line" onclick="sendInvoice()">Envoyer au client</button>
+      <div id="status"></div>
     </div>
   </div>
 </div>
@@ -744,7 +742,14 @@ function renderHistory(){
     <table><thead><tr><th>N°</th><th>Client</th><th>Date</th><th>Total</th><th>Statut</th><th>Actions</th></tr></thead>
     <tbody>${invoices.map(i=>`<tr>
       <td>${i.num}</td><td>${i.client}</td><td>${i.date||''}</td><td class="num">${i.total}</td>
-      <td><span style="color:${i.status==='Envoyée'?'var(--green)':'var(--gold)'};font-weight:600;">${i.status}</span></td>
+      <td>
+        <select onchange="updateInvoiceStatus('${i.num}', this.value)" style="width:auto;padding:3px 6px;font-size:11px;font-weight:600;color:${(i.status==='Envoyée'||i.status==='Payée')?'var(--green)':'var(--gold)'};">
+          <option value="Enregistrée"${i.status==='Enregistrée'?' selected':''}>Enregistrée</option>
+          <option value="Mise à jour"${i.status==='Mise à jour'?' selected':''}>Mise à jour</option>
+          <option value="Envoyée"${i.status==='Envoyée'?' selected':''}>Envoyée</option>
+          <option value="Payée"${i.status==='Payée'?' selected':''}>Payée</option>
+        </select>
+      </td>
       <td>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="viewInvoice('${i.num}')">Voir</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="editInvoice('${i.num}')">Modifier</button>
@@ -761,6 +766,16 @@ function deleteInvoice(num){
   renderHistory();
   renderCA();
   showToast('✔ Facture '+num+' supprimée.');
+}
+function updateInvoiceStatus(num, newStatus){
+  const invoices = storeArr('invoices');
+  const inv = invoices.find(i=>i.num===num);
+  if(!inv) return;
+  inv.status = newStatus;
+  set('invoices', invoices);
+  renderHistory();
+  renderCA();
+  showToast('✔ Statut de la facture '+num+' : '+newStatus+'.');
 }
 function renderCA(){
   const invoices = storeArr('invoices');
@@ -902,6 +917,7 @@ function addBookingForDay(day){
   const y = calDate.getFullYear(), m = calDate.getMonth();
   const dateKey = y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
   cancelEditBooking();
+  bkFormWrap.style.display = 'block';
   bkDate.value = dateKey;
   bkClient.focus();
   bkClient.scrollIntoView({behavior:'smooth', block:'center'});
@@ -942,8 +958,8 @@ function editBooking(id){
   bkRate.value = b.rate;
   bkFormTitle.textContent = 'Modifier le booking';
   bkSubmitBtn.textContent = 'Enregistrer les modifications';
-  bkCancelBtn.style.display = 'block';
   showTab('calendrier');
+  bkFormWrap.style.display = 'block';
   bkClient.scrollIntoView({behavior:'smooth', block:'center'});
 }
 function cancelEditBooking(){
@@ -951,7 +967,7 @@ function cancelEditBooking(){
   bkClient.value='';bkLabel.value='';bkDate.value='';bkFrom.value='';bkTo.value='';bkRate.value='';
   bkFormTitle.textContent = 'Nouveau booking';
   bkSubmitBtn.textContent = 'Ajouter au planning';
-  bkCancelBtn.style.display = 'none';
+  bkFormWrap.style.display = 'none';
 }
 function invoiceBooking(id){
   const bookings = storeArr('bookings');
@@ -1006,12 +1022,6 @@ function renderPlanning(){
     </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à facturer.</p>';
 }
 
-function updateAmt(input){
-  const row = input.closest('.item-row');
-  const qty = parseFloat(row.querySelector('.i-qty').value)||0;
-  const rate = parseFloat(row.querySelector('.i-rate').value)||0;
-  row.querySelector('.i-amt').textContent = (qty*rate).toFixed(2)+' €';
-}
 function calcRange(input){
   const row = input.closest('.item-row');
   const t1 = row.querySelector('.i-from').value;
@@ -1023,34 +1033,21 @@ function calcRange(input){
     if(mins < 0) mins += 24*60;
     row.querySelector('.i-qty').value = (mins/60).toFixed(2);
   }
-  const qty2 = parseFloat(row.querySelector('.i-qty').value)||0;
-  const rate2 = parseFloat(row.querySelector('.i-rate').value)||0;
-  row.querySelector('.i-amt').textContent = (qty2*rate2).toFixed(2)+' €';
   render();
 }
 function addItem(desc='',qty='',rate='',from='',to='',dates=[]){
   const div = document.createElement('div');
   div.className='item-row';
-  const amt = (parseFloat(qty)||0)*(parseFloat(rate)||0);
   div.innerHTML = `<textarea placeholder="Description" class="i-desc" oninput="render()">${desc}</textarea>
     <div class="row2">
-      <div class="rline rline-date">
-        <label style="margin:0 0 4px;">Dates de prestation (ajoute plusieurs jours ici)</label>
-        <div class="i-dates-chips"></div>
-        <input type="hidden" class="i-dates" value="${JSON.stringify(dates).replace(/"/g,'&quot;')}">
-        <div class="rline-add-date">
-          <input type="date" class="i-date-input" title="Choisis une date puis clique + Date pour l'ajouter à la liste">
-          <button type="button" class="btn-line" onclick="addDateChip(this)">+ Date</button>
-        </div>
-      </div>
-      <div class="rline rline-time">
+      <div class="i-dates-chips"></div>
+      <input type="hidden" class="i-dates" value="${JSON.stringify(dates).replace(/"/g,'&quot;')}">
+      <input type="hidden" class="i-qty" value="${qty}">
+      <div class="rline-compact">
+        <input type="date" class="i-date-input" title="Ajoute une date de prestation" onchange="addDateChip(this)">
         <input type="time" class="i-from" title="Début" value="${from}" onchange="calcRange(this)">
         <input type="time" class="i-to" title="Fin" value="${to}" onchange="calcRange(this)">
-      </div>
-      <input type="hidden" class="i-qty" value="${qty}">
-      <div class="rline rline-calc">
-        <input placeholder="Taux €/h" type="number" class="i-rate" value="${rate}" oninput="updateAmt(this);render()">
-        <span class="amtDisplay i-amt">${amt.toFixed(2)} €</span>
+        <input type="number" class="i-rate" placeholder="€/h" value="${rate}" oninput="render()">
       </div>
       <div class="rline rline-actions">
         <button class="btn-line" onclick="duplicateItem(this)">Dupliquer</button>
