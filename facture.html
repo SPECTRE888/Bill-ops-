@@ -1314,9 +1314,18 @@ function toggleOffert(){
   if(!offEnabled.checked) offVal.value = 0;
   render();
 }
+function defaultEmailMessage(){
+  return `Bonjour,\n\nVeuillez trouver ci-joint votre facture ${invNum.value||''}.\n\nN'hésitez pas à me contacter pour toute question.\n\nCordialement,\n${fromName.value||''}`;
+}
+function refreshEmailDefaults(){
+  if(!emailCustomEnabled.checked) return;
+  if(!emailSubject.value || /^Facture /.test(emailSubject.value)) emailSubject.value = 'Facture '+(invNum.value||'');
+  if(!emailMessage.value) emailMessage.value = defaultEmailMessage();
+}
 function toggleEmailCustom(){
   emailCustomFields.style.display = emailCustomEnabled.checked ? 'block' : 'none';
   if(!emailCustomEnabled.checked){ emailSubject.value=''; emailMessage.value=''; }
+  else refreshEmailDefaults();
 }
 
 function currentClient(){
@@ -1334,6 +1343,7 @@ function render(){
   const c = currentClient();
   pTo.innerHTML = c ? `<b>${c.name}</b><br>${c.addr}<br>${c.email}` : '';
   pInvNum.textContent = invNum.value||'---';
+  refreshEmailDefaults();
   pDate.textContent = formatFrDate(invDate.value);
 
   let sub=0; pItems.innerHTML='';
