@@ -18,10 +18,18 @@ ipcMain.handle('open-invoice-window', (_e, { html, title }) => {
   fs.writeFileSync(filePath, html, 'utf8')
   const win = new BrowserWindow({
     width: 900,
-    height: 1000,
+    height: 1040,
+    minWidth: 700,
+    minHeight: 600,
+    center: true,
+    show: false,
+    backgroundColor: '#f5f3ef',
     title: title || 'Facture',
+    parent: mainWin || undefined,
     webPreferences: { nodeIntegration: false, contextIsolation: true },
   })
+  win.once('ready-to-show', () => win.show())
+  win.on('closed', () => { fs.rm(tmpDir, { recursive: true, force: true }, () => {}) })
   win.loadFile(filePath)
   return true
 })

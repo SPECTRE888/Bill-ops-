@@ -52,6 +52,8 @@ body{margin:0;background:var(--bg);color:var(--text);transition:background .2s,c
 .theme-switch button:last-child{border-radius:0 3px 3px 0;border-left:none;}
 .theme-switch button.active{color:var(--gold);border-color:var(--gold-border);background:var(--gold-bg);}
 .panel{background:var(--surface);padding:24px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
+#tab-entreprise,#tab-clients{max-width:560px;}
+#histSearch{max-width:420px;}
 .tab{display:none;} .tab.active{display:block;}
 h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:600;}
 h2:first-child{margin-top:0;}
@@ -836,9 +838,14 @@ function viewInvoice(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   if(!inv) return;
   const styles = document.querySelector('style').outerHTML;
-  const w = window.open('', '_blank');
-  w.document.write('<html data-theme="light"><head><title>'+inv.num+'</title>'+styles+'</head><body style="margin:0;background:var(--bg);display:flex;justify-content:center;padding:40px;">'+inv.html+'</body></html>');
-  w.document.close();
+  const html = '<html data-theme="light"><head><title>'+inv.num+'</title>'+styles+'</head><body style="margin:0;background:var(--bg);display:flex;justify-content:center;padding:40px;">'+inv.html+'</body></html>';
+  if(window.electronBridge?.openInvoiceWindow){
+    window.electronBridge.openInvoiceWindow(html, 'Facture '+inv.num);
+  } else {
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+  }
 }
 function pdfOptions(filename){
   return {margin:10, filename, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
@@ -1224,7 +1231,7 @@ function renderPlanning(){
   const pending = bookings.filter(b=>b.status==='à facturer' && (!b.date || b.date < today));
   bkList.innerHTML = pending.length ? pending.map(b=>`
     <div class="client-card">
-      <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date||'sans date'}${b.from&&b.to?' de '+b.from+' à '+b.to:''}<br>
+      <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date?formatFrDate(b.date):'sans date'}${b.from&&b.to?' de '+b.from+' à '+b.to:''}<br>
       ${b.hours}h × ${b.rate}€ = <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span><br>
       <button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>
       <button class="btn-line" onclick="viewBooking(${b.id})">Voir</button>
