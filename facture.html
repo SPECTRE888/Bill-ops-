@@ -108,7 +108,6 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .preview-scroll{flex:1;min-height:0;overflow-y:auto;padding:40px;display:flex;justify-content:center;}
 .preview-actionbar{flex-shrink:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 40px;border-top:1px solid var(--border);background:var(--surface);}
 .preview-actionbar button{width:100%;margin:0;}
-.preview-actionbar #status{grid-column:1/-1;font-size:11px;color:var(--text2);}
 #invoice{background:var(--surface);color:var(--text);width:210mm;min-height:297mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
 .gold{color:var(--gold);}
 .inv-brand{text-align:center;padding-bottom:22px;}
@@ -469,11 +468,10 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       </div>
     </div>
     <div class="preview-actionbar">
-      <button class="btn-gold" onclick="render()">Générer l'aperçu</button>
+      <button class="btn-gold" onclick="render();showToast('✔ Aperçu mis à jour.',2000)">Générer l'aperçu</button>
       <button class="btn-gold" onclick="saveInvoice()">Enregistrer</button>
       <button class="btn-line" onclick="exportInvoicePdf()">Exporter en PDF</button>
       <button class="btn-line" onclick="sendInvoice()">Envoyer au client</button>
-      <div id="status"></div>
     </div>
   </div>
 </div>
@@ -1446,11 +1444,11 @@ async function sendInvoice(){
   render();
   const c = currentClient();
   const endpoint = sgEndpoint.value.trim();
-  if(!endpoint){ setStatusMsg(status, "⚠ Renseigne l'URL de ton serveur proxy."); return; }
-  if(!sgFrom.value.trim()){ setStatusMsg(status, "⚠ Renseigne l'email d'envoi dans Mon entreprise → Envoi (SendGrid)."); return; }
-  if(!c){ setStatusMsg(status, '⚠ Sélectionne un client.'); return; }
-  if(!isValidEmail(c.email)){ setStatusMsg(status, '⚠ Email client invalide : '+c.email); return; }
-  setStatusMsg(status, 'Envoi en cours…');
+  if(!endpoint){ showToast("⚠ Renseigne l'URL de ton serveur proxy dans Mon entreprise → Envoi (SendGrid)."); return; }
+  if(!sgFrom.value.trim()){ showToast("⚠ Renseigne l'email d'envoi dans Mon entreprise → Envoi (SendGrid)."); return; }
+  if(!c){ showToast('⚠ Sélectionne un client avant d\'envoyer.'); return; }
+  if(!isValidEmail(c.email)){ showToast('⚠ Email client invalide : '+(c.email||'(vide)')); return; }
+  showToast('Envoi en cours…', 2000);
   const msg = emailMessage.value.trim();
   const bodyHtml = (msg ? `<p>${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</p><hr>` : '') + document.getElementById('invoice').outerHTML;
   try{
@@ -1465,9 +1463,14 @@ async function sendInvoice(){
         html: bodyHtml
       })
     });
-    setStatusMsg(status, res.ok ? '✔ Facture envoyée à '+c.email : '✕ Échec de l\'envoi (voir serveur).');
-    if(res.ok) saveToHistory('Envoyée');
-  }catch(e){ setStatusMsg(status, '✕ Erreur : '+e.message); }
+    if(res.ok){
+      showToast('✔ Facture envoyée à '+c.email+'.');
+      saveToHistory('Envoyée');
+    } else {
+      const detail = await res.text().catch(()=> '');
+      showToast('✕ Échec de l\'envoi'+(detail?' : '+detail:' (voir le serveur proxy).'));
+    }
+  }catch(e){ showToast('✕ Erreur d\'envoi : '+e.message); }
 }
 
 loadFrom(); loadSg(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
