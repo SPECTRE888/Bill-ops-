@@ -135,6 +135,7 @@ table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px;}
 th{text-align:left;border-bottom:2px solid var(--gold);padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);}
 td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .num{text-align:right;}
+tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avoid;}
 .totals{margin-top:20px;margin-left:auto;width:280px;font-size:13px;}
 .totals div{display:flex;justify-content:space-between;padding:5px 0;}
 .totals .final{font-weight:700;font-size:22px;border-top:2px solid var(--gold);margin-top:6px;padding-top:12px;color:var(--gold)}
@@ -935,7 +936,13 @@ function openLivePreview(){
   showToast('✔ Aperçu mis à jour.', 2000);
 }
 function pdfOptions(filename){
-  return {margin:10, filename, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+  return {
+    margin:10, filename,
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+    pagebreak:{mode:['css','avoid-all'], avoid:['tr','.totals','.inv-reglement','.inv-meta-row']}
+  };
 }
 function exportInvoicePdf(){
   render();
