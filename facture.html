@@ -95,7 +95,6 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .date-chip button:hover{color:var(--red);}
 .client-list{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;}
 .client-list .client-card{margin-bottom:0;}
-.form-narrow{max-width:760px;}
 .client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
 .client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
 .cal-day{min-height:66px;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
@@ -152,6 +151,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 #accList{margin-bottom:4px;}
 .tab#tab-facture.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 .facture-scroll{flex:1;min-height:0;overflow-y:auto;}
+.tab#tab-historique.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
+#tab-historique h2:first-child{margin-top:0;}
+#histList{flex:1;min-height:60px;overflow-y:auto;}
+#histList table thead th{position:sticky;top:0;background:var(--surface);z-index:1;}
 .facture-fixed-top h2:first-child{margin-top:0;}
 #tab-facture h2{margin:12px 0 6px;}
 #tab-facture .facture-fixed-top h2:first-child{margin-top:0;}
@@ -211,7 +214,6 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
   <div class="nav">
     <div class="brand">BILL OPS</div>
 
-    <div class="nav-section">Accueil</div>
     <button id="nav-accueil" class="active" onclick="showTab('accueil')"><span class="dot"></span>Accueil</button>
 
     <div class="nav-section">Planning</div>
@@ -220,10 +222,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
     <div class="nav-section">Facturation</div>
     <button id="nav-facture" onclick="showTab('facture')"><span class="dot"></span>Facture</button>
-    <button id="nav-clients" onclick="showTab('clients')"><span class="dot"></span>Mes clients</button>
     <button id="nav-historique" onclick="showTab('historique')"><span class="dot"></span>Historique</button>
 
+    <div class="nav-section">Clients</div>
+    <button id="nav-clients" onclick="showTab('clients')"><span class="dot"></span>Mes clients</button>
+
     <div class="nav-spacer"></div>
+    <div class="nav-section">Paramètres</div>
     <button id="nav-entreprise" onclick="showTab('entreprise')"><span class="dot"></span>Mon entreprise</button>
     <div class="theme-switch">
       <button onclick="setTheme('dark')" id="theme-dark" title="Sombre">●</button>
@@ -284,7 +289,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
 
     <div class="tab" id="tab-clients">
-      <div class="form-narrow">
+      <div>
         <h2>Ajouter / modifier un client</h2>
         <input type="hidden" id="cliIdx" value="">
         <div class="row">
