@@ -119,7 +119,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .preview-scroll{flex:1;min-height:0;overflow-y:auto;padding:40px;display:flex;justify-content:center;}
 .preview-actionbar{flex-shrink:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 40px;border-top:1px solid var(--border);background:var(--surface);}
 .preview-actionbar button{width:100%;margin:0;}
-#invoice{background:var(--surface);color:var(--text);width:210mm;min-height:297mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
+#invoice{background:var(--surface);color:var(--text);width:210mm;min-height:285mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
 .gold{color:var(--gold);}
 .inv-brand{text-align:center;padding-bottom:22px;}
 .inv-brandname{font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;display:inline-block;padding-bottom:10px;border-bottom:1px solid var(--gold-border);min-width:200px;}
@@ -937,11 +937,11 @@ function openLivePreview(){
 }
 function pdfOptions(filename){
   return {
-    margin:10, filename,
+    margin:0, filename,
     image:{type:'jpeg',quality:0.98},
     html2canvas:{scale:2},
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-    pagebreak:{mode:['css','avoid-all'], avoid:['tr','.totals','.inv-reglement','.inv-meta-row']}
+    pagebreak:{mode:['css'], avoid:['tr','.totals','.inv-reglement','.inv-meta-row']}
   };
 }
 function exportInvoicePdf(){
