@@ -56,8 +56,8 @@ body{margin:0;background:var(--bg);color:var(--text);transition:background .2s,c
 h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:600;}
 h2:first-child{margin-top:0;}
 label{display:block;font-size:12px;color:var(--text2);margin:8px 0 3px;}
-.offert-header{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px;}
-.offert-header h2{margin:0;}
+.toggle-header{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px;}
+.toggle-header h2{margin:0;}
 .switch{position:relative;display:inline-block;width:38px;height:22px;flex-shrink:0;}
 .switch input{opacity:0;width:0;height:0;position:absolute;}
 .switch-track{position:absolute;inset:0;cursor:pointer;background:var(--surface3);border:1px solid var(--border2);border-radius:22px;transition:.2s;}
@@ -157,10 +157,27 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .stat-mini{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;text-align:center;}
 .stat-mini-value{font-family:var(--font-display);font-size:20px;color:var(--gold);font-weight:600;}
 .stat-mini-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-top:4px;}
+.hist-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.hist-filter{cursor:pointer;padding:5px 12px;border-radius:14px;border:1px solid var(--border2);background:var(--surface2);font-size:11.5px;color:var(--text2);}
+.hist-filter.active{color:var(--gold);border-color:var(--gold-border);background:var(--gold-bg);font-weight:600;}
+.ca-chart{display:flex;align-items:flex-end;gap:6px;height:120px;margin-bottom:16px;padding:10px 4px 0;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;}
+.ca-chart-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+.ca-chart-col{width:100%;max-width:26px;background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:3px 3px 0 0;min-height:2px;}
+.ca-chart-bar.current .ca-chart-col{background:var(--gold);border-color:var(--gold);}
+.ca-chart-label{font-size:9px;color:var(--text3);margin-top:4px;text-transform:uppercase;}
+.ca-chart-val{font-size:9px;color:var(--text2);margin-bottom:2px;white-space:nowrap;}
 .toast-stack{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
 .toast-card{background:var(--surface);border:1px solid var(--gold-border);border-left:3px solid var(--gold);border-radius:6px;padding:12px 16px;min-width:260px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:13px;color:var(--text);animation:toast-in .2s ease-out;}
 .toast-card b{color:var(--gold);font-family:var(--font-display);font-size:14px;display:block;margin-bottom:2px;}
 @keyframes toast-in{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;display:flex;align-items:center;justify-content:center;}
+.modal-box{background:var(--surface);border:1px solid var(--gold-border);border-radius:8px;padding:20px 24px;min-width:300px;max-width:420px;box-shadow:0 12px 32px rgba(0,0,0,.35);}
+.modal-header{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display);font-size:16px;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.modal-close{all:unset;cursor:pointer;font-size:20px;color:var(--text3);line-height:1;padding:0 4px;}
+.modal-close:hover{color:var(--red);}
+.modal-row{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.modal-row:last-child{border-bottom:none;}
+.modal-row-label{color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;}
 @media print{.nav,.panel,.preview-actionbar{display:none;}.app{display:block;height:auto;overflow:visible;}.preview-wrap{height:auto;}.preview-scroll{padding:0;height:auto;overflow:visible;}#invoice{box-shadow:none;width:auto;}
   :root,[data-theme]{
     --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
@@ -220,6 +237,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 
       <h2>Envoi (SendGrid)</h2>
       <label>Clé API SendGrid</label><input id="sgKey" type="password" placeholder="SG.xxxxx">
+      <label>Email d'envoi (vérifié dans SendGrid)</label><input id="sgFrom" type="email" placeholder="contact@tondomaine.com">
       <label>Endpoint proxy serveur</label><input id="sgEndpoint" placeholder="https://ton-serveur.com/send-invoice">
       <button class="btn-line" onclick="saveSg()">Enregistrer</button>
 
@@ -239,6 +257,13 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
         <button class="btn-line" onclick="disconnectSync()" style="color:var(--red);">Déconnecter cet appareil</button>
       </div>
       <div id="syncStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+
+      <h2>Sauvegarde</h2>
+      <p style="font-size:12px;color:var(--text2);">Exporte toutes tes données (entreprise, clients, factures, planning) dans un fichier, à conserver en lieu sûr ou à réimporter sur un autre appareil.</p>
+      <button class="btn-line" onclick="exportBackup()">Exporter mes données</button>
+      <label style="margin-top:10px;">Importer une sauvegarde</label>
+      <input type="file" id="importBackupInput" accept="application/json" onchange="importBackup(this)">
+      <div id="backupStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
     </div>
 
     <div class="tab" id="tab-clients">
@@ -277,7 +302,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           <div><label>Parking</label><input id="parking" type="number" value="0" oninput="render()"></div>
         </div>
 
-        <div class="offert-header">
+        <div class="toggle-header">
           <h2>Offert</h2>
           <label class="switch">
             <input type="checkbox" id="offEnabled" onchange="toggleOffert()">
@@ -293,6 +318,18 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           </div>
           <div><label>Valeur</label><input id="offVal" type="number" value="0" oninput="render()"></div>
         </div>
+
+        <div class="toggle-header">
+          <h2>Email</h2>
+          <label class="switch">
+            <input type="checkbox" id="emailCustomEnabled" onchange="toggleEmailCustom()">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div id="emailCustomFields" style="display:none;">
+          <label>Objet</label><input id="emailSubject" placeholder="Facture (numéro auto si vide)">
+          <label>Message</label><textarea id="emailMessage" rows="3" placeholder="Petit mot avant la facture (optionnel)"></textarea>
+        </div>
       </div>
 
       <h2 style="margin:12px 0 6px;flex-shrink:0;">Prestations</h2>
@@ -305,9 +342,11 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
     <div class="tab" id="tab-historique">
       <h2>Factures émises</h2>
       <input id="histSearch" placeholder="Rechercher un client..." oninput="renderHistory()" style="margin-bottom:10px;">
+      <div id="histFilters" class="hist-filters"></div>
       <div id="histList"></div>
 
       <h2>Chiffre d'affaires</h2>
+      <div id="caChart"></div>
       <div id="caStats"></div>
       <div id="caList"></div>
     </div>
@@ -330,6 +369,10 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
         <div class="dash-card">
           <div class="dash-card-label">Heures prévues ce mois</div>
           <div class="dash-card-value" id="dashHours">0 h</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-label">À encaisser</div>
+          <div class="dash-card-value" id="dashUnpaidAmt">0 €</div>
         </div>
       </div>
 
@@ -426,15 +469,26 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
     <div class="preview-actionbar">
       <button class="btn-gold" onclick="render()">Générer l'aperçu</button>
       <button class="btn-gold" onclick="saveInvoice()">Enregistrer</button>
-      <button class="btn-line" onclick="window.print()">Exporter en PDF</button>
+      <button class="btn-line" onclick="exportInvoicePdf()">Exporter en PDF</button>
       <button class="btn-line" onclick="sendInvoice()">Envoyer au client</button>
       <div id="status"></div>
     </div>
   </div>
 </div>
 <div class="toast-stack" id="toastStack"></div>
+<div class="modal-overlay" id="bookingModal" style="display:none;" onclick="if(event.target===this) closeBookingModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>Détail de la prestation</span>
+      <button type="button" class="modal-close" onclick="closeBookingModal()">×</button>
+    </div>
+    <div id="bookingModalBody"></div>
+    <button class="btn-gold" style="width:100%;margin-top:14px;" onclick="closeBookingModal()">Fermer</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 function showToast(msg, duration){
   const stack = document.getElementById('toastStack');
@@ -533,6 +587,31 @@ function disconnectSync(){
   renderSyncUI();
   updateSyncStatus('');
 }
+function exportBackup(){
+  const blob = new Blob([JSON.stringify(collectSyncPayload(), null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'bill-ops-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatusMsg(document.getElementById('backupStatus'), '✔ Sauvegarde téléchargée.');
+}
+function importBackup(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      applySyncPayload(data);
+      setStatusMsg(document.getElementById('backupStatus'), '✔ Données importées. Rechargement...');
+      setTimeout(()=>location.reload(), 800);
+    }catch(e){ setStatusMsg(document.getElementById('backupStatus'), '✕ Fichier invalide : '+e.message); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
 function copySyncCode(){
   const code = getSyncCode();
   if(!code) return;
@@ -558,6 +637,7 @@ applyTheme();
 const store = k => JSON.parse(localStorage.getItem(k) || '{}');
 const storeArr = k => JSON.parse(localStorage.getItem(k) || '[]');
 const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueSync(); };
+const invoiceAmt = i => parseFloat((i.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
 
 function showTab(name){
   const showPreview = name==='facture';
@@ -611,8 +691,8 @@ function formatFrDatesGrouped(dates){
   }
   return parsed.map(dt=>formatFrDate(dt.toISOString().slice(0,10))).join(', ');
 }
-function saveSg(){ set('sg', {key:sgKey.value, endpoint:sgEndpoint.value}); }
-function loadSg(){ const s=store('sg'); sgKey.value=s.key||''; sgEndpoint.value=s.endpoint||''; }
+function saveSg(){ set('sg', {key:sgKey.value, from:sgFrom.value, endpoint:sgEndpoint.value}); }
+function loadSg(){ const s=store('sg'); sgKey.value=s.key||''; sgFrom.value=s.from||''; sgEndpoint.value=s.endpoint||''; }
 
 function suggestPrefix(){
   if(cliPrefix.value) return;
@@ -623,7 +703,14 @@ function suggestPrefix(){
 function resetClientForm(){
   cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliPhone.value=''; cliAddr.value='';
 }
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email||'').trim());
+}
 function saveClient(){
+  if(cliEmail.value.trim() && !isValidEmail(cliEmail.value)){
+    showToast('⚠ Email client invalide : '+cliEmail.value);
+    return;
+  }
   const clients = storeArr('clients');
   const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value};
   if(cliIdx.value!=='') clients[cliIdx.value]=c; else clients.push(c);
@@ -704,6 +791,29 @@ function editInvoice(num){
   showTab('facture');
   showToast('✎ Facture '+num+' chargée pour modification.');
 }
+function duplicateInvoice(num){
+  const inv = storeArr('invoices').find(i=>i.num===num);
+  if(!inv || !inv.state){ showToast('⚠ Détail non disponible pour cette facture ancienne.'); return; }
+  const s = inv.state;
+  clientSelect.value = s.client;
+  lastNumberedClient = s.client;
+  const c = currentClient();
+  invNum.value = c ? nextInvoiceNumber(c.prefix) : '';
+  invDate.value = '';
+  tva.value = s.tva||0;
+  offType.value = s.offType||'pct';
+  offVal.value = s.offVal||0;
+  offEnabled.checked = (parseFloat(s.offVal)||0) > 0;
+  offFields.style.display = offEnabled.checked ? 'flex' : 'none';
+  km.value = s.km||0;
+  peage.value = s.peage||0;
+  parking.value = s.parking||0;
+  document.querySelectorAll('.item-row').forEach(r=>r.remove());
+  (s.items&&s.items.length ? s.items : [{}]).forEach(it=>addItem(it.desc||'', it.qty||'', it.rate||'', it.from||'', it.to||'', (it.dates&&it.dates.length) ? it.dates : (it.date ? [it.date] : [])));
+  render();
+  showTab('facture');
+  showToast('✔ Nouvelle facture '+invNum.value+' créée à partir de '+num+'.');
+}
 function saveToHistory(status){
   const c = currentClient();
   if(!c || !invNum.value) return;
@@ -730,19 +840,34 @@ function viewInvoice(num){
   w.document.write('<html data-theme="light"><head><title>'+inv.num+'</title>'+styles+'</head><body style="margin:0;background:var(--bg);display:flex;justify-content:center;padding:40px;">'+inv.html+'</body></html>');
   w.document.close();
 }
+function pdfOptions(filename){
+  return {margin:10, filename, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+}
+function exportInvoicePdf(){
+  render();
+  const filename = (invNum.value||'facture')+'.pdf';
+  html2pdf().set(pdfOptions(filename)).from(document.getElementById('invoice')).save();
+}
 function downloadInvoicePdf(num){
-  viewInvoice(num);
-  setTimeout(()=>showToast('Utilise Cmd/Ctrl+P → Enregistrer en PDF dans l\'onglet ouvert.'), 400);
+  const inv = storeArr('invoices').find(i=>i.num===num);
+  if(!inv){ showToast('⚠ Facture introuvable.'); return; }
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;background:#fff;';
+  container.setAttribute('data-theme','light');
+  container.innerHTML = inv.html;
+  document.body.appendChild(container);
+  html2pdf().set(pdfOptions(num+'.pdf')).from(container.firstElementChild).save().finally(()=>container.remove());
 }
 async function resendInvoice(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   const c = storeArr('clients').find(cl=>cl.name===inv.client);
   const endpoint = sgEndpoint.value.trim();
-  if(!endpoint || !c){ showToast('⚠ Configuration SendGrid ou client manquant.'); return; }
+  if(!endpoint || !sgFrom.value.trim() || !c){ showToast('⚠ Configuration SendGrid (endpoint/email d\'envoi) ou client manquant.'); return; }
+  if(!isValidEmail(c.email)){ showToast('⚠ Email client invalide : '+c.email); return; }
   try{
     const res = await fetch(endpoint, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({apiKey: sgKey.value, to: c.email, subject:'Facture '+inv.num, html: inv.html})
+      body: JSON.stringify({apiKey: sgKey.value, from: sgFrom.value.trim(), to: c.email, subject:'Facture '+inv.num, html: inv.html})
     });
     showToast(res.ok ? '✔ Facture renvoyée à '+c.email+'.' : '✕ Échec du renvoi.');
     if(res.ok){
@@ -753,10 +878,25 @@ async function resendInvoice(num){
     }
   }catch(e){ showToast('✕ Erreur : '+e.message); }
 }
+let histStatusFilter = 'Toutes';
+function setHistFilter(status){
+  histStatusFilter = status;
+  renderHistory();
+}
+function renderHistFilters(allInvoices){
+  const statuses = ['Toutes','Enregistrée','Mise à jour','Envoyée','Payée'];
+  histFilters.innerHTML = statuses.map(s=>{
+    const count = s==='Toutes' ? allInvoices.length : allInvoices.filter(i=>i.status===s).length;
+    return `<span class="hist-filter${histStatusFilter===s?' active':''}" onclick="setHistFilter('${s}')">${s} (${count})</span>`;
+  }).join('');
+}
 function renderHistory(){
   const q = (histSearch?.value||'').trim().toLowerCase();
-  let invoices = storeArr('invoices').slice().reverse();
+  const allInvoices = storeArr('invoices').slice().reverse();
+  renderHistFilters(allInvoices);
+  let invoices = allInvoices;
   if(q) invoices = invoices.filter(i=>i.client.toLowerCase().includes(q));
+  if(histStatusFilter!=='Toutes') invoices = invoices.filter(i=>i.status===histStatusFilter);
   histList.innerHTML = invoices.length ? `
     <table><thead><tr><th>N°</th><th>Client</th><th>Date</th><th>Total</th><th>Statut</th><th>Actions</th></tr></thead>
     <tbody>${invoices.map(i=>`<tr>
@@ -772,6 +912,7 @@ function renderHistory(){
       <td>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="viewInvoice('${i.num}')">Voir</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="editInvoice('${i.num}')">Modifier</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="duplicateInvoice('${i.num}')">Dupliquer</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="downloadInvoicePdf('${i.num}')">PDF</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="resendInvoice('${i.num}')">Renvoyer</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0;color:var(--red);" onclick="deleteInvoice('${i.num}')">Supprimer</button>
@@ -796,15 +937,31 @@ function updateInvoiceStatus(num, newStatus){
   renderCA();
   showToast('✔ Statut de la facture '+num+' : '+newStatus+'.');
 }
+function renderCaChart(invoices, amt){
+  const now = new Date();
+  const months = [];
+  for(let i=11;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: d.toLocaleDateString('fr-FR',{month:'short'}), current: i===0});
+  }
+  const values = months.map(m=>invoices.filter(i=>(i.date||'').startsWith(m.key)).reduce((s,i)=>s+amt(i),0));
+  const max = Math.max(...values, 1);
+  caChart.innerHTML = `<div class="ca-chart">${months.map((m,idx)=>`
+    <div class="ca-chart-bar${m.current?' current':''}">
+      <div class="ca-chart-val">${values[idx]>0?Math.round(values[idx])+'€':''}</div>
+      <div class="ca-chart-col" style="height:${Math.max(2,(values[idx]/max)*90)}px;"></div>
+      <div class="ca-chart-label">${m.label}</div>
+    </div>`).join('')}</div>`;
+}
 function renderCA(){
   const invoices = storeArr('invoices');
-  const amt = i => parseFloat((i.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
+  renderCaChart(invoices, invoiceAmt);
   const now = new Date();
   const yearKey = String(now.getFullYear());
   const monthKey = yearKey+'-'+String(now.getMonth()+1).padStart(2,'0');
-  const totalCA = invoices.reduce((s,i)=>s+amt(i),0);
-  const caYear = invoices.filter(i=>(i.date||'').startsWith(yearKey)).reduce((s,i)=>s+amt(i),0);
-  const caMonth = invoices.filter(i=>(i.date||'').startsWith(monthKey)).reduce((s,i)=>s+amt(i),0);
+  const totalCA = invoices.reduce((s,i)=>s+invoiceAmt(i),0);
+  const caYear = invoices.filter(i=>(i.date||'').startsWith(yearKey)).reduce((s,i)=>s+invoiceAmt(i),0);
+  const caMonth = invoices.filter(i=>(i.date||'').startsWith(monthKey)).reduce((s,i)=>s+invoiceAmt(i),0);
   const SEUIL_FRANCHISE_TVA = 32000;
   const franchiseDepassee = caYear > SEUIL_FRANCHISE_TVA;
   caStats.innerHTML = `
@@ -817,7 +974,7 @@ function renderCA(){
       ${franchiseDepassee ? '⚠' : ''} CA ${yearKey} cumulé : ${caYear.toFixed(2)} € / ${SEUIL_FRANCHISE_TVA} € ${franchiseDepassee ? '— seuil de franchise dépassé, TVA applicable.' : '(franchise en base active).'}
     </div>`;
   const byClient = {};
-  invoices.forEach(i=>{ byClient[i.client] = (byClient[i.client]||0) + amt(i); });
+  invoices.forEach(i=>{ byClient[i.client] = (byClient[i.client]||0) + invoiceAmt(i); });
   const rows = Object.entries(byClient).sort((a,b)=>b[1]-a[1]);
   caList.innerHTML = rows.length ? `
     <table><thead><tr><th>Client</th><th class="num">CA généré</th></tr></thead>
@@ -833,14 +990,16 @@ function renderDashboard(){
   const monthKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 
   const caMois = invoices.filter(i=>(i.date||'').startsWith(monthKey))
-    .reduce((s,i)=>s+(parseFloat((i.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0),0);
+    .reduce((s,i)=>s+invoiceAmt(i),0);
   dashCA.textContent = caMois.toFixed(2)+' €';
 
   const upcoming = bookings.filter(b=>b.status==='à facturer' && b.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
   dashUpcoming.textContent = upcoming.length;
 
-  const facturesEnAttente = invoices.filter(i=>i.status!=='Envoyée').length;
-  dashPending.textContent = facturesEnAttente;
+  const unpaidInvoices = invoices.filter(i=>i.status!=='Payée');
+  dashPending.textContent = unpaidInvoices.length;
+  const aEncaisser = unpaidInvoices.reduce((s,i)=>s+invoiceAmt(i),0);
+  dashUnpaidAmt.textContent = aEncaisser.toFixed(2)+' €';
 
   const heuresMois = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey))
     .reduce((s,b)=>s+b.hours,0);
@@ -978,17 +1137,21 @@ function prefillBookingClient(){
 function viewBooking(id){
   const b = storeArr('bookings').find(x=>x.id===id);
   if(!b) return;
-  const lines = [
-    `Client : ${b.client}`,
-    b.label ? `Prestation : ${b.label}` : '',
-    `Date : ${b.date ? new Date(b.date+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'non définie'}`,
-    (b.from&&b.to) ? `Horaires : ${b.from} – ${b.to} (${b.hours}h)` : '',
-    `Taux : ${b.rate} €/h`,
-    `Total : ${(b.hours*b.rate).toFixed(2)} €`,
-    b.addr ? `Adresse : ${b.addr}` : '',
-    b.contact ? `Contact : ${b.contact}` : '',
-  ].filter(Boolean).join('\n');
-  alert(lines);
+  const rows = [
+    ['Client', b.client],
+    ['Prestation', b.label],
+    ['Date', b.date ? new Date(b.date+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'non définie'],
+    ['Horaires', (b.from&&b.to) ? `${b.from} – ${b.to} (${b.hours}h)` : ''],
+    ['Taux', `${b.rate} €/h`],
+    ['Total', `${(b.hours*b.rate).toFixed(2)} €`],
+    ['Adresse', b.addr],
+    ['Contact', b.contact],
+  ].filter(([,v])=>v);
+  bookingModalBody.innerHTML = rows.map(([k,v])=>`<div class="modal-row"><span class="modal-row-label">${k}</span><span>${v}</span></div>`).join('');
+  bookingModal.style.display = 'flex';
+}
+function closeBookingModal(){
+  bookingModal.style.display = 'none';
 }
 function editBooking(id){
   const b = storeArr('bookings').find(x=>x.id===id);
@@ -1144,6 +1307,10 @@ function toggleOffert(){
   if(!offEnabled.checked) offVal.value = 0;
   render();
 }
+function toggleEmailCustom(){
+  emailCustomFields.style.display = emailCustomEnabled.checked ? 'block' : 'none';
+  if(!emailCustomEnabled.checked){ emailSubject.value=''; emailMessage.value=''; }
+}
 
 function currentClient(){
   const name = clientSelect.value.trim().toLowerCase();
@@ -1204,7 +1371,7 @@ function render(){
   const caYear = (invDate.value || new Date().toISOString().slice(0,10)).slice(0,4);
   const caCumulAvant = storeArr('invoices')
     .filter(i => i.num !== invNum.value && (i.date||'').slice(0,4) === caYear)
-    .reduce((s,i) => s + (parseFloat((i.total||'0').replace(',','.')) || 0), 0);
+    .reduce((s,i) => s + invoiceAmt(i), 0);
   const franchiseDepassee = (caCumulAvant + sub) > SEUIL_FRANCHISE_TVA;
   fromTva.disabled = true;
   if(franchiseDepassee){
@@ -1250,17 +1417,22 @@ async function sendInvoice(){
   const c = currentClient();
   const endpoint = sgEndpoint.value.trim();
   if(!endpoint){ setStatusMsg(status, "⚠ Renseigne l'URL de ton serveur proxy."); return; }
+  if(!sgFrom.value.trim()){ setStatusMsg(status, "⚠ Renseigne l'email d'envoi dans Mon entreprise → Envoi (SendGrid)."); return; }
   if(!c){ setStatusMsg(status, '⚠ Sélectionne un client.'); return; }
+  if(!isValidEmail(c.email)){ setStatusMsg(status, '⚠ Email client invalide : '+c.email); return; }
   setStatusMsg(status, 'Envoi en cours…');
+  const msg = emailMessage.value.trim();
+  const bodyHtml = (msg ? `<p>${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</p><hr>` : '') + document.getElementById('invoice').outerHTML;
   try{
     const res = await fetch(endpoint, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         apiKey: sgKey.value,
+        from: sgFrom.value.trim(),
         to: c.email,
-        subject: 'Facture ' + invNum.value,
-        html: document.getElementById('invoice').outerHTML
+        subject: emailSubject.value.trim() || ('Facture ' + invNum.value),
+        html: bodyHtml
       })
     });
     setStatusMsg(status, res.ok ? '✔ Facture envoyée à '+c.email : '✕ Échec de l\'envoi (voir serveur).');
