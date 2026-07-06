@@ -1030,13 +1030,26 @@ function dashNewInvoice(){ showTab('facture'); clientSelect.focus(); }
 function dashNewClient(){ showTab('clients'); resetClientForm(); cliName.focus(); }
 function nextInvoiceNumber(prefix){
   if(!prefix) prefix='FA';
-  const counters = store('invCounters');
   const year = new Date().getFullYear();
   const key = prefix+'-'+year;
-  const next = (counters[key]||0)+1;
-  counters[key]=next;
+  const counters = store('invCounters');
+  const invoices = storeArr('invoices');
+  const existingNums = new Set(invoices.map(i=>i.num));
+  const pattern = new RegExp('^'+prefix+year+'-(\\d+)$');
+  let maxExisting = 0;
+  invoices.forEach(i=>{
+    const m = pattern.exec(i.num||'');
+    if(m) maxExisting = Math.max(maxExisting, parseInt(m[1],10));
+  });
+  let next = Math.max(counters[key]||0, maxExisting) + 1;
+  let candidate = `${prefix}${year}-${String(next).padStart(3,'0')}`;
+  while(existingNums.has(candidate)){
+    next++;
+    candidate = `${prefix}${year}-${String(next).padStart(3,'0')}`;
+  }
+  counters[key] = next;
   set('invCounters', counters);
-  return `${prefix}${year}-${String(next).padStart(3,'0')}`;
+  return candidate;
 }
 
 let calDate = new Date();
