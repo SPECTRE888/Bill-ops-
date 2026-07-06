@@ -52,7 +52,7 @@ body{margin:0;background:var(--bg);color:var(--text);transition:background .2s,c
 .theme-switch button:last-child{border-radius:0 3px 3px 0;border-left:none;}
 .theme-switch button.active{color:var(--gold);border-color:var(--gold-border);background:var(--gold-bg);}
 .panel{background:var(--surface);padding:24px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
-#tab-entreprise,#tab-clients{max-width:560px;}
+#tab-entreprise{max-width:640px;}
 #histSearch{max-width:420px;}
 .tab{display:none;} .tab.active{display:block;}
 h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:600;}
@@ -87,7 +87,9 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .date-chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface3);border:1px solid var(--border2);border-radius:12px;padding:2px 4px 2px 8px;font-size:11px;color:var(--text);}
 .date-chip button{all:unset;cursor:pointer;font-size:13px;line-height:1;color:var(--text3);padding:0 4px;}
 .date-chip button:hover{color:var(--red);}
-.client-list{margin-top:10px;}
+.client-list{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
+.client-list .client-card{margin-bottom:0;}
+.form-narrow{max-width:520px;}
 .client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
 .client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
 .cal-day{min-height:66px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
@@ -143,7 +145,8 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 #tab-facture label{margin:5px 0 2px;font-size:11px;}
 #tab-facture input,#tab-facture select,#tab-facture textarea{padding:6px 8px;font-size:12.5px;}
 #tab-facture .row{gap:6px;}
-.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:6px;}
+.dash-section-title{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:0 0 8px;font-weight:600;}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px;}
 .dash-card{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:18px 16px;}
 .dash-card-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
 .dash-card-value{font-family:var(--font-display);font-size:28px;color:var(--gold);font-weight:600;}
@@ -268,15 +271,17 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
     </div>
 
     <div class="tab" id="tab-clients">
-      <h2>Ajouter / modifier un client</h2>
-      <input type="hidden" id="cliIdx" value="">
-      <label>Nom société</label><input id="cliName" oninput="suggestPrefix()">
-      <label>Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase">
-      <label>Email</label><input id="cliEmail">
-      <label>Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78">
-      <label>Adresse</label><input id="cliAddr">
-      <button class="btn-gold" onclick="saveClient()">Enregistrer le client</button>
-      <button class="btn-line" onclick="resetClientForm()">Nouveau client</button>
+      <div class="form-narrow">
+        <h2>Ajouter / modifier un client</h2>
+        <input type="hidden" id="cliIdx" value="">
+        <label>Nom société</label><input id="cliName" oninput="suggestPrefix()">
+        <label>Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase">
+        <label>Email</label><input id="cliEmail">
+        <label>Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78">
+        <label>Adresse</label><input id="cliAddr">
+        <button class="btn-gold" onclick="saveClient()">Enregistrer le client</button>
+        <button class="btn-line" onclick="resetClientForm()">Nouveau client</button>
+      </div>
 
       <h2>Clients enregistrés</h2>
       <div class="client-list" id="clientList"></div>
@@ -354,25 +359,39 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 
     <div class="tab active" id="tab-accueil">
       <h2>Vue d'ensemble</h2>
+
+      <div class="dash-section-title">Ce mois-ci (réalisé)</div>
       <div class="dash-grid">
         <div class="dash-card">
-          <div class="dash-card-label">CA du mois</div>
+          <div class="dash-card-label">CA facturé ce mois</div>
           <div class="dash-card-value" id="dashCA">0 €</div>
         </div>
+      </div>
+
+      <div class="dash-section-title">Prévisionnel</div>
+      <div class="dash-grid">
         <div class="dash-card">
           <div class="dash-card-label">Prestations à venir</div>
           <div class="dash-card-value" id="dashUpcoming">0</div>
         </div>
         <div class="dash-card">
-          <div class="dash-card-label">Factures en attente</div>
-          <div class="dash-card-value" id="dashPending">0</div>
+          <div class="dash-card-label">CA prévu ce mois</div>
+          <div class="dash-card-value" id="dashForecastAmt">0 €</div>
         </div>
         <div class="dash-card">
           <div class="dash-card-label">Heures prévues ce mois</div>
           <div class="dash-card-value" id="dashHours">0 h</div>
         </div>
+      </div>
+
+      <div class="dash-section-title">Facturation</div>
+      <div class="dash-grid">
         <div class="dash-card">
-          <div class="dash-card-label">À encaisser</div>
+          <div class="dash-card-label">Factures en attente</div>
+          <div class="dash-card-value" id="dashPending">0</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-label">Montant à encaisser</div>
           <div class="dash-card-value" id="dashUnpaidAmt">0 €</div>
         </div>
       </div>
@@ -468,7 +487,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       </div>
     </div>
     <div class="preview-actionbar">
-      <button class="btn-gold" onclick="render();showToast('✔ Aperçu mis à jour.',2000)">Générer l'aperçu</button>
+      <button class="btn-gold" onclick="openLivePreview()">Générer l'aperçu</button>
       <button class="btn-gold" onclick="saveInvoice()">Enregistrer</button>
       <button class="btn-line" onclick="exportInvoicePdf()">Exporter en PDF</button>
       <button class="btn-line" onclick="sendInvoice()">Envoyer au client</button>
@@ -744,7 +763,7 @@ function pickClient(){
   const c = currentClient();
   if(!c) return;
   if(lastNumberedClient !== c.name){
-    invNum.value = nextInvoiceNumber(c.prefix);
+    invNum.value = peekInvoiceNumber(c.prefix);
     lastNumberedClient = c.name;
   }
   render();
@@ -798,7 +817,7 @@ function duplicateInvoice(num){
   clientSelect.value = s.client;
   lastNumberedClient = s.client;
   const c = currentClient();
-  invNum.value = c ? nextInvoiceNumber(c.prefix) : '';
+  invNum.value = c ? peekInvoiceNumber(c.prefix) : '';
   invDate.value = '';
   tva.value = s.tva||0;
   offType.value = s.offType||'pct';
@@ -818,7 +837,12 @@ function saveToHistory(status){
   const c = currentClient();
   if(!c || !invNum.value) return;
   const invoices = storeArr('invoices');
-  const idx = invoices.findIndex(i=>i.num===invNum.value);
+  let idx = invoices.findIndex(i=>i.num===invNum.value);
+  if(idx<0){
+    // Facture réellement nouvelle : on réserve le numéro maintenant seulement (jamais avant).
+    invNum.value = nextInvoiceNumber(c.prefix);
+    render();
+  }
   const entry = {
     num: invNum.value,
     client: c.name,
@@ -844,6 +868,19 @@ function viewInvoice(num){
     w.document.write(html);
     w.document.close();
   }
+}
+function openLivePreview(){
+  render();
+  const styles = document.querySelector('style').outerHTML;
+  const html = '<html data-theme="light"><head><title>Aperçu facture</title>'+styles+'</head><body style="margin:0;background:var(--bg);display:flex;justify-content:center;padding:40px;">'+document.getElementById('invoice').outerHTML+'</body></html>';
+  if(window.electronBridge?.openInvoiceWindow){
+    window.electronBridge.openInvoiceWindow(html, 'Aperçu facture');
+  } else {
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+  }
+  showToast('✔ Aperçu mis à jour.', 2000);
 }
 function pdfOptions(filename){
   return {margin:10, filename, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
@@ -1006,9 +1043,11 @@ function renderDashboard(){
   const aEncaisser = unpaidInvoices.reduce((s,i)=>s+invoiceAmt(i),0);
   dashUnpaidAmt.textContent = aEncaisser.toFixed(2)+' €';
 
-  const heuresMois = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey))
-    .reduce((s,b)=>s+b.hours,0);
+  const bookingsMois = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey));
+  const heuresMois = bookingsMois.reduce((s,b)=>s+b.hours,0);
   dashHours.textContent = heuresMois.toFixed(1)+' h';
+  const forecastMois = bookingsMois.reduce((s,b)=>s+b.hours*b.rate,0);
+  dashForecastAmt.textContent = forecastMois.toFixed(2)+' €';
 
   const next = upcoming[0];
   if(next){
@@ -1026,7 +1065,7 @@ function renderDashboard(){
 function dashNewBooking(){ showTab('planning'); cancelEditBooking(); bkClient.focus(); }
 function dashNewInvoice(){ showTab('facture'); clientSelect.focus(); }
 function dashNewClient(){ showTab('clients'); resetClientForm(); cliName.focus(); }
-function nextInvoiceNumber(prefix){
+function computeNextInvoiceNumber(prefix){
   if(!prefix) prefix='FA';
   const year = new Date().getFullYear();
   const key = prefix+'-'+year;
@@ -1045,6 +1084,16 @@ function nextInvoiceNumber(prefix){
     next++;
     candidate = `${prefix}${year}-${String(next).padStart(3,'0')}`;
   }
+  return { key, next, candidate };
+}
+// Aperçu du prochain numéro, sans réserver/consommer le compteur (juste pour affichage).
+function peekInvoiceNumber(prefix){
+  return computeNextInvoiceNumber(prefix).candidate;
+}
+// Réserve réellement le prochain numéro (à appeler seulement au moment de l'enregistrement effectif).
+function nextInvoiceNumber(prefix){
+  const { key, next, candidate } = computeNextInvoiceNumber(prefix);
+  const counters = store('invCounters');
   counters[key] = next;
   set('invCounters', counters);
   return candidate;
