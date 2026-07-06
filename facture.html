@@ -102,6 +102,8 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
 .cal-day.selected{outline:2px solid var(--gold);}
 .cal-day.empty{background:transparent;cursor:default;}
+.cal-day.past{opacity:.5;}
+.cal-day.past.has-booking{background:var(--surface3);border-color:var(--border2);}
 .cal-day .cal-daynum{font-size:13px;}
 .cal-day .cal-names{font-size:10px;font-weight:400;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
 .cal-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;flex-shrink:0;}
@@ -141,8 +143,11 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 .meta{margin-top:20px;font-size:10.5px;color:var(--text3);line-height:1.6;font-style:italic;}
 .planning-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;align-items:start;}
 .acc-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:5px;font-size:11.5px;}
+.acc-row .cal-dot{flex-shrink:0;}
 .acc-row .acc-info{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .acc-row button{padding:4px 8px;font-size:10.5px;margin:0;flex-shrink:0;}
+.acc-day-header{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:600;margin:14px 0 6px;}
+.acc-day-header:first-child{margin-top:0;}
 #accList{margin-bottom:4px;}
 .tab#tab-facture.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 .facture-scroll{flex:1;min-height:0;overflow-y:auto;}
@@ -1182,18 +1187,21 @@ function renderCalendar(){
     const timePrefix = b.from ? (b.from+(b.to?'-'+b.to:'')+' ') : '';
     byDay[day].names.push({client:b.client, text: timePrefix + (b.label ? b.client+' — '+b.label : b.client)});
   });
+  const todayKey = new Date().toISOString().slice(0,10);
   let html = ['L','M','M','J','V','S','D'].map(d=>`<div style="font-size:10px;color:var(--text3);text-align:center;">${d}</div>`).join('');
   for(let i=0;i<startOffset;i++) html += `<div class="cal-day empty"></div>`;
   for(let d=1;d<=daysInMonth;d++){
     const info = byDay[d];
     const sel = selectedCalDay===d ? ' selected' : '';
+    const dateKey = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const past = dateKey < todayKey ? ' past' : '';
     if(info){
       const shown = info.names.slice(0,2);
       const extra = info.names.length - shown.length;
       const namesHtml = shown.map(n=>`<div class="cal-names"><span class="cal-dot" style="background:${clientColor(n.client)};"></span>${n.text}</div>`).join('') + (extra>0 ? `<div class="cal-names">+${extra} autre${extra>1?'s':''}</div>` : '');
-      html += `<div class="cal-day has-booking${sel}" onclick="selectCalDay(${d})"><span class="cal-daynum">${d}</span>${namesHtml}<span class="cal-ca">${info.ca.toFixed(0)}€</span></div>`;
+      html += `<div class="cal-day has-booking${past}${sel}" onclick="selectCalDay(${d})"><span class="cal-daynum">${d}</span>${namesHtml}<span class="cal-ca">${info.ca.toFixed(0)}€</span></div>`;
     } else {
-      html += `<div class="cal-day${sel}" onclick="selectCalDay(${d})"><span class="cal-daynum">${d}</span></div>`;
+      html += `<div class="cal-day${past}${sel}" onclick="selectCalDay(${d})"><span class="cal-daynum">${d}</span></div>`;
     }
   }
   bkCal.innerHTML = html;
@@ -1327,14 +1335,26 @@ function renderAccueil(){
   const today = new Date().toISOString().slice(0,10);
   const bookings = storeArr('bookings')
     .filter(b=>b.status==='à facturer' && b.date >= today)
-    .sort((a,b)=>a.date.localeCompare(b.date));
-  accList.innerHTML = bookings.length ? bookings.map(b=>`
+    .sort((a,b)=>a.date.localeCompare(b.date) || (a.from||'').localeCompare(b.from||''));
+  if(!bookings.length){ accList.innerHTML = '<p style="color:var(--text3);font-size:12px;">Aucune presta à venir.</p>'; return; }
+  let html = '';
+  let lastDate = null;
+  bookings.forEach(b=>{
+    if(b.date !== lastDate){
+      lastDate = b.date;
+      const label = new Date(b.date+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+      html += `<div class="acc-day-header">${label.charAt(0).toUpperCase()+label.slice(1)}</div>`;
+    }
+    html += `
     <div class="acc-row">
-      <div class="acc-info"><b>${b.client}</b>${b.label?' — '+b.label:''} · ${new Date(b.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}${b.from&&b.to?' '+b.from+'-'+b.to:''} · <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span></div>
+      <span class="cal-dot" style="background:${clientColor(b.client)};"></span>
+      <div class="acc-info"><b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' · '+b.from+'-'+b.to:''} · <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span></div>
       <button class="btn-line" onclick="viewBooking(${b.id})">Voir</button>
       <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
       <button class="btn-line" onclick="deleteBooking(${b.id})">Suppr.</button>
-    </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à venir.</p>';
+    </div>`;
+  });
+  accList.innerHTML = html;
 }
 function renderCalendarTab(){
   renderCalendar();
