@@ -373,7 +373,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <div id="bkFormWrap" style="display:none;">
         <h2 id="bkFormTitle">Nouveau booking</h2>
         <input type="hidden" id="bkEditId" value="">
-        <label>Client</label><input id="bkClient" list="clientNames" onchange="prefillBookingClient()">
+        <label>Client</label><input id="bkClient" list="clientNames" oninput="prefillBookingClient()" onchange="prefillBookingClient()">
         <label>Nom de la prestation</label><input id="bkLabel" placeholder="Ex. Prestation Barman">
         <label>Adresse de la prestation</label><input id="bkAddr" placeholder="Lieu de l'événement">
         <label>Contact sur place</label><input id="bkContact" placeholder="Nom / téléphone du contact">
@@ -975,6 +975,21 @@ function prefillBookingClient(){
   bkAddr.value = c.addr||'';
   bkContact.value = c.phone||'';
 }
+function viewBooking(id){
+  const b = storeArr('bookings').find(x=>x.id===id);
+  if(!b) return;
+  const lines = [
+    `Client : ${b.client}`,
+    b.label ? `Prestation : ${b.label}` : '',
+    `Date : ${b.date ? new Date(b.date+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'non définie'}`,
+    (b.from&&b.to) ? `Horaires : ${b.from} – ${b.to} (${b.hours}h)` : '',
+    `Taux : ${b.rate} €/h`,
+    `Total : ${(b.hours*b.rate).toFixed(2)} €`,
+    b.addr ? `Adresse : ${b.addr}` : '',
+    b.contact ? `Contact : ${b.contact}` : '',
+  ].filter(Boolean).join('\n');
+  alert(lines);
+}
 function editBooking(id){
   const b = storeArr('bookings').find(x=>x.id===id);
   if(!b) return;
@@ -1025,6 +1040,7 @@ function renderAccueil(){
   accList.innerHTML = bookings.length ? bookings.map(b=>`
     <div class="acc-row">
       <div class="acc-info"><b>${b.client}</b>${b.label?' — '+b.label:''} · ${new Date(b.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}${b.from&&b.to?' '+b.from+'-'+b.to:''} · <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span></div>
+      <button class="btn-line" onclick="viewBooking(${b.id})">Voir</button>
       <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
       <button class="btn-line" onclick="deleteBooking(${b.id})">Suppr.</button>
     </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à venir.</p>';
@@ -1048,6 +1064,7 @@ function renderPlanning(){
       <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date||'sans date'}${b.from&&b.to?' de '+b.from+' à '+b.to:''}<br>
       ${b.hours}h × ${b.rate}€ = <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span><br>
       <button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>
+      <button class="btn-line" onclick="viewBooking(${b.id})">Voir</button>
       <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
       <button class="btn-line" onclick="deleteBooking(${b.id})">Supprimer</button>
     </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à facturer.</p>';
@@ -1069,8 +1086,7 @@ function calcRange(input){
 function addItem(desc='',qty='',rate='',from='',to='',dates=[]){
   const div = document.createElement('div');
   div.className='item-row';
-  div.innerHTML = `<textarea placeholder="Description" class="i-desc" oninput="render()">${desc}</textarea>
-    <div class="row2">
+  div.innerHTML = `<div class="row2">
       <div class="i-dates-chips"></div>
       <input type="hidden" class="i-dates" value="${JSON.stringify(dates).replace(/"/g,'&quot;')}">
       <input type="hidden" class="i-qty" value="${qty}">
@@ -1080,6 +1096,7 @@ function addItem(desc='',qty='',rate='',from='',to='',dates=[]){
         <input type="time" class="i-from" title="Début" value="${from}" onchange="calcRange(this)">
         <input type="time" class="i-to" title="Fin" value="${to}" onchange="calcRange(this)">
       </div>
+      <textarea placeholder="Description" class="i-desc" oninput="render()">${desc}</textarea>
       <div class="rline rline-actions">
         <button class="btn-line" onclick="duplicateItem(this)">Dupliquer</button>
         <button class="btn-line" onclick="this.closest('.item-row').remove();render()">Supprimer</button>
