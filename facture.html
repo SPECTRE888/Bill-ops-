@@ -1066,7 +1066,13 @@ function renderDashboard(){
     dashNext.innerHTML = '<p style="color:var(--text3);font-size:12px;">Aucune prestation programmée.</p>';
   }
 }
-function dashNewBooking(){ showTab('planning'); cancelEditBooking(); bkClient.focus(); }
+function dashNewBooking(){
+  showTab('calendrier');
+  cancelEditBooking();
+  bkFormWrap.style.display = 'block';
+  bkClient.focus();
+  bkClient.scrollIntoView({behavior:'smooth', block:'center'});
+}
 function dashNewInvoice(){ showTab('facture'); clientSelect.focus(); }
 function dashNewClient(){ showTab('clients'); resetClientForm(); cliName.focus(); }
 function computeNextInvoiceNumber(prefix){
