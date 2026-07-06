@@ -56,6 +56,14 @@ body{margin:0;background:var(--bg);color:var(--text);transition:background .2s,c
 h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:600;}
 h2:first-child{margin-top:0;}
 label{display:block;font-size:12px;color:var(--text2);margin:8px 0 3px;}
+.offert-header{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px;}
+.offert-header h2{margin:0;}
+.switch{position:relative;display:inline-block;width:38px;height:22px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;position:absolute;}
+.switch-track{position:absolute;inset:0;cursor:pointer;background:var(--surface3);border:1px solid var(--border2);border-radius:22px;transition:.2s;}
+.switch-track::before{content:'';position:absolute;height:14px;width:14px;left:3px;top:3px;background:var(--text3);border-radius:50%;transition:.2s;}
+.switch input:checked + .switch-track{background:var(--gold-bg);border-color:var(--gold-border);}
+.switch input:checked + .switch-track::before{transform:translateX(16px);background:var(--gold);}
 input,select,textarea{width:100%;padding:8px;border:1px solid var(--border2);border-radius:4px;font-size:13px;background:var(--surface2);color:var(--text);}
 button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:13px;font-weight:600;}
 .btn-gold{background:var(--gold);color:var(--bg);}
@@ -96,7 +104,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .preview-wrap{display:none;background:var(--bg);height:100%;}
 .preview-wrap.active{display:flex;flex-direction:column;}
 .preview-scroll{flex:1;min-height:0;overflow-y:auto;padding:40px;display:flex;justify-content:center;}
-.preview-actionbar{flex-shrink:0;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:14px 40px;border-top:1px solid var(--border);background:var(--surface);}
+.preview-actionbar{flex-shrink:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 40px;border-top:1px solid var(--border);background:var(--surface);}
 .preview-actionbar button{width:100%;margin:0;}
 .preview-actionbar #status{grid-column:1/-1;font-size:11px;color:var(--text2);}
 #invoice{background:var(--surface);color:var(--text);width:210mm;min-height:297mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
@@ -268,8 +276,14 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           <div><label>Parking</label><input id="parking" type="number" value="0" oninput="render()"></div>
         </div>
 
-        <h2>Offert</h2>
-        <div class="row">
+        <div class="offert-header">
+          <h2>Offert</h2>
+          <label class="switch">
+            <input type="checkbox" id="offEnabled" onchange="toggleOffert()">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div class="row" id="offFields" style="display:none;">
           <div><label>Type</label>
             <select id="offType" onchange="render()">
               <option value="pct">%</option>
@@ -676,6 +690,8 @@ function editInvoice(num){
   tva.value = s.tva||0;
   offType.value = s.offType||'pct';
   offVal.value = s.offVal||0;
+  offEnabled.checked = (parseFloat(s.offVal)||0) > 0;
+  offFields.style.display = offEnabled.checked ? 'flex' : 'none';
   km.value = s.km||0;
   peage.value = s.peage||0;
   parking.value = s.parking||0;
@@ -1045,9 +1061,9 @@ function addItem(desc='',qty='',rate='',from='',to='',dates=[]){
       <input type="hidden" class="i-qty" value="${qty}">
       <div class="rline-compact">
         <input type="date" class="i-date-input" title="Ajoute une date de prestation" onchange="addDateChip(this)">
+        <input type="number" class="i-rate" placeholder="€/h" value="${rate}" oninput="render()">
         <input type="time" class="i-from" title="Début" value="${from}" onchange="calcRange(this)">
         <input type="time" class="i-to" title="Fin" value="${to}" onchange="calcRange(this)">
-        <input type="number" class="i-rate" placeholder="€/h" value="${rate}" oninput="render()">
       </div>
       <div class="rline rline-actions">
         <button class="btn-line" onclick="duplicateItem(this)">Dupliquer</button>
@@ -1090,6 +1106,12 @@ function duplicateItem(btn){
   render();
 }
 addItem();
+
+function toggleOffert(){
+  offFields.style.display = offEnabled.checked ? 'flex' : 'none';
+  if(!offEnabled.checked) offVal.value = 0;
+  render();
+}
 
 function currentClient(){
   const name = clientSelect.value.trim().toLowerCase();
@@ -1136,7 +1158,7 @@ function render(){
     sub+=parkingVal;
     pItems.innerHTML += `<tr><td>Parking</td><td class="num">-</td><td class="num">-</td><td class="num">${parkingVal.toFixed(2)} €</td></tr>`;
   }
-  const offVal_ = parseFloat(offVal.value)||0;
+  const offVal_ = offEnabled.checked ? (parseFloat(offVal.value)||0) : 0;
   const offType_ = offType.value;
   const offAmt = offVal_>0 ? (offType_==='pct' ? sub*offVal_/100 : offVal_) : 0;
   if(offAmt>0){
