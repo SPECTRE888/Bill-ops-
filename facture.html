@@ -87,9 +87,9 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .date-chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface3);border:1px solid var(--border2);border-radius:12px;padding:2px 4px 2px 8px;font-size:11px;color:var(--text);}
 .date-chip button{all:unset;cursor:pointer;font-size:13px;line-height:1;color:var(--text3);padding:0 4px;}
 .date-chip button:hover{color:var(--red);}
-.client-list{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
+.client-list{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;}
 .client-list .client-card{margin-bottom:0;}
-.form-narrow{max-width:520px;}
+.form-narrow{max-width:760px;}
 .client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
 .client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
 .cal-day{min-height:66px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
@@ -274,10 +274,14 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <div class="form-narrow">
         <h2>Ajouter / modifier un client</h2>
         <input type="hidden" id="cliIdx" value="">
-        <label>Nom société</label><input id="cliName" oninput="suggestPrefix()">
-        <label>Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase">
-        <label>Email</label><input id="cliEmail">
-        <label>Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78">
+        <div class="row">
+          <div><label>Nom société</label><input id="cliName" oninput="suggestPrefix()"></div>
+          <div><label>Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase"></div>
+        </div>
+        <div class="row">
+          <div><label>Email</label><input id="cliEmail"></div>
+          <div><label>Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78"></div>
+        </div>
         <label>Adresse</label><input id="cliAddr">
         <button class="btn-gold" onclick="saveClient()">Enregistrer le client</button>
         <button class="btn-line" onclick="resetClientForm()">Nouveau client</button>
@@ -1069,16 +1073,17 @@ function computeNextInvoiceNumber(prefix){
   if(!prefix) prefix='FA';
   const year = new Date().getFullYear();
   const key = prefix+'-'+year;
-  const counters = store('invCounters');
   const invoices = storeArr('invoices');
   const existingNums = new Set(invoices.map(i=>i.num));
   const pattern = new RegExp('^'+prefix+year+'-(\\d+)$');
+  // L'historique des factures est la seule source de vérité : on ignore volontairement
+  // toute valeur de compteur stockée qui serait plus élevée (ex. gonflée par un ancien bug).
   let maxExisting = 0;
   invoices.forEach(i=>{
     const m = pattern.exec(i.num||'');
     if(m) maxExisting = Math.max(maxExisting, parseInt(m[1],10));
   });
-  let next = Math.max(counters[key]||0, maxExisting) + 1;
+  let next = maxExisting + 1;
   let candidate = `${prefix}${year}-${String(next).padStart(3,'0')}`;
   while(existingNums.has(candidate)){
     next++;
