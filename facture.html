@@ -247,6 +247,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <label>Nom société</label><input id="cliName" oninput="suggestPrefix()">
       <label>Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase">
       <label>Email</label><input id="cliEmail">
+      <label>Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78">
       <label>Adresse</label><input id="cliAddr">
       <button class="btn-gold" onclick="saveClient()">Enregistrer le client</button>
       <button class="btn-line" onclick="resetClientForm()">Nouveau client</button>
@@ -358,6 +359,9 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
 
     <div class="tab" id="tab-calendrier">
       <h2>Calendrier</h2>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);">Prévisionnel du mois</div>
+      <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:14px;"></div>
+
       <div id="bkCalHead" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(-1)">‹</button>
         <span id="bkCalLabel" style="font-family:var(--font-display);font-size:15px;color:var(--gold);"></span>
@@ -366,14 +370,13 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <div id="bkCal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;"></div>
       <div id="bkDayPanel"></div>
 
-      <h2>Prévisionnel du mois</h2>
-      <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:16px;"></div>
-
       <div id="bkFormWrap" style="display:none;">
         <h2 id="bkFormTitle">Nouveau booking</h2>
         <input type="hidden" id="bkEditId" value="">
-        <label>Client</label><input id="bkClient" list="clientNames">
+        <label>Client</label><input id="bkClient" list="clientNames" onchange="prefillBookingClient()">
         <label>Nom de la prestation</label><input id="bkLabel" placeholder="Ex. Prestation Barman">
+        <label>Adresse de la prestation</label><input id="bkAddr" placeholder="Lieu de l'événement">
+        <label>Contact sur place</label><input id="bkContact" placeholder="Nom / téléphone du contact">
         <label>Date prestation</label><input id="bkDate" type="date">
         <div class="row">
           <div><label>De</label><input id="bkFrom" type="time"></div>
@@ -618,18 +621,18 @@ function suggestPrefix(){
   cliPrefix.value = p.toUpperCase().slice(0,3);
 }
 function resetClientForm(){
-  cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliAddr.value='';
+  cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliPhone.value=''; cliAddr.value='';
 }
 function saveClient(){
   const clients = storeArr('clients');
-  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, addr:cliAddr.value};
+  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value};
   if(cliIdx.value!=='') clients[cliIdx.value]=c; else clients.push(c);
   set('clients', clients);
   resetClientForm(); renderClientList(); refreshClientSelect();
 }
 function editClient(i){
   const c = storeArr('clients')[i];
-  cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliAddr.value=c.addr;
+  cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliPhone.value=c.phone||''; cliAddr.value=c.addr;
 }
 function deleteClient(i){
   const clients = storeArr('clients'); clients.splice(i,1); set('clients',clients);
@@ -640,7 +643,7 @@ function renderClientList(){
   clientList.innerHTML = clients.map((c,i)=>`
     <div class="client-card">
       <b>${c.name}</b> <span class="tag">[${c.prefix}]</span><br>
-      ${c.email}<br>${c.addr}<br>
+      ${c.email}${c.phone?' · '+c.phone:''}<br>${c.addr}<br>
       <button class="btn-line" onclick="editClient(${i})">Modifier</button>
       <button class="btn-line" onclick="deleteClient(${i})">Supprimer</button>
     </div>`).join('') || '<p style="color:var(--text2);font-size:12px;">Aucun client.</p>';
@@ -846,11 +849,12 @@ function renderDashboard(){
   const next = upcoming[0];
   if(next){
     const c = clients.find(cl=>cl.name===next.client);
+    const lieu = next.addr || (c && c.addr) || '';
     dashNext.innerHTML = `
       <div class="dash-next-date">${new Date(next.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div>
       ${next.from&&next.to ? `<div class="dash-next-time">${next.from} – ${next.to}</div>` : ''}
       <div class="dash-next-client">${next.client}${next.label?' — '+next.label:''}</div>
-      ${c&&c.addr ? `<div class="dash-next-lieu">${c.addr}</div>` : ''}`;
+      ${lieu ? `<div class="dash-next-lieu">${lieu}</div>` : ''}`;
   } else {
     dashNext.innerHTML = '<p style="color:var(--text3);font-size:12px;">Aucune prestation programmée.</p>';
   }
@@ -919,7 +923,10 @@ function renderCalDayPanel(){
   const bookings = storeArr('bookings').filter(b=>b.date===dateKey);
   const rows = bookings.map(b=>`
     <div class="cal-b-row">
-      <span><b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' '+b.from+'-'+b.to:''} — <span class="gold">${(b.hours*b.rate).toFixed(2)} €</span></span>
+      <span>
+        <b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' '+b.from+'-'+b.to:''} — <span class="gold">${(b.hours*b.rate).toFixed(2)} €</span>
+        ${(b.addr||b.contact) ? `<br><span style="font-size:11px;color:var(--text2);">${[b.addr,b.contact].filter(Boolean).join(' · ')}</span>` : ''}
+      </span>
       <span>
         <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
         <button class="btn-line" onclick="deleteBooking(${b.id})">Suppr.</button>
@@ -952,15 +959,21 @@ function addBooking(){
   const editId = bkEditId.value;
   if(editId){
     const b = bookings.find(x=>x.id===Number(editId));
-    if(b){ Object.assign(b, {client:bkClient.value,label:bkLabel.value,date:bkDate.value,from:bkFrom.value,to:bkTo.value,hours,rate:parseFloat(bkRate.value)||0}); }
+    if(b){ Object.assign(b, {client:bkClient.value,label:bkLabel.value,addr:bkAddr.value,contact:bkContact.value,date:bkDate.value,from:bkFrom.value,to:bkTo.value,hours,rate:parseFloat(bkRate.value)||0}); }
     showToast('✔ Booking modifié.');
   } else {
-    bookings.push({id:Date.now(),client:bkClient.value,label:bkLabel.value,date:bkDate.value,from:bkFrom.value,to:bkTo.value,hours,rate:parseFloat(bkRate.value)||0,status:'à facturer'});
+    bookings.push({id:Date.now(),client:bkClient.value,label:bkLabel.value,addr:bkAddr.value,contact:bkContact.value,date:bkDate.value,from:bkFrom.value,to:bkTo.value,hours,rate:parseFloat(bkRate.value)||0,status:'à facturer'});
   }
   set('bookings',bookings);
   cancelEditBooking();
   renderPlanning();
   renderCalendarTab();
+}
+function prefillBookingClient(){
+  const c = storeArr('clients').find(cl=>cl.name.trim().toLowerCase()===bkClient.value.trim().toLowerCase());
+  if(!c) return;
+  bkAddr.value = c.addr||'';
+  bkContact.value = c.phone||'';
 }
 function editBooking(id){
   const b = storeArr('bookings').find(x=>x.id===id);
@@ -968,6 +981,8 @@ function editBooking(id){
   bkEditId.value = b.id;
   bkClient.value = b.client;
   bkLabel.value = b.label||'';
+  bkAddr.value = b.addr||'';
+  bkContact.value = b.contact||'';
   bkDate.value = b.date;
   bkFrom.value = b.from||'';
   bkTo.value = b.to||'';
@@ -980,7 +995,7 @@ function editBooking(id){
 }
 function cancelEditBooking(){
   bkEditId.value='';
-  bkClient.value='';bkLabel.value='';bkDate.value='';bkFrom.value='';bkTo.value='';bkRate.value='';
+  bkClient.value='';bkLabel.value='';bkAddr.value='';bkContact.value='';bkDate.value='';bkFrom.value='';bkTo.value='';bkRate.value='';
   bkFormTitle.textContent = 'Nouveau booking';
   bkSubmitBtn.textContent = 'Ajouter au planning';
   bkFormWrap.style.display = 'none';
