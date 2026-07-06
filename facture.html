@@ -60,6 +60,12 @@ h2:first-child{margin-top:0;}
 label{display:block;font-size:12px;color:var(--text2);margin:8px 0 3px;}
 .toggle-header{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px;}
 .toggle-header h2{margin:0;}
+.toggle-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:22px 0 10px;}
+.toggle-item{display:flex;align-items:center;justify-content:space-between;gap:4px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;}
+.toggle-item span{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.02em;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.toggle-item .switch{width:30px;height:18px;}
+.toggle-item .switch-track::before{height:12px;width:12px;}
+.toggle-item .switch input:checked + .switch-track::before{transform:translateX(12px);}
 .switch{position:relative;display:inline-block;width:38px;height:22px;flex-shrink:0;}
 .switch input{opacity:0;width:0;height:0;position:absolute;}
 .switch-track{position:absolute;inset:0;cursor:pointer;background:var(--surface3);border:1px solid var(--border2);border-radius:22px;transition:.2s;}
@@ -92,12 +98,13 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .form-narrow{max-width:760px;}
 .client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
 .client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
-.cal-day{min-height:66px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
+.cal-day{min-height:66px;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
 .cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
 .cal-day.selected{outline:2px solid var(--gold);}
 .cal-day.empty{background:transparent;cursor:default;}
 .cal-day .cal-daynum{font-size:13px;}
 .cal-day .cal-names{font-size:10px;font-weight:400;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+.cal-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;flex-shrink:0;}
 .cal-day .cal-ca{font-size:10px;color:var(--gold);font-weight:700;margin-top:auto;align-self:flex-end;}
 .cal-day-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:14px;font-size:12px;max-height:180px;overflow-y:auto;}
 .cal-day-panel .cal-b-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);gap:6px;}
@@ -303,6 +310,8 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           <div><label>N° facture</label><input id="invNum" readonly></div>
           <div><label>Date</label><input id="invDate" type="date" oninput="render()"></div>
         </div>
+        <label>Date travaillée <span style="color:var(--text3);font-weight:400;">(pour rattacher le CA au bon mois)</span></label>
+        <input id="workDate" type="month" oninput="render()">
         <div id="tvaFieldWrap" style="display:none;"><label>TVA (%)</label><input id="tva" type="number" value="0" oninput="render()"></div>
 
         <h2>Frais déplacement</h2>
@@ -312,12 +321,28 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           <div><label>Parking</label><input id="parking" type="number" value="0" oninput="render()"></div>
         </div>
 
-        <div class="toggle-header">
-          <h2>Offert</h2>
-          <label class="switch">
-            <input type="checkbox" id="offEnabled" onchange="toggleOffert()">
-            <span class="switch-track"></span>
-          </label>
+        <div class="toggle-row">
+          <div class="toggle-item">
+            <span>Offert</span>
+            <label class="switch">
+              <input type="checkbox" id="offEnabled" onchange="toggleOffert()">
+              <span class="switch-track"></span>
+            </label>
+          </div>
+          <div class="toggle-item">
+            <span>Email</span>
+            <label class="switch">
+              <input type="checkbox" id="emailCustomEnabled" onchange="toggleEmailCustom()">
+              <span class="switch-track"></span>
+            </label>
+          </div>
+          <div class="toggle-item">
+            <span>Repas</span>
+            <label class="switch">
+              <input type="checkbox" id="mealEnabled" onchange="toggleMeal()">
+              <span class="switch-track"></span>
+            </label>
+          </div>
         </div>
         <div class="row" id="offFields" style="display:none;">
           <div><label>Type</label>
@@ -328,17 +353,12 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
           </div>
           <div><label>Valeur</label><input id="offVal" type="number" value="0" oninput="render()"></div>
         </div>
-
-        <div class="toggle-header">
-          <h2>Email</h2>
-          <label class="switch">
-            <input type="checkbox" id="emailCustomEnabled" onchange="toggleEmailCustom()">
-            <span class="switch-track"></span>
-          </label>
-        </div>
         <div id="emailCustomFields" style="display:none;">
           <label>Objet</label><input id="emailSubject" placeholder="Facture (numéro auto si vide)">
           <label>Message</label><textarea id="emailMessage" rows="3" placeholder="Petit mot avant la facture (optionnel)"></textarea>
+        </div>
+        <div id="mealFields" style="display:none;">
+          <label>Montant repas</label><input id="meal" type="number" value="0" oninput="render()">
         </div>
       </div>
 
@@ -367,7 +387,7 @@ td{padding:10px 4px;border-bottom:1px solid var(--border);}
       <div class="dash-section-title">Ce mois-ci (réalisé)</div>
       <div class="dash-grid">
         <div class="dash-card">
-          <div class="dash-card-label">CA facturé ce mois</div>
+          <div class="dash-card-label">CA du mois (prestas effectuées)</div>
           <div class="dash-card-value" id="dashCA">0 €</div>
         </div>
       </div>
@@ -661,6 +681,19 @@ const store = k => JSON.parse(localStorage.getItem(k) || '{}');
 const storeArr = k => JSON.parse(localStorage.getItem(k) || '[]');
 const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueSync(); };
 const invoiceAmt = i => parseFloat((i.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
+// Mois (YYYY-MM) auquel rattacher le CA d'une facture : basé sur la date de la prestation
+// (première date de la première ligne datée), pas sur la date d'émission de la facture —
+// une presta de juin peut très bien être facturée en juillet.
+function invoiceEventMonth(inv){
+  if(inv.workDate) return inv.workDate.slice(0,7);
+  const items = inv.state && inv.state.items;
+  if(items && items.length){
+    const dates = [];
+    items.forEach(it=>{ if(it.dates && it.dates.length) dates.push(...it.dates); else if(it.date) dates.push(it.date); });
+    if(dates.length) return dates.sort()[0].slice(0,7);
+  }
+  return (inv.date||'').slice(0,7);
+}
 
 function showTab(name){
   const showPreview = name==='facture';
@@ -782,6 +815,7 @@ function collectInvoiceState(){
     km: km.value,
     peage: peage.value,
     parking: parking.value,
+    meal: meal.value,
     items: [...document.querySelectorAll('.item-row')].map(r=>({
       desc: r.querySelector('.i-desc').value,
       qty: r.querySelector('.i-qty').value,
@@ -800,6 +834,7 @@ function editInvoice(num){
   lastNumberedClient = s.client;
   invNum.value = num;
   invDate.value = s.invDate||'';
+  workDate.value = inv.workDate||'';
   tva.value = s.tva||0;
   offType.value = s.offType||'pct';
   offVal.value = s.offVal||0;
@@ -808,6 +843,9 @@ function editInvoice(num){
   km.value = s.km||0;
   peage.value = s.peage||0;
   parking.value = s.parking||0;
+  meal.value = s.meal||0;
+  mealEnabled.checked = (parseFloat(s.meal)||0) > 0;
+  mealFields.style.display = mealEnabled.checked ? 'block' : 'none';
   document.querySelectorAll('.item-row').forEach(r=>r.remove());
   (s.items&&s.items.length ? s.items : [{}]).forEach(it=>addItem(it.desc||'', it.qty||'', it.rate||'', it.from||'', it.to||'', (it.dates&&it.dates.length) ? it.dates : (it.date ? [it.date] : [])));
   render();
@@ -823,6 +861,7 @@ function duplicateInvoice(num){
   const c = currentClient();
   invNum.value = c ? peekInvoiceNumber(c.prefix) : '';
   invDate.value = '';
+  workDate.value = '';
   tva.value = s.tva||0;
   offType.value = s.offType||'pct';
   offVal.value = s.offVal||0;
@@ -831,6 +870,9 @@ function duplicateInvoice(num){
   km.value = s.km||0;
   peage.value = s.peage||0;
   parking.value = s.parking||0;
+  meal.value = s.meal||0;
+  mealEnabled.checked = (parseFloat(s.meal)||0) > 0;
+  mealFields.style.display = mealEnabled.checked ? 'block' : 'none';
   document.querySelectorAll('.item-row').forEach(r=>r.remove());
   (s.items&&s.items.length ? s.items : [{}]).forEach(it=>addItem(it.desc||'', it.qty||'', it.rate||'', it.from||'', it.to||'', (it.dates&&it.dates.length) ? it.dates : (it.date ? [it.date] : [])));
   render();
@@ -851,6 +893,7 @@ function saveToHistory(status){
     num: invNum.value,
     client: c.name,
     date: invDate.value,
+    workDate: workDate.value,
     total: pTotal.textContent,
     status,
     state: collectInvoiceState(),
@@ -990,7 +1033,7 @@ function renderCaChart(invoices, amt){
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
     months.push({key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: d.toLocaleDateString('fr-FR',{month:'short'}), current: i===0});
   }
-  const values = months.map(m=>invoices.filter(i=>(i.date||'').startsWith(m.key)).reduce((s,i)=>s+amt(i),0));
+  const values = months.map(m=>invoices.filter(i=>invoiceEventMonth(i)===m.key).reduce((s,i)=>s+amt(i),0));
   const max = Math.max(...values, 1);
   caChart.innerHTML = `<div class="ca-chart">${months.map((m,idx)=>`
     <div class="ca-chart-bar${m.current?' current':''}">
@@ -1006,8 +1049,8 @@ function renderCA(){
   const yearKey = String(now.getFullYear());
   const monthKey = yearKey+'-'+String(now.getMonth()+1).padStart(2,'0');
   const totalCA = invoices.reduce((s,i)=>s+invoiceAmt(i),0);
-  const caYear = invoices.filter(i=>(i.date||'').startsWith(yearKey)).reduce((s,i)=>s+invoiceAmt(i),0);
-  const caMonth = invoices.filter(i=>(i.date||'').startsWith(monthKey)).reduce((s,i)=>s+invoiceAmt(i),0);
+  const caYear = invoices.filter(i=>invoiceEventMonth(i).startsWith(yearKey)).reduce((s,i)=>s+invoiceAmt(i),0);
+  const caMonth = invoices.filter(i=>invoiceEventMonth(i)===monthKey).reduce((s,i)=>s+invoiceAmt(i),0);
   const SEUIL_FRANCHISE_TVA = 32000;
   const franchiseDepassee = caYear > SEUIL_FRANCHISE_TVA;
   caStats.innerHTML = `
@@ -1035,7 +1078,7 @@ function renderDashboard(){
   const now = new Date();
   const monthKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 
-  const caMois = invoices.filter(i=>(i.date||'').startsWith(monthKey))
+  const caMois = invoices.filter(i=>invoiceEventMonth(i)===monthKey)
     .reduce((s,i)=>s+invoiceAmt(i),0);
   dashCA.textContent = caMois.toFixed(2)+' €';
 
@@ -1113,6 +1156,13 @@ function nextInvoiceNumber(prefix){
 let calDate = new Date();
 let selectedCalDay = null;
 function calShift(n){ calDate.setMonth(calDate.getMonth()+n); selectedCalDay=null; renderCalendarTab(); }
+const CLIENT_PALETTE = ['#c4a46b','#8aa9c4','#c48a8a','#7fc49a','#b48ac4','#c4b45a','#6ec4c0','#c47ab0','#9ac47a','#c4907a'];
+function clientColor(name){
+  let hash = 0;
+  const s = name||'';
+  for(let i=0;i<s.length;i++){ hash = (hash*31 + s.charCodeAt(i)) | 0; }
+  return CLIENT_PALETTE[Math.abs(hash) % CLIENT_PALETTE.length];
+}
 function renderCalendar(){
   const bookings = storeArr('bookings');
   const y = calDate.getFullYear(), m = calDate.getMonth();
@@ -1130,7 +1180,7 @@ function renderCalendar(){
     byDay[day].count++;
     byDay[day].ca += b.hours*b.rate;
     const timePrefix = b.from ? (b.from+(b.to?'-'+b.to:'')+' ') : '';
-    byDay[day].names.push(timePrefix + (b.label ? b.client+' — '+b.label : b.client));
+    byDay[day].names.push({client:b.client, text: timePrefix + (b.label ? b.client+' — '+b.label : b.client)});
   });
   let html = ['L','M','M','J','V','S','D'].map(d=>`<div style="font-size:10px;color:var(--text3);text-align:center;">${d}</div>`).join('');
   for(let i=0;i<startOffset;i++) html += `<div class="cal-day empty"></div>`;
@@ -1140,7 +1190,7 @@ function renderCalendar(){
     if(info){
       const shown = info.names.slice(0,2);
       const extra = info.names.length - shown.length;
-      const namesHtml = shown.map(n=>`<div class="cal-names">${n}</div>`).join('') + (extra>0 ? `<div class="cal-names">+${extra} autre${extra>1?'s':''}</div>` : '');
+      const namesHtml = shown.map(n=>`<div class="cal-names"><span class="cal-dot" style="background:${clientColor(n.client)};"></span>${n.text}</div>`).join('') + (extra>0 ? `<div class="cal-names">+${extra} autre${extra>1?'s':''}</div>` : '');
       html += `<div class="cal-day has-booking${sel}" onclick="selectCalDay(${d})"><span class="cal-daynum">${d}</span>${namesHtml}<span class="cal-ca">${info.ca.toFixed(0)}€</span></div>`;
     } else {
       html += `<div class="cal-day${sel}" onclick="selectCalDay(${d})"><span class="cal-daynum">${d}</span></div>`;
@@ -1159,7 +1209,7 @@ function renderCalDayPanel(){
   const dateKey = y+'-'+String(m+1).padStart(2,'0')+'-'+String(selectedCalDay).padStart(2,'0');
   const bookings = storeArr('bookings').filter(b=>b.date===dateKey);
   const rows = bookings.map(b=>`
-    <div class="cal-b-row">
+    <div class="cal-b-row" style="border-left:3px solid ${clientColor(b.client)};padding-left:8px;">
       <span>
         <b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' '+b.from+'-'+b.to:''} — <span class="gold">${(b.hours*b.rate).toFixed(2)} €</span>
         ${(b.addr||b.contact) ? `<br><span style="font-size:11px;color:var(--text2);">${[b.addr,b.contact].filter(Boolean).join(' · ')}</span>` : ''}
@@ -1398,6 +1448,11 @@ function toggleEmailCustom(){
   if(!emailCustomEnabled.checked){ emailSubject.value=''; emailMessage.value=''; }
   else refreshEmailDefaults();
 }
+function toggleMeal(){
+  mealFields.style.display = mealEnabled.checked ? 'block' : 'none';
+  if(!mealEnabled.checked) meal.value = 0;
+  render();
+}
 
 function currentClient(){
   const name = clientSelect.value.trim().toLowerCase();
@@ -1444,6 +1499,11 @@ function render(){
   if(parkingVal>0){
     sub+=parkingVal;
     pItems.innerHTML += `<tr><td>Parking</td><td class="num">-</td><td class="num">-</td><td class="num">${parkingVal.toFixed(2)} €</td></tr>`;
+  }
+  const mealVal = mealEnabled.checked ? (parseFloat(meal.value)||0) : 0;
+  if(mealVal>0){
+    sub+=mealVal;
+    pItems.innerHTML += `<tr><td>Repas</td><td class="num">-</td><td class="num">-</td><td class="num">${mealVal.toFixed(2)} €</td></tr>`;
   }
   const offVal_ = offEnabled.checked ? (parseFloat(offVal.value)||0) : 0;
   const offType_ = offType.value;
