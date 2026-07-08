@@ -44,11 +44,13 @@
 body{margin:0;background:var(--bg);color:var(--text);}
 h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;font-weight:600;}
 label{display:block;font-size:12px;color:var(--text2);margin:8px 0 3px;}
-input{width:100%;padding:10px;border:1px solid var(--border2);border-radius:4px;font-size:14px;background:var(--surface2);color:var(--text);}
+input,select{width:100%;padding:10px;border:1px solid var(--border2);border-radius:4px;font-size:14px;background:var(--surface2);color:var(--text);}
 button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:13px;font-weight:600;}
 .btn-gold{background:var(--gold);color:var(--bg);}
 .btn-line{background:transparent;border:1px solid var(--border2);color:var(--text);}
 .action-btn{width:100%;padding:14px;font-size:15px;margin-top:10px;}
+.row{display:flex;gap:8px;}
+.row>*{flex:1;}
 
 .pair-gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:5000;}
 .pair-box{max-width:360px;width:100%;}
@@ -78,6 +80,26 @@ button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:1
 .modal-header{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display);font-size:16px;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 .modal-close{all:unset;cursor:pointer;font-size:20px;color:var(--text3);line-height:1;padding:0 4px;}
 .modal-close:hover{color:var(--red);}
+.modal-box-lg{max-width:420px;max-height:85vh;overflow-y:auto;}
+
+.toggle-row{display:flex;gap:8px;margin:14px 0 10px;}
+.toggle-item{flex:1;display:flex;align-items:center;justify-content:space-between;gap:4px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;}
+.toggle-item span{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
+.switch{position:relative;display:inline-block;width:34px;height:20px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;position:absolute;}
+.switch-track{position:absolute;inset:0;cursor:pointer;background:var(--surface3);border:1px solid var(--border2);border-radius:20px;transition:.2s;}
+.switch-track::before{content:'';position:absolute;height:12px;width:12px;left:3px;top:3px;background:var(--text3);border-radius:50%;transition:.2s;}
+.switch input:checked + .switch-track{background:var(--gold-bg);border-color:var(--gold-border);}
+.switch input:checked + .switch-track::before{transform:translateX(14px);background:var(--gold);}
+.extras-total{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-family:var(--font-display);font-size:18px;color:var(--gold);font-weight:600;}
+
+.invoice-preview-overlay{position:fixed;inset:0;background:var(--bg);z-index:10001;overflow-y:auto;display:none;}
+.invoice-preview-bar{position:sticky;top:0;z-index:1;display:flex;justify-content:flex-end;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+.invoice-preview-close{all:unset;cursor:pointer;color:var(--text);font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;border:1px solid var(--border2);border-radius:4px;}
+.invoice-preview-close:hover{border-color:var(--red);color:var(--red);}
+.invoice-preview-body{display:flex;justify-content:center;padding:20px 14px 60px;}
+.invoice-preview-body #invoice{width:100%;min-width:0;min-height:0;padding:20px;box-shadow:none;}
+.invoice-preview-body .totals{width:100%;max-width:280px;}
 
 /* Rendu facture (aperçu / PDF), repris de facture.html pour que inv.html s'affiche correctement */
 #invoice{background:var(--surface);color:var(--text);width:210mm;min-height:285mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
@@ -175,6 +197,50 @@ button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:1
     <div id="clockModalError" style="color:var(--red);font-size:12px;margin-top:6px;"></div>
     <button class="btn-gold action-btn" onclick="confirmClock()">Confirmer</button>
   </div>
+</div>
+
+<div class="modal-overlay" id="invoiceExtrasModal" style="display:none;">
+  <div class="modal-box modal-box-lg">
+    <div class="modal-header"><span>Facturer la prestation</span><button class="modal-close" onclick="closeInvoiceExtras()">×</button></div>
+    <label>Km parcourus</label><input id="ieKm" type="number" value="0" oninput="updateInvoiceExtrasTotal()">
+    <label>Péage</label><input id="iePeage" type="number" value="0" oninput="updateInvoiceExtrasTotal()">
+    <label>Parking</label><input id="ieParking" type="number" value="0" oninput="updateInvoiceExtrasTotal()">
+    <div class="toggle-row">
+      <div class="toggle-item">
+        <span>Offert</span>
+        <label class="switch">
+          <input type="checkbox" id="ieOffEnabled" onchange="toggleOffertMobile()">
+          <span class="switch-track"></span>
+        </label>
+      </div>
+      <div class="toggle-item">
+        <span>Repas</span>
+        <label class="switch">
+          <input type="checkbox" id="ieMealEnabled" onchange="toggleMealMobile()">
+          <span class="switch-track"></span>
+        </label>
+      </div>
+    </div>
+    <div class="row" id="ieOffFields" style="display:none;">
+      <div><label>Type</label>
+        <select id="ieOffType" onchange="updateInvoiceExtrasTotal()">
+          <option value="pct">%</option>
+          <option value="amt">€</option>
+        </select>
+      </div>
+      <div><label>Valeur</label><input id="ieOffVal" type="number" value="0" oninput="updateInvoiceExtrasTotal()"></div>
+    </div>
+    <div id="ieMealFields" style="display:none;">
+      <label>Montant repas</label><input id="ieMeal" type="number" value="0" oninput="updateInvoiceExtrasTotal()">
+    </div>
+    <div class="extras-total"><span>Total</span><span id="ieTotal">0,00 €</span></div>
+    <button class="btn-gold action-btn" onclick="confirmInvoiceExtras()">Créer la facture</button>
+  </div>
+</div>
+
+<div class="invoice-preview-overlay" id="invoicePreviewOverlay">
+  <div class="invoice-preview-bar"><button class="invoice-preview-close" onclick="closeInvoicePreview()">Fermer ×</button></div>
+  <div class="invoice-preview-body" id="invoicePreviewBody" data-theme="light"></div>
 </div>
 
 <div class="toast-stack" id="toastStack"></div>
@@ -342,13 +408,21 @@ function renderPointage(){
   const recentSection = document.getElementById('recentSection');
   if(!recent.length){ recentSection.style.display='none'; return; }
   recentSection.style.display='block';
-  document.getElementById('recentList').innerHTML = recent.map(b=>`
+  document.getElementById('recentList').innerHTML = recent.map(b=>{
+    const invoiced = b.status==='facturé';
+    return `
     <div class="mcard">
       <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
       <span style="color:var(--text2);font-size:12px;">${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · ${b.actualHours}h réel</span><br>
-      <button class="btn-line" style="margin-top:8px;margin-right:6px;" onclick="openClockModal(${b.id},'in')">Modifier arrivée</button>
-      <button class="btn-line" style="margin-top:8px;" onclick="openClockModal(${b.id},'out')">Modifier départ</button>
-    </div>`).join('');
+      ${invoiced
+        ? '<span style="color:var(--green);font-size:12px;font-weight:600;">Facturée</span>'
+        : `<button class="btn-gold action-btn" onclick="openInvoiceExtras(${b.id})">Transformer en facture</button>
+           <div style="margin-top:8px;">
+             <button class="btn-line" style="margin-right:6px;" onclick="openClockModal(${b.id},'in')">Modifier arrivée</button>
+             <button class="btn-line" onclick="openClockModal(${b.id},'out')">Modifier départ</button>
+           </div>`}
+    </div>`;
+  }).join('');
 }
 
 let clockCtx = null;
@@ -507,21 +581,44 @@ function renderFacturesTab(){
       <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn-line" onclick="viewInvoiceMobile('${i.num}')">Aperçu</button>
         <button class="btn-line" onclick="downloadInvoicePdfMobile('${i.num}')">Télécharger le PDF</button>
+        <button class="btn-line" onclick="sendInvoiceMobile('${i.num}')">Envoyer</button>
       </div>
     </div>`;
   }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune facture.</p>';
 }
-function invoiceStyles(){
-  return document.querySelector('style').outerHTML;
-}
 function viewInvoiceMobile(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   if(!inv) return;
-  const html = '<html data-theme="light"><head><title>'+inv.num+'</title>'+invoiceStyles()+'</head><body style="margin:0;background:var(--bg);display:flex;justify-content:center;padding:20px;">'+inv.html+'</body></html>';
-  const w = window.open('', '_blank');
-  if(!w){ showToast('⚠ Autorise les pop-ups pour voir la facture.'); return; }
-  w.document.write(html);
-  w.document.close();
+  document.getElementById('invoicePreviewBody').innerHTML = inv.html;
+  document.getElementById('invoicePreviewOverlay').style.display = 'block';
+}
+function closeInvoicePreview(){
+  document.getElementById('invoicePreviewOverlay').style.display = 'none';
+  document.getElementById('invoicePreviewBody').innerHTML = '';
+}
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email||'').trim());
+}
+async function sendInvoiceMobile(num){
+  const inv = storeArr('invoices').find(i=>i.num===num);
+  const c = storeArr('clients').find(cl=>cl.name===inv.client);
+  const sg = store('sg');
+  const endpoint = (sg.endpoint||'').trim();
+  if(!endpoint || !(sg.from||'').trim() || !c){ showToast('⚠ Configuration SendGrid ou client manquant (à régler sur le Mac).'); return; }
+  if(!isValidEmail(c.email)){ showToast('⚠ Email client invalide : '+c.email); return; }
+  try{
+    const res = await fetch(endpoint, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({apiKey: sg.key, from: sg.from.trim(), to: c.email, subject:'Facture '+inv.num, html: inv.html})
+    });
+    showToast(res.ok ? '✔ Facture envoyée à '+c.email+'.' : '✕ Échec de l\'envoi.');
+    if(res.ok){
+      const invoices = storeArr('invoices');
+      invoices.find(i=>i.num===num).status='Envoyée';
+      set('invoices', invoices);
+      renderFacturesTab();
+    }
+  }catch(e){ showToast('✕ Erreur : '+e.message); }
 }
 function pdfOptions(filename){
   return {
@@ -541,6 +638,185 @@ function downloadInvoicePdfMobile(num){
   container.innerHTML = inv.html;
   document.body.appendChild(container);
   html2pdf().set(pdfOptions(num+'.pdf')).from(container.firstElementChild).save().finally(()=>container.remove());
+}
+
+// --- Transformer une presta pointée en facture (ligne unique, sans extras : le mobile ne connaît que ce que le pointage a saisi) ---
+function computeNextInvoiceNumber(prefix){
+  if(!prefix) prefix='FA';
+  const year = new Date().getFullYear();
+  const key = prefix+'-'+year;
+  const invoices = storeArr('invoices');
+  const existingNums = new Set(invoices.map(i=>i.num));
+  const pattern = new RegExp('^'+prefix+year+'-(\\d+)$');
+  let maxExisting = 0;
+  invoices.forEach(i=>{
+    const m = pattern.exec(i.num||'');
+    if(m) maxExisting = Math.max(maxExisting, parseInt(m[1],10));
+  });
+  let next = maxExisting + 1;
+  let candidate = `${prefix}${year}-${String(next).padStart(3,'0')}`;
+  while(existingNums.has(candidate)){
+    next++;
+    candidate = `${prefix}${year}-${String(next).padStart(3,'0')}`;
+  }
+  return { key, next, candidate };
+}
+function nextInvoiceNumber(prefix){
+  const { key, next, candidate } = computeNextInvoiceNumber(prefix);
+  const counters = store('invCounters');
+  counters[key] = next;
+  set('invCounters', counters);
+  return candidate;
+}
+let ieCtx = null;
+function openInvoiceExtras(id){
+  const b = storeArr('bookings').find(x=>x.id===id);
+  if(!b || b.status==='facturé') return;
+  ieCtx = id;
+  ['ieKm','iePeage','ieParking','ieOffVal','ieMeal'].forEach(fid=>document.getElementById(fid).value=0);
+  document.getElementById('ieOffEnabled').checked = false;
+  document.getElementById('ieMealEnabled').checked = false;
+  document.getElementById('ieOffType').value = 'pct';
+  document.getElementById('ieOffFields').style.display = 'none';
+  document.getElementById('ieMealFields').style.display = 'none';
+  updateInvoiceExtrasTotal();
+  document.getElementById('invoiceExtrasModal').style.display = 'flex';
+}
+function closeInvoiceExtras(){
+  document.getElementById('invoiceExtrasModal').style.display = 'none';
+  ieCtx = null;
+}
+function toggleOffertMobile(){
+  const on = document.getElementById('ieOffEnabled').checked;
+  document.getElementById('ieOffFields').style.display = on ? 'flex' : 'none';
+  if(!on) document.getElementById('ieOffVal').value = 0;
+  updateInvoiceExtrasTotal();
+}
+function toggleMealMobile(){
+  const on = document.getElementById('ieMealEnabled').checked;
+  document.getElementById('ieMealFields').style.display = on ? 'block' : 'none';
+  if(!on) document.getElementById('ieMeal').value = 0;
+  updateInvoiceExtrasTotal();
+}
+function computeInvoiceExtras(){
+  const b = storeArr('bookings').find(x=>x.id===ieCtx);
+  if(!b) return null;
+  const useActual = b.checkedInAt && b.checkedOutAt;
+  const qty = useActual ? b.actualHours : b.hours;
+  const rate = b.rate||0;
+  const amt = qty*rate;
+  let sub = amt;
+  const km = parseFloat(document.getElementById('ieKm').value)||0;
+  const peage = parseFloat(document.getElementById('iePeage').value)||0;
+  const parking = parseFloat(document.getElementById('ieParking').value)||0;
+  const mealEnabled = document.getElementById('ieMealEnabled').checked;
+  const meal = mealEnabled ? (parseFloat(document.getElementById('ieMeal').value)||0) : 0;
+  const kmAmt = km*0.5;
+  sub += kmAmt + peage + parking + meal;
+  const offEnabled = document.getElementById('ieOffEnabled').checked;
+  const offType = document.getElementById('ieOffType').value;
+  const offVal = offEnabled ? (parseFloat(document.getElementById('ieOffVal').value)||0) : 0;
+  const offAmt = offVal>0 ? (offType==='pct' ? sub*offVal/100 : offVal) : 0;
+  sub -= offAmt;
+
+  const invDate = new Date().toISOString().slice(0,10);
+  const SEUIL_FRANCHISE_TVA = 32000;
+  const caYear = invDate.slice(0,4);
+  const caCumulAvant = storeArr('invoices')
+    .filter(i => (i.date||'').slice(0,4) === caYear)
+    .reduce((s,i)=> s + (parseFloat((i.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0), 0);
+  const franchiseDepassee = (caCumulAvant + sub) > SEUIL_FRANCHISE_TVA;
+  const tvaPct = franchiseDepassee ? 20 : 0;
+  const tvaAmt = sub*tvaPct/100;
+  const total = sub+tvaAmt;
+
+  return { b, qty, rate, amt, km, kmAmt, peage, parking, meal, offEnabled, offType, offVal, offAmt, sub, invDate, franchiseDepassee, tvaPct, tvaAmt, total };
+}
+function updateInvoiceExtrasTotal(){
+  if(!ieCtx) return;
+  const r = computeInvoiceExtras();
+  if(!r) return;
+  document.getElementById('ieTotal').textContent = r.total.toFixed(2)+' €';
+}
+function confirmInvoiceExtras(){
+  const r = computeInvoiceExtras();
+  if(!r) return;
+  const { b, qty, rate, amt, km, kmAmt, peage, parking, meal, offType, offVal, offAmt, sub, invDate, franchiseDepassee, tvaPct, tvaAmt, total } = r;
+  const bookings = storeArr('bookings');
+  const bk = bookings.find(x=>x.id===b.id);
+  const client = storeArr('clients').find(c=>c.name.trim().toLowerCase()===bk.client.trim().toLowerCase()) || {name:bk.client, prefix:'', addr:'', email:''};
+  const from = store('from');
+  const useActual = bk.checkedInAt && bk.checkedOutAt;
+  const timeFrom = useActual ? localHM(bk.checkedInAt) : (bk.from||'');
+  const timeTo = useActual ? localHM(bk.checkedOutAt) : (bk.to||'');
+  const num = nextInvoiceNumber(client.prefix);
+  const tvaMention = franchiseDepassee
+    ? 'TVA applicable au taux en vigueur (franchise en base dépassée, CA cumulé > 32 000 €)'
+    : (from.tva || 'TVA non applicable, art. 293 B du CGI');
+  const descCell = [bk.date?`<b>${formatFrDate(bk.date)}</b>`:'', (timeFrom&&timeTo)?`${timeFrom} – ${timeTo}`:'', bk.label||'Prestation'].filter(Boolean).join(' · ');
+
+  let rows = `<tr><td>${descCell}</td><td class="num">${qty||''}</td><td class="num">${rate?rate.toFixed(2)+' €':'-'}</td><td class="num">${amt.toFixed(2)} €</td></tr>`;
+  if(km>0) rows += `<tr><td>Frais kilométriques</td><td class="num">${km} km</td><td class="num">0.50 €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
+  if(peage>0) rows += `<tr><td>Péage</td><td class="num">-</td><td class="num">-</td><td class="num">${peage.toFixed(2)} €</td></tr>`;
+  if(parking>0) rows += `<tr><td>Parking</td><td class="num">-</td><td class="num">-</td><td class="num">${parking.toFixed(2)} €</td></tr>`;
+  if(meal>0) rows += `<tr><td>Repas</td><td class="num">-</td><td class="num">-</td><td class="num">${meal.toFixed(2)} €</td></tr>`;
+
+  const html = `<div id="invoice">
+    <div class="inv-brand">
+      <div class="inv-brandname">${from.name||'Votre entreprise'}</div>
+      <div class="inv-tagline" style="${from.tagline?'':'display:none;'}">${from.tagline||''}</div>
+    </div>
+    <div class="inv-title-rule"><span>Facture</span></div>
+    <div class="inv-meta-row">
+      <div><div class="inv-label">N° de facture</div><div class="inv-value">${num}</div></div>
+      <div style="text-align:right;"><div class="inv-label">Date</div><div class="inv-value">${formatFrDate(invDate)}</div></div>
+    </div>
+    <div class="from-to">
+      <div><h3>De</h3><div><b>${from.name||''}</b><br>${from.addr||''}<br>${from.contact||''}</div></div>
+      <div style="text-align:right;"><h3>À</h3><div><b>${client.name}</b><br>${client.addr||''}<br>${client.email||''}</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Unitaire</th><th class="num">Montant</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="totals">
+      <div><span>Sous-total</span><span>${sub.toFixed(2)} €</span></div>
+      <div style="${franchiseDepassee?'':'display:none;'}"><span>TVA</span><span>${tvaAmt.toFixed(2)} € (${tvaPct}%)</span></div>
+      <div style="${offAmt>0?'':'display:none;'}"><span>Offert</span><span class="gold">-${offAmt.toFixed(2)} €${offType==='pct'?' ('+offVal+'%)':''}</span></div>
+      <div class="final"><span>Total à régler</span><span>${total.toFixed(2)} €</span></div>
+    </div>
+    <div class="inv-reglement">
+      <h3>Règlement</h3>
+      <div>
+        Titulaire : ${from.name||''}<br>
+        ${from.rib ? from.rib.replace(/\n/g,'<br>')+'<br>' : ''}
+        <b>${from.pay||'Virement bancaire'} — Paiement à réception de facture, échéance : 30 jours.</b>
+      </div>
+    </div>
+    <div class="meta">SIRET : ${from.siret||''} — ${from.rcs||''}. ${tvaMention}.<br>
+      En cas de retard de paiement : pénalité de 3× le taux d'intérêt légal + indemnité forfaitaire de recouvrement de 40 €.</div>
+  </div>`;
+
+  const invoices = storeArr('invoices');
+  invoices.push({
+    num,
+    client: client.name,
+    date: invDate,
+    workDate: bk.date||'',
+    total: total.toFixed(2)+' €',
+    status: 'Enregistrée',
+    state: {
+      client: client.name, invDate, tva: tvaPct, offType, offVal, km, peage, parking, meal,
+      items: [{ desc: bk.label||'Prestation', qty, rate, from: timeFrom, to: timeTo, dates: bk.date?[bk.date]:[] }]
+    },
+    html
+  });
+  set('invoices', invoices);
+  bk.status = 'facturé';
+  set('bookings', bookings);
+  closeInvoiceExtras();
+  renderActiveTab();
+  showToast('✔ Facture '+num+' créée.');
 }
 
 // --- Boot ---
