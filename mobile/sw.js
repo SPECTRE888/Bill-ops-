@@ -1,4 +1,4 @@
-const CACHE_NAME = 'billops-mobile-v1';
+const CACHE_NAME = 'billops-mobile-v2';
 const SHELL = ['./', 'index.html', 'manifest.json', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -14,10 +14,16 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Network-first : le shell est toujours rechargé frais quand il y a du réseau,
+// le cache ne sert que de secours hors-ligne (évite de rester bloqué sur une vieille version).
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET' || !req.url.startsWith(self.location.origin)) return;
   event.respondWith(
-    caches.match(req).then((cached) => cached || fetch(req))
+    fetch(req).then((res) => {
+      const copy = res.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+      return res;
+    }).catch(() => caches.match(req))
   );
 });
