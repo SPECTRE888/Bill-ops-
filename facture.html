@@ -1296,7 +1296,7 @@ function viewBooking(id){
     ['Horaires', (b.from&&b.to) ? `${b.from} – ${b.to} (${b.hours}h)` : ''],
     ['Réel (pointé)', (b.checkedInAt&&b.checkedOutAt) ? `${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} (${b.actualHours}h)` : ''],
     ['Taux', `${b.rate} €/h`],
-    ['Total', `${(b.hours*b.rate).toFixed(2)} €`],
+    ['Total', `${((b.actualHours ?? b.hours)*b.rate).toFixed(2)} €`],
     ['Adresse', b.addr],
     ['Contact', b.contact],
   ].filter(([,v])=>v);
@@ -1355,7 +1355,7 @@ function deleteBooking(id){
 function renderAccueil(){
   const today = new Date().toISOString().slice(0,10);
   const bookings = storeArr('bookings')
-    .filter(b=>b.status==='à facturer' && b.date >= today)
+    .filter(b=>b.status==='à facturer' && b.date >= today && !b.checkedOutAt)
     .sort((a,b)=>a.date.localeCompare(b.date) || (a.from||'').localeCompare(b.from||''));
   if(!bookings.length){ accList.innerHTML = '<p style="color:var(--text3);font-size:12px;">Aucune presta à venir.</p>'; return; }
   let html = '';
@@ -1383,23 +1383,26 @@ function renderCalendarTab(){
   const now = new Date();
   const monthKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const forecast = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey))
-    .reduce((s,b)=>s+b.hours*b.rate,0);
+    .reduce((s,b)=>s+(b.actualHours ?? b.hours)*b.rate,0);
   bkForecast.textContent = forecast.toFixed(2)+' € à facturer ce mois-ci';
 }
 function renderPlanning(){
   renderAccueil();
   const today = new Date().toISOString().slice(0,10);
   const bookings = storeArr('bookings');
-  const pending = bookings.filter(b=>b.status==='à facturer' && (!b.date || b.date < today));
-  bkList.innerHTML = pending.length ? pending.map(b=>`
+  const pending = bookings.filter(b=>b.status==='à facturer' && (!b.date || b.date < today || b.checkedOutAt));
+  bkList.innerHTML = pending.length ? pending.map(b=>{
+    const h = b.actualHours ?? b.hours;
+    return `
     <div class="client-card">
       <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date?formatFrDate(b.date):'sans date'}${b.from&&b.to?' de '+b.from+' à '+b.to:''}<br>
-      ${b.hours}h × ${b.rate}€ = <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span><br>
+      ${b.checkedInAt&&b.checkedOutAt?`Pointé : ${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · `:''}${h}h × ${b.rate}€ = <span class="tag">${(h*b.rate).toFixed(2)} €</span><br>
       <button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>
       <button class="btn-line" onclick="viewBooking(${b.id})">Voir</button>
       <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
       <button class="btn-line" onclick="deleteBooking(${b.id})">Supprimer</button>
-    </div>`).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à facturer.</p>';
+    </div>`;
+  }).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à facturer.</p>';
 }
 
 function calcRange(input){

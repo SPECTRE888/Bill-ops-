@@ -59,12 +59,12 @@ button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:1
 .mheader-brand{font-family:var(--font-display);font-size:17px;letter-spacing:.1em;color:var(--gold);}
 .mheader-right{display:flex;align-items:center;gap:10px;}
 .mheader-sync{font-size:10.5px;color:var(--text3);}
-.mheader-disconnect{all:unset;cursor:pointer;color:var(--text3);font-size:15px;padding:2px 4px;}
+.mheader-disconnect{all:unset;cursor:pointer;color:var(--text3);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:2px 4px;}
+.mheader-disconnect:hover{color:var(--red);}
 .mobile-main{flex:1;padding:16px 16px 100px;}
-.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:100;display:flex;background:var(--surface);border-top:1px solid var(--border);padding:6px 6px calc(6px + env(safe-area-inset-bottom));}
-.bottom-nav button{flex:1;background:none;border:none;color:var(--text3);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;}
-.bottom-nav button span{font-size:19px;}
-.bottom-nav button.active{color:var(--gold);}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:100;display:flex;background:var(--surface);border-top:1px solid var(--border);padding:0 6px calc(0px + env(safe-area-inset-bottom));}
+.bottom-nav button{all:unset;box-sizing:border-box;flex:1;text-align:center;cursor:pointer;color:var(--text3);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;padding:14px 0 12px;border-top:2px solid transparent;}
+.bottom-nav button.active{color:var(--gold);border-top:2px solid var(--gold);}
 
 .mcard{border:1px solid var(--border2);border-radius:6px;padding:12px;margin-bottom:10px;font-size:13px;background:var(--surface2);line-height:1.6;}
 .mcard b{color:var(--text);}
@@ -78,6 +78,30 @@ button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:1
 .modal-header{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display);font-size:16px;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 .modal-close{all:unset;cursor:pointer;font-size:20px;color:var(--text3);line-height:1;padding:0 4px;}
 .modal-close:hover{color:var(--red);}
+
+/* Rendu facture (aperçu / PDF), repris de facture.html pour que inv.html s'affiche correctement */
+#invoice{background:var(--surface);color:var(--text);width:210mm;min-height:285mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
+.gold{color:var(--gold);}
+.inv-brand{text-align:center;padding-bottom:22px;}
+.inv-brandname{font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;display:inline-block;padding-bottom:10px;border-bottom:1px solid var(--gold-border);min-width:200px;}
+.inv-tagline{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-top:10px;}
+.inv-title-rule{display:flex;align-items:center;gap:14px;margin:26px 0;color:var(--text3);font-size:12px;letter-spacing:.35em;text-transform:uppercase;}
+.inv-title-rule::before,.inv-title-rule::after{content:'';flex:1;border-top:1px solid var(--border2);}
+.inv-meta-row{display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:24px;}
+.inv-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+.inv-value{font-weight:700;font-size:14px;}
+.from-to{display:flex;justify-content:space-between;margin:0 0 30px;font-size:13px;line-height:1.7;}
+.from-to h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin:0 0 6px;}
+#invoice table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px;}
+#invoice th{text-align:left;border-bottom:2px solid var(--gold);padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);}
+#invoice td{padding:10px 4px;border-bottom:1px solid var(--border);}
+#invoice .num{text-align:right;}
+.totals{margin-top:20px;margin-left:auto;width:280px;font-size:13px;}
+.totals div{display:flex;justify-content:space-between;padding:5px 0;}
+.totals .final{font-weight:700;font-size:22px;border-top:2px solid var(--gold);margin-top:6px;padding-top:12px;color:var(--gold)}
+.inv-reglement{margin-top:30px;font-size:12.5px;line-height:1.8;color:var(--text2);}
+.inv-reglement h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:0 0 8px;}
+.meta{margin-top:20px;font-size:10.5px;color:var(--text3);line-height:1.6;font-style:italic;}
 </style>
 </head>
 <body>
@@ -98,7 +122,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:1
     <span class="mheader-brand">BILL OPS</span>
     <div class="mheader-right">
       <span id="syncStatusText" class="mheader-sync"></span>
-      <button class="mheader-disconnect" onclick="handleDisconnect()" title="Déconnecter">⎋</button>
+      <button class="mheader-disconnect" onclick="handleDisconnect()">Déconnecter</button>
     </div>
   </div>
   <main class="mobile-main">
@@ -112,6 +136,23 @@ button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:1
     </section>
     <section id="tab-planning" style="display:none;">
       <h2>Prestas à venir</h2>
+      <button class="btn-gold action-btn" id="btnNewBooking" onclick="openBookingForm()">+ Nouvelle presta</button>
+      <div id="bookingFormWrap" style="display:none;margin:14px 0 20px;padding:14px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);">
+        <input type="hidden" id="bkEditId" value="">
+        <label>Client</label><input id="bkClient" list="clientNames" oninput="prefillBookingClientMobile()">
+        <label>Nom de la prestation</label><input id="bkLabel" placeholder="Ex. Prestation Barman">
+        <label>Adresse de la prestation</label><input id="bkAddr">
+        <label>Contact sur place</label><input id="bkContact">
+        <label>Date</label><input id="bkDate" type="date">
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;"><label>De</label><input id="bkFrom" type="time"></div>
+          <div style="flex:1;"><label>À</label><input id="bkTo" type="time"></div>
+        </div>
+        <label>Taux €/h</label><input id="bkRate" type="number">
+        <button class="btn-gold action-btn" onclick="saveBookingForm()">Enregistrer</button>
+        <button class="btn-line action-btn" onclick="closeBookingForm()">Annuler</button>
+      </div>
+      <datalist id="clientNames"></datalist>
       <div id="planningList"></div>
     </section>
     <section id="tab-factures" style="display:none;">
@@ -120,9 +161,9 @@ button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:1
     </section>
   </main>
   <nav class="bottom-nav">
-    <button data-tab="pointage" class="active" onclick="switchTab('pointage')"><span>⏱</span>Pointage</button>
-    <button data-tab="planning" onclick="switchTab('planning')"><span>📅</span>Planning</button>
-    <button data-tab="factures" onclick="switchTab('factures')"><span>🧾</span>Factures</button>
+    <button data-tab="pointage" class="active" onclick="switchTab('pointage')">Pointage</button>
+    <button data-tab="planning" onclick="switchTab('planning')">Planning</button>
+    <button data-tab="factures" onclick="switchTab('factures')">Factures</button>
   </nav>
 </div>
 
@@ -139,6 +180,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:1
 <div class="toast-stack" id="toastStack"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 function showToast(msg, duration){
   const stack = document.getElementById('toastStack');
@@ -282,19 +324,19 @@ function renderActiveTab(){
 
 // --- Pointage ---
 function renderPointage(){
+  const today = new Date().toISOString().slice(0,10);
   const bookings = storeArr('bookings');
-  const active = bookings.filter(b=>b.status==='à facturer' && !b.checkedOutAt)
-    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const active = bookings.filter(b=>b.status==='à facturer' && !b.checkedOutAt && b.date===today)
+    .sort((a,b)=>(a.from||'').localeCompare(b.from||''));
   const el = document.getElementById('pointageList');
   el.innerHTML = active.length ? active.map(b=>{
-    const dateLabel = b.date ? formatFrDate(b.date) : '';
-    const info = `<b>${b.client}</b>${b.label?' — '+b.label:''}<br><span style="color:var(--text2);font-size:12px;">${dateLabel}${b.from&&b.to?' · '+b.from+'-'+b.to:''}</span>`;
+    const info = `<b>${b.client}</b>${b.label?' — '+b.label:''}<br><span style="color:var(--text2);font-size:12px;">${b.from&&b.to?b.from+'-'+b.to:''}</span>`;
     const statusLine = b.checkedInAt ? `<div style="margin-top:6px;font-size:12px;color:var(--gold);">Arrivé à ${localHM(b.checkedInAt)}</div>` : '';
     const btn = !b.checkedInAt
       ? `<button class="btn-gold action-btn" onclick="openClockModal(${b.id},'in')">Je suis arrivé(e)</button>`
       : `<button class="btn-gold action-btn" onclick="openClockModal(${b.id},'out')">Je termine</button>`;
     return `<div class="mcard">${info}${statusLine}${btn}</div>`;
-  }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta à pointer.</p>';
+  }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta aujourd\'hui.</p>';
 
   const recent = bookings.filter(b=>b.checkedOutAt).sort((a,b)=>(b.checkedOutAt||'').localeCompare(a.checkedOutAt||'')).slice(0,5);
   const recentSection = document.getElementById('recentSection');
@@ -357,7 +399,7 @@ function confirmClock(){
 function renderPlanningTab(){
   const today = new Date().toISOString().slice(0,10);
   const bookings = storeArr('bookings')
-    .filter(b=>b.status==='à facturer' && b.date>=today)
+    .filter(b=>b.status==='à facturer' && b.date>=today && !b.checkedOutAt)
     .sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.from||'').localeCompare(b.from||''));
   const el = document.getElementById('planningList');
   el.innerHTML = bookings.length ? bookings.map(b=>`
@@ -366,8 +408,90 @@ function renderPlanningTab(){
       <span style="color:var(--text2);font-size:12px;">${formatFrDate(b.date)}${b.from&&b.to?' · '+b.from+'-'+b.to:''}</span>
       ${b.addr?`<br><span style="color:var(--text3);font-size:11.5px;">${b.addr}</span>`:''}<br>
       <span style="color:var(--gold);font-weight:600;">${(b.hours*b.rate).toFixed(2)} €</span>
-      <div><button class="btn-line" style="margin-top:8px;" onclick="switchTab('pointage')">Pointer cette presta</button></div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn-line" onclick="switchTab('pointage')">Pointer</button>
+        <button class="btn-line" onclick="openBookingForm(${b.id})">Modifier</button>
+        <button class="btn-line" style="color:var(--red);" onclick="deleteBookingMobile(${b.id})">Supprimer</button>
+      </div>
     </div>`).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta à venir.</p>';
+}
+
+function populateClientNames(){
+  document.getElementById('clientNames').innerHTML = storeArr('clients').map(c=>`<option value="${c.name}">`).join('');
+}
+function openBookingForm(id){
+  populateClientNames();
+  document.getElementById('bookingFormWrap').style.display = 'block';
+  document.getElementById('btnNewBooking').style.display = 'none';
+  if(id){
+    const b = storeArr('bookings').find(x=>x.id===id);
+    if(!b) return;
+    document.getElementById('bkEditId').value = b.id;
+    document.getElementById('bkClient').value = b.client||'';
+    document.getElementById('bkLabel').value = b.label||'';
+    document.getElementById('bkAddr').value = b.addr||'';
+    document.getElementById('bkContact').value = b.contact||'';
+    document.getElementById('bkDate').value = b.date||'';
+    document.getElementById('bkFrom').value = b.from||'';
+    document.getElementById('bkTo').value = b.to||'';
+    document.getElementById('bkRate').value = b.rate||'';
+  } else {
+    ['bkEditId','bkClient','bkLabel','bkAddr','bkContact','bkDate','bkFrom','bkTo','bkRate'].forEach(id=>document.getElementById(id).value='');
+  }
+  document.getElementById('bookingFormWrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function closeBookingForm(){
+  document.getElementById('bookingFormWrap').style.display = 'none';
+  document.getElementById('btnNewBooking').style.display = 'block';
+  ['bkEditId','bkClient','bkLabel','bkAddr','bkContact','bkDate','bkFrom','bkTo','bkRate'].forEach(id=>document.getElementById(id).value='');
+}
+function prefillBookingClientMobile(){
+  const val = document.getElementById('bkClient').value;
+  const c = storeArr('clients').find(cl=>cl.name.trim().toLowerCase()===val.trim().toLowerCase());
+  if(!c) return;
+  document.getElementById('bkAddr').value = c.addr||'';
+  document.getElementById('bkContact').value = c.phone||'';
+}
+function saveBookingForm(){
+  const client = document.getElementById('bkClient').value.trim();
+  if(!client){ showToast('⚠ Renseigne un client.'); return; }
+  const from = document.getElementById('bkFrom').value;
+  const to = document.getElementById('bkTo').value;
+  let hours = 0;
+  if(from && to){
+    const [h1,m1] = from.split(':').map(Number);
+    const [h2,m2] = to.split(':').map(Number);
+    let mins = (h2*60+m2)-(h1*60+m1);
+    if(mins<0) mins += 24*60;
+    hours = mins/60;
+  }
+  const payload = {
+    client,
+    label: document.getElementById('bkLabel').value,
+    addr: document.getElementById('bkAddr').value,
+    contact: document.getElementById('bkContact').value,
+    date: document.getElementById('bkDate').value,
+    from, to, hours,
+    rate: parseFloat(document.getElementById('bkRate').value)||0
+  };
+  const bookings = storeArr('bookings');
+  const editId = document.getElementById('bkEditId').value;
+  if(editId){
+    const b = bookings.find(x=>x.id===Number(editId));
+    if(b) Object.assign(b, payload);
+  } else {
+    bookings.push({id:Date.now(), status:'à facturer', ...payload});
+  }
+  set('bookings', bookings);
+  closeBookingForm();
+  renderActiveTab();
+  showToast(editId ? '✔ Presta modifiée.' : '✔ Presta ajoutée.');
+}
+function deleteBookingMobile(id){
+  if(!confirm('Supprimer cette prestation ?')) return;
+  set('bookings', storeArr('bookings').filter(x=>x.id!==id));
+  renderActiveTab();
+  showToast('✔ Prestation supprimée.');
 }
 
 // --- Factures ---
@@ -380,8 +504,43 @@ function renderFacturesTab(){
       <b>${i.num}</b> — ${i.client}<br>
       <span style="color:var(--text2);font-size:12px;">${i.date||''}</span><br>
       <span style="font-weight:600;">${i.total}</span> · <span style="color:${color};font-weight:600;">${i.status}</span>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn-line" onclick="viewInvoiceMobile('${i.num}')">Aperçu</button>
+        <button class="btn-line" onclick="downloadInvoicePdfMobile('${i.num}')">Télécharger le PDF</button>
+      </div>
     </div>`;
   }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune facture.</p>';
+}
+function invoiceStyles(){
+  return document.querySelector('style').outerHTML;
+}
+function viewInvoiceMobile(num){
+  const inv = storeArr('invoices').find(i=>i.num===num);
+  if(!inv) return;
+  const html = '<html data-theme="light"><head><title>'+inv.num+'</title>'+invoiceStyles()+'</head><body style="margin:0;background:var(--bg);display:flex;justify-content:center;padding:20px;">'+inv.html+'</body></html>';
+  const w = window.open('', '_blank');
+  if(!w){ showToast('⚠ Autorise les pop-ups pour voir la facture.'); return; }
+  w.document.write(html);
+  w.document.close();
+}
+function pdfOptions(filename){
+  return {
+    margin:0, filename,
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+    pagebreak:{mode:['css'], avoid:['tr','.totals','.inv-reglement','.inv-meta-row']}
+  };
+}
+function downloadInvoicePdfMobile(num){
+  const inv = storeArr('invoices').find(i=>i.num===num);
+  if(!inv){ showToast('⚠ Facture introuvable.'); return; }
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;background:#fff;';
+  container.setAttribute('data-theme','light');
+  container.innerHTML = inv.html;
+  document.body.appendChild(container);
+  html2pdf().set(pdfOptions(num+'.pdf')).from(container.firstElementChild).save().finally(()=>container.remove());
 }
 
 // --- Boot ---
