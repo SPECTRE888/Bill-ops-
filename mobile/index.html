@@ -273,6 +273,12 @@ function localHM(iso){
   if(!iso) return '';
   return new Date(iso).toTimeString().slice(0,5);
 }
+// Date du jour en heure locale (YYYY-MM-DD) — new Date().toISOString() renvoie l'UTC,
+// ce qui fait basculer "aujourd'hui" sur la veille entre minuit et le décalage horaire local.
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
 
 // --- Sync engine (ported from facture.html, same Supabase project/table) ---
 const SUPABASE_URL = 'https://chlmqnrvnrgeaihryreb.supabase.co';
@@ -390,7 +396,7 @@ function renderActiveTab(){
 
 // --- Pointage ---
 function renderPointage(){
-  const today = new Date().toISOString().slice(0,10);
+  const today = todayStr();
   const bookings = storeArr('bookings');
   const active = bookings.filter(b=>b.status==='à facturer' && !b.checkedOutAt && b.date===today)
     .sort((a,b)=>(a.from||'').localeCompare(b.from||''));
@@ -471,7 +477,7 @@ function confirmClock(){
 
 // --- Planning ---
 function renderPlanningTab(){
-  const today = new Date().toISOString().slice(0,10);
+  const today = todayStr();
   const bookings = storeArr('bookings')
     .filter(b=>b.status==='à facturer' && b.date>=today && !b.checkedOutAt)
     .sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.from||'').localeCompare(b.from||''));
@@ -719,7 +725,7 @@ function computeInvoiceExtras(){
   const offAmt = offVal>0 ? (offType==='pct' ? sub*offVal/100 : offVal) : 0;
   sub -= offAmt;
 
-  const invDate = new Date().toISOString().slice(0,10);
+  const invDate = todayStr();
   const SEUIL_FRANCHISE_TVA = 32000;
   const caYear = invDate.slice(0,4);
   const caCumulAvant = storeArr('invoices')

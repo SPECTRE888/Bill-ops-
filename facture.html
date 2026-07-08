@@ -646,7 +646,7 @@ function exportBackup(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'bill-ops-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.download = 'bill-ops-backup-'+todayStr()+'.json';
   a.click();
   URL.revokeObjectURL(url);
   setStatusMsg(document.getElementById('backupStatus'), '✔ Sauvegarde téléchargée.');
@@ -743,6 +743,12 @@ function formatFrDate(d){
 function localHM(iso){
   if(!iso) return '';
   return new Date(iso).toTimeString().slice(0,5);
+}
+// Date du jour en heure locale (YYYY-MM-DD) — new Date().toISOString() renvoie l'UTC,
+// ce qui fait basculer "aujourd'hui" sur la veille entre minuit et le décalage horaire local.
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 function formatFrDateShort(d){
   const dt = new Date(d+'T00:00:00');
@@ -1095,7 +1101,7 @@ function renderDashboard(){
   const bookings = storeArr('bookings');
   const invoices = storeArr('invoices');
   const clients = storeArr('clients');
-  const today = new Date().toISOString().slice(0,10);
+  const today = todayStr();
   const now = new Date();
   const monthKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 
@@ -1203,7 +1209,7 @@ function renderCalendar(){
     const timePrefix = b.from ? (b.from+(b.to?'-'+b.to:'')+' ') : '';
     byDay[day].names.push({client:b.client, text: timePrefix + (b.label ? b.client+' — '+b.label : b.client)});
   });
-  const todayKey = new Date().toISOString().slice(0,10);
+  const todayKey = todayStr();
   let html = ['L','M','M','J','V','S','D'].map(d=>`<div style="font-size:10px;color:var(--text3);text-align:center;">${d}</div>`).join('');
   for(let i=0;i<startOffset;i++) html += `<div class="cal-day empty"></div>`;
   for(let d=1;d<=daysInMonth;d++){
@@ -1353,7 +1359,7 @@ function deleteBooking(id){
   renderCalendarTab();
 }
 function renderAccueil(){
-  const today = new Date().toISOString().slice(0,10);
+  const today = todayStr();
   const bookings = storeArr('bookings')
     .filter(b=>b.status==='à facturer' && b.date >= today && !b.checkedOutAt)
     .sort((a,b)=>a.date.localeCompare(b.date) || (a.from||'').localeCompare(b.from||''));
@@ -1388,7 +1394,7 @@ function renderCalendarTab(){
 }
 function renderPlanning(){
   renderAccueil();
-  const today = new Date().toISOString().slice(0,10);
+  const today = todayStr();
   const bookings = storeArr('bookings');
   const pending = bookings.filter(b=>b.status==='à facturer' && (!b.date || b.date < today || b.checkedOutAt));
   bkList.innerHTML = pending.length ? pending.map(b=>{
@@ -1560,7 +1566,7 @@ function render(){
     pOffertRow.style.display='none';
   }
   const SEUIL_FRANCHISE_TVA = 32000;
-  const caYear = (invDate.value || new Date().toISOString().slice(0,10)).slice(0,4);
+  const caYear = (invDate.value || todayStr()).slice(0,4);
   const caCumulAvant = storeArr('invoices')
     .filter(i => i.num !== invNum.value && (i.date||'').slice(0,4) === caYear)
     .reduce((s,i) => s + invoiceAmt(i), 0);
