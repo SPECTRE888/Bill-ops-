@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bill Ops</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080808">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808;--surface:#0f0f0f;--surface2:#141414;--surface3:#1c1c1c;
+  --border:#222222;--border2:#2a2a2a;
+  --text:#ede8e0;--text2:#a09890;--text3:#585450;
+  --gold:#c4a46b;--gold2:#d4b47a;--gold3:#e8d4a8;
+  --gold-bg:rgba(196,164,107,0.07);--gold-border:rgba(196,164,107,0.20);
+  --red:#c47070;--green:#6aaa88;
+  --radius:5px;--radius-lg:8px;
+  --font-display:'Cormorant Garamond',serif;--font-body:'Jost',sans-serif;
+}
+[data-theme="light"]{
+  --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
+  --border:#ddd9d2;--border2:#ccc8c0;
+  --text:#1a1814;--text2:#6b6560;--text3:#a09890;
+  --gold:#9a7a3a;--gold2:#b08840;--gold3:#7a5e28;
+  --gold-bg:rgba(154,122,58,0.08);--gold-border:rgba(154,122,58,0.22);
+  --red:#b84444;--green:#3a7a58;
+}
+@media(prefers-color-scheme:light){
+  [data-theme="auto"]{
+    --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
+    --border:#ddd9d2;--border2:#ccc8c0;
+    --text:#1a1814;--text2:#6b6560;--text3:#a09890;
+    --gold:#9a7a3a;--gold2:#b08840;--gold3:#7a5e28;
+    --gold-bg:rgba(154,122,58,0.08);--gold-border:rgba(154,122,58,0.22);
+    --red:#b84444;--green:#3a7a58;
+  }
+}
+*{box-sizing:border-box;font-family:var(--font-body);-webkit-tap-highlight-color:transparent;}
+body{margin:0;background:var(--bg);color:var(--text);}
+h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;font-weight:600;}
+label{display:block;font-size:12px;color:var(--text2);margin:8px 0 3px;}
+input{width:100%;padding:10px;border:1px solid var(--border2);border-radius:4px;font-size:14px;background:var(--surface2);color:var(--text);}
+button{cursor:pointer;border:none;border-radius:4px;padding:9px 14px;font-size:13px;font-weight:600;}
+.btn-gold{background:var(--gold);color:var(--bg);}
+.btn-line{background:transparent;border:1px solid var(--border2);color:var(--text);}
+.action-btn{width:100%;padding:14px;font-size:15px;margin-top:10px;}
+
+.pair-gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:5000;}
+.pair-box{max-width:360px;width:100%;}
+.pair-title{font-family:var(--font-display);font-size:30px;color:var(--gold);text-align:center;letter-spacing:.1em;margin-bottom:16px;}
+
+.mobile-app{min-height:100vh;display:flex;flex-direction:column;}
+.mheader{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+.mheader-brand{font-family:var(--font-display);font-size:17px;letter-spacing:.1em;color:var(--gold);}
+.mheader-right{display:flex;align-items:center;gap:10px;}
+.mheader-sync{font-size:10.5px;color:var(--text3);}
+.mheader-disconnect{all:unset;cursor:pointer;color:var(--text3);font-size:15px;padding:2px 4px;}
+.mobile-main{flex:1;padding:16px 16px 100px;}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:100;display:flex;background:var(--surface);border-top:1px solid var(--border);padding:6px 6px calc(6px + env(safe-area-inset-bottom));}
+.bottom-nav button{flex:1;background:none;border:none;color:var(--text3);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;}
+.bottom-nav button span{font-size:19px;}
+.bottom-nav button.active{color:var(--gold);}
+
+.mcard{border:1px solid var(--border2);border-radius:6px;padding:12px;margin-bottom:10px;font-size:13px;background:var(--surface2);line-height:1.6;}
+.mcard b{color:var(--text);}
+
+.toast-stack{position:fixed;top:20px;right:20px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
+.toast-card{background:var(--surface);border:1px solid var(--gold-border);border-left:3px solid var(--gold);border-radius:6px;padding:12px 16px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:13px;color:var(--text);}
+.toast-card b{color:var(--gold);font-family:var(--font-display);font-size:14px;display:block;margin-bottom:2px;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-box{background:var(--surface);border:1px solid var(--gold-border);border-radius:8px;padding:20px 24px;width:100%;max-width:360px;box-shadow:0 12px 32px rgba(0,0,0,.35);}
+.modal-header{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display);font-size:16px;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.modal-close{all:unset;cursor:pointer;font-size:20px;color:var(--text3);line-height:1;padding:0 4px;}
+.modal-close:hover{color:var(--red);}
+</style>
+</head>
+<body>
+
+<div id="pairGate" class="pair-gate">
+  <div class="pair-box">
+    <div class="pair-title">BILL OPS</div>
+    <p style="color:var(--text2);font-size:13px;text-align:center;">Colle le code de synchro généré sur le Mac (Mon entreprise → Synchronisation) pour retrouver ton planning et tes factures.</p>
+    <label>Code de synchro</label>
+    <input id="pairCodeInput" placeholder="Code de synchro">
+    <button class="btn-gold action-btn" onclick="doConnect()">Connecter</button>
+    <div id="pairStatus" style="font-size:12px;margin-top:8px;text-align:center;color:var(--gold);"></div>
+  </div>
+</div>
+
+<div id="appShell" class="mobile-app" style="display:none;">
+  <div class="mheader">
+    <span class="mheader-brand">BILL OPS</span>
+    <div class="mheader-right">
+      <span id="syncStatusText" class="mheader-sync"></span>
+      <button class="mheader-disconnect" onclick="handleDisconnect()" title="Déconnecter">⎋</button>
+    </div>
+  </div>
+  <main class="mobile-main">
+    <section id="tab-pointage">
+      <h2>Pointage</h2>
+      <div id="pointageList"></div>
+      <div id="recentSection" style="display:none;margin-top:24px;">
+        <h2>Récemment pointées</h2>
+        <div id="recentList"></div>
+      </div>
+    </section>
+    <section id="tab-planning" style="display:none;">
+      <h2>Prestas à venir</h2>
+      <div id="planningList"></div>
+    </section>
+    <section id="tab-factures" style="display:none;">
+      <h2>Factures</h2>
+      <div id="facturesList"></div>
+    </section>
+  </main>
+  <nav class="bottom-nav">
+    <button data-tab="pointage" class="active" onclick="switchTab('pointage')"><span>⏱</span>Pointage</button>
+    <button data-tab="planning" onclick="switchTab('planning')"><span>📅</span>Planning</button>
+    <button data-tab="factures" onclick="switchTab('factures')"><span>🧾</span>Factures</button>
+  </nav>
+</div>
+
+<div class="modal-overlay" id="clockModal" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header"><span id="clockModalTitle">Heure</span><button class="modal-close" onclick="closeClockModal()">×</button></div>
+    <label>Heure</label>
+    <input type="time" id="clockTimeInput">
+    <div id="clockModalError" style="color:var(--red);font-size:12px;margin-top:6px;"></div>
+    <button class="btn-gold action-btn" onclick="confirmClock()">Confirmer</button>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+function showToast(msg, duration){
+  const stack = document.getElementById('toastStack');
+  if(!stack) return;
+  const card = document.createElement('div');
+  card.className = 'toast-card';
+  card.innerHTML = `<b>Bill Ops</b>${msg}`;
+  stack.appendChild(card);
+  setTimeout(()=>{ card.remove(); }, duration || 4000);
+}
+function setStatusMsg(el, msg){
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = msg.startsWith('✔') ? 'var(--green)' : (msg.startsWith('✕')||msg.startsWith('⚠')) ? 'var(--red)' : 'var(--gold)';
+}
+function formatFrDate(d){
+  if(!d) return '';
+  const dt = new Date(d+'T00:00:00');
+  const day = String(dt.getDate()).padStart(2,'0');
+  const month = dt.toLocaleDateString('fr-FR',{month:'long'});
+  return `${day} ${month.charAt(0).toUpperCase()+month.slice(1)} ${dt.getFullYear()}`;
+}
+function localHM(iso){
+  if(!iso) return '';
+  return new Date(iso).toTimeString().slice(0,5);
+}
+
+// --- Sync engine (ported from facture.html, same Supabase project/table) ---
+const SUPABASE_URL = 'https://chlmqnrvnrgeaihryreb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobG1xbnJ2bnJnZWFpaHJ5cmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNTQ1MjMsImV4cCI6MjA5ODczMDUyM30.ErgkAYc0mVv6iyEeIDtJ8kKaX6ExyNi4ribi_rvqX6s';
+const SYNC_TABLE = 'billops_sync';
+const SYNC_KEYS = { from:'{}', sg:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}' };
+let sb = null;
+function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); return sb; }
+function getSyncCode(){ return localStorage.getItem('syncCode') || ''; }
+
+function collectSyncPayload(){
+  const data = {};
+  Object.keys(SYNC_KEYS).forEach(k=>{ data[k] = JSON.parse(localStorage.getItem(k) || SYNC_KEYS[k]); });
+  data.inv_theme = localStorage.getItem('inv_theme') || 'auto';
+  return data;
+}
+function applySyncPayload(data){
+  Object.keys(SYNC_KEYS).forEach(k=>{ if(data[k]!==undefined) localStorage.setItem(k, JSON.stringify(data[k])); });
+  if(data.inv_theme) localStorage.setItem('inv_theme', data.inv_theme);
+}
+function updateSyncStatus(msg){ setStatusMsg(document.getElementById('syncStatusText'), msg); }
+
+let syncTimer=null, syncBusy=false;
+function queueSync(){
+  if(syncBusy || !getSyncCode()) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushSync, 1200);
+}
+async function pushSync(){
+  const code = getSyncCode();
+  if(!code) return;
+  try{
+    const { data, error } = await getSb().from(SYNC_TABLE)
+      .upsert({ sync_code: code, data: collectSyncPayload(), updated_at: new Date().toISOString() })
+      .select('updated_at').single();
+    if(error){ updateSyncStatus('✕ Erreur sync'); return; }
+    localStorage.setItem('syncLastAppliedAt', data.updated_at);
+    updateSyncStatus('✔ Synchronisé');
+  }catch(e){ updateSyncStatus('✕ Hors ligne'); }
+}
+async function pullSync(force){
+  const code = getSyncCode();
+  if(!code) return false;
+  try{
+    const { data: row, error } = await getSb().from(SYNC_TABLE).select('data,updated_at').eq('sync_code', code).maybeSingle();
+    if(error){ updateSyncStatus('✕ Erreur sync'); return false; }
+    if(!row){ if(force) await pushSync(); return false; }
+    const lastApplied = localStorage.getItem('syncLastAppliedAt');
+    if(!force && lastApplied===row.updated_at) return false;
+    syncBusy = true;
+    applySyncPayload(row.data);
+    localStorage.setItem('syncLastAppliedAt', row.updated_at);
+    syncBusy = false;
+    updateSyncStatus('✔ Synchronisé');
+    return true;
+  }catch(e){ updateSyncStatus('✕ Hors ligne'); syncBusy=false; return false; }
+}
+function connectSyncCode(code){
+  localStorage.setItem('syncCode', code);
+  localStorage.removeItem('syncLastAppliedAt');
+}
+function handleDisconnect(){
+  if(!confirm('Déconnecter cet appareil de la synchronisation ?')) return;
+  localStorage.removeItem('syncCode');
+  localStorage.removeItem('syncLastAppliedAt');
+  location.reload();
+}
+
+const store = k => JSON.parse(localStorage.getItem(k) || '{}');
+const storeArr = k => JSON.parse(localStorage.getItem(k) || '[]');
+const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueSync(); };
+
+function applyTheme(){
+  const theme = localStorage.getItem('inv_theme')||'auto';
+  document.documentElement.setAttribute('data-theme', theme);
+}
+
+// --- Pairing ---
+function showPairGate(show){
+  document.getElementById('pairGate').style.display = show ? 'flex' : 'none';
+  document.getElementById('appShell').style.display = show ? 'none' : 'flex';
+}
+async function doConnect(){
+  const code = (document.getElementById('pairCodeInput').value||'').trim();
+  const statusEl = document.getElementById('pairStatus');
+  if(!code){ setStatusMsg(statusEl, '⚠ Colle un code valide'); return; }
+  connectSyncCode(code);
+  setStatusMsg(statusEl, '⏳ Connexion...');
+  const found = await pullSync(true);
+  applyTheme();
+  if(found){
+    setStatusMsg(statusEl, '✔ Connecté');
+    showPairGate(false);
+    renderActiveTab();
+  } else {
+    setStatusMsg(statusEl, '⚠ Aucune donnée trouvée pour ce code — vérifie qu\'il correspond à celui affiché sur le Mac.');
+  }
+}
+
+// --- Tabs ---
+let activeTab = 'pointage';
+function switchTab(name){
+  activeTab = name;
+  ['pointage','planning','factures'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  renderActiveTab();
+}
+function renderActiveTab(){
+  if(activeTab==='pointage') renderPointage();
+  else if(activeTab==='planning') renderPlanningTab();
+  else renderFacturesTab();
+}
+
+// --- Pointage ---
+function renderPointage(){
+  const bookings = storeArr('bookings');
+  const active = bookings.filter(b=>b.status==='à facturer' && !b.checkedOutAt)
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const el = document.getElementById('pointageList');
+  el.innerHTML = active.length ? active.map(b=>{
+    const dateLabel = b.date ? formatFrDate(b.date) : '';
+    const info = `<b>${b.client}</b>${b.label?' — '+b.label:''}<br><span style="color:var(--text2);font-size:12px;">${dateLabel}${b.from&&b.to?' · '+b.from+'-'+b.to:''}</span>`;
+    const statusLine = b.checkedInAt ? `<div style="margin-top:6px;font-size:12px;color:var(--gold);">Arrivé à ${localHM(b.checkedInAt)}</div>` : '';
+    const btn = !b.checkedInAt
+      ? `<button class="btn-gold action-btn" onclick="openClockModal(${b.id},'in')">Je suis arrivé(e)</button>`
+      : `<button class="btn-gold action-btn" onclick="openClockModal(${b.id},'out')">Je termine</button>`;
+    return `<div class="mcard">${info}${statusLine}${btn}</div>`;
+  }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta à pointer.</p>';
+
+  const recent = bookings.filter(b=>b.checkedOutAt).sort((a,b)=>(b.checkedOutAt||'').localeCompare(a.checkedOutAt||'')).slice(0,5);
+  const recentSection = document.getElementById('recentSection');
+  if(!recent.length){ recentSection.style.display='none'; return; }
+  recentSection.style.display='block';
+  document.getElementById('recentList').innerHTML = recent.map(b=>`
+    <div class="mcard">
+      <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
+      <span style="color:var(--text2);font-size:12px;">${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · ${b.actualHours}h réel</span><br>
+      <button class="btn-line" style="margin-top:8px;margin-right:6px;" onclick="openClockModal(${b.id},'in')">Modifier arrivée</button>
+      <button class="btn-line" style="margin-top:8px;" onclick="openClockModal(${b.id},'out')">Modifier départ</button>
+    </div>`).join('');
+}
+
+let clockCtx = null;
+function openClockModal(id, mode){
+  const b = storeArr('bookings').find(x=>x.id===id);
+  if(!b) return;
+  clockCtx = {id, mode};
+  const existing = mode==='in' ? b.checkedInAt : b.checkedOutAt;
+  const timeVal = existing ? localHM(existing) : new Date().toTimeString().slice(0,5);
+  document.getElementById('clockModalTitle').textContent = mode==='in' ? "Heure d'arrivée" : 'Heure de départ';
+  document.getElementById('clockTimeInput').value = timeVal;
+  document.getElementById('clockModalError').textContent = '';
+  document.getElementById('clockModal').style.display = 'flex';
+}
+function closeClockModal(){ document.getElementById('clockModal').style.display='none'; clockCtx=null; }
+function confirmClock(){
+  if(!clockCtx) return;
+  const { id, mode } = clockCtx;
+  const bookings = storeArr('bookings');
+  const b = bookings.find(x=>x.id===id);
+  const timeVal = document.getElementById('clockTimeInput').value;
+  const errEl = document.getElementById('clockModalError');
+  if(!b || !timeVal) return;
+
+  if(mode==='in'){
+    const iso = new Date(b.date+'T'+timeVal+':00').toISOString();
+    if(b.checkedOutAt && new Date(iso) >= new Date(b.checkedOutAt)){ errEl.textContent = "⚠ L'arrivée doit être avant le départ."; return; }
+    b.checkedInAt = iso;
+  } else {
+    if(!b.checkedInAt){ errEl.textContent = "⚠ Renseigne d'abord l'heure d'arrivée."; return; }
+    let iso = new Date(b.date+'T'+timeVal+':00').toISOString();
+    if(new Date(iso) <= new Date(b.checkedInAt)){
+      // presta à cheval sur minuit : on reporte le départ au lendemain de la date du booking
+      const nextDay = new Date(b.date+'T00:00:00'); nextDay.setDate(nextDay.getDate()+1);
+      iso = new Date(nextDay.toISOString().slice(0,10)+'T'+timeVal+':00').toISOString();
+    }
+    if(new Date(iso) <= new Date(b.checkedInAt)){ errEl.textContent = '⚠ Le départ doit être après l\'arrivée.'; return; }
+    b.checkedOutAt = iso;
+    b.actualHours = Math.round(((new Date(iso) - new Date(b.checkedInAt))/3600000)*4)/4;
+  }
+  set('bookings', bookings);
+  closeClockModal();
+  renderPointage();
+  showToast(mode==='in' ? '✔ Arrivée enregistrée.' : '✔ Départ enregistré.');
+}
+
+// --- Planning ---
+function renderPlanningTab(){
+  const today = new Date().toISOString().slice(0,10);
+  const bookings = storeArr('bookings')
+    .filter(b=>b.status==='à facturer' && b.date>=today)
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.from||'').localeCompare(b.from||''));
+  const el = document.getElementById('planningList');
+  el.innerHTML = bookings.length ? bookings.map(b=>`
+    <div class="mcard">
+      <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
+      <span style="color:var(--text2);font-size:12px;">${formatFrDate(b.date)}${b.from&&b.to?' · '+b.from+'-'+b.to:''}</span>
+      ${b.addr?`<br><span style="color:var(--text3);font-size:11.5px;">${b.addr}</span>`:''}<br>
+      <span style="color:var(--gold);font-weight:600;">${(b.hours*b.rate).toFixed(2)} €</span>
+      <div><button class="btn-line" style="margin-top:8px;" onclick="switchTab('pointage')">Pointer cette presta</button></div>
+    </div>`).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta à venir.</p>';
+}
+
+// --- Factures ---
+function renderFacturesTab(){
+  const invoices = storeArr('invoices').slice().reverse();
+  const el = document.getElementById('facturesList');
+  el.innerHTML = invoices.length ? invoices.map(i=>{
+    const color = (i.status==='Envoyée'||i.status==='Payée') ? 'var(--green)' : 'var(--gold)';
+    return `<div class="mcard">
+      <b>${i.num}</b> — ${i.client}<br>
+      <span style="color:var(--text2);font-size:12px;">${i.date||''}</span><br>
+      <span style="font-weight:600;">${i.total}</span> · <span style="color:${color};font-weight:600;">${i.status}</span>
+    </div>`;
+  }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune facture.</p>';
+}
+
+// --- Boot ---
+applyTheme();
+if(getSyncCode()){
+  showPairGate(false);
+  renderActiveTab();
+  pullSync(false).then(found=>{ if(found){ applyTheme(); renderActiveTab(); } });
+} else {
+  showPairGate(true);
+}
+setInterval(()=>{ if(getSyncCode()) pullSync(false).then(found=>{ if(found){ applyTheme(); renderActiveTab(); } }); }, 60000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && getSyncCode()) pullSync(false).then(found=>{ if(found){ applyTheme(); renderActiveTab(); } }); });
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>
