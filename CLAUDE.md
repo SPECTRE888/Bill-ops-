@@ -7,8 +7,9 @@ HTML/CSS/JS vanilla, localStorage (from, clients, invoices, bookings, invCounter
 Thème dark/light/auto (tokens BAR OPS), fonts Cormorant Garamond + Jost.
 
 ## Sync multi-device (Mac ↔ iPhone)
-`facture.html` et `mobile/index.html` partagent les mêmes données via Supabase (table `billops_sync`, clé anon publique — même modèle de confiance que le reste de l'app client-side). Principe : un "code de synchro" aléatoire généré côté Mac (Mon entreprise → Synchronisation) sert de clé pour une ligne unique en base contenant tout l'état (`from, sg, clients, invoices, bookings, invCounters, inv_theme`) en un seul blob JSON. Toute écriture locale (`set(k,v)`) déclenche un push debounced (1.2s) ; chaque appareil pull toutes les 60s + au retour au premier plan (`visibilitychange`). Whole-blob last-write-wins, pas de fusion par enregistrement — acceptable pour un usage solo sur deux appareils utilisés séquentiellement.
+`facture.html` et `mobile/index.html` partagent les mêmes données via Supabase (table `billops_sync`, clé anon publique — même modèle de confiance que le reste de l'app client-side). Principe : un "code de synchro" aléatoire généré côté Mac (Mon entreprise → Synchronisation) sert de clé pour une ligne unique en base contenant tout l'état (`from, sg, clients, invoices, bookings, invCounters, inv_theme, pushSubscriptions`) en un seul blob JSON. Toute écriture locale (`set(k,v)`) déclenche un push debounced (1.2s) ; chaque appareil pull toutes les 60s + au retour au premier plan (`visibilitychange`). Whole-blob last-write-wins, pas de fusion par enregistrement — acceptable pour un usage solo sur deux appareils utilisés séquentiellement.
 La PWA mobile ne génère pas de code (pairing unidirectionnel Mac → téléphone) : on colle sur le téléphone le code affiché côté Mac.
+`SYNC_KEYS` doit toujours être identique dans les deux fichiers (même si une clé n'est utilisée activement que d'un côté, ex. `pushSubscriptions`) : `pushSync()` remplace tout le blob JSON à chaque écriture, donc une clé absente d'un des deux serait effacée silencieusement au prochain push de l'autre appareil.
 
 ## Onglets (nav gauche, groupés par catégorie)
 Accueil : tableau de bord (CA du mois, prestas à venir, factures en attente, heures prévues, prochaine presta, actions rapides), onglet par défaut, sans catégorie (item unique en haut de nav).
@@ -22,9 +23,13 @@ Catégorie Paramètres (en bas de nav, après le spacer) : Mon entreprise + sél
 `mobile/index.html` a sa propre mise en page (barre d'onglets fixe en bas : Pointage/Planning/Factures), indépendante du layout desktop.
 
 ## App mobile (PWA)
-`mobile/index.html` — compagnon iPhone installable via Safari (Ajouter à l'écran d'accueil), pas d'app native/App Store. Usage volontairement restreint : consulter le planning, consulter les factures (lecture seule), et pointer les horaires réels d'une presta via deux popups (arrivée / départ).
-Champs additionnels sur les objets `bookings` (optionnels, rétrocompatibles) : `checkedInAt`, `checkedOutAt` (timestamps ISO), `actualHours` (arrondi au quart d'heure). `facture.html:invoiceBooking` utilise ces heures réelles pour la ligne de facture quand elles existent, sinon retombe sur `hours`/`from`/`to` statiques.
+`mobile/index.html` — compagnon iPhone installable via Safari (Ajouter à l'écran d'accueil), pas d'app native/App Store. Trois onglets : Pointage (pointer arrivée/départ, transformer une presta pointée en facture avec extras km/péage/parking/offert/repas), Planning (consultation + ajout/modif/suppression de prestas, comme sur le Mac), Factures (lecture, aperçu en overlay in-app, téléchargement PDF, envoi par email via la config SendGrid déjà synchronisée).
+Champs additionnels sur les objets `bookings` (optionnels, rétrocompatibles) : `checkedInAt`, `checkedOutAt` (timestamps ISO), `actualHours` (arrondi au quart d'heure), `notifiedAt` (posé par la Edge Function de notification, voir plus bas). `facture.html:invoiceBooking` utilise les heures réelles pour la ligne de facture quand elles existent, sinon retombe sur `hours`/`from`/`to` statiques.
 Déploiement : `.github/workflows/pages.yml` publie le dossier `mobile/` sur GitHub Pages à chaque push touchant `mobile/**` (Pages doit être activé une fois dans Settings → Pages → Source: GitHub Actions).
+
+## Notifications push ("la presta commence")
+Web Push standard (VAPID), supporté par Safari iOS 16.4+ pour les PWA installées sur l'écran d'accueil. Bouton "Activer les notifications" dans le header mobile → abonnement stocké dans `pushSubscriptions` (synced comme le reste, pas de table dédiée). Une Edge Function Supabase (`supabase/functions/notify-upcoming-bookings`), déclenchée toutes les ~3 min par pg_cron, scanne les bookings non pointés dont l'heure de début tombe dans les 10 dernières minutes et envoie une notification (sans contenu chiffré, texte fixe géré par `mobile/sw.js`), puis pose `notifiedAt` pour ne pas re-notifier.
+Déploiement : voir `supabase/README.md` — nécessite un compte Supabase authentifié en CLI (login/link/deploy/secrets), à faire manuellement une seule fois, pas automatisable depuis cet environnement.
 
 ## Repo cible
 https://github.com/SPECTRE888/Bill-ops-.git (branche main)

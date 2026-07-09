@@ -27,3 +27,28 @@ self.addEventListener('fetch', (event) => {
     }).catch(() => caches.match(req))
   );
 });
+
+// Rappel qu'une prestation commence — pas de contenu chiffré (payload-less),
+// texte fixe pour éviter d'implémenter le déchiffrement RFC 8291 côté client.
+self.addEventListener('push', (event) => {
+  event.waitUntil(
+    self.registration.showNotification('Bill Ops', {
+      body: "Une prestation commence — ouvre l'app pour pointer ton arrivée.",
+      icon: 'icon-192.png',
+      badge: 'icon-192.png',
+      tag: 'booking-start'
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ('focus' in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow('./index.html');
+    })
+  );
+});

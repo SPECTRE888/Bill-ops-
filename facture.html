@@ -561,7 +561,10 @@ function setStatusMsg(el, msg){
 const SUPABASE_URL = 'https://chlmqnrvnrgeaihryreb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobG1xbnJ2bnJnZWFpaHJ5cmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNTQ1MjMsImV4cCI6MjA5ODczMDUyM30.ErgkAYc0mVv6iyEeIDtJ8kKaX6ExyNi4ribi_rvqX6s';
 const SYNC_TABLE = 'billops_sync';
-const SYNC_KEYS = { from:'{}', sg:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}' };
+// pushSubscriptions n'est jamais écrit depuis le Mac (les notifs sont gérées par mobile/index.html),
+// mais doit rester listé ici : pushSync() remplace tout le blob à chaque écriture, donc l'omettre
+// effacerait silencieusement l'abonnement du téléphone à la prochaine sauvegarde depuis le Mac.
+const SYNC_KEYS = { from:'{}', sg:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}', pushSubscriptions:'[]' };
 let sb = null;
 function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); return sb; }
 function getSyncCode(){ return localStorage.getItem('syncCode') || ''; }
