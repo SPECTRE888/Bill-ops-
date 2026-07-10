@@ -2,8 +2,10 @@
 
 Les deux fonctions sont déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill-ops) :
 
-- **`send-invoice`** — proxy SendGrid (remplace `send-invoice-server.js`, jamais hébergé). URL à
-  coller dans l'app, onglet Mon entreprise → Envoi (SendGrid) → Endpoint proxy serveur :
+- **`send-invoice`** — proxy SendGrid (remplace `send-invoice-server.js`, jamais hébergé). URL
+  codée en dur dans `facture.html`/`mobile/index.html` (constante `SENDGRID_PROXY_URL`, dérivée de
+  `SUPABASE_URL`) — rien à configurer côté app, l'onglet Mon entreprise → Envoi (SendGrid) ne
+  demande plus que la clé API et l'email d'envoi :
   `https://chlmqnrvnrgeaihryreb.supabase.co/functions/v1/send-invoice`
 - **`notify-upcoming-bookings`** — rappel push ~15 min avant le début d'une presta pointée.
   Planifié via `pg_cron` toutes les 3 minutes (job `notify-upcoming-bookings`, voir

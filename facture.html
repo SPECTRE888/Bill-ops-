@@ -271,7 +271,6 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <h2>Envoi (SendGrid)</h2>
       <label>Clé API SendGrid</label><input id="sgKey" type="password" placeholder="SG.xxxxx">
       <label>Email d'envoi (vérifié dans SendGrid)</label><input id="sgFrom" type="email" placeholder="contact@tondomaine.com">
-      <label>Endpoint proxy serveur</label><input id="sgEndpoint" placeholder="https://ton-serveur.com/send-invoice">
       <button class="btn-line" onclick="saveSg()">Enregistrer</button>
 
       <h2>Synchronisation</h2>
@@ -580,6 +579,7 @@ function setStatusMsg(el, msg){
   el.style.color = msg.startsWith('✔') ? 'var(--green)' : (msg.startsWith('✕')||msg.startsWith('⚠')) ? 'var(--red)' : 'var(--gold)';
 }
 const SUPABASE_URL = 'https://chlmqnrvnrgeaihryreb.supabase.co';
+const SENDGRID_PROXY_URL = SUPABASE_URL + '/functions/v1/send-invoice';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobG1xbnJ2bnJnZWFpaHJ5cmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNTQ1MjMsImV4cCI6MjA5ODczMDUyM30.ErgkAYc0mVv6iyEeIDtJ8kKaX6ExyNi4ribi_rvqX6s';
 const SYNC_TABLE = 'billops_sync';
 // pushSubscriptions n'est jamais écrit depuis le Mac (les notifs sont gérées par mobile/index.html),
@@ -792,8 +792,8 @@ function formatFrDatesGrouped(dates){
   }
   return parsed.map(dt=>formatFrDate(dt.toISOString().slice(0,10))).join(', ');
 }
-function saveSg(){ set('sg', {key:sgKey.value, from:sgFrom.value, endpoint:sgEndpoint.value}); }
-function loadSg(){ const s=store('sg'); sgKey.value=s.key||''; sgFrom.value=s.from||''; sgEndpoint.value=s.endpoint||''; }
+function saveSg(){ set('sg', {key:sgKey.value, from:sgFrom.value}); }
+function loadSg(){ const s=store('sg'); sgKey.value=s.key||''; sgFrom.value=s.from||''; }
 
 function suggestPrefix(){
   if(cliPrefix.value) return;
@@ -1004,11 +1004,10 @@ function downloadInvoicePdf(num){
 async function resendInvoice(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   const c = storeArr('clients').find(cl=>cl.name===inv.client);
-  const endpoint = sgEndpoint.value.trim();
-  if(!endpoint || !sgFrom.value.trim() || !c){ showToast('⚠ Configuration SendGrid (endpoint/email d\'envoi) ou client manquant.'); return; }
+  if(!sgFrom.value.trim() || !c){ showToast('⚠ Configuration SendGrid (email d\'envoi) ou client manquant.'); return; }
   if(!isValidEmail(c.email)){ showToast('⚠ Email client invalide : '+c.email); return; }
   try{
-    const res = await fetch(endpoint, {
+    const res = await fetch(SENDGRID_PROXY_URL, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({apiKey: sgKey.value, from: sgFrom.value.trim(), to: c.email, subject:'Facture '+inv.num, html: inv.html})
     });
@@ -1720,8 +1719,6 @@ function saveInvoice(){
 async function sendInvoice(){
   render();
   const c = currentClient();
-  const endpoint = sgEndpoint.value.trim();
-  if(!endpoint){ showToast("⚠ Renseigne l'URL de ton serveur proxy dans Mon entreprise → Envoi (SendGrid)."); return; }
   if(!sgFrom.value.trim()){ showToast("⚠ Renseigne l'email d'envoi dans Mon entreprise → Envoi (SendGrid)."); return; }
   if(!c){ showToast('⚠ Sélectionne un client avant d\'envoyer.'); return; }
   if(!isValidEmail(c.email)){ showToast('⚠ Email client invalide : '+(c.email||'(vide)')); return; }
@@ -1729,7 +1726,7 @@ async function sendInvoice(){
   const msg = emailMessage.value.trim();
   const bodyHtml = (msg ? `<p>${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</p><hr>` : '') + document.getElementById('invoice').outerHTML;
   try{
-    const res = await fetch(endpoint, {
+    const res = await fetch(SENDGRID_PROXY_URL, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({

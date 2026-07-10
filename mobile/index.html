@@ -290,6 +290,7 @@ function todayStr(){
 const SUPABASE_URL = 'https://chlmqnrvnrgeaihryreb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobG1xbnJ2bnJnZWFpaHJ5cmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNTQ1MjMsImV4cCI6MjA5ODczMDUyM30.ErgkAYc0mVv6iyEeIDtJ8kKaX6ExyNi4ribi_rvqX6s';
 const SYNC_TABLE = 'billops_sync';
+const SENDGRID_PROXY_URL = SUPABASE_URL + '/functions/v1/send-invoice';
 const SYNC_KEYS = { from:'{}', sg:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}', pushSubscriptions:'[]' };
 const VAPID_PUBLIC_KEY = 'BNAR3mX4w7cbnSefEGzsl0dBxIIEBr7ZuzPbXQf6UQCAntPLdFohiSp4dXeop7pwVFsMYL9PMwxJ4rc2_rZ8zaY';
 let sb = null;
@@ -653,11 +654,10 @@ async function sendInvoiceMobile(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   const c = storeArr('clients').find(cl=>cl.name===inv.client);
   const sg = store('sg');
-  const endpoint = (sg.endpoint||'').trim();
-  if(!endpoint || !(sg.from||'').trim() || !c){ showToast('⚠ Configuration SendGrid ou client manquant (à régler sur le Mac).'); return; }
+  if(!(sg.from||'').trim() || !c){ showToast('⚠ Configuration SendGrid ou client manquant (à régler sur le Mac).'); return; }
   if(!isValidEmail(c.email)){ showToast('⚠ Email client invalide : '+c.email); return; }
   try{
-    const res = await fetch(endpoint, {
+    const res = await fetch(SENDGRID_PROXY_URL, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({apiKey: sg.key, from: sg.from.trim(), to: c.email, subject:'Facture '+inv.num, html: inv.html})
     });
