@@ -756,7 +756,8 @@ function computeInvoiceExtras(){
   const parking = parseFloat(document.getElementById('ieParking').value)||0;
   const mealEnabled = document.getElementById('ieMealEnabled').checked;
   const meal = mealEnabled ? (parseFloat(document.getElementById('ieMeal').value)||0) : 0;
-  const kmAmt = km*0.5;
+  const kmRate = parseFloat(store('from').kmRate)||0.5;
+  const kmAmt = km*kmRate;
   sub += kmAmt + peage + parking + meal;
   const offEnabled = document.getElementById('ieOffEnabled').checked;
   const offType = document.getElementById('ieOffType').value;
@@ -775,7 +776,7 @@ function computeInvoiceExtras(){
   const tvaAmt = sub*tvaPct/100;
   const total = sub+tvaAmt;
 
-  return { b, qty, rate, amt, km, kmAmt, peage, parking, meal, offEnabled, offType, offVal, offAmt, sub, invDate, franchiseDepassee, tvaPct, tvaAmt, total };
+  return { b, qty, rate, amt, km, kmRate, kmAmt, peage, parking, meal, offEnabled, offType, offVal, offAmt, sub, invDate, franchiseDepassee, tvaPct, tvaAmt, total };
 }
 function updateInvoiceExtrasTotal(){
   if(!ieCtx) return;
@@ -786,7 +787,7 @@ function updateInvoiceExtrasTotal(){
 function confirmInvoiceExtras(){
   const r = computeInvoiceExtras();
   if(!r) return;
-  const { b, qty, rate, amt, km, kmAmt, peage, parking, meal, offType, offVal, offAmt, sub, invDate, franchiseDepassee, tvaPct, tvaAmt, total } = r;
+  const { b, qty, rate, amt, km, kmRate, kmAmt, peage, parking, meal, offType, offVal, offAmt, sub, invDate, franchiseDepassee, tvaPct, tvaAmt, total } = r;
   const bookings = storeArr('bookings');
   const bk = bookings.find(x=>x.id===b.id);
   const client = storeArr('clients').find(c=>c.name.trim().toLowerCase()===bk.client.trim().toLowerCase()) || {name:bk.client, prefix:'', addr:'', email:''};
@@ -801,7 +802,7 @@ function confirmInvoiceExtras(){
   const descCell = [bk.date?`<b>${formatFrDate(bk.date)}</b>`:'', (timeFrom&&timeTo)?`${timeFrom} – ${timeTo}`:'', bk.label||'Prestation'].filter(Boolean).join(' · ');
 
   let rows = `<tr><td>${descCell}</td><td class="num">${qty||''}</td><td class="num">${rate?rate.toFixed(2)+' €':'-'}</td><td class="num">${amt.toFixed(2)} €</td></tr>`;
-  if(km>0) rows += `<tr><td>Frais kilométriques</td><td class="num">${km} km</td><td class="num">0.50 €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
+  if(km>0) rows += `<tr><td>Frais kilométriques</td><td class="num">${km} km</td><td class="num">${kmRate.toFixed(2)} €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
   if(peage>0) rows += `<tr><td>Péage</td><td class="num">-</td><td class="num">-</td><td class="num">${peage.toFixed(2)} €</td></tr>`;
   if(parking>0) rows += `<tr><td>Parking</td><td class="num">-</td><td class="num">-</td><td class="num">${parking.toFixed(2)} €</td></tr>`;
   if(meal>0) rows += `<tr><td>Repas</td><td class="num">-</td><td class="num">-</td><td class="num">${meal.toFixed(2)} €</td></tr>`;

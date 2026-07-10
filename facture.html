@@ -252,6 +252,11 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <option value="">TVA applicable</option>
       </select>
       <label>Mention RCS/RM</label><input id="fromRcs" value="Dispensé d'immatriculation au RCS et au RM">
+      <label>Tarif frais kilométriques</label>
+      <select id="fromKmRate">
+        <option value="0.5">0,50 €/km</option>
+        <option value="0.3">0,30 €/km</option>
+      </select>
       <label>Mode de règlement</label><input id="fromPay" value="Virement bancaire">
       <label>RIB / IBAN</label><textarea id="fromRib" rows="2" placeholder="IBAN + BIC"></textarea>
       <button class="btn-gold" onclick="saveFrom()">Enregistrer mes infos</button>
@@ -726,14 +731,15 @@ function showTab(name){
 }
 
 function saveFrom(){
-  set('from', {name:fromName.value,tagline:fromTagline.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value,tva:fromTva.value,rcs:fromRcs.value,pay:fromPay.value,rib:fromRib.value});
+  set('from', {name:fromName.value,tagline:fromTagline.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value,tva:fromTva.value,rcs:fromRcs.value,kmRate:parseFloat(fromKmRate.value)||0.5,pay:fromPay.value,rib:fromRib.value});
   setStatusMsg(fromStatus, '✔ Infos enregistrées');
   setTimeout(()=>fromStatus.textContent='',2000);
+  render();
 }
 function loadFrom(){
   const f = store('from');
   fromName.value=f.name||'Jerome Jarrige'; fromTagline.value=f.tagline||'Paris · Monaco · Cannes · Saint-Tropez'; fromAddr.value=f.addr||'Intelligence Spotlighted\n63, avenue Pasteur — 93100 Montreuil'; fromContact.value=f.contact||'contact@intelligencespotlighted.fr — www.intelligencespotlighted.fr'; fromSiret.value=f.siret||'';
-  fromTva.value=f.tva??'TVA non applicable, art. 293 B du CGI'; fromRcs.value=f.rcs||"Dispensé d'immatriculation au RCS et au RM"; fromPay.value=f.pay||'Virement bancaire';
+  fromTva.value=f.tva??'TVA non applicable, art. 293 B du CGI'; fromRcs.value=f.rcs||"Dispensé d'immatriculation au RCS et au RM"; fromKmRate.value=f.kmRate??0.5; fromPay.value=f.pay||'Virement bancaire';
   fromRib.value=f.rib||'IBAN : FR76 1741 8000 0100 0110 3467 090\nBIC : SNNNFR22XXX';
 }
 function formatFrDate(d){
@@ -1540,8 +1546,9 @@ function render(){
   });
   const kmVal = parseFloat(km.value)||0;
   if(kmVal>0){
-    const kmAmt = kmVal*0.5; sub+=kmAmt;
-    pItems.innerHTML += `<tr><td>Frais kilométriques</td><td class="num">${kmVal} km</td><td class="num">0.50 €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
+    const kmRate = parseFloat(fromKmRate.value)||0.5;
+    const kmAmt = kmVal*kmRate; sub+=kmAmt;
+    pItems.innerHTML += `<tr><td>Frais kilométriques</td><td class="num">${kmVal} km</td><td class="num">${kmRate.toFixed(2)} €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
   }
   const peageVal = parseFloat(peage.value)||0;
   if(peageVal>0){
