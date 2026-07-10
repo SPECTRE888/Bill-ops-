@@ -1,6 +1,6 @@
 # Bill-Ops — App de facturation
 
-Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `send-invoice-server.js` (proxy SendGrid).
+Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `supabase/functions/` (Edge Functions : `send-invoice` proxy SendGrid, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (version Express équivalente à `send-invoice`, gardée en référence pour qui voudrait s'auto-héberger, mais pas utilisée en prod).
 
 ## Stack
 HTML/CSS/JS vanilla, localStorage (from, clients, invoices, bookings, invCounters, sg, inv_theme).
@@ -27,16 +27,15 @@ Catégorie Paramètres (en bas de nav, après le spacer) : Mon entreprise + sél
 Champs additionnels sur les objets `bookings` (optionnels, rétrocompatibles) : `checkedInAt`, `checkedOutAt` (timestamps ISO), `actualHours` (arrondi au quart d'heure), `notifiedAt` (posé par la Edge Function de notification, voir plus bas). `facture.html:invoiceBooking` utilise les heures réelles pour la ligne de facture quand elles existent, sinon retombe sur `hours`/`from`/`to` statiques.
 Déploiement : `.github/workflows/pages.yml` publie le dossier `mobile/` sur GitHub Pages à chaque push touchant `mobile/**` (Pages doit être activé une fois dans Settings → Pages → Source: GitHub Actions).
 
-## Notifications push ("la presta commence")
-Web Push standard (VAPID), supporté par Safari iOS 16.4+ pour les PWA installées sur l'écran d'accueil. Bouton "Activer les notifications" dans le header mobile → abonnement stocké dans `pushSubscriptions` (synced comme le reste, pas de table dédiée). Une Edge Function Supabase (`supabase/functions/notify-upcoming-bookings`), déclenchée toutes les ~3 min par pg_cron, scanne les bookings non pointés dont l'heure de début tombe dans les 10 dernières minutes et envoie une notification (sans contenu chiffré, texte fixe géré par `mobile/sw.js`), puis pose `notifiedAt` pour ne pas re-notifier.
-Déploiement : voir `supabase/README.md` — nécessite un compte Supabase authentifié en CLI (login/link/deploy/secrets), à faire manuellement une seule fois, pas automatisable depuis cet environnement.
+## Notifications push ("la presta commence bientôt")
+Web Push standard (VAPID), supporté par Safari iOS 16.4+ pour les PWA installées sur l'écran d'accueil. Bouton "Activer les notifications" dans le header mobile → abonnement stocké dans `pushSubscriptions` (synced comme le reste, pas de table dédiée). Une Edge Function Supabase (`supabase/functions/notify-upcoming-bookings`), déclenchée toutes les ~3 min par pg_cron, scanne les bookings non pointés dont l'heure de début tombe dans une fenêtre ~10-20 min à venir (viser un rappel ~15 min avant, tolérant un tick pg_cron manqué) et envoie une notification (sans contenu chiffré, texte fixe géré par `mobile/sw.js`), puis pose `notifiedAt` pour ne pas re-notifier. Les abonnements qui répondent 404/410 (révoqués côté navigateur) sont retirés automatiquement de `pushSubscriptions`.
+Déploiement des Edge Functions (`send-invoice`, `notify-upcoming-bookings`) : voir `supabase/README.md` — nécessite un compte Supabase authentifié en CLI (login une fois via navigateur ; link/deploy/secrets ensuite automatisables).
 
 ## Repo cible
 https://github.com/SPECTRE888/Bill-ops-.git (branche main)
 
 ## Backlog fonctionnel en attente
-- Génération PDF réelle (actuellement window.print manuel) → intégrer html2pdf.js ou jsPDF.
-- SendGrid : endpoint proxy à déployer (send-invoice-server.js, Node/Express) — non hébergé.
+- Aucun point bloquant connu. PDF (html2pdf.js) et proxy SendGrid (Edge Function `send-invoice`) sont en prod.
 
 ## Contraintes de style utilisateur
 Réponses ultra-minimales, exécution directe, pas d'explication.

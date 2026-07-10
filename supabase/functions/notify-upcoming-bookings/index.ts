@@ -1,7 +1,7 @@
 // Edge Function déclenchée toutes les ~3 min par pg_cron (voir supabase/README.md pour le SQL
-// de planification). Cherche les prestations qui démarrent maintenant (fenêtre de 10 min pour
-// tolérer un tick pg_cron manqué) et n'ont pas encore été pointées, envoie une notification push
-// (sans contenu chiffré — voir mobile/sw.js) à chaque abonnement, puis marque `notifiedAt`.
+// de planification). Cherche les prestations qui démarrent dans ~15 min et n'ont pas encore été
+// pointées, envoie une notification push (sans contenu chiffré — voir mobile/sw.js) à chaque
+// abonnement, marque `notifiedAt`, et nettoie les abonnements devenus invalides (404/410).
 //
 // Risque connu à vérifier en premier lors du déploiement : npm:web-push peut avoir des soucis de
 // compatibilité avec certains internals Node sous Deno. Tester isolément (voir CLAUDE.md) avant de
@@ -18,7 +18,8 @@ const CRON_SECRET = Deno.env.get('CRON_SECRET');
 const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY')!;
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY')!;
 
-const WINDOW_MIN = 10;
+const LEAD_MIN = 15; // rappel ~15 min avant le début de la presta
+const TOLERANCE_MIN = 5; // demi-largeur de la fenêtre, pour tolérer un tick pg_cron manqué
 const SYNC_TABLE = 'billops_sync';
 
 webpush.setVapidDetails('mailto:jarrige.jerome@hotmail.fr', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
@@ -60,16 +61,21 @@ Deno.serve(async (req) => {
     if (!subs.length) continue;
 
     const idsToMark: any[] = [];
+    const staleEndpoints = new Set<string>();
     for (const b of bookings) {
       if (b.status !== 'à facturer' || b.checkedInAt || b.notifiedAt || !b.date || !b.from) continue;
+      // diffMin négatif = presta future. On vise ~15 min avant le début (fenêtre [-20, -10]).
       const diffMin = minutesSince(nowStr, b.date, b.from);
-      if (diffMin < 0 || diffMin > WINDOW_MIN) continue;
+      if (diffMin < -(LEAD_MIN + TOLERANCE_MIN) || diffMin > -(LEAD_MIN - TOLERANCE_MIN)) continue;
 
       for (const sub of subs) {
         try {
           await webpush.sendNotification(sub);
-        } catch (e) {
-          console.error('push failed for', sub.endpoint, e.message ?? e);
+        } catch (e: any) {
+          // 404/410 = abonnement révoqué côté navigateur (RFC 8030) : on le retire pour de bon,
+          // les autres erreurs (réseau, quota...) sont juste loguées et retentées au prochain tick.
+          if (e?.statusCode === 404 || e?.statusCode === 410) staleEndpoints.add(sub.endpoint);
+          else console.error('push failed for', sub.endpoint, e?.message ?? e);
         }
       }
       const stamp = new Date().toISOString();
@@ -78,7 +84,11 @@ Deno.serve(async (req) => {
       notified++;
     }
 
-    if (!idsToMark.length) continue;
+    if (staleEndpoints.size) {
+      payload.pushSubscriptions = subs.filter((s: any) => !staleEndpoints.has(s.endpoint));
+    }
+
+    if (!idsToMark.length && !staleEndpoints.size) continue;
 
     // Concurrence optimiste : n'écrase que si personne n'a écrit depuis notre lecture.
     const { data: updated, error: updErr } = await supabase
@@ -89,17 +99,22 @@ Deno.serve(async (req) => {
       .select('sync_code');
     if (updErr) { console.error('update failed', updErr.message); continue; }
     if (!updated || updated.length === 0) {
-      // Quelqu'un a écrit entre-temps : on relit la version fraîche et on ne pose que le flag
-      // notifiedAt sur les bookings identifiés par id (les push, eux, ont déjà été envoyés).
+      // Quelqu'un a écrit entre-temps : on relit la version fraîche et on ne réapplique que ce
+      // qu'on sait déjà vrai (les push ont déjà été envoyés, pas la peine de les rejouer) :
+      // le flag notifiedAt sur les bookings identifiés par id, et le retrait des abonnements morts.
       const { data: fresh } = await supabase.from(SYNC_TABLE).select('data, updated_at').eq('sync_code', row.sync_code).maybeSingle();
       if (fresh) {
-        const freshBookings: any[] = fresh.data?.bookings ?? [];
+        const freshData = fresh.data as any;
+        const freshBookings: any[] = freshData?.bookings ?? [];
         const stamp = new Date().toISOString();
         for (const fb of freshBookings) {
           if (idsToMark.includes(fb.id) && !fb.notifiedAt) fb.notifiedAt = stamp;
         }
+        if (staleEndpoints.size) {
+          freshData.pushSubscriptions = (freshData.pushSubscriptions ?? []).filter((s: any) => !staleEndpoints.has(s.endpoint));
+        }
         await supabase.from(SYNC_TABLE)
-          .update({ data: fresh.data, updated_at: stamp })
+          .update({ data: freshData, updated_at: stamp })
           .eq('sync_code', row.sync_code)
           .eq('updated_at', fresh.updated_at);
       }

@@ -33,7 +33,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification('Bill Ops', {
-      body: "Une prestation commence — ouvre l'app pour pointer ton arrivée.",
+      body: "Une prestation commence dans ~15 min — pense à pointer ton arrivée.",
       icon: 'icon-192.png',
       badge: 'icon-192.png',
       tag: 'booking-start'
