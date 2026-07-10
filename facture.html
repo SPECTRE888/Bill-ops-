@@ -118,7 +118,9 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .preview-scroll{flex:1;min-height:0;overflow-y:auto;padding:40px;display:flex;justify-content:center;}
 .preview-actionbar{flex-shrink:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 40px;border-top:1px solid var(--border);background:var(--surface);}
 .preview-actionbar button{width:100%;margin:0;}
-#invoice{background:var(--surface);color:var(--text);width:210mm;min-height:285mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);}
+.invoice-pages{display:flex;flex-direction:column;gap:28px;align-items:center;}
+#invoice,.invoice-page{background:var(--surface);color:var(--text);width:210mm;min-height:285mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);box-sizing:border-box;}
+.invoice-page-num{text-align:center;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-top:16px;}
 .gold{color:var(--gold);}
 .inv-brand{text-align:center;padding-bottom:22px;}
 .inv-brandname{font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;display:inline-block;padding-bottom:10px;border-bottom:1px solid var(--gold-border);min-width:200px;}
@@ -198,7 +200,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .modal-row{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
 .modal-row:last-child{border-bottom:none;}
 .modal-row-label{color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;}
-@media print{.nav,.panel,.preview-actionbar{display:none;}.app{display:block;height:auto;overflow:visible;}.preview-wrap{height:auto;}.preview-scroll{padding:0;height:auto;overflow:visible;}#invoice{box-shadow:none;width:auto;}
+@media print{.nav,.panel,.preview-actionbar{display:none;}.app{display:block;height:auto;overflow:visible;}.preview-wrap{height:auto;}.preview-scroll{padding:0;height:auto;overflow:visible;}#invoice,.invoice-page{box-shadow:none;width:auto;}.invoice-page-num{display:none;}
   :root,[data-theme]{
     --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
     --border:#ddd9d2;--border2:#ccc8c0;
@@ -498,36 +500,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
   <div class="preview-wrap" id="previewWrap">
     <div class="preview-scroll">
-      <div id="invoice">
-        <div class="inv-brand">
-          <div class="inv-brandname" id="pBrandName"></div>
-          <div class="inv-tagline" id="pTagline"></div>
-        </div>
-        <div class="inv-title-rule"><span>Facture</span></div>
-        <div class="inv-meta-row">
-          <div><div class="inv-label">N° de facture</div><div class="inv-value" id="pInvNum"></div></div>
-          <div style="text-align:right;"><div class="inv-label">Date</div><div class="inv-value" id="pDate"></div></div>
-        </div>
-        <div class="from-to">
-          <div><h3>De</h3><div id="pFrom"></div></div>
-          <div style="text-align:right;"><h3>À</h3><div id="pTo"></div></div>
-        </div>
-        <table>
-          <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Unitaire</th><th class="num">Montant</th></tr></thead>
-          <tbody id="pItems"></tbody>
-        </table>
-        <div class="totals">
-          <div><span>Sous-total</span><span id="pSub"></span></div>
-          <div id="pTvaRow" style="display:none;"><span>TVA</span><span id="pTvaLine"></span></div>
-          <div id="pOffertRow" style="display:none;"><span>Offert</span><span id="pOffertLine" class="gold"></span></div>
-          <div class="final"><span>Total à régler</span><span id="pTotal"></span></div>
-        </div>
-        <div class="inv-reglement">
-          <h3>Règlement</h3>
-          <div id="pReglement"></div>
-        </div>
-        <div class="meta" id="pLegal"></div>
-      </div>
+      <div class="invoice-pages" id="invoicePages"></div>
     </div>
     <div class="preview-actionbar">
       <button class="btn-gold" onclick="openLivePreview()">Générer l'aperçu</button>
@@ -536,6 +509,38 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <button class="btn-line" onclick="sendInvoice()">Envoyer au client</button>
     </div>
   </div>
+</div>
+<div style="position:fixed;left:-9999px;top:0;">
+<div id="invoice">
+  <div class="inv-brand">
+    <div class="inv-brandname" id="pBrandName"></div>
+    <div class="inv-tagline" id="pTagline"></div>
+  </div>
+  <div class="inv-title-rule"><span>Facture</span></div>
+  <div class="inv-meta-row">
+    <div><div class="inv-label">N° de facture</div><div class="inv-value" id="pInvNum"></div></div>
+    <div style="text-align:right;"><div class="inv-label">Date</div><div class="inv-value" id="pDate"></div></div>
+  </div>
+  <div class="from-to">
+    <div><h3>De</h3><div id="pFrom"></div></div>
+    <div style="text-align:right;"><h3>À</h3><div id="pTo"></div></div>
+  </div>
+  <table>
+    <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Unitaire</th><th class="num">Montant</th></tr></thead>
+    <tbody id="pItems"></tbody>
+  </table>
+  <div class="totals">
+    <div><span>Sous-total</span><span id="pSub"></span></div>
+    <div id="pTvaRow" style="display:none;"><span>TVA</span><span id="pTvaLine"></span></div>
+    <div id="pOffertRow" style="display:none;"><span>Offert</span><span id="pOffertLine" class="gold"></span></div>
+    <div class="final"><span>Total à régler</span><span id="pTotal"></span></div>
+  </div>
+  <div class="inv-reglement">
+    <h3>Règlement</h3>
+    <div id="pReglement"></div>
+  </div>
+  <div class="meta" id="pLegal"></div>
+</div>
 </div>
 <div class="toast-stack" id="toastStack"></div>
 <div class="modal-overlay" id="bookingModal" style="display:none;" onclick="if(event.target===this) closeBookingModal()">
@@ -1616,6 +1621,85 @@ function render(){
     <b>${fromPay.value} — Paiement à réception de facture, échéance : ${due}.</b>`;
   pLegal.innerHTML = `SIRET : ${f.siret} — ${fromRcs.value}. ${tvaMention}.<br>
     En cas de retard de paiement : pénalité de 3× le taux d'intérêt légal + indemnité forfaitaire de recouvrement de 40 €.`;
+  renderInvoicePages();
+}
+function mmToPx(mm){
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;visibility:hidden;height:'+mm+'mm;width:0;top:0;left:0;';
+  document.body.appendChild(probe);
+  const px = probe.getBoundingClientRect().height;
+  probe.remove();
+  return px;
+}
+// Le PDF exporté (voir pdfOptions) pagine déjà correctement via html2pdf/css pagebreak.
+// L'aperçu à l'écran, lui, affichait #invoice comme un unique bloc qui grandissait sans
+// jamais afficher de vraie coupure de page — on reconstruit ici une version paginée
+// (clone mesuré hors-écran, jamais #invoice lui-même) pour que l'aperçu ne déborde plus
+// visuellement d'une page sans le montrer.
+function renderInvoicePages(){
+  const src = document.getElementById('invoice');
+  const wrap = document.getElementById('invoicePages');
+  if(!src || !wrap) return;
+
+  const clone = src.cloneNode(true);
+  clone.removeAttribute('id');
+  clone.removeAttribute('style');
+  clone.className = 'invoice-page';
+  clone.style.cssText = 'position:fixed;visibility:hidden;left:0;top:0;';
+  clone.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));
+  document.body.appendChild(clone);
+
+  const PAGE_H = mmToPx(285);
+  const MAX_H = PAGE_H - mmToPx(20)*2;
+
+  const table = clone.querySelector('table');
+  const thead = table.querySelector('thead');
+  const tbody = table.querySelector('tbody');
+  const totalsEl = clone.querySelector('.totals');
+  const reglementEl = clone.querySelector('.inv-reglement');
+  const metaEl = clone.querySelector('.meta');
+
+  let headerHtml = '';
+  let headerH = 0;
+  let node = clone.firstElementChild;
+  while(node && node !== table){
+    headerHtml += node.outerHTML;
+    headerH += node.getBoundingClientRect().height;
+    node = node.nextElementSibling;
+  }
+  const theadH = thead.getBoundingClientRect().height;
+  const rows = [...tbody.children].map(r=>({html:r.outerHTML, h:r.getBoundingClientRect().height}));
+  const totalsH = totalsEl ? totalsEl.getBoundingClientRect().height : 0;
+  const reglementH = reglementEl ? reglementEl.getBoundingClientRect().height : 0;
+  const metaH = metaEl ? metaEl.getBoundingClientRect().height : 0;
+
+  document.body.removeChild(clone);
+
+  const rowBudget = MAX_H - headerH - theadH;
+  const pages = [];
+  let curRows = [], curH = 0;
+  rows.forEach(({html,h})=>{
+    if(curH + h > rowBudget && curRows.length){
+      pages.push(curRows);
+      curRows = []; curH = 0;
+    }
+    curRows.push(html);
+    curH += h;
+  });
+  pages.push(curRows);
+
+  const tailH = totalsH + reglementH + metaH;
+  if(curH + tailH > rowBudget && curRows.length){
+    pages.push([]);
+  }
+
+  const tailHtml = (totalsEl?totalsEl.outerHTML:'') + (reglementEl?reglementEl.outerHTML:'') + (metaEl?metaEl.outerHTML:'');
+  wrap.innerHTML = pages.map((rowsHtml,i)=>{
+    const isLast = i === pages.length-1;
+    const tableHtml = rowsHtml.length ? `<table><thead>${thead.innerHTML}</thead><tbody>${rowsHtml.join('')}</tbody></table>` : '';
+    const pageLabel = pages.length>1 ? `<div class="invoice-page-num">Page ${i+1} / ${pages.length}</div>` : '';
+    return `<div class="invoice-page">${headerHtml}${tableHtml}${isLast?tailHtml:''}${pageLabel}</div>`;
+  }).join('');
 }
 function saveInvoice(){
   render();
