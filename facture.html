@@ -35,7 +35,7 @@
   }
 }
 *{box-sizing:border-box;font-family:var(--font-body);}
-body{margin:0;background:var(--bg);color:var(--text);transition:background .2s,color .2s;}
+body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s;}
 .app{display:grid;grid-template-columns:220px 340px 1fr;grid-template-rows:100vh;height:100vh;overflow:hidden;}
 .app.no-preview{grid-template-columns:220px 1fr;}
 .nav{background:var(--surface);border-right:1px solid var(--border);padding:28px 0;display:flex;flex-direction:column;height:100%;overflow-y:auto;}
@@ -223,7 +223,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
   <div class="nav">
     <div class="brand">BILL OPS</div>
     <div class="brand-rule"></div>
-    <div class="brand-tagline">Facturation freelance</div>
+    <div class="brand-tagline">Professional Event Billing</div>
 
     <button id="nav-accueil" class="active" onclick="showTab('accueil')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="7" rx="1"/><rect x="9" y="1" width="6" height="4" rx="1"/><rect x="1" y="10" width="6" height="5" rx="1"/><rect x="9" y="7" width="6" height="8" rx="1"/></svg>Accueil</button>
 
@@ -400,7 +400,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
     <div class="tab" id="tab-historique">
       <h2>Factures émises</h2>
-      <input id="histSearch" placeholder="Rechercher un client..." oninput="renderHistory()" style="margin-bottom:10px;">
+      <input id="histSearch" placeholder="Rechercher (client, n° de facture, mot-clé d'une prestation)..." oninput="renderHistory()" style="margin-bottom:10px;">
       <div id="histFilters" class="hist-filters"></div>
       <div id="histList"></div>
 
@@ -1037,7 +1037,10 @@ function renderHistory(){
   const allInvoices = storeArr('invoices').slice().reverse();
   renderHistFilters(allInvoices);
   let invoices = allInvoices;
-  if(q) invoices = invoices.filter(i=>i.client.toLowerCase().includes(q));
+  if(q) invoices = invoices.filter(i=>{
+    const items = (i.state?.items||[]).map(it=>it.desc||'').join(' ');
+    return [i.num, i.client, items].join(' ').toLowerCase().includes(q);
+  });
   if(histStatusFilter!=='Toutes') invoices = invoices.filter(i=>i.status===histStatusFilter);
   histList.innerHTML = invoices.length ? `
     <table><thead><tr><th>N°</th><th>Client</th><th>Date</th><th>Total</th><th>Statut</th><th>Actions</th></tr></thead>

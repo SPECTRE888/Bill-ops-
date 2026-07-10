@@ -1,4 +1,4 @@
-const CACHE_NAME = 'billops-mobile-v5';
+const CACHE_NAME = 'billops-mobile-v6';
 const SHELL = ['./', 'index.html', 'manifest.json', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (event) => {
