@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Générateur de Facture</title>
+<title>BILL OPS — Professional Event Billing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -36,20 +36,23 @@
 }
 *{box-sizing:border-box;font-family:var(--font-body);}
 body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s;}
-.app{display:grid;grid-template-columns:220px 340px 1fr;grid-template-rows:100vh;height:100vh;overflow:hidden;}
-.app.no-preview{grid-template-columns:220px 1fr;}
-.nav{background:var(--surface);border-right:1px solid var(--border);padding:28px 0;display:flex;flex-direction:column;height:100%;overflow-y:auto;}
-.nav .brand{font-family:var(--font-body);font-size:15px;font-weight:400;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;padding:0 24px;}
-.nav .brand-rule{width:24px;height:1px;background:var(--gold-border);margin:10px 24px 0;}
-.nav .brand-tagline{font-size:8px;color:var(--text3);letter-spacing:.18em;text-transform:uppercase;padding:6px 24px 26px;border-bottom:1px solid var(--border);margin-bottom:14px;}
-.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px 24px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:500;border-left:2px solid transparent;transition:.15s;}
-.nav button:hover{color:var(--text);background:var(--gold-bg);}
-.nav button.active{color:var(--gold);border-left:2px solid var(--gold);background:var(--gold-bg);}
+.app{display:grid;grid-template-columns:260px 340px 1fr;grid-template-rows:100vh;height:100vh;overflow:hidden;}
+.app.no-preview{grid-template-columns:260px 1fr;}
+.nav{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100%;overflow:hidden;}
+.nav-logo{padding:28px 20px 22px;border-bottom:1px solid var(--border);}
+.nav-logo .brand{font-family:var(--font-body);font-size:15px;font-weight:400;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;}
+.nav-logo .brand-rule{width:24px;height:1px;background:var(--gold-border);margin:10px 0 0;}
+.nav-logo .brand-tagline{font-size:8px;color:var(--text3);letter-spacing:.18em;text-transform:uppercase;font-weight:400;margin-top:5px;}
+.nav-list{padding:12px 8px;flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.nav button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius,5px);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:400;border-left:1px solid transparent;transition:.15s;margin-bottom:1px;}
+.nav button:hover{color:var(--text2);background:var(--surface2);}
+.nav button.active{color:var(--gold);border-left:1px solid var(--gold-border);background:var(--gold-bg);}
 .nav button .nav-icon{width:14px;height:14px;flex-shrink:0;opacity:.5;}
 .nav button.active .nav-icon{opacity:1;}
-.nav-section{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);padding:16px 24px 6px;font-weight:600;}
+.nav-section{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);padding:10px 12px 5px;font-weight:400;}
 .nav-spacer{flex:1;}
-.theme-switch{display:flex;gap:0;margin:18px 24px 0;}
+.nav-bottom{border-top:1px solid var(--border);padding:14px 18px;display:flex;flex-direction:column;gap:10px;}
+.theme-switch{display:flex;gap:0;}
 .theme-switch button{all:unset;font-size:11px;padding:5px 10px;border:1px solid var(--border2);cursor:pointer;color:var(--text3);text-align:center;flex:1;}
 .theme-switch button:first-child{border-radius:3px 0 0 3px;border-right:none;}
 .theme-switch button:last-child{border-radius:0 3px 3px 0;border-left:none;}
@@ -227,9 +230,12 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 <body>
 <div class="app no-preview" id="appRoot">
   <div class="nav">
-    <div class="brand">BILL OPS</div>
-    <div class="brand-rule"></div>
-    <div class="brand-tagline">Professional Event Billing</div>
+    <div class="nav-logo">
+      <div class="brand">BILL OPS</div>
+      <div class="brand-rule"></div>
+      <div class="brand-tagline">Professional Event Billing</div>
+    </div>
+    <div class="nav-list">
 
     <button id="nav-accueil" class="active" onclick="showTab('accueil')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="7" rx="1"/><rect x="9" y="1" width="6" height="4" rx="1"/><rect x="1" y="10" width="6" height="5" rx="1"/><rect x="9" y="7" width="6" height="8" rx="1"/></svg>Accueil</button>
 
@@ -247,10 +253,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <div class="nav-spacer"></div>
     <div class="nav-section">Paramètres</div>
     <button id="nav-entreprise" onclick="showTab('entreprise')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="6" width="14" height="9" rx="1"/><path d="M5 6V4a3 3 0 016 0v2"/><circle cx="8" cy="10" r="1.5"/></svg>Mon entreprise</button>
-    <div class="theme-switch">
-      <button onclick="setTheme('dark')" id="theme-dark" title="Sombre">●</button>
-      <button onclick="setTheme('auto')" id="theme-auto" title="Auto">A</button>
-      <button onclick="setTheme('light')" id="theme-light" title="Clair">○</button>
+    </div>
+    <div class="nav-bottom">
+      <div class="theme-switch">
+        <button onclick="setTheme('dark')" id="theme-dark" title="Sombre">●</button>
+        <button onclick="setTheme('auto')" id="theme-auto" title="Auto">A</button>
+        <button onclick="setTheme('light')" id="theme-light" title="Clair">○</button>
+      </div>
     </div>
   </div>
 
