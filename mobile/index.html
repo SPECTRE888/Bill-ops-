@@ -199,11 +199,30 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <h2>Factures</h2>
       <div id="facturesList"></div>
     </section>
+    <section id="tab-parametres" style="display:none;">
+      <h2>Réglages</h2>
+      <div class="mcard">
+        <b>Notifications</b><br>
+        <span id="notifDiagStatus"></span>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-line" onclick="enableNotifications()">Activer</button>
+          <button class="btn-line" onclick="testLocalNotification()">Tester en local</button>
+        </div>
+      </div>
+      <div class="mcard">
+        <b>Synchronisation</b><br>
+        <span id="syncDiagStatus"></span>
+        <div style="margin-top:10px;">
+          <button class="btn-line" onclick="pullSync(true)">Forcer la synchro</button>
+        </div>
+      </div>
+    </section>
   </main>
   <nav class="bottom-nav">
     <button data-tab="pointage" class="active" onclick="switchTab('pointage')">Pointage</button>
     <button data-tab="planning" onclick="switchTab('planning')">Planning</button>
     <button data-tab="factures" onclick="switchTab('factures')">Factures</button>
+    <button data-tab="parametres" onclick="switchTab('parametres')">Réglages</button>
   </nav>
 </div>
 
@@ -446,7 +465,7 @@ async function doConnect(){
 let activeTab = 'pointage';
 function switchTab(name){
   activeTab = name;
-  ['pointage','planning','factures'].forEach(t=>{
+  ['pointage','planning','factures','parametres'].forEach(t=>{
     document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
   });
   document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
@@ -455,7 +474,34 @@ function switchTab(name){
 function renderActiveTab(){
   if(activeTab==='pointage') renderPointage();
   else if(activeTab==='planning') renderPlanningTab();
+  else if(activeTab==='parametres') renderParametres();
   else renderFacturesTab();
+}
+
+// --- Réglages / diagnostic notifications & synchro ---
+function isStandalone(){
+  return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+}
+function notifPermissionLabel(){
+  if(!notifSupported()) return 'Non supportées sur ce navigateur';
+  return {granted:'Autorisées', denied:'Refusées (à réactiver dans Réglages iOS > Notifications)', default:'Pas encore demandées'}[Notification.permission] || 'Inconnu';
+}
+function renderParametres(){
+  const subs = storeArr('pushSubscriptions');
+  notifDiagStatus.innerHTML = `
+    Permission : <b>${notifPermissionLabel()}</b><br>
+    Installée sur l'écran d'accueil : <b>${isStandalone() ? 'Oui' : "Non — requis sur iOS pour recevoir les notifications"}</b><br>
+    Abonnement enregistré sur cet appareil : <b>${subs.length ? 'Oui' : 'Non'}</b>`;
+  syncDiagStatus.innerHTML = getSyncCode() ? 'Connecté (code : <code>'+getSyncCode().slice(0,8)+'…</code>)' : 'Non connecté';
+}
+async function testLocalNotification(){
+  if(!notifSupported()){ showToast('⚠ Notifications non supportées sur ce navigateur.'); return; }
+  if(Notification.permission!=='granted'){ showToast("⚠ Autorise d'abord les notifications."); return; }
+  const reg = await navigator.serviceWorker.ready;
+  reg.showNotification('Bill Ops', {
+    body: "Notification de test — si tu vois ceci, l'affichage fonctionne sur cet appareil.",
+    icon: 'icon-192.png', badge: 'icon-192.png', tag: 'test'
+  });
 }
 
 // --- Pointage ---
