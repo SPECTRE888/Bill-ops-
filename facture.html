@@ -56,13 +56,12 @@ body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-fon
 .nav-logo .brand-rule{width:24px;height:1px;background:var(--gold-border);margin:10px 0 0;}
 .nav-logo .brand-tagline{font-size:8px;color:var(--text3);letter-spacing:.18em;text-transform:uppercase;font-weight:400;margin-top:5px;}
 .nav-list{padding:12px 8px;flex:1;overflow-y:auto;display:flex;flex-direction:column;}
-.nav button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius,5px);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:400;border-left:1px solid transparent;transition:.15s;margin-bottom:1px;}
-.nav button:hover{color:var(--text2);background:var(--surface2);}
-.nav button.active{color:var(--gold);border-left:1px solid var(--gold-border);background:var(--gold-bg);}
-.nav button .nav-icon{width:14px;height:14px;flex-shrink:0;opacity:.5;}
-.nav button.active .nav-icon{opacity:1;}
+.nav-list button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius,5px);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:400;border-left:1px solid transparent;transition:.15s;margin-bottom:1px;}
+.nav-list button:hover{color:var(--text2);background:var(--surface2);}
+.nav-list button.active{color:var(--gold);border-left:1px solid var(--gold-border);background:var(--gold-bg);}
+.nav-list button .nav-icon{width:14px;height:14px;flex-shrink:0;opacity:.5;}
+.nav-list button.active .nav-icon{opacity:1;}
 .nav-section{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);padding:10px 12px 5px;font-weight:400;}
-.nav-spacer{flex:1;}
 .panel{background:var(--surface);padding:24px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
 #tab-entreprise{max-width:640px;}
 #tab-entreprise .card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;}
@@ -253,7 +252,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
     <div class="nav-list">
 
-    <button id="nav-accueil" class="active" onclick="showTab('accueil')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="7" rx="1"/><rect x="9" y="1" width="6" height="4" rx="1"/><rect x="1" y="10" width="6" height="5" rx="1"/><rect x="9" y="7" width="6" height="8" rx="1"/></svg><span data-i18n="nav_accueil">Accueil</span></button>
+    <button id="nav-accueil" class="active" onclick="showTab('accueil')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="7" rx="1"/><rect x="9" y="1" width="6" height="4" rx="1"/><rect x="1" y="10" width="6" height="5" rx="1"/><rect x="9" y="7" width="6" height="8" rx="1"/></svg><span data-i18n="nav_accueil">Tableau de bord</span></button>
 
     <div class="nav-section" data-i18n="sec_planning">Planning</div>
     <button id="nav-planning" onclick="showTab('planning')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="3" width="12" height="11" rx="1"/><path d="M5 1v4M11 1v4M2 7h12"/></svg><span data-i18n="nav_planning">Planning</span></button>
@@ -266,31 +265,29 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <div class="nav-section" data-i18n="sec_clients">Clients</div>
     <button id="nav-clients" onclick="showTab('clients')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/><circle cx="11" cy="5" r="2.5"/><path d="M11 10c2.8 0 5 2.2 5 5"/></svg><span data-i18n="nav_clients">Mes clients</span></button>
 
-    <div class="nav-spacer"></div>
-    <div class="nav-section" data-i18n="sec_parametres">Paramètres</div>
-    <button id="nav-entreprise" onclick="showTab('entreprise')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span data-i18n="nav_donnees">Profil</span></button>
+    <button id="nav-entreprise" onclick="showTab('entreprise')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span data-i18n="nav_donnees">Compte</span></button>
     </div>
     <div style="margin-top:auto;border-top:1px solid var(--border);padding:14px 18px;display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;gap:1px;">
           <button onclick="setTheme('dark')" id="theme-dark" title="Sombre" data-i18n-title="theme_dark_title" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-radius:3px 0 0 3px;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">●</button>
-          <button onclick="setTheme('auto')" id="theme-auto" title="Auto" data-i18n-title="theme_auto_title" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-left:none;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">A</button>
+          <button onclick="setTheme('auto')" id="theme-auto" title="Auto" data-i18n-title="theme_auto_title" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-left:none;border-radius:0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">A</button>
           <button onclick="setTheme('light')" id="theme-light" title="Clair" data-i18n-title="theme_light_title" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-left:none;border-radius:0 3px 3px 0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">○</button>
         </div>
         <div style="display:flex;gap:1px;">
           <button onclick="setLang('fr')" id="lang-fr" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-radius:3px 0 0 3px;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">FR</button>
-          <button onclick="setLang('en')" id="lang-en" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-left:none;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">EN</button>
+          <button onclick="setLang('en')" id="lang-en" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-left:none;border-radius:0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">EN</button>
           <button onclick="setLang('es')" id="lang-es" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-radius:0 3px 3px 0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">ES</button>
         </div>
       </div>
-      <button onclick="openLegalModal()" style="font-size:9px;color:var(--text3);background:none;border:none;cursor:pointer;letter-spacing:.08em;font-family:var(--font-body);width:100%;margin-top:auto;">© BILL OPS</button>
+      <button onclick="openLegalModal()" style="font-size:9px;color:var(--text3);background:none;border:none;border-radius:0;padding:0;text-align:center;cursor:pointer;letter-spacing:.08em;font-family:var(--font-body);width:100%;margin-top:auto;">© BILL OPS</button>
     </div>
   </div>
 
   <div class="panel">
 
     <div class="tab" id="tab-entreprise">
-      <h2 style="margin-top:0;" data-i18n="data_title">Mes données</h2>
+      <h2 style="margin-top:0;" data-i18n="data_title">Profil</h2>
 
       <div class="card">
         <div class="ctitle" data-i18n="data_info_title">Informations</div>
@@ -652,8 +649,8 @@ const LOCALE_MAP = {fr:'fr-FR', en:'en-US', es:'es-ES'};
 const WEEKDAY_LETTERS = {fr:['L','M','M','J','V','S','D'], en:['M','T','W','T','F','S','S'], es:['L','M','X','J','V','S','D']};
 const I18N = {
 fr:{
-nav_accueil:'Accueil', nav_planning:'Planning', nav_calendrier:'Calendrier', nav_facture:'Facture', nav_historique:'Historique', nav_clients:'Mes clients', nav_donnees:'Profil',
-sec_planning:'Planning', sec_facturation:'Facturation', sec_clients:'Clients', sec_parametres:'Compte',
+nav_accueil:'Tableau de bord', nav_planning:'Planning', nav_calendrier:'Calendrier', nav_facture:'Facture', nav_historique:'Historique', nav_clients:'Mes clients', nav_donnees:'Compte',
+sec_planning:'Planning', sec_facturation:'Facturation', sec_clients:'Clients',
 theme_dark_title:'Sombre', theme_auto_title:'Auto', theme_light_title:'Clair', legal_link:'Mentions légales',
 data_title:'Profil', data_info_title:'Informations',
 lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
@@ -734,8 +731,8 @@ legal_contact:'Contact',
 inv_paiement_reception:'Paiement à réception de facture, échéance :', inv_jours:'jours'
 },
 en:{
-nav_accueil:'Home', nav_planning:'Schedule', nav_calendrier:'Calendar', nav_facture:'Invoice', nav_historique:'History', nav_clients:'My clients', nav_donnees:'Profile',
-sec_planning:'Schedule', sec_facturation:'Billing', sec_clients:'Clients', sec_parametres:'Account',
+nav_accueil:'Dashboard', nav_planning:'Schedule', nav_calendrier:'Calendar', nav_facture:'Invoice', nav_historique:'History', nav_clients:'My clients', nav_donnees:'Account',
+sec_planning:'Schedule', sec_facturation:'Billing', sec_clients:'Clients',
 theme_dark_title:'Dark', theme_auto_title:'Auto', theme_light_title:'Light', legal_link:'Legal notice',
 data_title:'Profile', data_info_title:'Information',
 lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
@@ -816,8 +813,8 @@ legal_contact:'Contact',
 inv_paiement_reception:'Payment upon receipt of invoice, due within:', inv_jours:'days'
 },
 es:{
-nav_accueil:'Inicio', nav_planning:'Planificación', nav_calendrier:'Calendario', nav_facture:'Factura', nav_historique:'Historial', nav_clients:'Mis clientes', nav_donnees:'Perfil',
-sec_planning:'Planificación', sec_facturation:'Facturación', sec_clients:'Clientes', sec_parametres:'Cuenta',
+nav_accueil:'Dashboard', nav_planning:'Planificación', nav_calendrier:'Calendario', nav_facture:'Factura', nav_historique:'Historial', nav_clients:'Mis clientes', nav_donnees:'Cuenta',
+sec_planning:'Planificación', sec_facturation:'Facturación', sec_clients:'Clientes',
 theme_dark_title:'Oscuro', theme_auto_title:'Auto', theme_light_title:'Claro', legal_link:'Aviso legal',
 data_title:'Perfil', data_info_title:'Información',
 lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
@@ -1124,7 +1121,7 @@ function showTab(name){
   previewWrap.classList.toggle('active', showPreview);
   appRoot.classList.toggle('no-preview', !showPreview);
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-list button').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   document.getElementById('nav-'+name).classList.add('active');
   if(name==='clients') renderClientList();
