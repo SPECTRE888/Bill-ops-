@@ -318,11 +318,13 @@ function collectSyncPayload(){
   const data = {};
   Object.keys(SYNC_KEYS).forEach(k=>{ data[k] = JSON.parse(localStorage.getItem(k) || SYNC_KEYS[k]); });
   data.inv_theme = localStorage.getItem('inv_theme') || 'auto';
+  data.inv_lang = localStorage.getItem('inv_lang') || 'fr';
   return data;
 }
 function applySyncPayload(data){
   Object.keys(SYNC_KEYS).forEach(k=>{ if(data[k]!==undefined) localStorage.setItem(k, JSON.stringify(data[k])); });
   if(data.inv_theme) localStorage.setItem('inv_theme', data.inv_theme);
+  if(data.inv_lang) localStorage.setItem('inv_lang', data.inv_lang);
 }
 function updateSyncStatus(msg){ setStatusMsg(document.getElementById('syncStatusText'), msg); }
 

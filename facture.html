@@ -64,17 +64,25 @@ body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-fon
 .nav-section{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);padding:10px 12px 5px;font-weight:400;}
 .nav-spacer{flex:1;}
 .nav-bottom{border-top:1px solid var(--border);padding:14px 18px;display:flex;flex-direction:column;gap:10px;}
+.nav-bottom-row{display:flex;gap:8px;}
+.nav-bottom-row .theme-switch{flex:1;}
 .theme-switch{display:flex;gap:0;}
 .theme-switch button{all:unset;font-size:11px;padding:5px 10px;border:1px solid var(--border2);cursor:pointer;color:var(--text3);text-align:center;flex:1;}
 .theme-switch button:first-child{border-radius:3px 0 0 3px;border-right:none;}
 .theme-switch button:last-child{border-radius:0 3px 3px 0;border-left:none;}
 .theme-switch button.active{color:var(--gold);border-color:var(--gold-border);background:var(--gold-bg);}
+.nav-copyright{font-size:9px;color:var(--text3);text-align:center;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:.15s;}
+.nav-copyright:hover{color:var(--gold);}
 .panel{background:var(--surface);padding:24px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
 #tab-entreprise{max-width:640px;}
 #tab-entreprise .card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;}
 #tab-entreprise .ctitle{font-size:8px;font-weight:500;text-transform:uppercase;letter-spacing:.2em;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
 #tab-entreprise .ctitle::after{content:'';flex:1;height:1px;background:var(--border);}
 #tab-entreprise .card label:first-of-type{margin-top:0;}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px 20px;}
+.info-label{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;}
+.info-value{font-size:13px;color:var(--text);white-space:pre-line;}
+.info-value:empty::before{content:'—';color:var(--text3);}
 .sg-status{font-size:12px;margin:2px 0 10px;}
 .sg-status.on{color:var(--gold);font-weight:500;}
 .sg-status.off{color:var(--text3);}
@@ -255,88 +263,120 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
     <div class="nav-list">
 
-    <button id="nav-accueil" class="active" onclick="showTab('accueil')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="7" rx="1"/><rect x="9" y="1" width="6" height="4" rx="1"/><rect x="1" y="10" width="6" height="5" rx="1"/><rect x="9" y="7" width="6" height="8" rx="1"/></svg>Accueil</button>
+    <button id="nav-accueil" class="active" onclick="showTab('accueil')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="7" rx="1"/><rect x="9" y="1" width="6" height="4" rx="1"/><rect x="1" y="10" width="6" height="5" rx="1"/><rect x="9" y="7" width="6" height="8" rx="1"/></svg><span data-i18n="nav_accueil">Accueil</span></button>
 
-    <div class="nav-section">Planning</div>
-    <button id="nav-planning" onclick="showTab('planning')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="3" width="12" height="11" rx="1"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>Planning</button>
-    <button id="nav-calendrier" onclick="showTab('calendrier')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="12" rx="1"/><path d="M1 6h14"/><circle cx="5" cy="9.5" r="1"/><circle cx="8" cy="9.5" r="1"/><circle cx="11" cy="9.5" r="1"/><circle cx="5" cy="12.5" r="1"/></svg>Calendrier</button>
+    <div class="nav-section" data-i18n="sec_planning">Planning</div>
+    <button id="nav-planning" onclick="showTab('planning')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="3" width="12" height="11" rx="1"/><path d="M5 1v4M11 1v4M2 7h12"/></svg><span data-i18n="nav_planning">Planning</span></button>
+    <button id="nav-calendrier" onclick="showTab('calendrier')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="12" rx="1"/><path d="M1 6h14"/><circle cx="5" cy="9.5" r="1"/><circle cx="8" cy="9.5" r="1"/><circle cx="11" cy="9.5" r="1"/><circle cx="5" cy="12.5" r="1"/></svg><span data-i18n="nav_calendrier">Calendrier</span></button>
 
-    <div class="nav-section">Facturation</div>
-    <button id="nav-facture" onclick="showTab('facture')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="1" width="10" height="14" rx="1"/><path d="M6 5h4M6 8h4M6 11h2"/></svg>Facture</button>
-    <button id="nav-historique" onclick="showTab('historique')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="1,12 5,7 8,9 11,4 15,6"/><path d="M1 15h14"/></svg>Historique</button>
+    <div class="nav-section" data-i18n="sec_facturation">Facturation</div>
+    <button id="nav-facture" onclick="showTab('facture')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="1" width="10" height="14" rx="1"/><path d="M6 5h4M6 8h4M6 11h2"/></svg><span data-i18n="nav_facture">Facture</span></button>
+    <button id="nav-historique" onclick="showTab('historique')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="1,12 5,7 8,9 11,4 15,6"/><path d="M1 15h14"/></svg><span data-i18n="nav_historique">Historique</span></button>
 
-    <div class="nav-section">Clients</div>
-    <button id="nav-clients" onclick="showTab('clients')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/><circle cx="11" cy="5" r="2.5"/><path d="M11 10c2.8 0 5 2.2 5 5"/></svg>Mes clients</button>
+    <div class="nav-section" data-i18n="sec_clients">Clients</div>
+    <button id="nav-clients" onclick="showTab('clients')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/><circle cx="11" cy="5" r="2.5"/><path d="M11 10c2.8 0 5 2.2 5 5"/></svg><span data-i18n="nav_clients">Mes clients</span></button>
 
     <div class="nav-spacer"></div>
-    <div class="nav-section">Paramètres</div>
-    <button id="nav-entreprise" onclick="showTab('entreprise')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="6" width="14" height="9" rx="1"/><path d="M5 6V4a3 3 0 016 0v2"/><circle cx="8" cy="10" r="1.5"/></svg>Mon entreprise</button>
+    <div class="nav-section" data-i18n="sec_parametres">Paramètres</div>
+    <button id="nav-entreprise" onclick="showTab('entreprise')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="6" width="14" height="9" rx="1"/><path d="M5 6V4a3 3 0 016 0v2"/><circle cx="8" cy="10" r="1.5"/></svg><span data-i18n="nav_donnees">Mes données</span></button>
     </div>
     <div class="nav-bottom">
-      <div class="theme-switch">
-        <button onclick="setTheme('dark')" id="theme-dark" title="Sombre">●</button>
-        <button onclick="setTheme('auto')" id="theme-auto" title="Auto">A</button>
-        <button onclick="setTheme('light')" id="theme-light" title="Clair">○</button>
+      <div class="nav-bottom-row">
+        <div class="theme-switch">
+          <button onclick="setTheme('dark')" id="theme-dark" title="Sombre" data-i18n-title="theme_dark_title">●</button>
+          <button onclick="setTheme('auto')" id="theme-auto" title="Auto" data-i18n-title="theme_auto_title">A</button>
+          <button onclick="setTheme('light')" id="theme-light" title="Clair" data-i18n-title="theme_light_title">○</button>
+        </div>
+        <div class="theme-switch">
+          <button onclick="setLang('fr')" id="lang-fr" class="active">FR</button>
+          <button onclick="setLang('en')" id="lang-en">EN</button>
+          <button onclick="setLang('es')" id="lang-es">ES</button>
+        </div>
       </div>
+      <div class="nav-copyright" onclick="openLegalModal()" data-i18n="legal_link">Mentions légales</div>
     </div>
   </div>
 
   <div class="panel">
 
     <div class="tab" id="tab-entreprise">
-      <h2 style="margin-top:0;">Mon entreprise</h2>
+      <h2 style="margin-top:0;" data-i18n="data_title">Mes données</h2>
 
       <div class="card">
-        <div class="ctitle">Informations</div>
-        <label>Nom</label><input id="fromName">
-        <label>Sous-titre (optionnel, ex. villes)</label><input id="fromTagline" placeholder="Paris · Lyon · Marseille">
-        <label>Adresse</label><input id="fromAddr">
-        <label>Email / Tel</label><input id="fromContact">
-        <label>SIRET</label><input id="fromSiret">
-        <label>Régime TVA <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">(basculement automatique à 32 000 € de CA cumulé)</span></label>
-        <select id="fromTva">
-          <option value="TVA non applicable, art. 293 B du CGI">Franchise en base (auto-entrepreneur)</option>
-          <option value="">TVA applicable</option>
-        </select>
-        <label>Mention RCS/RM</label><input id="fromRcs" value="Dispensé d'immatriculation au RCS et au RM">
-        <label>Mode de règlement</label><input id="fromPay" value="Virement bancaire">
-        <label>RIB / IBAN</label><textarea id="fromRib" rows="2" placeholder="IBAN + BIC"></textarea>
-        <button class="btn-gold" onclick="saveFrom()">Enregistrer mes infos</button>
-        <div id="fromStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+        <div class="ctitle" data-i18n="data_info_title">Informations</div>
+        <div id="infoView" class="info-grid">
+          <div class="info-item"><div class="info-label" data-i18n="lbl_nom">Nom</div><div class="info-value" id="viewName"></div></div>
+          <div class="info-item"><div class="info-label" data-i18n="lbl_adresse">Adresse</div><div class="info-value" id="viewAddr"></div></div>
+          <div class="info-item"><div class="info-label" data-i18n="lbl_email_tel">Email / Tel</div><div class="info-value" id="viewContact"></div></div>
+          <div class="info-item"><div class="info-label" data-i18n="lbl_siret">SIRET</div><div class="info-value" id="viewSiret"></div></div>
+          <div class="info-item"><div class="info-label" data-i18n="lbl_tva_regime">Régime TVA</div><div class="info-value" id="viewTvaLabel"></div></div>
+          <div class="info-item"><div class="info-label" data-i18n="lbl_paiement">Mode de règlement</div><div class="info-value" id="viewPay"></div></div>
+        </div>
+        <button class="btn-line" id="infoEditBtn" onclick="toggleInfoEdit(true)" data-i18n="btn_edit" style="margin-top:14px;">Modifier</button>
+
+        <div id="infoEdit" style="display:none;">
+          <label data-i18n="lbl_nom">Nom</label><input id="fromName">
+          <label data-i18n="lbl_soustitre">Sous-titre (optionnel, ex. villes)</label><input id="fromTagline" placeholder="Paris · Lyon · Marseille">
+          <label data-i18n="lbl_adresse">Adresse</label><input id="fromAddr">
+          <label data-i18n="lbl_email_tel">Email / Tel</label><input id="fromContact">
+          <label data-i18n="lbl_siret">SIRET</label><input id="fromSiret">
+          <label><span data-i18n="lbl_tva_regime">Régime TVA</span> <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;" data-i18n="hint_tva_regime">(basculement automatique à 32 000 € de CA cumulé)</span></label>
+          <select id="fromTva">
+            <option value="TVA non applicable, art. 293 B du CGI" data-i18n="opt_tva_franchise">Franchise en base (auto-entrepreneur)</option>
+            <option value="" data-i18n="opt_tva_applicable">TVA applicable</option>
+          </select>
+          <label data-i18n="lbl_rcs">Mention RCS/RM</label><input id="fromRcs" value="Dispensé d'immatriculation au RCS et au RM">
+          <label data-i18n="lbl_paiement">Mode de règlement</label><input id="fromPay" value="Virement bancaire">
+          <label data-i18n="lbl_rib">RIB / IBAN</label><textarea id="fromRib" rows="2" placeholder="IBAN + BIC"></textarea>
+          <div class="row" style="margin-top:6px;">
+            <button class="btn-gold" onclick="saveFrom()" data-i18n="btn_save_info">Enregistrer mes infos</button>
+            <button class="btn-line" onclick="toggleInfoEdit(false)" data-i18n="btn_cancel" style="margin-top:0;">Annuler</button>
+          </div>
+          <div id="fromStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+        </div>
       </div>
 
       <div class="card">
-        <div class="ctitle">Envoi (SendGrid) <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0;">— envoi automatique des factures</span></div>
-        <div id="sgStatus" class="sg-status off">Non configurée</div>
-        <label>Clé API SendGrid</label><input id="sgKey" type="password" placeholder="SG.xxxxx" oninput="updateSgStatus()">
-        <label>Email d'envoi (vérifié dans SendGrid)</label><input id="sgFrom" type="email" placeholder="contact@tondomaine.com">
-        <button class="btn-line" onclick="saveSg()">Enregistrer</button>
+        <div class="ctitle"><span data-i18n="data_sendgrid_title">Envoi (SendGrid)</span> <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0;" data-i18n="data_sendgrid_sub">— envoi automatique des factures</span></div>
+        <div id="sgView">
+          <div id="sgStatus" class="sg-status off" data-i18n="sg_status_off">Non configurée</div>
+          <div class="info-item" id="sgFromViewWrap" style="display:none;"><div class="info-label" data-i18n="lbl_sg_from">Email d'envoi (vérifié dans SendGrid)</div><div class="info-value" id="viewSgFrom"></div></div>
+          <button class="btn-line" onclick="toggleSgEdit(true)" data-i18n="btn_edit" style="margin-top:10px;">Modifier</button>
+        </div>
+        <div id="sgEdit" style="display:none;">
+          <label data-i18n="lbl_sg_key">Clé API SendGrid</label><input id="sgKey" type="password" placeholder="SG.xxxxx" oninput="updateSgStatus()">
+          <label data-i18n="lbl_sg_from">Email d'envoi (vérifié dans SendGrid)</label><input id="sgFrom" type="email" placeholder="contact@tondomaine.com">
+          <div class="row" style="margin-top:6px;">
+            <button class="btn-line" onclick="saveSg()" data-i18n="btn_save" style="margin-top:0;">Enregistrer</button>
+            <button class="btn-line" onclick="toggleSgEdit(false)" data-i18n="btn_cancel" style="margin-top:0;">Annuler</button>
+          </div>
+        </div>
       </div>
 
       <div class="card">
-        <div class="ctitle">Synchronisation</div>
+        <div class="ctitle" data-i18n="data_sync_title">Synchronisation</div>
         <div id="syncNotConnected">
-          <p style="font-size:12px;color:var(--text2);">Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.</p>
-          <button class="btn-gold" onclick="genSyncCode()">Générer un code de synchro</button>
-          <label style="margin-top:10px;">Ou coller un code existant</label>
-          <input id="syncCodeInput" placeholder="Code de synchro">
-          <button class="btn-line" onclick="connectSyncCode()">Connecter</button>
+          <p style="font-size:12px;color:var(--text2);" data-i18n="sync_intro">Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.</p>
+          <button class="btn-gold" onclick="genSyncCode()" data-i18n="btn_gen_sync">Générer un code de synchro</button>
+          <label style="margin-top:10px;" data-i18n="lbl_paste_sync">Ou coller un code existant</label>
+          <input id="syncCodeInput" placeholder="Code de synchro" data-i18n-ph="ph_sync_code">
+          <button class="btn-line" onclick="connectSyncCode()" data-i18n="btn_connect">Connecter</button>
         </div>
         <div id="syncConnected" style="display:none;">
-          <p style="font-size:12px;color:var(--text2);">Code de synchro (à coller sur l'autre appareil) :</p>
+          <p style="font-size:12px;color:var(--text2);" data-i18n="sync_code_intro">Code de synchro (à coller sur l'autre appareil) :</p>
           <div id="syncCodeBox" style="font-family:monospace;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:8px;word-break:break-all;font-size:12px;"></div>
-          <button class="btn-line" onclick="copySyncCode()">Copier le code</button>
-          <button class="btn-line" onclick="pullSync(true)">Forcer la synchro</button>
-          <button class="btn-line" onclick="disconnectSync()" style="color:var(--red);">Déconnecter cet appareil</button>
+          <button class="btn-line" onclick="copySyncCode()" data-i18n="btn_copy_code">Copier le code</button>
+          <button class="btn-line" onclick="pullSync(true)" data-i18n="btn_force_sync">Forcer la synchro</button>
+          <button class="btn-line" onclick="disconnectSync()" style="color:var(--red);" data-i18n="btn_disconnect_device">Déconnecter cet appareil</button>
         </div>
         <div id="syncStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
 
       <div class="card">
-        <div class="ctitle">Sauvegarde</div>
-        <p style="font-size:12px;color:var(--text2);">Exporte toutes tes données (entreprise, clients, factures, planning) dans un fichier, à conserver en lieu sûr ou à réimporter sur un autre appareil.</p>
-        <button class="btn-line" onclick="exportBackup()">Exporter mes données</button>
-        <label style="margin-top:10px;">Importer une sauvegarde</label>
+        <div class="ctitle" data-i18n="data_backup_title">Sauvegarde</div>
+        <p style="font-size:12px;color:var(--text2);" data-i18n="backup_intro">Exporte toutes tes données (entreprise, clients, factures, planning) dans un fichier, à conserver en lieu sûr ou à réimporter sur un autre appareil.</p>
+        <button class="btn-line" onclick="exportBackup()" data-i18n="btn_export_data">Exporter mes données</button>
+        <label style="margin-top:10px;" data-i18n="lbl_import_backup">Importer une sauvegarde</label>
         <input type="file" id="importBackupInput" accept="application/json" onchange="importBackup(this)">
         <div id="backupStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
@@ -344,45 +384,45 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
     <div class="tab" id="tab-clients">
       <div>
-        <h2>Ajouter / modifier un client</h2>
+        <h2 data-i18n="clients_add_title">Ajouter / modifier un client</h2>
         <input type="hidden" id="cliIdx" value="">
         <div class="row">
-          <div><label>Nom société</label><input id="cliName" oninput="suggestPrefix()"></div>
-          <div><label>Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase"></div>
+          <div><label data-i18n="lbl_nom_societe">Nom société</label><input id="cliName" oninput="suggestPrefix()"></div>
+          <div><label data-i18n="lbl_prefixe">Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase"></div>
         </div>
         <div class="row">
-          <div><label>Email</label><input id="cliEmail"></div>
-          <div><label>Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78"></div>
+          <div><label data-i18n="lbl_email">Email</label><input id="cliEmail"></div>
+          <div><label data-i18n="lbl_telephone">Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78"></div>
         </div>
-        <label>Adresse</label><input id="cliAddr">
-        <button class="btn-gold" onclick="saveClient()">Enregistrer le client</button>
-        <button class="btn-line" onclick="resetClientForm()">Nouveau client</button>
+        <label data-i18n="lbl_adresse">Adresse</label><input id="cliAddr">
+        <button class="btn-gold" onclick="saveClient()" data-i18n="btn_save_client">Enregistrer le client</button>
+        <button class="btn-line" onclick="resetClientForm()" data-i18n="btn_new_client">Nouveau client</button>
       </div>
 
-      <h2>Clients enregistrés</h2>
+      <h2 data-i18n="clients_list_title">Clients enregistrés</h2>
       <div class="client-list" id="clientList"></div>
     </div>
 
     <div class="tab" id="tab-facture">
       <div class="facture-fixed-top">
-        <h2>Client</h2>
-        <label>Nom société</label>
-        <input id="clientSelect" list="clientNames" oninput="pickClient()" onchange="pickClient()" placeholder="Tape le nom du client...">
+        <h2 data-i18n="fact_client_title">Client</h2>
+        <label data-i18n="lbl_nom_societe">Nom société</label>
+        <input id="clientSelect" list="clientNames" oninput="pickClient()" onchange="pickClient()" placeholder="Tape le nom du client..." data-i18n-ph="ph_client_search">
         <datalist id="clientNames"></datalist>
 
-        <h2>Facture</h2>
+        <h2 data-i18n="fact_invoice_title">Facture</h2>
         <div class="row">
-          <div><label>N° facture</label><input id="invNum" readonly></div>
-          <div><label>Date</label><input id="invDate" type="date" oninput="render()"></div>
+          <div><label data-i18n="lbl_num_facture">N° facture</label><input id="invNum" readonly></div>
+          <div><label data-i18n="lbl_date">Date</label><input id="invDate" type="date" oninput="render()"></div>
         </div>
-        <label>Date travaillée <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">(pour rattacher le CA au bon mois)</span></label>
+        <label><span data-i18n="lbl_date_travaillee">Date travaillée</span> <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;" data-i18n="hint_date_travaillee">(pour rattacher le CA au bon mois)</span></label>
         <input id="workDate" type="month" oninput="render()">
-        <div id="tvaFieldWrap" style="display:none;"><label>TVA (%)</label><input id="tva" type="number" value="0" oninput="render()"></div>
+        <div id="tvaFieldWrap" style="display:none;"><label data-i18n="lbl_tva_pct">TVA (%)</label><input id="tva" type="number" value="0" oninput="render()"></div>
 
-        <h2>Frais déplacement</h2>
+        <h2 data-i18n="fact_frais_title">Frais déplacement</h2>
         <div class="row">
-          <div><label>Km parcourus</label><input id="km" type="number" value="0" oninput="render()"></div>
-          <div><label>Tarif km</label>
+          <div><label data-i18n="lbl_km">Km parcourus</label><input id="km" type="number" value="0" oninput="render()"></div>
+          <div><label data-i18n="lbl_tarif_km">Tarif km</label>
             <select id="kmRate" onchange="render()">
               <option value="0.5">0,50 €/km</option>
               <option value="0.3">0,30 €/km</option>
@@ -390,27 +430,27 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           </div>
         </div>
         <div class="row">
-          <div><label>Péage</label><input id="peage" type="number" value="0" oninput="render()"></div>
-          <div><label>Parking</label><input id="parking" type="number" value="0" oninput="render()"></div>
+          <div><label data-i18n="lbl_peage">Péage</label><input id="peage" type="number" value="0" oninput="render()"></div>
+          <div><label data-i18n="lbl_parking">Parking</label><input id="parking" type="number" value="0" oninput="render()"></div>
         </div>
 
         <div class="toggle-row">
           <div class="toggle-item">
-            <span>Offert</span>
+            <span data-i18n="toggle_offert">Offert</span>
             <label class="switch">
               <input type="checkbox" id="offEnabled" onchange="toggleOffert()">
               <span class="switch-track"></span>
             </label>
           </div>
           <div class="toggle-item">
-            <span>Email</span>
+            <span data-i18n="toggle_email">Email</span>
             <label class="switch">
               <input type="checkbox" id="emailCustomEnabled" onchange="toggleEmailCustom()">
               <span class="switch-track"></span>
             </label>
           </div>
           <div class="toggle-item">
-            <span>Repas</span>
+            <span data-i18n="toggle_repas">Repas</span>
             <label class="switch">
               <input type="checkbox" id="mealEnabled" onchange="toggleMeal()">
               <span class="switch-track"></span>
@@ -418,107 +458,107 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           </div>
         </div>
         <div class="row" id="offFields" style="display:none;">
-          <div><label>Type</label>
+          <div><label data-i18n="lbl_type">Type</label>
             <select id="offType" onchange="render()">
               <option value="pct">%</option>
               <option value="amt">€</option>
             </select>
           </div>
-          <div><label>Valeur</label><input id="offVal" type="number" value="0" oninput="render()"></div>
+          <div><label data-i18n="lbl_valeur">Valeur</label><input id="offVal" type="number" value="0" oninput="render()"></div>
         </div>
         <div id="emailCustomFields" style="display:none;">
-          <label>Objet</label><input id="emailSubject" placeholder="Facture (numéro auto si vide)">
-          <label>Message</label><textarea id="emailMessage" rows="3" placeholder="Petit mot avant la facture (optionnel)"></textarea>
+          <label data-i18n="lbl_objet">Objet</label><input id="emailSubject" placeholder="Facture (numéro auto si vide)" data-i18n-ph="ph_objet">
+          <label data-i18n="lbl_message">Message</label><textarea id="emailMessage" rows="3" placeholder="Petit mot avant la facture (optionnel)" data-i18n-ph="ph_message"></textarea>
         </div>
         <div id="mealFields" style="display:none;">
-          <label>Montant repas</label><input id="meal" type="number" value="0" oninput="render()">
+          <label data-i18n="lbl_montant_repas">Montant repas</label><input id="meal" type="number" value="0" oninput="render()">
         </div>
       </div>
 
-      <h2 style="margin:12px 0 6px;flex-shrink:0;">Prestations</h2>
+      <h2 style="margin:12px 0 6px;flex-shrink:0;" data-i18n="fact_prestations_title">Prestations</h2>
       <div class="facture-scroll">
         <div id="items"></div>
       </div>
-      <button class="btn-line" onclick="addItem()" style="margin:6px 0 0;flex-shrink:0;">+ Ajouter une ligne</button>
+      <button class="btn-line" onclick="addItem()" style="margin:6px 0 0;flex-shrink:0;" data-i18n="btn_add_line">+ Ajouter une ligne</button>
     </div>
 
     <div class="tab" id="tab-historique">
-      <h2>Factures émises</h2>
-      <input id="histSearch" placeholder="Rechercher (client, n° de facture, mot-clé d'une prestation)..." oninput="renderHistory()" style="margin-bottom:10px;">
+      <h2 data-i18n="hist_title">Factures émises</h2>
+      <input id="histSearch" placeholder="Rechercher (client, n° de facture, mot-clé d'une prestation)..." oninput="renderHistory()" style="margin-bottom:10px;" data-i18n-ph="ph_hist_search">
       <div id="histFilters" class="hist-filters"></div>
       <div id="histList"></div>
 
-      <h2>Chiffre d'affaires</h2>
+      <h2 data-i18n="ca_title">Chiffre d'affaires</h2>
       <div id="caChart"></div>
       <div id="caStats"></div>
       <div id="caList"></div>
     </div>
 
     <div class="tab active" id="tab-accueil">
-      <h2>Vue d'ensemble</h2>
+      <h2 data-i18n="home_title">Vue d'ensemble</h2>
 
-      <div class="dash-section-title">Ce mois-ci (réalisé)</div>
+      <div class="dash-section-title" data-i18n="home_sec_mois">Ce mois-ci (réalisé)</div>
       <div class="dash-card dash-card-hero">
-        <div class="dash-card-label">CA du mois (prestas effectuées)</div>
+        <div class="dash-card-label" data-i18n="home_ca_mois">CA du mois (prestas effectuées)</div>
         <div class="dash-card-value" id="dashCA">0 €</div>
         <div class="dash-card-hero-rule"></div>
       </div>
 
-      <div class="dash-section-title">Prévisionnel</div>
+      <div class="dash-section-title" data-i18n="home_sec_previsionnel">Prévisionnel</div>
       <div class="dash-grid">
         <div class="dash-card">
-          <div class="dash-card-label">Prestations à venir</div>
+          <div class="dash-card-label" data-i18n="home_prestas_venir">Prestations à venir</div>
           <div class="dash-card-value" id="dashUpcoming">0</div>
         </div>
         <div class="dash-card">
-          <div class="dash-card-label">CA prévu ce mois</div>
+          <div class="dash-card-label" data-i18n="home_ca_prevu">CA prévu ce mois</div>
           <div class="dash-card-value" id="dashForecastAmt">0 €</div>
         </div>
         <div class="dash-card">
-          <div class="dash-card-label">Heures prévues ce mois</div>
+          <div class="dash-card-label" data-i18n="home_heures_prevues">Heures prévues ce mois</div>
           <div class="dash-card-value" id="dashHours">0 h</div>
         </div>
       </div>
 
-      <div class="dash-section-title">Facturation</div>
+      <div class="dash-section-title" data-i18n="home_sec_facturation">Facturation</div>
       <div class="dash-grid">
         <div class="dash-card">
-          <div class="dash-card-label">Factures en attente</div>
+          <div class="dash-card-label" data-i18n="home_factures_attente">Factures en attente</div>
           <div class="dash-card-value" id="dashPending">0</div>
         </div>
         <div class="dash-card">
-          <div class="dash-card-label">Montant à encaisser</div>
+          <div class="dash-card-label" data-i18n="home_montant_encaisser">Montant à encaisser</div>
           <div class="dash-card-value" id="dashUnpaidAmt">0 €</div>
         </div>
       </div>
 
-      <h2>Prochaine prestation</h2>
+      <h2 data-i18n="home_next_title">Prochaine prestation</h2>
       <div class="dash-next-box" id="dashNext"></div>
 
-      <h2>Actions rapides</h2>
+      <h2 data-i18n="home_actions_title">Actions rapides</h2>
       <div class="dash-actions">
-        <button class="btn-gold" onclick="dashNewBooking()">+ Nouvelle prestation</button>
-        <button class="btn-gold" onclick="dashNewInvoice()">+ Nouvelle facture</button>
-        <button class="btn-line" onclick="dashNewClient()">+ Ajouter un client</button>
+        <button class="btn-gold" onclick="dashNewBooking()" data-i18n="btn_new_booking">+ Nouvelle prestation</button>
+        <button class="btn-gold" onclick="dashNewInvoice()" data-i18n="btn_new_invoice">+ Nouvelle facture</button>
+        <button class="btn-line" onclick="dashNewClient()" data-i18n="btn_new_client">+ Ajouter un client</button>
       </div>
     </div>
 
     <div class="tab" id="tab-planning">
       <div class="planning-cols">
         <div>
-          <h2>Prestas à venir</h2>
+          <h2 data-i18n="plan_venir_title">Prestas à venir</h2>
           <div id="accList"></div>
         </div>
         <div>
-          <h2>Prestas à facturer</h2>
+          <h2 data-i18n="plan_facturer_title">Prestas à facturer</h2>
           <div id="bkList"></div>
         </div>
       </div>
     </div>
 
     <div class="tab" id="tab-calendrier">
-      <h2>Calendrier</h2>
-      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);">Prévisionnel du mois</div>
+      <h2 data-i18n="cal_title">Calendrier</h2>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);" data-i18n="cal_prev_month">Prévisionnel du mois</div>
       <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:14px;"></div>
 
       <div id="bkCalHead" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -530,20 +570,20 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <div id="bkDayPanel"></div>
 
       <div id="bkFormWrap" style="display:none;">
-        <h2 id="bkFormTitle">Nouveau booking</h2>
+        <h2 id="bkFormTitle" data-i18n="booking_new_title">Nouveau booking</h2>
         <input type="hidden" id="bkEditId" value="">
-        <label>Client</label><input id="bkClient" list="clientNames" oninput="prefillBookingClient()" onchange="prefillBookingClient()">
-        <label>Nom de la prestation</label><input id="bkLabel" placeholder="Ex. Prestation Barman">
-        <label>Adresse de la prestation</label><input id="bkAddr" placeholder="Lieu de l'événement">
-        <label>Contact sur place</label><input id="bkContact" placeholder="Nom / téléphone du contact">
-        <label>Date prestation</label><input id="bkDate" type="date">
+        <label data-i18n="lbl_client">Client</label><input id="bkClient" list="clientNames" oninput="prefillBookingClient()" onchange="prefillBookingClient()">
+        <label data-i18n="lbl_nom_prestation">Nom de la prestation</label><input id="bkLabel" placeholder="Ex. Prestation Barman" data-i18n-ph="ph_nom_prestation">
+        <label data-i18n="lbl_addr_prestation">Adresse de la prestation</label><input id="bkAddr" placeholder="Lieu de l'événement" data-i18n-ph="ph_addr_prestation">
+        <label data-i18n="lbl_contact_place">Contact sur place</label><input id="bkContact" placeholder="Nom / téléphone du contact" data-i18n-ph="ph_contact_place">
+        <label data-i18n="lbl_date_prestation">Date prestation</label><input id="bkDate" type="date">
         <div class="row">
-          <div><label>De</label><input id="bkFrom" type="time"></div>
-          <div><label>À</label><input id="bkTo" type="time"></div>
-          <div><label>Taux €/h</label><input id="bkRate" type="number"></div>
+          <div><label data-i18n="lbl_de">De</label><input id="bkFrom" type="time"></div>
+          <div><label data-i18n="lbl_a">À</label><input id="bkTo" type="time"></div>
+          <div><label data-i18n="lbl_taux">Taux €/h</label><input id="bkRate" type="number"></div>
         </div>
-        <button class="btn-gold" id="bkSubmitBtn" onclick="addBooking()" style="width:100%;margin-top:10px;">Ajouter au planning</button>
-        <button class="btn-line" id="bkCancelBtn" onclick="cancelEditBooking()" style="width:100%;">Annuler</button>
+        <button class="btn-gold" id="bkSubmitBtn" onclick="addBooking()" style="width:100%;margin-top:10px;" data-i18n="btn_add_planning">Ajouter au planning</button>
+        <button class="btn-line" id="bkCancelBtn" onclick="cancelEditBooking()" style="width:100%;" data-i18n="btn_cancel">Annuler</button>
       </div>
     </div>
 
@@ -554,10 +594,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <div class="invoice-pages" id="invoicePages"></div>
     </div>
     <div class="preview-actionbar">
-      <button class="btn-gold" onclick="openLivePreview()">Générer l'aperçu</button>
-      <button class="btn-gold" onclick="saveInvoice()">Enregistrer</button>
-      <button class="btn-line" onclick="exportInvoicePdf()">Exporter en PDF</button>
-      <button class="btn-line" onclick="sendInvoice()">Envoyer au client</button>
+      <button class="btn-gold" onclick="openLivePreview()" data-i18n="btn_generate_preview">Générer l'aperçu</button>
+      <button class="btn-gold" onclick="saveInvoice()" data-i18n="btn_save">Enregistrer</button>
+      <button class="btn-line" onclick="exportInvoicePdf()" data-i18n="btn_export_pdf">Exporter en PDF</button>
+      <button class="btn-line" onclick="sendInvoice()" data-i18n="btn_send_client">Envoyer au client</button>
     </div>
   </div>
 </div>
@@ -567,27 +607,27 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <div class="inv-brandname" id="pBrandName"></div>
     <div class="inv-tagline" id="pTagline"></div>
   </div>
-  <div class="inv-title-rule"><span>Facture</span></div>
+  <div class="inv-title-rule"><span id="pFactureLabel">Facture</span></div>
   <div class="inv-meta-row">
-    <div><div class="inv-label">N° de facture</div><div class="inv-value" id="pInvNum"></div></div>
-    <div style="text-align:right;"><div class="inv-label">Date</div><div class="inv-value" id="pDate"></div></div>
+    <div><div class="inv-label" id="pNumLabel">N° de facture</div><div class="inv-value" id="pInvNum"></div></div>
+    <div style="text-align:right;"><div class="inv-label" id="pDateLabel">Date</div><div class="inv-value" id="pDate"></div></div>
   </div>
   <div class="from-to">
-    <div><h3>De</h3><div id="pFrom"></div></div>
-    <div style="text-align:right;"><h3>À</h3><div id="pTo"></div></div>
+    <div><h3 id="pDeLabel">De</h3><div id="pFrom"></div></div>
+    <div style="text-align:right;"><h3 id="pALabel">À</h3><div id="pTo"></div></div>
   </div>
   <table>
-    <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Unitaire</th><th class="num">Montant</th></tr></thead>
+    <thead><tr><th id="pDescLabel">Description</th><th class="num" id="pQteLabel">Qté</th><th class="num" id="pUnitaireLabel">Unitaire</th><th class="num" id="pMontantLabel">Montant</th></tr></thead>
     <tbody id="pItems"></tbody>
   </table>
   <div class="totals">
-    <div><span>Sous-total</span><span id="pSub"></span></div>
-    <div id="pTvaRow" style="display:none;"><span>TVA</span><span id="pTvaLine"></span></div>
-    <div id="pOffertRow" style="display:none;"><span>Offert</span><span id="pOffertLine" class="gold"></span></div>
-    <div class="final"><span>Total à régler</span><span id="pTotal"></span></div>
+    <div><span id="pSousTotalLabel">Sous-total</span><span id="pSub"></span></div>
+    <div id="pTvaRow" style="display:none;"><span id="pTvaLabel">TVA</span><span id="pTvaLine"></span></div>
+    <div id="pOffertRow" style="display:none;"><span id="pOffertLabel">Offert</span><span id="pOffertLine" class="gold"></span></div>
+    <div class="final"><span id="pTotalReglerLabel">Total à régler</span><span id="pTotal"></span></div>
   </div>
   <div class="inv-reglement">
-    <h3>Règlement</h3>
+    <h3 id="pReglementLabel">Règlement</h3>
     <div id="pReglement"></div>
   </div>
   <div class="meta" id="pLegal"></div>
@@ -597,17 +637,315 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 <div class="modal-overlay" id="bookingModal" style="display:none;" onclick="if(event.target===this) closeBookingModal()">
   <div class="modal-box">
     <div class="modal-header">
-      <span>Détail de la prestation</span>
+      <span data-i18n="modal_booking_title">Détail de la prestation</span>
       <button type="button" class="modal-close" onclick="closeBookingModal()">×</button>
     </div>
     <div id="bookingModalBody"></div>
-    <button class="btn-gold" style="width:100%;margin-top:14px;" onclick="closeBookingModal()">Fermer</button>
+    <button class="btn-gold" style="width:100%;margin-top:14px;" onclick="closeBookingModal()" data-i18n="btn_close">Fermer</button>
+  </div>
+</div>
+<div class="modal-overlay" id="legalModal" style="display:none;" onclick="if(event.target===this) closeLegalModal()">
+  <div class="modal-box" style="max-width:520px;max-height:80vh;overflow-y:auto;">
+    <div class="modal-header">
+      <span data-i18n="legal_modal_title">Mentions légales</span>
+      <button type="button" class="modal-close" onclick="closeLegalModal()">×</button>
+    </div>
+    <div id="legalModalBody" style="font-size:12px;line-height:1.8;color:var(--text2);"></div>
+    <button class="btn-gold" style="width:100%;margin-top:14px;" onclick="closeLegalModal()" data-i18n="btn_close">Fermer</button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
+const LOCALE_MAP = {fr:'fr-FR', en:'en-US', es:'es-ES'};
+const WEEKDAY_LETTERS = {fr:['L','M','M','J','V','S','D'], en:['M','T','W','T','F','S','S'], es:['L','M','X','J','V','S','D']};
+const I18N = {
+fr:{
+nav_accueil:'Accueil', nav_planning:'Planning', nav_calendrier:'Calendrier', nav_facture:'Facture', nav_historique:'Historique', nav_clients:'Mes clients', nav_donnees:'Mes données',
+sec_planning:'Planning', sec_facturation:'Facturation', sec_clients:'Clients', sec_parametres:'Paramètres',
+theme_dark_title:'Sombre', theme_auto_title:'Auto', theme_light_title:'Clair', legal_link:'Mentions légales',
+data_title:'Mes données', data_info_title:'Informations',
+lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
+lbl_tva_regime:'Régime TVA', hint_tva_regime:'(basculement automatique à 32 000 € de CA cumulé)',
+opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'TVA applicable',
+lbl_rcs:'Mention RCS/RM', lbl_paiement:'Mode de règlement', lbl_rib:'RIB / IBAN', ph_rib:'IBAN + BIC',
+btn_save:'Enregistrer', btn_edit:'Modifier', btn_save_info:'Enregistrer mes infos',
+data_sendgrid_title:'Envoi (SendGrid)', data_sendgrid_sub:'— envoi automatique des factures',
+sg_status_on:'Configurée', sg_status_off:'Non configurée',
+lbl_sg_key:"Clé API SendGrid", lbl_sg_from:"Email d'envoi (vérifié dans SendGrid)",
+data_sync_title:'Synchronisation', sync_intro:'Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.',
+btn_gen_sync:'Générer un code de synchro', lbl_paste_sync:'Ou coller un code existant', ph_sync_code:'Code de synchro', btn_connect:'Connecter',
+sync_code_intro:'Code de synchro (à coller sur l\'autre appareil) :', btn_copy_code:'Copier le code', btn_force_sync:'Forcer la synchro', btn_disconnect_device:'Déconnecter cet appareil',
+data_backup_title:'Sauvegarde', backup_intro:'Exporte toutes tes données (entreprise, clients, factures, planning) dans un fichier, à conserver en lieu sûr ou à réimporter sur un autre appareil.',
+btn_export_data:'Exporter mes données', lbl_import_backup:'Importer une sauvegarde',
+clients_add_title:'Ajouter / modifier un client', lbl_nom_societe:'Nom société', lbl_prefixe:'Préfixe facture (2-3 lettres)', lbl_email:'Email', lbl_telephone:'Téléphone',
+btn_save_client:'Enregistrer le client', btn_new_client:'Nouveau client', clients_list_title:'Clients enregistrés', empty_clients:'Aucun client.', btn_delete:'Supprimer',
+fact_client_title:'Client', ph_client_search:'Tape le nom du client...', fact_invoice_title:'Facture', lbl_num_facture:'N° facture', lbl_date:'Date',
+lbl_date_travaillee:'Date travaillée', hint_date_travaillee:'(pour rattacher le CA au bon mois)', lbl_tva_pct:'TVA (%)',
+fact_frais_title:'Frais déplacement', lbl_km:'Km parcourus', lbl_tarif_km:'Tarif km', lbl_peage:'Péage', lbl_parking:'Parking',
+toggle_offert:'Offert', toggle_email:'Email', toggle_repas:'Repas', lbl_type:'Type', lbl_valeur:'Valeur',
+lbl_objet:'Objet', ph_objet:'Facture (numéro auto si vide)', lbl_message:'Message', ph_message:'Petit mot avant la facture (optionnel)', lbl_montant_repas:'Montant repas',
+fact_prestations_title:'Prestations', btn_add_line:'+ Ajouter une ligne', btn_duplicate:'Dupliquer',
+btn_generate_preview:"Générer l'aperçu", btn_export_pdf:'Exporter en PDF', btn_send_client:'Envoyer au client',
+hist_title:'Factures émises', ph_hist_search:"Rechercher (client, n° de facture, mot-clé d'une prestation)...",
+hist_col_num:'N°', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Statut', hist_col_actions:'Actions',
+btn_view:'Voir', btn_resend:'Renvoyer', empty_invoices:'Aucune facture émise.',
+status_toutes:'Toutes', status_enregistree:'Enregistrée', status_maj:'Mise à jour', status_envoyee:'Envoyée', status_payee:'Payée',
+ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette année', stat_total:'Total',
+ca_col_client:'Client', ca_col_generated:'CA généré', empty_data:'Aucune donnée.',
+franchise_ok:'(franchise en base active).', franchise_over:'— seuil de franchise dépassé, TVA applicable.',
+franchise_prefix:'CA {year} cumulé : {ca} € / {seuil} €',
+home_title:"Vue d'ensemble", home_sec_mois:'Ce mois-ci (réalisé)', home_ca_mois:'CA du mois (prestas effectuées)',
+home_sec_previsionnel:'Prévisionnel', home_prestas_venir:'Prestations à venir', home_ca_prevu:'CA prévu ce mois', home_heures_prevues:'Heures prévues ce mois',
+home_sec_facturation:'Facturation', home_factures_attente:'Factures en attente', home_montant_encaisser:'Montant à encaisser',
+home_next_title:'Prochaine prestation', empty_next:'Aucune prestation programmée.',
+home_actions_title:'Actions rapides', btn_new_booking:'+ Nouvelle prestation', btn_new_invoice:'+ Nouvelle facture', btn_new_client:'+ Ajouter un client',
+plan_venir_title:'Prestas à venir', plan_facturer_title:'Prestas à facturer', empty_venir:'Aucune presta à venir.', empty_facturer:'Aucune presta à facturer.',
+btn_invoice:'Facturer', btn_delete_short:'Suppr.', sans_date:'sans date', pointe_prefix:'Pointé : ',
+cal_title:'Calendrier', cal_prev_month:'Prévisionnel du mois', cal_forecast_suffix:' € à facturer ce mois-ci',
+booking_new_title:'Nouveau booking', booking_edit_title:'Modifier le booking', lbl_client:'Client', lbl_nom_prestation:'Nom de la prestation', ph_nom_prestation:'Ex. Prestation Barman',
+lbl_addr_prestation:'Adresse de la prestation', ph_addr_prestation:"Lieu de l'événement", lbl_contact_place:'Contact sur place', ph_contact_place:'Nom / téléphone du contact',
+lbl_date_prestation:'Date prestation', lbl_de:'De', lbl_a:'À', lbl_taux:'Taux €/h',
+btn_add_planning:'Ajouter au planning', btn_save_changes:'Enregistrer les modifications', btn_cancel:'Annuler',
+empty_day:'Aucune prestation ce jour.', btn_add_service_day:'+ Ajouter une prestation',
+modal_booking_title:'Détail de la prestation', btn_close:'Fermer',
+row_client:'Client', row_prestation:'Prestation', row_date:'Date', row_horaires:'Horaires', row_reel:'Réel (pointé)', row_taux:'Taux', row_total:'Total', row_adresse:'Adresse', row_contact:'Contact',
+non_definie:'non définie',
+toast_client_email_invalid:'⚠ Email client invalide : {email}',
+toast_old_invoice_no_detail:'⚠ Détail non disponible pour cette facture ancienne.',
+toast_invoice_loaded:'✎ Facture {num} chargée pour modification.',
+toast_invoice_duplicated:'✔ Nouvelle facture {num} créée à partir de {from}.',
+toast_invoice_sent_status:'✔ Facture {num} envoyée.', toast_invoice_saved:'✔ Facture {num} enregistrée.',
+toast_invoice_not_found:'⚠ Facture introuvable.',
+toast_sendgrid_missing:"⚠ Configuration SendGrid (email d'envoi) ou client manquant.",
+toast_invoice_resent:'✔ Facture renvoyée à {email}.', toast_resend_failed:'✕ Échec du renvoi.', toast_error_generic:'✕ Erreur : {msg}',
+confirm_delete_invoice:'Supprimer définitivement la facture {num} ?', toast_invoice_deleted:'✔ Facture {num} supprimée.',
+toast_status_updated:'✔ Statut de la facture {num} : {status}.', toast_booking_updated:'✔ Booking modifié.', toast_preview_updated:'✔ Aperçu mis à jour.',
+toast_select_client_save:"⚠ Sélectionne un client avant d'enregistrer.",
+toast_set_sendgrid_email:"⚠ Renseigne l'email d'envoi dans Mes données → Envoi (SendGrid).",
+toast_select_client_send:"⚠ Sélectionne un client avant d'envoyer.", toast_sending:'Envoi en cours…',
+toast_invoice_sent:'✔ Facture envoyée à {email}.', toast_send_failed:"✕ Échec de l'envoi{detail}", toast_send_error:"✕ Erreur d'envoi : {msg}",
+toast_sync_synced:'✔ Synchronisé', toast_sync_error:'✕ Erreur sync : {msg}', toast_sync_invalid_code:'⚠ Colle un code valide',
+toast_backup_downloaded:'✔ Sauvegarde téléchargée.', toast_backup_imported:'✔ Données importées. Rechargement...', toast_backup_invalid:'✕ Fichier invalide : {msg}',
+toast_code_copied:'✔ Code copié', toast_info_saved:'✔ Infos enregistrées', default_service_label:'Prestation',
+preview_title:'Aperçu facture', title_debut:'Début', title_fin:'Fin',
+email_default_body:"Bonjour,\n\nVeuillez trouver ci-joint votre facture {num}.\n\nN'hésitez pas à me contacter pour toute question.\n\nCordialement,\n{name}",
+legal_modal_title:'Mentions légales',
+inv_facture_label:'Facture', inv_num:'N° de facture', inv_date:'Date', inv_de:'De', inv_a:'À',
+inv_desc:'Description', inv_qte:'Qté', inv_unitaire:'Unitaire', inv_montant:'Montant',
+inv_sous_total:'Sous-total', inv_tva:'TVA', inv_offert:'Offert', inv_total_regler:'Total à régler', inv_reglement:'Règlement',
+inv_km:'Frais kilométriques', inv_peage:'Péage', inv_parking:'Parking', inv_repas:'Repas',
+inv_votre_entreprise:'Votre entreprise', inv_titulaire:'Titulaire',
+legal_intro:"Conformément à la loi, voici les informations d'identification de l'éditeur de cette application.",
+legal_editeur:'Éditeur', legal_hebergement:'Hébergement', legal_hebergement_txt:'Application locale (Mac/PWA) — les données sont stockées sur les appareils de l\'utilisateur et synchronisées via Supabase (hébergeur : Supabase Inc.).',
+legal_pi:'Propriété intellectuelle', legal_pi_txt:'Cette application et son contenu sont la propriété de son éditeur. Toute reproduction est interdite sans autorisation.',
+legal_contact:'Contact',
+inv_paiement_reception:'Paiement à réception de facture, échéance :', inv_jours:'jours'
+},
+en:{
+nav_accueil:'Home', nav_planning:'Schedule', nav_calendrier:'Calendar', nav_facture:'Invoice', nav_historique:'History', nav_clients:'My clients', nav_donnees:'My data',
+sec_planning:'Schedule', sec_facturation:'Billing', sec_clients:'Clients', sec_parametres:'Settings',
+theme_dark_title:'Dark', theme_auto_title:'Auto', theme_light_title:'Light', legal_link:'Legal notice',
+data_title:'My data', data_info_title:'Information',
+lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
+lbl_tva_regime:'VAT regime', hint_tva_regime:'(automatically switches at €32,000 cumulative revenue)',
+opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applicable',
+lbl_rcs:'Trade register notice', lbl_paiement:'Payment method', lbl_rib:'Bank details / IBAN', ph_rib:'IBAN + BIC',
+btn_save:'Save', btn_edit:'Edit', btn_save_info:'Save my info',
+data_sendgrid_title:'Sending (SendGrid)', data_sendgrid_sub:'— automatic invoice sending',
+sg_status_on:'Configured', sg_status_off:'Not configured',
+lbl_sg_key:'SendGrid API key', lbl_sg_from:'Sending email (verified in SendGrid)',
+data_sync_title:'Sync', sync_intro:'Link this device to another one (Mac / iPhone) to share clients, invoices and schedule.',
+btn_gen_sync:'Generate a sync code', lbl_paste_sync:'Or paste an existing code', ph_sync_code:'Sync code', btn_connect:'Connect',
+sync_code_intro:'Sync code (paste it on the other device):', btn_copy_code:'Copy code', btn_force_sync:'Force sync', btn_disconnect_device:'Disconnect this device',
+data_backup_title:'Backup', backup_intro:'Export all your data (company, clients, invoices, schedule) to a file, to keep safe or re-import on another device.',
+btn_export_data:'Export my data', lbl_import_backup:'Import a backup',
+clients_add_title:'Add / edit a client', lbl_nom_societe:'Company name', lbl_prefixe:'Invoice prefix (2-3 letters)', lbl_email:'Email', lbl_telephone:'Phone',
+btn_save_client:'Save client', btn_new_client:'New client', clients_list_title:'Saved clients', empty_clients:'No clients.', btn_delete:'Delete',
+fact_client_title:'Client', ph_client_search:"Type the client's name...", fact_invoice_title:'Invoice', lbl_num_facture:'Invoice no.', lbl_date:'Date',
+lbl_date_travaillee:'Work date', hint_date_travaillee:'(to attribute revenue to the right month)', lbl_tva_pct:'VAT (%)',
+fact_frais_title:'Travel expenses', lbl_km:'Distance (km)', lbl_tarif_km:'Rate per km', lbl_peage:'Toll', lbl_parking:'Parking',
+toggle_offert:'Discount', toggle_email:'Email', toggle_repas:'Meal', lbl_type:'Type', lbl_valeur:'Value',
+lbl_objet:'Subject', ph_objet:'Invoice (auto number if empty)', lbl_message:'Message', ph_message:'A short note before the invoice (optional)', lbl_montant_repas:'Meal amount',
+fact_prestations_title:'Services', btn_add_line:'+ Add a line', btn_duplicate:'Duplicate',
+btn_generate_preview:'Generate preview', btn_export_pdf:'Export as PDF', btn_send_client:'Send to client',
+hist_title:'Issued invoices', ph_hist_search:'Search (client, invoice no., service keyword)...',
+hist_col_num:'No.', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Status', hist_col_actions:'Actions',
+btn_view:'View', btn_resend:'Resend', empty_invoices:'No invoices issued.',
+status_toutes:'All', status_enregistree:'Saved', status_maj:'Updated', status_envoyee:'Sent', status_payee:'Paid',
+ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', stat_total:'Total',
+ca_col_client:'Client', ca_col_generated:'Revenue generated', empty_data:'No data.',
+franchise_ok:'(VAT exemption active).', franchise_over:'— exemption threshold exceeded, VAT applicable.',
+franchise_prefix:'{year} cumulative revenue: €{ca} / €{seuil}',
+home_title:'Overview', home_sec_mois:'This month (completed)', home_ca_mois:'Monthly revenue (services completed)',
+home_sec_previsionnel:'Forecast', home_prestas_venir:'Upcoming services', home_ca_prevu:'Forecast revenue this month', home_heures_prevues:'Forecast hours this month',
+home_sec_facturation:'Billing', home_factures_attente:'Pending invoices', home_montant_encaisser:'Amount to collect',
+home_next_title:'Next service', empty_next:'No service scheduled.',
+home_actions_title:'Quick actions', btn_new_booking:'+ New service', btn_new_invoice:'+ New invoice', btn_new_client:'+ Add a client',
+plan_venir_title:'Upcoming services', plan_facturer_title:'Services to invoice', empty_venir:'No upcoming services.', empty_facturer:'No services to invoice.',
+btn_invoice:'Invoice', btn_delete_short:'Del.', sans_date:'no date', pointe_prefix:'Clocked: ',
+cal_title:'Calendar', cal_prev_month:'Forecast for the month', cal_forecast_suffix:' € to invoice this month',
+booking_new_title:'New booking', booking_edit_title:'Edit booking', lbl_client:'Client', lbl_nom_prestation:'Service name', ph_nom_prestation:'E.g. Bartending service',
+lbl_addr_prestation:'Service address', ph_addr_prestation:'Event location', lbl_contact_place:'On-site contact', ph_contact_place:'Contact name / phone',
+lbl_date_prestation:'Service date', lbl_de:'From', lbl_a:'To', lbl_taux:'Rate €/h',
+btn_add_planning:'Add to schedule', btn_save_changes:'Save changes', btn_cancel:'Cancel',
+empty_day:'No service that day.', btn_add_service_day:'+ Add a service',
+modal_booking_title:'Service detail', btn_close:'Close',
+row_client:'Client', row_prestation:'Service', row_date:'Date', row_horaires:'Hours', row_reel:'Actual (clocked)', row_taux:'Rate', row_total:'Total', row_adresse:'Address', row_contact:'Contact',
+non_definie:'not set',
+toast_client_email_invalid:'⚠ Invalid client email: {email}',
+toast_old_invoice_no_detail:'⚠ Detail unavailable for this older invoice.',
+toast_invoice_loaded:'✎ Invoice {num} loaded for editing.',
+toast_invoice_duplicated:'✔ New invoice {num} created from {from}.',
+toast_invoice_sent_status:'✔ Invoice {num} sent.', toast_invoice_saved:'✔ Invoice {num} saved.',
+toast_invoice_not_found:'⚠ Invoice not found.',
+toast_sendgrid_missing:'⚠ Missing SendGrid configuration (sending email) or client.',
+toast_invoice_resent:'✔ Invoice resent to {email}.', toast_resend_failed:'✕ Resend failed.', toast_error_generic:'✕ Error: {msg}',
+confirm_delete_invoice:'Permanently delete invoice {num}?', toast_invoice_deleted:'✔ Invoice {num} deleted.',
+toast_status_updated:'✔ Invoice {num} status: {status}.', toast_booking_updated:'✔ Booking updated.', toast_preview_updated:'✔ Preview updated.',
+toast_select_client_save:'⚠ Select a client before saving.',
+toast_set_sendgrid_email:'⚠ Set the sending email in My data → Sending (SendGrid).',
+toast_select_client_send:'⚠ Select a client before sending.', toast_sending:'Sending…',
+toast_invoice_sent:'✔ Invoice sent to {email}.', toast_send_failed:'✕ Send failed{detail}', toast_send_error:'✕ Sending error: {msg}',
+toast_sync_synced:'✔ Synced', toast_sync_error:'✕ Sync error: {msg}', toast_sync_invalid_code:'⚠ Paste a valid code',
+toast_backup_downloaded:'✔ Backup downloaded.', toast_backup_imported:'✔ Data imported. Reloading...', toast_backup_invalid:'✕ Invalid file: {msg}',
+toast_code_copied:'✔ Code copied', toast_info_saved:'✔ Info saved', default_service_label:'Service',
+preview_title:'Invoice preview', title_debut:'Start', title_fin:'End',
+email_default_body:"Hello,\n\nPlease find attached your invoice {num}.\n\nFeel free to contact me with any questions.\n\nBest regards,\n{name}",
+legal_modal_title:'Legal notice',
+inv_facture_label:'Invoice', inv_num:'Invoice no.', inv_date:'Date', inv_de:'From', inv_a:'To',
+inv_desc:'Description', inv_qte:'Qty', inv_unitaire:'Unit price', inv_montant:'Amount',
+inv_sous_total:'Subtotal', inv_tva:'VAT', inv_offert:'Discount', inv_total_regler:'Total due', inv_reglement:'Payment',
+inv_km:'Mileage expenses', inv_peage:'Toll', inv_parking:'Parking', inv_repas:'Meal',
+inv_votre_entreprise:'Your company', inv_titulaire:'Account holder',
+legal_intro:'In accordance with the law, here is the identification information of the publisher of this application.',
+legal_editeur:'Publisher', legal_hebergement:'Hosting', legal_hebergement_txt:'Local application (Mac/PWA) — data is stored on the user\'s devices and synced via Supabase (host: Supabase Inc.).',
+legal_pi:'Intellectual property', legal_pi_txt:'This application and its content are the property of its publisher. Any reproduction is prohibited without authorization.',
+legal_contact:'Contact',
+inv_paiement_reception:'Payment upon receipt of invoice, due within:', inv_jours:'days'
+},
+es:{
+nav_accueil:'Inicio', nav_planning:'Planificación', nav_calendrier:'Calendario', nav_facture:'Factura', nav_historique:'Historial', nav_clients:'Mis clientes', nav_donnees:'Mis datos',
+sec_planning:'Planificación', sec_facturation:'Facturación', sec_clients:'Clientes', sec_parametres:'Ajustes',
+theme_dark_title:'Oscuro', theme_auto_title:'Auto', theme_light_title:'Claro', legal_link:'Aviso legal',
+data_title:'Mis datos', data_info_title:'Información',
+lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
+lbl_tva_regime:'Régimen de IVA', hint_tva_regime:'(cambio automático a 32.000 € de facturación acumulada)',
+opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplicable',
+lbl_rcs:'Mención Registro Mercantil', lbl_paiement:'Forma de pago', lbl_rib:'Datos bancarios / IBAN', ph_rib:'IBAN + BIC',
+btn_save:'Guardar', btn_edit:'Modificar', btn_save_info:'Guardar mis datos',
+data_sendgrid_title:'Envío (SendGrid)', data_sendgrid_sub:'— envío automático de facturas',
+sg_status_on:'Configurada', sg_status_off:'No configurada',
+lbl_sg_key:'Clave API de SendGrid', lbl_sg_from:'Email de envío (verificado en SendGrid)',
+data_sync_title:'Sincronización', sync_intro:'Vincula este dispositivo con otro (Mac / iPhone) para compartir clientes, facturas y planificación.',
+btn_gen_sync:'Generar un código de sincronización', lbl_paste_sync:'O pega un código existente', ph_sync_code:'Código de sincronización', btn_connect:'Conectar',
+sync_code_intro:'Código de sincronización (pégalo en el otro dispositivo):', btn_copy_code:'Copiar código', btn_force_sync:'Forzar sincronización', btn_disconnect_device:'Desconectar este dispositivo',
+data_backup_title:'Copia de seguridad', backup_intro:'Exporta todos tus datos (empresa, clientes, facturas, planificación) a un archivo, para guardar en un lugar seguro o reimportar en otro dispositivo.',
+btn_export_data:'Exportar mis datos', lbl_import_backup:'Importar una copia de seguridad',
+clients_add_title:'Añadir / modificar un cliente', lbl_nom_societe:'Nombre de la empresa', lbl_prefixe:'Prefijo de factura (2-3 letras)', lbl_email:'Email', lbl_telephone:'Teléfono',
+btn_save_client:'Guardar cliente', btn_new_client:'Nuevo cliente', clients_list_title:'Clientes guardados', empty_clients:'Ningún cliente.', btn_delete:'Eliminar',
+fact_client_title:'Cliente', ph_client_search:'Escribe el nombre del cliente...', fact_invoice_title:'Factura', lbl_num_facture:'N.º factura', lbl_date:'Fecha',
+lbl_date_travaillee:'Fecha de trabajo', hint_date_travaillee:'(para asignar la facturación al mes correcto)', lbl_tva_pct:'IVA (%)',
+fact_frais_title:'Gastos de desplazamiento', lbl_km:'Kilómetros recorridos', lbl_tarif_km:'Tarifa por km', lbl_peage:'Peaje', lbl_parking:'Aparcamiento',
+toggle_offert:'Descuento', toggle_email:'Email', toggle_repas:'Comida', lbl_type:'Tipo', lbl_valeur:'Valor',
+lbl_objet:'Asunto', ph_objet:'Factura (número automático si está vacío)', lbl_message:'Mensaje', ph_message:'Una nota antes de la factura (opcional)', lbl_montant_repas:'Importe de la comida',
+fact_prestations_title:'Servicios', btn_add_line:'+ Añadir una línea', btn_duplicate:'Duplicar',
+btn_generate_preview:'Generar vista previa', btn_export_pdf:'Exportar en PDF', btn_send_client:'Enviar al cliente',
+hist_title:'Facturas emitidas', ph_hist_search:'Buscar (cliente, n.º de factura, palabra clave de un servicio)...',
+hist_col_num:'N.º', hist_col_client:'Cliente', hist_col_date:'Fecha', hist_col_total:'Total', hist_col_statut:'Estado', hist_col_actions:'Acciones',
+btn_view:'Ver', btn_resend:'Reenviar', empty_invoices:'Ninguna factura emitida.',
+status_toutes:'Todas', status_enregistree:'Guardada', status_maj:'Actualizada', status_envoyee:'Enviada', status_payee:'Pagada',
+ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', stat_total:'Total',
+ca_col_client:'Cliente', ca_col_generated:'Facturación generada', empty_data:'Sin datos.',
+franchise_ok:'(exención de IVA activa).', franchise_over:'— umbral de exención superado, IVA aplicable.',
+franchise_prefix:'Facturación acumulada {year}: {ca} € / {seuil} €',
+home_title:'Resumen', home_sec_mois:'Este mes (realizado)', home_ca_mois:'Facturación del mes (servicios realizados)',
+home_sec_previsionnel:'Previsión', home_prestas_venir:'Servicios próximos', home_ca_prevu:'Facturación prevista este mes', home_heures_prevues:'Horas previstas este mes',
+home_sec_facturation:'Facturación', home_factures_attente:'Facturas pendientes', home_montant_encaisser:'Importe a cobrar',
+home_next_title:'Próximo servicio', empty_next:'Ningún servicio programado.',
+home_actions_title:'Acciones rápidas', btn_new_booking:'+ Nuevo servicio', btn_new_invoice:'+ Nueva factura', btn_new_client:'+ Añadir un cliente',
+plan_venir_title:'Servicios próximos', plan_facturer_title:'Servicios a facturar', empty_venir:'Ningún servicio próximo.', empty_facturer:'Ningún servicio a facturar.',
+btn_invoice:'Facturar', btn_delete_short:'Elim.', sans_date:'sin fecha', pointe_prefix:'Fichado: ',
+cal_title:'Calendario', cal_prev_month:'Previsión del mes', cal_forecast_suffix:' € a facturar este mes',
+booking_new_title:'Nueva reserva', booking_edit_title:'Modificar reserva', lbl_client:'Cliente', lbl_nom_prestation:'Nombre del servicio', ph_nom_prestation:'Ej. Servicio de camarero',
+lbl_addr_prestation:'Dirección del servicio', ph_addr_prestation:'Lugar del evento', lbl_contact_place:'Contacto en el lugar', ph_contact_place:'Nombre / teléfono del contacto',
+lbl_date_prestation:'Fecha del servicio', lbl_de:'Desde', lbl_a:'Hasta', lbl_taux:'Tarifa €/h',
+btn_add_planning:'Añadir a la planificación', btn_save_changes:'Guardar cambios', btn_cancel:'Cancelar',
+empty_day:'Ningún servicio ese día.', btn_add_service_day:'+ Añadir un servicio',
+modal_booking_title:'Detalle del servicio', btn_close:'Cerrar',
+row_client:'Cliente', row_prestation:'Servicio', row_date:'Fecha', row_horaires:'Horario', row_reel:'Real (fichado)', row_taux:'Tarifa', row_total:'Total', row_adresse:'Dirección', row_contact:'Contacto',
+non_definie:'sin definir',
+toast_client_email_invalid:'⚠ Email de cliente no válido: {email}',
+toast_old_invoice_no_detail:'⚠ Detalle no disponible para esta factura antigua.',
+toast_invoice_loaded:'✎ Factura {num} cargada para editar.',
+toast_invoice_duplicated:'✔ Nueva factura {num} creada a partir de {from}.',
+toast_invoice_sent_status:'✔ Factura {num} enviada.', toast_invoice_saved:'✔ Factura {num} guardada.',
+toast_invoice_not_found:'⚠ Factura no encontrada.',
+toast_sendgrid_missing:'⚠ Falta la configuración de SendGrid (email de envío) o el cliente.',
+toast_invoice_resent:'✔ Factura reenviada a {email}.', toast_resend_failed:'✕ Error al reenviar.', toast_error_generic:'✕ Error: {msg}',
+confirm_delete_invoice:'¿Eliminar definitivamente la factura {num}?', toast_invoice_deleted:'✔ Factura {num} eliminada.',
+toast_status_updated:'✔ Estado de la factura {num}: {status}.', toast_booking_updated:'✔ Reserva modificada.', toast_preview_updated:'✔ Vista previa actualizada.',
+toast_select_client_save:'⚠ Selecciona un cliente antes de guardar.',
+toast_set_sendgrid_email:'⚠ Indica el email de envío en Mis datos → Envío (SendGrid).',
+toast_select_client_send:'⚠ Selecciona un cliente antes de enviar.', toast_sending:'Enviando…',
+toast_invoice_sent:'✔ Factura enviada a {email}.', toast_send_failed:'✕ Error al enviar{detail}', toast_send_error:'✕ Error de envío: {msg}',
+toast_sync_synced:'✔ Sincronizado', toast_sync_error:'✕ Error de sincronización: {msg}', toast_sync_invalid_code:'⚠ Pega un código válido',
+toast_backup_downloaded:'✔ Copia de seguridad descargada.', toast_backup_imported:'✔ Datos importados. Recargando...', toast_backup_invalid:'✕ Archivo no válido: {msg}',
+toast_code_copied:'✔ Código copiado', toast_info_saved:'✔ Datos guardados', default_service_label:'Servicio',
+preview_title:'Vista previa de factura', title_debut:'Inicio', title_fin:'Fin',
+email_default_body:"Hola,\n\nAdjunto encontrarás tu factura {num}.\n\nNo dudes en contactarme si tienes alguna pregunta.\n\nSaludos,\n{name}",
+legal_modal_title:'Aviso legal',
+inv_facture_label:'Factura', inv_num:'N.º de factura', inv_date:'Fecha', inv_de:'De', inv_a:'Para',
+inv_desc:'Descripción', inv_qte:'Cant.', inv_unitaire:'Precio unitario', inv_montant:'Importe',
+inv_sous_total:'Subtotal', inv_tva:'IVA', inv_offert:'Descuento', inv_total_regler:'Total a pagar', inv_reglement:'Pago',
+inv_km:'Gastos de kilometraje', inv_peage:'Peaje', inv_parking:'Aparcamiento', inv_repas:'Comida',
+inv_votre_entreprise:'Tu empresa', inv_titulaire:'Titular',
+legal_intro:'De acuerdo con la ley, aquí está la información de identificación del editor de esta aplicación.',
+legal_editeur:'Editor', legal_hebergement:'Alojamiento', legal_hebergement_txt:'Aplicación local (Mac/PWA): los datos se almacenan en los dispositivos del usuario y se sincronizan mediante Supabase (proveedor: Supabase Inc.).',
+legal_pi:'Propiedad intelectual', legal_pi_txt:'Esta aplicación y su contenido son propiedad de su editor. Queda prohibida su reproducción sin autorización.',
+legal_contact:'Contacto',
+inv_paiement_reception:'Pago a la recepción de la factura, plazo:', inv_jours:'días'
+}
+};
+let LANG = localStorage.getItem('inv_lang') || 'fr';
+function t(key, vars){
+  let s = (I18N[LANG] && I18N[LANG][key]) || I18N.fr[key] || key;
+  if(vars) Object.keys(vars).forEach(k=>{ s = s.split('{'+k+'}').join(vars[k]); });
+  return s;
+}
+function locale(){ return LOCALE_MAP[LANG] || 'fr-FR'; }
+function applyI18n(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.title = t(el.getAttribute('data-i18n-title')); });
+  ['fr','en','es'].forEach(l=>{ const b=document.getElementById('lang-'+l); if(b) b.classList.toggle('active', l===LANG); });
+}
+function setLang(l){
+  LANG = l;
+  localStorage.setItem('inv_lang', l);
+  applyI18n();
+  refreshAllViews();
+  queueSync();
+}
+const STATUS_KEYS = {'Enregistrée':'status_enregistree','Mise à jour':'status_maj','Envoyée':'status_envoyee','Payée':'status_payee','Toutes':'status_toutes'};
+function statusLabel(s){ return STATUS_KEYS[s] ? t(STATUS_KEYS[s]) : s; }
+function refreshAllViews(){
+  refreshInfoView(); updateSgStatus();
+  renderClientList(); refreshClientSelect(); renderHistory(); renderCA(); renderPlanning(); renderCalendarTab(); renderDashboard(); render();
+}
+function openLegalModal(){
+  const f = store('from');
+  legalModalBody.innerHTML = `
+    <p>${t('legal_intro')}</p>
+    <p style="margin-top:10px;"><b>${t('legal_editeur')}</b><br>${f.name||''}<br>${(f.addr||'').replace(/\n/g,'<br>')}<br>SIRET : ${f.siret||'—'}<br>${f.contact||''}</p>
+    <p style="margin-top:10px;"><b>${t('legal_hebergement')}</b><br>${t('legal_hebergement_txt')}</p>
+    <p style="margin-top:10px;"><b>${t('legal_pi')}</b><br>${t('legal_pi_txt')}</p>
+    <p style="margin-top:10px;"><b>${t('legal_contact')}</b><br>${f.contact||''}</p>`;
+  legalModal.style.display = 'flex';
+}
+function closeLegalModal(){ legalModal.style.display = 'none'; }
 function showToast(msg, duration){
   const stack = document.getElementById('toastStack');
   if(!stack) return;
@@ -638,11 +976,13 @@ function collectSyncPayload(){
   const data = {};
   Object.keys(SYNC_KEYS).forEach(k=>{ data[k] = JSON.parse(localStorage.getItem(k) || SYNC_KEYS[k]); });
   data.inv_theme = localStorage.getItem('inv_theme') || 'auto';
+  data.inv_lang = localStorage.getItem('inv_lang') || 'fr';
   return data;
 }
 function applySyncPayload(data){
   Object.keys(SYNC_KEYS).forEach(k=>{ if(data[k]!==undefined) localStorage.setItem(k, JSON.stringify(data[k])); });
   if(data.inv_theme) localStorage.setItem('inv_theme', data.inv_theme);
+  if(data.inv_lang) localStorage.setItem('inv_lang', data.inv_lang);
 }
 function updateSyncStatus(msg){ setStatusMsg(document.getElementById('syncStatus'), msg); }
 function renderSyncUI(){
@@ -667,17 +1007,17 @@ async function pushSync(){
     const { data, error } = await getSb().from(SYNC_TABLE)
       .upsert({ sync_code: code, data: collectSyncPayload(), updated_at: new Date().toISOString() })
       .select('updated_at').single();
-    if(error){ updateSyncStatus('✕ Erreur sync : '+error.message); return; }
+    if(error){ updateSyncStatus(t('toast_sync_error',{msg:error.message})); return; }
     localStorage.setItem('syncLastAppliedAt', data.updated_at);
-    updateSyncStatus('✔ Synchronisé');
-  }catch(e){ updateSyncStatus('✕ Erreur sync : '+e.message); }
+    updateSyncStatus(t('toast_sync_synced'));
+  }catch(e){ updateSyncStatus(t('toast_sync_error',{msg:e.message})); }
 }
 async function pullSync(force){
   const code = getSyncCode();
   if(!code) return;
   try{
     const { data: row, error } = await getSb().from(SYNC_TABLE).select('data,updated_at').eq('sync_code', code).maybeSingle();
-    if(error){ updateSyncStatus('✕ Erreur sync : '+error.message); return; }
+    if(error){ updateSyncStatus(t('toast_sync_error',{msg:error.message})); return; }
     if(!row){ if(force) await pushSync(); return; }
     const lastApplied = localStorage.getItem('syncLastAppliedAt');
     if(!force && lastApplied===row.updated_at) return;
@@ -686,7 +1026,7 @@ async function pullSync(force){
     localStorage.setItem('syncLastAppliedAt', row.updated_at);
     syncBusy = false;
     if(lastApplied!==row.updated_at) location.reload();
-  }catch(e){ updateSyncStatus('✕ Erreur sync : '+e.message); syncBusy=false; }
+  }catch(e){ updateSyncStatus(t('toast_sync_error',{msg:e.message})); syncBusy=false; }
 }
 function genSyncCode(){
   const bytes = crypto.getRandomValues(new Uint8Array(16));
@@ -697,7 +1037,7 @@ function genSyncCode(){
 }
 function connectSyncCode(){
   const code = (document.getElementById('syncCodeInput').value||'').trim();
-  if(!code){ updateSyncStatus('⚠ Colle un code valide'); return; }
+  if(!code){ updateSyncStatus(t('toast_sync_invalid_code')); return; }
   localStorage.setItem('syncCode', code);
   localStorage.removeItem('syncLastAppliedAt');
   renderSyncUI();
@@ -717,7 +1057,7 @@ function exportBackup(){
   a.download = 'bill-ops-backup-'+todayStr()+'.json';
   a.click();
   URL.revokeObjectURL(url);
-  setStatusMsg(document.getElementById('backupStatus'), '✔ Sauvegarde téléchargée.');
+  setStatusMsg(document.getElementById('backupStatus'), t('toast_backup_downloaded'));
 }
 function importBackup(input){
   const file = input.files[0];
@@ -727,9 +1067,9 @@ function importBackup(input){
     try{
       const data = JSON.parse(reader.result);
       applySyncPayload(data);
-      setStatusMsg(document.getElementById('backupStatus'), '✔ Données importées. Rechargement...');
+      setStatusMsg(document.getElementById('backupStatus'), t('toast_backup_imported'));
       setTimeout(()=>location.reload(), 800);
-    }catch(e){ setStatusMsg(document.getElementById('backupStatus'), '✕ Fichier invalide : '+e.message); }
+    }catch(e){ setStatusMsg(document.getElementById('backupStatus'), t('toast_backup_invalid',{msg:e.message})); }
   };
   reader.readAsText(file);
   input.value = '';
@@ -738,7 +1078,7 @@ function copySyncCode(){
   const code = getSyncCode();
   if(!code) return;
   navigator.clipboard?.writeText(code);
-  updateSyncStatus('✔ Code copié');
+  updateSyncStatus(t('toast_code_copied'));
 }
 
 function setTheme(t){
@@ -790,9 +1130,25 @@ function showTab(name){
   if(name==='accueil') renderDashboard();
 }
 
+function tvaRegimeLabel(){ return fromTva.value ? t('opt_tva_franchise') : t('opt_tva_applicable'); }
+function refreshInfoView(){
+  viewName.textContent = fromName.value;
+  viewAddr.textContent = fromAddr.value;
+  viewContact.textContent = fromContact.value;
+  viewSiret.textContent = fromSiret.value;
+  viewTvaLabel.textContent = tvaRegimeLabel();
+  viewPay.textContent = fromPay.value;
+}
+function toggleInfoEdit(show){
+  infoView.style.display = show ? 'none' : 'grid';
+  infoEditBtn.style.display = show ? 'none' : 'inline-flex';
+  infoEdit.style.display = show ? 'block' : 'none';
+}
 function saveFrom(){
   set('from', {name:fromName.value,tagline:fromTagline.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value,tva:fromTva.value,rcs:fromRcs.value,pay:fromPay.value,rib:fromRib.value});
-  setStatusMsg(fromStatus, '✔ Infos enregistrées');
+  refreshInfoView();
+  toggleInfoEdit(false);
+  setStatusMsg(fromStatus, t('toast_info_saved'));
   setTimeout(()=>fromStatus.textContent='',2000);
 }
 function loadFrom(){
@@ -800,12 +1156,13 @@ function loadFrom(){
   fromName.value=f.name||'Jerome Jarrige'; fromTagline.value=f.tagline||'Paris · Monaco · Cannes · Saint-Tropez'; fromAddr.value=f.addr||'Intelligence Spotlighted\n63, avenue Pasteur — 93100 Montreuil'; fromContact.value=f.contact||'contact@intelligencespotlighted.fr — www.intelligencespotlighted.fr'; fromSiret.value=f.siret||'';
   fromTva.value=f.tva??'TVA non applicable, art. 293 B du CGI'; fromRcs.value=f.rcs||"Dispensé d'immatriculation au RCS et au RM"; fromPay.value=f.pay||'Virement bancaire';
   fromRib.value=f.rib||'IBAN : FR76 1741 8000 0100 0110 3467 090\nBIC : SNNNFR22XXX';
+  refreshInfoView();
 }
 function formatFrDate(d){
   if(!d) return '';
   const dt = new Date(d+'T00:00:00');
   const day = String(dt.getDate()).padStart(2,'0');
-  const month = dt.toLocaleDateString('fr-FR',{month:'long'});
+  const month = dt.toLocaleDateString(locale(),{month:'long'});
   return `${day} ${month.charAt(0).toUpperCase()+month.slice(1)} ${dt.getFullYear()}`;
 }
 function localHM(iso){
@@ -829,19 +1186,25 @@ function formatFrDatesGrouped(dates){
   const sameMonth = parsed.every(dt=>dt.getMonth()===parsed[0].getMonth() && dt.getFullYear()===parsed[0].getFullYear());
   if(sameMonth){
     const days = parsed.map(dt=>dt.getDate());
-    const monthName = parsed[0].toLocaleDateString('fr-FR',{month:'long'});
+    const monthName = parsed[0].toLocaleDateString(locale(),{month:'long'});
     const monthCap = monthName.charAt(0).toUpperCase()+monthName.slice(1);
-    const daysStr = days.length===1 ? String(days[0]) : days.slice(0,-1).join(', ')+' et '+days[days.length-1];
+    const daysStr = days.length===1 ? String(days[0]) : days.slice(0,-1).join(', ')+' '+(LANG==='en'?'and':LANG==='es'?'y':'et')+' '+days[days.length-1];
     return `${daysStr} ${monthCap} ${parsed[0].getFullYear()}`;
   }
   return parsed.map(dt=>formatFrDate(dt.toISOString().slice(0,10))).join(', ');
 }
-function saveSg(){ set('sg', {key:sgKey.value, from:sgFrom.value}); updateSgStatus(); }
+function toggleSgEdit(show){
+  sgView.style.display = show ? 'none' : 'block';
+  sgEdit.style.display = show ? 'block' : 'none';
+}
+function saveSg(){ set('sg', {key:sgKey.value, from:sgFrom.value}); updateSgStatus(); toggleSgEdit(false); }
 function loadSg(){ const s=store('sg'); sgKey.value=s.key||''; sgFrom.value=s.from||''; updateSgStatus(); }
 function updateSgStatus(){
   const on = !!sgKey.value.trim();
-  sgStatus.textContent = on ? 'Configurée' : 'Non configurée';
+  sgStatus.textContent = on ? t('sg_status_on') : t('sg_status_off');
   sgStatus.className = 'sg-status ' + (on ? 'on' : 'off');
+  sgFromViewWrap.style.display = on && sgFrom.value.trim() ? 'block' : 'none';
+  viewSgFrom.textContent = sgFrom.value;
 }
 
 function suggestPrefix(){
@@ -858,7 +1221,7 @@ function isValidEmail(email){
 }
 function saveClient(){
   if(cliEmail.value.trim() && !isValidEmail(cliEmail.value)){
-    showToast('⚠ Email client invalide : '+cliEmail.value);
+    showToast(t('toast_client_email_invalid',{email:cliEmail.value}));
     return;
   }
   const clients = storeArr('clients');
@@ -881,9 +1244,9 @@ function renderClientList(){
     <div class="client-card">
       <b>${c.name}</b> <span class="tag">[${c.prefix}]</span><br>
       ${c.email}${c.phone?' · '+c.phone:''}<br>${c.addr}<br>
-      <button class="btn-line" onclick="editClient(${i})">Modifier</button>
-      <button class="btn-line" onclick="deleteClient(${i})">Supprimer</button>
-    </div>`).join('') || '<p style="color:var(--text2);font-size:12px;">Aucun client.</p>';
+      <button class="btn-line" onclick="editClient(${i})">${t('btn_edit')}</button>
+      <button class="btn-line" onclick="deleteClient(${i})">${t('btn_delete')}</button>
+    </div>`).join('') || `<p style="color:var(--text2);font-size:12px;">${t('empty_clients')}</p>`;
 }
 function refreshClientSelect(){
   const clients = storeArr('clients');
@@ -923,7 +1286,7 @@ function collectInvoiceState(){
 }
 function editInvoice(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
-  if(!inv || !inv.state){ showToast('⚠ Détail non disponible pour cette facture ancienne.'); return; }
+  if(!inv || !inv.state){ showToast(t('toast_old_invoice_no_detail')); return; }
   const s = inv.state;
   clientSelect.value = s.client;
   lastNumberedClient = s.client;
@@ -946,11 +1309,11 @@ function editInvoice(num){
   (s.items&&s.items.length ? s.items : [{}]).forEach(it=>addItem(it.desc||'', it.qty||'', it.rate||'', it.from||'', it.to||'', (it.dates&&it.dates.length) ? it.dates : (it.date ? [it.date] : [])));
   render();
   showTab('facture');
-  showToast('✎ Facture '+num+' chargée pour modification.');
+  showToast(t('toast_invoice_loaded',{num}));
 }
 function duplicateInvoice(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
-  if(!inv || !inv.state){ showToast('⚠ Détail non disponible pour cette facture ancienne.'); return; }
+  if(!inv || !inv.state){ showToast(t('toast_old_invoice_no_detail')); return; }
   const s = inv.state;
   clientSelect.value = s.client;
   lastNumberedClient = s.client;
@@ -974,7 +1337,7 @@ function duplicateInvoice(num){
   (s.items&&s.items.length ? s.items : [{}]).forEach(it=>addItem(it.desc||'', it.qty||'', it.rate||'', it.from||'', it.to||'', (it.dates&&it.dates.length) ? it.dates : (it.date ? [it.date] : [])));
   render();
   showTab('facture');
-  showToast('✔ Nouvelle facture '+invNum.value+' créée à partir de '+num+'.');
+  showToast(t('toast_invoice_duplicated',{num:invNum.value, from:num}));
 }
 function saveToHistory(status){
   const c = currentClient();
@@ -998,7 +1361,7 @@ function saveToHistory(status){
   };
   if(idx>=0) invoices[idx]=entry; else invoices.push(entry);
   set('invoices', invoices);
-  showToast(status==='Envoyée' ? '✔ Facture '+invNum.value+' envoyée.' : '✔ Facture '+invNum.value+' enregistrée.');
+  showToast(status==='Envoyée' ? t('toast_invoice_sent_status',{num:invNum.value}) : t('toast_invoice_saved',{num:invNum.value}));
 }
 function viewInvoice(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
@@ -1006,7 +1369,7 @@ function viewInvoice(num){
   const styles = document.querySelector('style').outerHTML;
   const html = '<html data-theme="light"><head><title>'+inv.num+'</title>'+styles+'</head><body style="margin:0;background:var(--bg);display:flex;justify-content:center;padding:40px;">'+inv.html+'</body></html>';
   if(window.electronBridge?.openInvoiceWindow){
-    window.electronBridge.openInvoiceWindow(html, 'Facture '+inv.num);
+    window.electronBridge.openInvoiceWindow(html, t('inv_facture_label')+' '+inv.num);
   } else {
     const w = window.open('', '_blank');
     w.document.write(html);
@@ -1016,15 +1379,15 @@ function viewInvoice(num){
 function openLivePreview(){
   render();
   const styles = document.querySelector('style').outerHTML;
-  const html = '<html data-theme="light"><head><title>Aperçu facture</title>'+styles+'</head><body style="margin:0;background:var(--bg);display:flex;justify-content:center;padding:40px;">'+document.getElementById('invoice').outerHTML+'</body></html>';
+  const html = '<html data-theme="light"><head><title>'+t('preview_title')+'</title>'+styles+'</head><body style="margin:0;background:var(--bg);display:flex;justify-content:center;padding:40px;">'+document.getElementById('invoice').outerHTML+'</body></html>';
   if(window.electronBridge?.openInvoiceWindow){
-    window.electronBridge.openInvoiceWindow(html, 'Aperçu facture');
+    window.electronBridge.openInvoiceWindow(html, t('preview_title'));
   } else {
     const w = window.open('', '_blank');
     w.document.write(html);
     w.document.close();
   }
-  showToast('✔ Aperçu mis à jour.', 2000);
+  showToast(t('toast_preview_updated'), 2000);
 }
 function pdfOptions(filename){
   return {
@@ -1042,7 +1405,7 @@ function exportInvoicePdf(){
 }
 function downloadInvoicePdf(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
-  if(!inv){ showToast('⚠ Facture introuvable.'); return; }
+  if(!inv){ showToast(t('toast_invoice_not_found')); return; }
   const container = document.createElement('div');
   container.style.cssText = 'position:fixed;left:-9999px;top:0;background:#fff;';
   container.setAttribute('data-theme','light');
@@ -1053,21 +1416,21 @@ function downloadInvoicePdf(num){
 async function resendInvoice(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   const c = storeArr('clients').find(cl=>cl.name===inv.client);
-  if(!sgFrom.value.trim() || !c){ showToast('⚠ Configuration SendGrid (email d\'envoi) ou client manquant.'); return; }
-  if(!isValidEmail(c.email)){ showToast('⚠ Email client invalide : '+c.email); return; }
+  if(!sgFrom.value.trim() || !c){ showToast(t('toast_sendgrid_missing')); return; }
+  if(!isValidEmail(c.email)){ showToast(t('toast_client_email_invalid',{email:c.email})); return; }
   try{
     const res = await fetch(SENDGRID_PROXY_URL, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({apiKey: sgKey.value, from: sgFrom.value.trim(), to: c.email, subject:'Facture '+inv.num, html: inv.html})
+      body: JSON.stringify({apiKey: sgKey.value, from: sgFrom.value.trim(), to: c.email, subject:t('inv_facture_label')+' '+inv.num, html: inv.html})
     });
-    showToast(res.ok ? '✔ Facture renvoyée à '+c.email+'.' : '✕ Échec du renvoi.');
+    showToast(res.ok ? t('toast_invoice_resent',{email:c.email}) : t('toast_resend_failed'));
     if(res.ok){
       const invoices = storeArr('invoices');
       invoices.find(i=>i.num===num).status='Envoyée';
       set('invoices', invoices);
       renderHistory();
     }
-  }catch(e){ showToast('✕ Erreur : '+e.message); }
+  }catch(e){ showToast(t('toast_error_generic',{msg:e.message})); }
 }
 let histStatusFilter = 'Toutes';
 function setHistFilter(status){
@@ -1078,7 +1441,7 @@ function renderHistFilters(allInvoices){
   const statuses = ['Toutes','Enregistrée','Mise à jour','Envoyée','Payée'];
   histFilters.innerHTML = statuses.map(s=>{
     const count = s==='Toutes' ? allInvoices.length : allInvoices.filter(i=>i.status===s).length;
-    return `<span class="hist-filter${histStatusFilter===s?' active':''}" onclick="setHistFilter('${s}')">${s} (${count})</span>`;
+    return `<span class="hist-filter${histStatusFilter===s?' active':''}" onclick="setHistFilter('${s}')">${statusLabel(s)} (${count})</span>`;
   }).join('');
 }
 function renderHistory(){
@@ -1092,34 +1455,34 @@ function renderHistory(){
   });
   if(histStatusFilter!=='Toutes') invoices = invoices.filter(i=>i.status===histStatusFilter);
   histList.innerHTML = invoices.length ? `
-    <table><thead><tr><th>N°</th><th>Client</th><th>Date</th><th>Total</th><th>Statut</th><th>Actions</th></tr></thead>
+    <table><thead><tr><th>${t('hist_col_num')}</th><th>${t('hist_col_client')}</th><th>${t('hist_col_date')}</th><th>${t('hist_col_total')}</th><th>${t('hist_col_statut')}</th><th>${t('hist_col_actions')}</th></tr></thead>
     <tbody>${invoices.map(i=>`<tr>
       <td>${i.num}</td><td>${i.client}</td><td>${i.date||''}</td><td class="num">${i.total}</td>
       <td>
         <select onchange="updateInvoiceStatus('${i.num}', this.value)" style="width:auto;padding:3px 6px;font-size:11px;font-weight:600;color:${(i.status==='Envoyée'||i.status==='Payée')?'var(--green)':'var(--gold)'};">
-          <option value="Enregistrée"${i.status==='Enregistrée'?' selected':''}>Enregistrée</option>
-          <option value="Mise à jour"${i.status==='Mise à jour'?' selected':''}>Mise à jour</option>
-          <option value="Envoyée"${i.status==='Envoyée'?' selected':''}>Envoyée</option>
-          <option value="Payée"${i.status==='Payée'?' selected':''}>Payée</option>
+          <option value="Enregistrée"${i.status==='Enregistrée'?' selected':''}>${t('status_enregistree')}</option>
+          <option value="Mise à jour"${i.status==='Mise à jour'?' selected':''}>${t('status_maj')}</option>
+          <option value="Envoyée"${i.status==='Envoyée'?' selected':''}>${t('status_envoyee')}</option>
+          <option value="Payée"${i.status==='Payée'?' selected':''}>${t('status_payee')}</option>
         </select>
       </td>
       <td>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="viewInvoice('${i.num}')">Voir</button>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="editInvoice('${i.num}')">Modifier</button>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="duplicateInvoice('${i.num}')">Dupliquer</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="viewInvoice('${i.num}')">${t('btn_view')}</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="editInvoice('${i.num}')">${t('btn_edit')}</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="duplicateInvoice('${i.num}')">${t('btn_duplicate')}</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="downloadInvoicePdf('${i.num}')">PDF</button>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="resendInvoice('${i.num}')">Renvoyer</button>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0;color:var(--red);" onclick="deleteInvoice('${i.num}')">Supprimer</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="resendInvoice('${i.num}')">${t('btn_resend')}</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0;color:var(--red);" onclick="deleteInvoice('${i.num}')">${t('btn_delete')}</button>
       </td>
     </tr>`).join('')}</tbody></table>
-  ` : '<p style="color:var(--text3);font-size:12px;">Aucune facture émise.</p>';
+  ` : `<p style="color:var(--text3);font-size:12px;">${t('empty_invoices')}</p>`;
 }
 function deleteInvoice(num){
-  if(!confirm('Supprimer définitivement la facture '+num+' ?')) return;
+  if(!confirm(t('confirm_delete_invoice',{num}))) return;
   set('invoices', storeArr('invoices').filter(i=>i.num!==num));
   renderHistory();
   renderCA();
-  showToast('✔ Facture '+num+' supprimée.');
+  showToast(t('toast_invoice_deleted',{num}));
 }
 function updateInvoiceStatus(num, newStatus){
   const invoices = storeArr('invoices');
@@ -1129,14 +1492,14 @@ function updateInvoiceStatus(num, newStatus){
   set('invoices', invoices);
   renderHistory();
   renderCA();
-  showToast('✔ Statut de la facture '+num+' : '+newStatus+'.');
+  showToast(t('toast_status_updated',{num, status:statusLabel(newStatus)}));
 }
 function renderCaChart(invoices, amt){
   const now = new Date();
   const months = [];
   for(let i=11;i>=0;i--){
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    months.push({key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: d.toLocaleDateString('fr-FR',{month:'short'}), current: i===0});
+    months.push({key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: d.toLocaleDateString(locale(),{month:'short'}), current: i===0});
   }
   const values = months.map(m=>invoices.filter(i=>invoiceEventMonth(i)===m.key).reduce((s,i)=>s+amt(i),0));
   const max = Math.max(...values, 1);
@@ -1160,20 +1523,20 @@ function renderCA(){
   const franchiseDepassee = caYear > SEUIL_FRANCHISE_TVA;
   caStats.innerHTML = `
     <div class="stat-row">
-      <div class="stat-mini"><div class="stat-mini-value">${caMonth.toFixed(2)} €</div><div class="stat-mini-label">Ce mois</div></div>
-      <div class="stat-mini"><div class="stat-mini-value">${caYear.toFixed(2)} €</div><div class="stat-mini-label">Cette année</div></div>
-      <div class="stat-mini"><div class="stat-mini-value">${totalCA.toFixed(2)} €</div><div class="stat-mini-label">Total</div></div>
+      <div class="stat-mini"><div class="stat-mini-value">${caMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_ce_mois')}</div></div>
+      <div class="stat-mini"><div class="stat-mini-value">${caYear.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_cette_annee')}</div></div>
+      <div class="stat-mini"><div class="stat-mini-value">${totalCA.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_total')}</div></div>
     </div>
     <div style="font-size:11px;margin-bottom:14px;color:${franchiseDepassee?'var(--red)':'var(--text2)'};">
-      ${franchiseDepassee ? '⚠' : ''} CA ${yearKey} cumulé : ${caYear.toFixed(2)} € / ${SEUIL_FRANCHISE_TVA} € ${franchiseDepassee ? '— seuil de franchise dépassé, TVA applicable.' : '(franchise en base active).'}
+      ${franchiseDepassee ? '⚠' : ''} ${t('franchise_prefix',{year:yearKey, ca:caYear.toFixed(2), seuil:SEUIL_FRANCHISE_TVA})} ${franchiseDepassee ? t('franchise_over') : t('franchise_ok')}
     </div>`;
   const byClient = {};
   invoices.forEach(i=>{ byClient[i.client] = (byClient[i.client]||0) + invoiceAmt(i); });
   const rows = Object.entries(byClient).sort((a,b)=>b[1]-a[1]);
   caList.innerHTML = rows.length ? `
-    <table><thead><tr><th>Client</th><th class="num">CA généré</th></tr></thead>
+    <table><thead><tr><th>${t('ca_col_client')}</th><th class="num">${t('ca_col_generated')}</th></tr></thead>
     <tbody>${rows.map(([c,v])=>`<tr><td>${c}</td><td class="num">${v.toFixed(2)} €</td></tr>`).join('')}</tbody></table>
-  ` : '<p style="color:var(--text3);font-size:12px;">Aucune donnée.</p>';
+  ` : `<p style="color:var(--text3);font-size:12px;">${t('empty_data')}</p>`;
 }
 function renderDashboard(){
   const bookings = storeArr('bookings');
@@ -1206,12 +1569,12 @@ function renderDashboard(){
     const c = clients.find(cl=>cl.name===next.client);
     const lieu = next.addr || (c && c.addr) || '';
     dashNext.innerHTML = `
-      <div class="dash-next-date">${new Date(next.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div>
+      <div class="dash-next-date">${new Date(next.date).toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'long'})}</div>
       ${next.from&&next.to ? `<div class="dash-next-time">${next.from} – ${next.to}</div>` : ''}
       <div class="dash-next-client">${next.client}${next.label?' — '+next.label:''}</div>
       ${lieu ? `<div class="dash-next-lieu">${lieu}</div>` : ''}`;
   } else {
-    dashNext.innerHTML = '<p style="color:var(--text3);font-size:12px;">Aucune prestation programmée.</p>';
+    dashNext.innerHTML = `<p style="color:var(--text3);font-size:12px;">${t('empty_next')}</p>`;
   }
 }
 function dashNewBooking(){
@@ -1271,7 +1634,7 @@ function clientColor(name){
 function renderCalendar(){
   const bookings = storeArr('bookings');
   const y = calDate.getFullYear(), m = calDate.getMonth();
-  bkCalLabel.textContent = calDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  bkCalLabel.textContent = calDate.toLocaleDateString(locale(),{month:'long',year:'numeric'});
   const first = new Date(y,m,1);
   const startOffset = (first.getDay()+6)%7; // lundi=0
   const daysInMonth = new Date(y,m+1,0).getDate();
@@ -1288,7 +1651,7 @@ function renderCalendar(){
     byDay[day].names.push({client:b.client, text: timePrefix + (b.label ? b.client+' — '+b.label : b.client)});
   });
   const todayKey = todayStr();
-  let html = ['L','M','M','J','V','S','D'].map(d=>`<div style="font-size:10px;color:var(--text3);text-align:center;">${d}</div>`).join('');
+  let html = WEEKDAY_LETTERS[LANG].map(d=>`<div style="font-size:10px;color:var(--text3);text-align:center;">${d}</div>`).join('');
   for(let i=0;i<startOffset;i++) html += `<div class="cal-day empty"></div>`;
   for(let d=1;d<=daysInMonth;d++){
     const info = byDay[d];
@@ -1298,7 +1661,8 @@ function renderCalendar(){
     if(info){
       const shown = info.names.slice(0,2);
       const extra = info.names.length - shown.length;
-      const namesHtml = shown.map(n=>`<div class="cal-names"><span class="cal-dot" style="background:${clientColor(n.client)};"></span>${n.text}</div>`).join('') + (extra>0 ? `<div class="cal-names">+${extra} autre${extra>1?'s':''}</div>` : '');
+      const extraLabel = LANG==='en' ? 'more' : LANG==='es' ? 'más' : ('autre'+(extra>1?'s':''));
+      const namesHtml = shown.map(n=>`<div class="cal-names"><span class="cal-dot" style="background:${clientColor(n.client)};"></span>${n.text}</div>`).join('') + (extra>0 ? `<div class="cal-names">+${extra} ${extraLabel}</div>` : '');
       html += `<div class="cal-day has-booking${past}${sel}" onclick="selectCalDay(${d})"><span class="cal-daynum">${d}</span>${namesHtml}<span class="cal-ca">${info.ca.toFixed(0)}€</span></div>`;
     } else {
       html += `<div class="cal-day${past}${sel}" onclick="selectCalDay(${d})"><span class="cal-daynum">${d}</span></div>`;
@@ -1323,12 +1687,12 @@ function renderCalDayPanel(){
         ${(b.addr||b.contact) ? `<br><span style="font-size:11px;color:var(--text2);">${[b.addr,b.contact].filter(Boolean).join(' · ')}</span>` : ''}
       </span>
       <span>
-        <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
-        <button class="btn-line" onclick="deleteBooking(${b.id})">Suppr.</button>
+        <button class="btn-line" onclick="editBooking(${b.id})">${t('btn_edit')}</button>
+        <button class="btn-line" onclick="deleteBooking(${b.id})">${t('btn_delete_short')}</button>
       </span>
     </div>`).join('');
-  bkDayPanel.innerHTML = `<div class="cal-day-panel">${rows || '<p style="color:var(--text3);font-size:11px;margin:2px 0;">Aucune prestation ce jour.</p>'}
-    <button class="btn-gold" style="width:100%;margin-top:8px;" onclick="addBookingForDay(${selectedCalDay})">+ Ajouter une prestation</button>
+  bkDayPanel.innerHTML = `<div class="cal-day-panel">${rows || `<p style="color:var(--text3);font-size:11px;margin:2px 0;">${t('empty_day')}</p>`}
+    <button class="btn-gold" style="width:100%;margin-top:8px;" onclick="addBookingForDay(${selectedCalDay})">${t('btn_add_service_day')}</button>
   </div>`;
 }
 function addBookingForDay(day){
@@ -1355,7 +1719,7 @@ function addBooking(){
   if(editId){
     const b = bookings.find(x=>x.id===Number(editId));
     if(b){ Object.assign(b, {client:bkClient.value,label:bkLabel.value,addr:bkAddr.value,contact:bkContact.value,date:bkDate.value,from:bkFrom.value,to:bkTo.value,hours,rate:parseFloat(bkRate.value)||0}); }
-    showToast('✔ Booking modifié.');
+    showToast(t('toast_booking_updated'));
   } else {
     bookings.push({id:Date.now(),client:bkClient.value,label:bkLabel.value,addr:bkAddr.value,contact:bkContact.value,date:bkDate.value,from:bkFrom.value,to:bkTo.value,hours,rate:parseFloat(bkRate.value)||0,status:'à facturer'});
   }
@@ -1374,15 +1738,15 @@ function viewBooking(id){
   const b = storeArr('bookings').find(x=>x.id===id);
   if(!b) return;
   const rows = [
-    ['Client', b.client],
-    ['Prestation', b.label],
-    ['Date', b.date ? new Date(b.date+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'non définie'],
-    ['Horaires', (b.from&&b.to) ? `${b.from} – ${b.to} (${b.hours}h)` : ''],
-    ['Réel (pointé)', (b.checkedInAt&&b.checkedOutAt) ? `${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} (${b.actualHours}h)` : ''],
-    ['Taux', `${b.rate} €/h`],
-    ['Total', `${((b.actualHours ?? b.hours)*b.rate).toFixed(2)} €`],
-    ['Adresse', b.addr],
-    ['Contact', b.contact],
+    [t('row_client'), b.client],
+    [t('row_prestation'), b.label],
+    [t('row_date'), b.date ? new Date(b.date+'T00:00:00').toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : t('non_definie')],
+    [t('row_horaires'), (b.from&&b.to) ? `${b.from} – ${b.to} (${b.hours}h)` : ''],
+    [t('row_reel'), (b.checkedInAt&&b.checkedOutAt) ? `${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} (${b.actualHours}h)` : ''],
+    [t('row_taux'), `${b.rate} €/h`],
+    [t('row_total'), `${((b.actualHours ?? b.hours)*b.rate).toFixed(2)} €`],
+    [t('row_adresse'), b.addr],
+    [t('row_contact'), b.contact],
   ].filter(([,v])=>v);
   bookingModalBody.innerHTML = rows.map(([k,v])=>`<div class="modal-row"><span class="modal-row-label">${k}</span><span>${v}</span></div>`).join('');
   bookingModal.style.display = 'flex';
@@ -1402,8 +1766,8 @@ function editBooking(id){
   bkFrom.value = b.from||'';
   bkTo.value = b.to||'';
   bkRate.value = b.rate;
-  bkFormTitle.textContent = 'Modifier le booking';
-  bkSubmitBtn.textContent = 'Enregistrer les modifications';
+  bkFormTitle.textContent = t('booking_edit_title');
+  bkSubmitBtn.textContent = t('btn_save_changes');
   showTab('calendrier');
   bkFormWrap.style.display = 'block';
   bkClient.scrollIntoView({behavior:'smooth', block:'center'});
@@ -1411,8 +1775,8 @@ function editBooking(id){
 function cancelEditBooking(){
   bkEditId.value='';
   bkClient.value='';bkLabel.value='';bkAddr.value='';bkContact.value='';bkDate.value='';bkFrom.value='';bkTo.value='';bkRate.value='';
-  bkFormTitle.textContent = 'Nouveau booking';
-  bkSubmitBtn.textContent = 'Ajouter au planning';
+  bkFormTitle.textContent = t('booking_new_title');
+  bkSubmitBtn.textContent = t('btn_add_planning');
   bkFormWrap.style.display = 'none';
 }
 function invoiceBooking(id){
@@ -1426,7 +1790,7 @@ function invoiceBooking(id){
   const from = useActual ? localHM(b.checkedInAt) : (b.from||'');
   const to   = useActual ? localHM(b.checkedOutAt) : (b.to||'');
   const qty  = useActual ? b.actualHours : b.hours;
-  addItem(b.label||'Prestation', qty, b.rate, from, to, b.date ? [b.date] : []);
+  addItem(b.label||t('default_service_label'), qty, b.rate, from, to, b.date ? [b.date] : []);
   b.status='facturé';
   set('bookings',bookings);
   showTab('facture');
@@ -1441,22 +1805,22 @@ function renderAccueil(){
   const bookings = storeArr('bookings')
     .filter(b=>b.status==='à facturer' && b.date >= today && !b.checkedOutAt)
     .sort((a,b)=>a.date.localeCompare(b.date) || (a.from||'').localeCompare(b.from||''));
-  if(!bookings.length){ accList.innerHTML = '<p style="color:var(--text3);font-size:12px;">Aucune presta à venir.</p>'; return; }
+  if(!bookings.length){ accList.innerHTML = `<p style="color:var(--text3);font-size:12px;">${t('empty_venir')}</p>`; return; }
   let html = '';
   let lastDate = null;
   bookings.forEach(b=>{
     if(b.date !== lastDate){
       lastDate = b.date;
-      const label = new Date(b.date+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+      const label = new Date(b.date+'T00:00:00').toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'long'});
       html += `<div class="acc-day-header">${label.charAt(0).toUpperCase()+label.slice(1)}</div>`;
     }
     html += `
     <div class="acc-row">
       <span class="cal-dot" style="background:${clientColor(b.client)};"></span>
       <div class="acc-info"><b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' · '+b.from+'-'+b.to:''} · <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span></div>
-      <button class="btn-line" onclick="viewBooking(${b.id})">Voir</button>
-      <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
-      <button class="btn-line" onclick="deleteBooking(${b.id})">Suppr.</button>
+      <button class="btn-line" onclick="viewBooking(${b.id})">${t('btn_view')}</button>
+      <button class="btn-line" onclick="editBooking(${b.id})">${t('btn_edit')}</button>
+      <button class="btn-line" onclick="deleteBooking(${b.id})">${t('btn_delete_short')}</button>
     </div>`;
   });
   accList.innerHTML = html;
@@ -1468,7 +1832,7 @@ function renderCalendarTab(){
   const monthKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const forecast = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey))
     .reduce((s,b)=>s+(b.actualHours ?? b.hours)*b.rate,0);
-  bkForecast.textContent = forecast.toFixed(2)+' € à facturer ce mois-ci';
+  bkForecast.textContent = forecast.toFixed(2)+t('cal_forecast_suffix');
 }
 function renderPlanning(){
   renderAccueil();
@@ -1479,14 +1843,14 @@ function renderPlanning(){
     const h = b.actualHours ?? b.hours;
     return `
     <div class="client-card">
-      <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date?formatFrDate(b.date):'sans date'}${b.from&&b.to?' de '+b.from+' à '+b.to:''}<br>
-      ${b.checkedInAt&&b.checkedOutAt?`Pointé : ${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · `:''}${h}h × ${b.rate}€ = <span class="tag">${(h*b.rate).toFixed(2)} €</span><br>
-      <button class="btn-line" onclick="invoiceBooking(${b.id})">Facturer</button>
-      <button class="btn-line" onclick="viewBooking(${b.id})">Voir</button>
-      <button class="btn-line" onclick="editBooking(${b.id})">Modifier</button>
-      <button class="btn-line" onclick="deleteBooking(${b.id})">Supprimer</button>
+      <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date?formatFrDate(b.date):t('sans_date')}${b.from&&b.to?' '+t('lbl_de').toLowerCase()+' '+b.from+' '+t('lbl_a').toLowerCase()+' '+b.to:''}<br>
+      ${b.checkedInAt&&b.checkedOutAt?`${t('pointe_prefix')}${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · `:''}${h}h × ${b.rate}€ = <span class="tag">${(h*b.rate).toFixed(2)} €</span><br>
+      <button class="btn-line" onclick="invoiceBooking(${b.id})">${t('btn_invoice')}</button>
+      <button class="btn-line" onclick="viewBooking(${b.id})">${t('btn_view')}</button>
+      <button class="btn-line" onclick="editBooking(${b.id})">${t('btn_edit')}</button>
+      <button class="btn-line" onclick="deleteBooking(${b.id})">${t('btn_delete')}</button>
     </div>`;
-  }).join('') : '<p style="color:var(--text3);font-size:12px;">Aucune presta à facturer.</p>';
+  }).join('') : `<p style="color:var(--text3);font-size:12px;">${t('empty_facturer')}</p>`;
 }
 
 function calcRange(input){
@@ -1512,8 +1876,8 @@ function addItem(desc='',qty='',rate='',from='',to='',dates=[]){
       <div class="rline-compact">
         <input type="date" class="i-date-input" title="Ajoute une date de prestation" onchange="addDateChip(this)">
         <input type="number" class="i-rate" placeholder="€/h" value="${rate}" oninput="render()">
-        <input type="time" class="i-from" title="Début" value="${from}" onchange="calcRange(this)">
-        <input type="time" class="i-to" title="Fin" value="${to}" onchange="calcRange(this)">
+        <input type="time" class="i-from" title="${t('title_debut')}" value="${from}" onchange="calcRange(this)">
+        <input type="time" class="i-to" title="${t('title_fin')}" value="${to}" onchange="calcRange(this)">
       </div>
       <textarea placeholder="Description" class="i-desc" oninput="render()">${desc}</textarea>
       <div class="rline rline-actions">
@@ -1564,11 +1928,11 @@ function toggleOffert(){
   render();
 }
 function defaultEmailMessage(){
-  return `Bonjour,\n\nVeuillez trouver ci-joint votre facture ${invNum.value||''}.\n\nN'hésitez pas à me contacter pour toute question.\n\nCordialement,\n${fromName.value||''}`;
+  return t('email_default_body',{num:invNum.value||'', name:fromName.value||''});
 }
 function refreshEmailDefaults(){
   if(!emailCustomEnabled.checked) return;
-  if(!emailSubject.value || /^Facture /.test(emailSubject.value)) emailSubject.value = 'Facture '+(invNum.value||'');
+  if(!emailSubject.value || /^(Facture|Invoice|Factura) /.test(emailSubject.value)) emailSubject.value = t('inv_facture_label')+' '+(invNum.value||'');
   if(!emailMessage.value) emailMessage.value = defaultEmailMessage();
 }
 function toggleEmailCustom(){
@@ -1589,8 +1953,13 @@ function currentClient(){
 }
 
 function render(){
+  pFactureLabel.textContent = t('inv_facture_label'); pNumLabel.textContent = t('inv_num'); pDateLabel.textContent = t('inv_date');
+  pDeLabel.textContent = t('inv_de'); pALabel.textContent = t('inv_a');
+  pDescLabel.textContent = t('inv_desc'); pQteLabel.textContent = t('inv_qte'); pUnitaireLabel.textContent = t('inv_unitaire'); pMontantLabel.textContent = t('inv_montant');
+  pSousTotalLabel.textContent = t('inv_sous_total'); pTvaLabel.textContent = t('inv_tva'); pOffertLabel.textContent = t('inv_offert');
+  pTotalReglerLabel.textContent = t('inv_total_regler'); pReglementLabel.textContent = t('inv_reglement');
   const f = {name:fromName.value,tagline:fromTagline.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value};
-  pBrandName.textContent = f.name || 'Votre entreprise';
+  pBrandName.textContent = f.name || t('inv_votre_entreprise');
   pTagline.textContent = f.tagline || '';
   pTagline.style.display = f.tagline ? 'block' : 'none';
   pFrom.innerHTML = `<b>${f.name}</b><br>${f.addr}<br>${f.contact}`;
@@ -1617,22 +1986,22 @@ function render(){
   if(kmVal>0){
     const kmRateVal = parseFloat(kmRate.value)||0.5;
     const kmAmt = kmVal*kmRateVal; sub+=kmAmt;
-    pItems.innerHTML += `<tr><td>Frais kilométriques</td><td class="num">${kmVal} km</td><td class="num">${kmRateVal.toFixed(2)} €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
+    pItems.innerHTML += `<tr><td>${t('inv_km')}</td><td class="num">${kmVal} km</td><td class="num">${kmRateVal.toFixed(2)} €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
   }
   const peageVal = parseFloat(peage.value)||0;
   if(peageVal>0){
     sub+=peageVal;
-    pItems.innerHTML += `<tr><td>Péage</td><td class="num">-</td><td class="num">-</td><td class="num">${peageVal.toFixed(2)} €</td></tr>`;
+    pItems.innerHTML += `<tr><td>${t('inv_peage')}</td><td class="num">-</td><td class="num">-</td><td class="num">${peageVal.toFixed(2)} €</td></tr>`;
   }
   const parkingVal = parseFloat(parking.value)||0;
   if(parkingVal>0){
     sub+=parkingVal;
-    pItems.innerHTML += `<tr><td>Parking</td><td class="num">-</td><td class="num">-</td><td class="num">${parkingVal.toFixed(2)} €</td></tr>`;
+    pItems.innerHTML += `<tr><td>${t('inv_parking')}</td><td class="num">-</td><td class="num">-</td><td class="num">${parkingVal.toFixed(2)} €</td></tr>`;
   }
   const mealVal = mealEnabled.checked ? (parseFloat(meal.value)||0) : 0;
   if(mealVal>0){
     sub+=mealVal;
-    pItems.innerHTML += `<tr><td>Repas</td><td class="num">-</td><td class="num">-</td><td class="num">${mealVal.toFixed(2)} €</td></tr>`;
+    pItems.innerHTML += `<tr><td>${t('inv_repas')}</td><td class="num">-</td><td class="num">-</td><td class="num">${mealVal.toFixed(2)} €</td></tr>`;
   }
   const offVal_ = offEnabled.checked ? (parseFloat(offVal.value)||0) : 0;
   const offType_ = offType.value;
@@ -1673,11 +2042,11 @@ function render(){
   pTvaLine.textContent = tvaAmt.toFixed(2)+' € ('+tvaPct+'%)';
   pTotal.textContent = (sub+tvaAmt).toFixed(2)+' €';
 
-  const due = '30 jours';
+  const due = '30 '+t('inv_jours');
   pReglement.innerHTML = `
-    Titulaire : ${f.name}<br>
+    ${t('inv_titulaire')} : ${f.name}<br>
     ${fromRib.value ? fromRib.value.replace(/\n/g,'<br>')+'<br>' : ''}
-    <b>${fromPay.value} — Paiement à réception de facture, échéance : ${due}.</b>`;
+    <b>${fromPay.value} — ${t('inv_paiement_reception')} ${due}.</b>`;
   pLegal.innerHTML = `SIRET : ${f.siret} — ${fromRcs.value}. ${tvaMention}.<br>
     En cas de retard de paiement : pénalité de 3× le taux d'intérêt légal + indemnité forfaitaire de recouvrement de 40 €.`;
   renderInvoicePages();
@@ -1763,7 +2132,7 @@ function renderInvoicePages(){
 function saveInvoice(){
   render();
   const c = currentClient();
-  if(!c || !invNum.value){ showToast('⚠ Sélectionne un client avant d\'enregistrer.'); return; }
+  if(!c || !invNum.value){ showToast(t('toast_select_client_save')); return; }
   const existing = storeArr('invoices').some(i=>i.num===invNum.value);
   saveToHistory(existing ? 'Mise à jour' : 'Enregistrée');
 }
@@ -1771,10 +2140,10 @@ function saveInvoice(){
 async function sendInvoice(){
   render();
   const c = currentClient();
-  if(!sgFrom.value.trim()){ showToast("⚠ Renseigne l'email d'envoi dans Mon entreprise → Envoi (SendGrid)."); return; }
-  if(!c){ showToast('⚠ Sélectionne un client avant d\'envoyer.'); return; }
-  if(!isValidEmail(c.email)){ showToast('⚠ Email client invalide : '+(c.email||'(vide)')); return; }
-  showToast('Envoi en cours…', 2000);
+  if(!sgFrom.value.trim()){ showToast(t('toast_set_sendgrid_email')); return; }
+  if(!c){ showToast(t('toast_select_client_send')); return; }
+  if(!isValidEmail(c.email)){ showToast(t('toast_client_email_invalid',{email:c.email||'(vide)'})); return; }
+  showToast(t('toast_sending'), 2000);
   const msg = emailMessage.value.trim();
   const bodyHtml = (msg ? `<p>${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</p><hr>` : '') + document.getElementById('invoice').outerHTML;
   try{
@@ -1785,20 +2154,21 @@ async function sendInvoice(){
         apiKey: sgKey.value,
         from: sgFrom.value.trim(),
         to: c.email,
-        subject: emailSubject.value.trim() || ('Facture ' + invNum.value),
+        subject: emailSubject.value.trim() || (t('inv_facture_label') + ' ' + invNum.value),
         html: bodyHtml
       })
     });
     if(res.ok){
-      showToast('✔ Facture envoyée à '+c.email+'.');
+      showToast(t('toast_invoice_sent',{email:c.email}));
       saveToHistory('Envoyée');
     } else {
       const detail = await res.text().catch(()=> '');
-      showToast('✕ Échec de l\'envoi'+(detail?' : '+detail:' (voir le serveur proxy).'));
+      showToast(t('toast_send_failed',{detail:(detail?' : '+detail:' (voir le serveur proxy).')}));
     }
-  }catch(e){ showToast('✕ Erreur d\'envoi : '+e.message); }
+  }catch(e){ showToast(t('toast_send_error',{msg:e.message})); }
 }
 
+applyI18n();
 loadFrom(); loadSg(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
 renderSyncUI();
 if(getSyncCode()) pullSync(false);
