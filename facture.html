@@ -632,14 +632,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <button class="btn-gold" style="width:100%;margin-top:14px;" onclick="closeBookingModal()" data-i18n="btn_close">Fermer</button>
   </div>
 </div>
-<div class="modal-overlay" id="legalModal" style="display:none;" onclick="if(event.target===this) closeLegalModal()">
-  <div class="modal-box" style="max-width:520px;max-height:80vh;overflow-y:auto;">
-    <div class="modal-header">
-      <span data-i18n="legal_modal_title">Mentions légales</span>
-      <button type="button" class="modal-close" onclick="closeLegalModal()">×</button>
-    </div>
-    <div id="legalModalBody" style="font-size:12px;line-height:1.8;color:var(--text2);"></div>
-    <button class="btn-gold" style="width:100%;margin-top:14px;" onclick="closeLegalModal()" data-i18n="btn_close">Fermer</button>
+<div class="modal-overlay" id="legalModal" style="display:none;background:rgba(0,0,0,.65);" onclick="if(event.target===this) closeLegalModal()">
+  <div class="modal-box" style="max-width:560px;width:92%;border-radius:14px;padding:28px;max-height:85vh;overflow-y:auto;position:relative;">
+    <button type="button" class="modal-close" onclick="closeLegalModal()" style="position:absolute;top:20px;right:20px;">×</button>
+    <div style="font-family:var(--font-display);font-size:20px;color:var(--gold);margin-bottom:4px;">BILL OPS</div>
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:20px;" data-i18n="legal_modal_title">Mentions légales</div>
+    <div id="legalModalBody" style="font-size:11px;line-height:1.8;color:var(--text2);"></div>
+    <button class="btn-gold" style="width:100%;margin-top:20px;" onclick="closeLegalModal()" data-i18n="btn_close">Fermer</button>
   </div>
 </div>
 
@@ -726,10 +725,15 @@ inv_desc:'Description', inv_qte:'Qté', inv_unitaire:'Unitaire', inv_montant:'Mo
 inv_sous_total:'Sous-total', inv_tva:'TVA', inv_offert:'Offert', inv_total_regler:'Total à régler', inv_reglement:'Règlement',
 inv_km:'Frais kilométriques', inv_peage:'Péage', inv_parking:'Parking', inv_repas:'Repas',
 inv_votre_entreprise:'Votre entreprise', inv_titulaire:'Titulaire',
-legal_intro:"Conformément à la loi, voici les informations d'identification de l'éditeur de cette application.",
-legal_editeur:'Éditeur', legal_hebergement:'Hébergement', legal_hebergement_txt:'Application locale (Mac/PWA) — les données sont stockées sur les appareils de l\'utilisateur et synchronisées via Supabase (hébergeur : Supabase Inc.).',
-legal_pi:'Propriété intellectuelle', legal_pi_txt:'Cette application et son contenu sont la propriété de son éditeur. Toute reproduction est interdite sans autorisation.',
-legal_contact:'Contact',
+legal_copyright:'© {year} Jérôme Jarrige. Tous droits réservés.',
+legal_editeur_title:'Éditeur', legal_editeur_body:'Jérôme Jarrige — Entrepreneur individuel<br>Contact : <a href="mailto:Jarrige.jerome@hotmail.fr" style="color:var(--gold);text-decoration:none">Jarrige.jerome@hotmail.fr</a>',
+legal_pi_title:'Propriété intellectuelle', legal_pi_body:"BILL OPS est une œuvre originale dont Jérôme Jarrige est l'auteur et le titulaire exclusif des droits. Le code source, l'architecture logicielle, le design, les interfaces et l'ensemble des éléments de l'application sont protégés par le droit d'auteur français (CPI) et les conventions internationales. Toute reproduction, représentation, modification, distribution, ingénierie inverse ou utilisation à des fins commerciales sans autorisation écrite préalable est strictement interdite.",
+legal_licence_title:"Licence d'utilisation", legal_licence_body:"L'utilisation de BILL OPS est réservée à un usage personnel et professionnel individuel. La revente, le partage à des tiers ou toute exploitation dérivée sans autorisation sont interdits.",
+legal_rgpd_title:'Hébergement et traitement des données (RGPD)', legal_rgpd_body:"Les données saisies dans l'application (entreprise, clients, factures, planning) sont :<br>• stockées localement sur votre appareil (localStorage)<br>• synchronisées et hébergées sur Supabase (UE), prestataire conforme RGPD<br>• transmises à SendGrid (Twilio) uniquement lors de l'envoi d'une facture par email, si cette fonctionnalité est configurée<br>Le responsable de traitement est Jérôme Jarrige. Vous disposez d'un droit d'accès, de rectification, de portabilité et de suppression de vos données ; pour l'exercer, contactez l'éditeur ou utilisez la fonction « Exporter mes données » dans Mes données → Sauvegarde.",
+legal_archivage_title:'Archivage légal', legal_archivage_body:"Conformément à l'art. L.110-4 du Code de commerce et à l'art. 286 I-3° du CGI, les factures émises sont conservées avec numérotation continue et immuable, consultables dans Historique.",
+legal_responsabilite_title:'Limitation de responsabilité', legal_responsabilite_body:'BILL OPS est fourni "en l\'état" sans garantie d\'aucune sorte. L\'éditeur ne saurait être tenu responsable de pertes de données, erreurs de calcul, indisponibilité de service ou de tout préjudice résultant de l\'utilisation de l\'application, dans les limites permises par le droit applicable.',
+legal_composants_title:'Composants tiers', legal_composants_body:"L'application utilise des bibliothèques open-source (Electron, Supabase JS, html2pdf.js) sous leurs licences respectives (MIT, Apache-2.0). Ces licences ne s'appliquent qu'aux composants concernés et n'affectent pas la nature propriétaire de BILL OPS dans son ensemble.",
+legal_droit_title:'Droit applicable', legal_droit_body:'Les présentes mentions sont régies par le droit français. Tout litige relève de la compétence exclusive des tribunaux français.',
 inv_paiement_reception:'Paiement à réception de facture, échéance :', inv_jours:'jours'
 },
 en:{
@@ -809,10 +813,15 @@ inv_desc:'Description', inv_qte:'Qty', inv_unitaire:'Unit price', inv_montant:'A
 inv_sous_total:'Subtotal', inv_tva:'VAT', inv_offert:'Discount', inv_total_regler:'Total due', inv_reglement:'Payment',
 inv_km:'Mileage expenses', inv_peage:'Toll', inv_parking:'Parking', inv_repas:'Meal',
 inv_votre_entreprise:'Your company', inv_titulaire:'Account holder',
-legal_intro:'In accordance with the law, here is the identification information of the publisher of this application.',
-legal_editeur:'Publisher', legal_hebergement:'Hosting', legal_hebergement_txt:'Local application (Mac/PWA) — data is stored on the user\'s devices and synced via Supabase (host: Supabase Inc.).',
-legal_pi:'Intellectual property', legal_pi_txt:'This application and its content are the property of its publisher. Any reproduction is prohibited without authorization.',
-legal_contact:'Contact',
+legal_copyright:'© {year} Jérôme Jarrige. All rights reserved.',
+legal_editeur_title:'Publisher', legal_editeur_body:'Jérôme Jarrige — Sole proprietor<br>Contact: <a href="mailto:Jarrige.jerome@hotmail.fr" style="color:var(--gold);text-decoration:none">Jarrige.jerome@hotmail.fr</a>',
+legal_pi_title:'Intellectual property', legal_pi_body:'BILL OPS is an original work of which Jérôme Jarrige is the author and sole rights holder. The source code, software architecture, design, interfaces and all elements of the application are protected by French copyright law (CPI) and international conventions. Any reproduction, representation, modification, distribution, reverse engineering or commercial use without prior written authorization is strictly prohibited.',
+legal_licence_title:'License to use', legal_licence_body:'Use of BILL OPS is reserved for personal and individual professional use. Resale, sharing with third parties or any derivative exploitation without authorization is prohibited.',
+legal_rgpd_title:'Hosting and data processing (GDPR)', legal_rgpd_body:'Data entered in the application (company, clients, invoices, schedule) is:<br>• stored locally on your device (localStorage)<br>• synced and hosted on Supabase (EU), a GDPR-compliant provider<br>• sent to SendGrid (Twilio) only when sending an invoice by email, if that feature is configured<br>The data controller is Jérôme Jarrige. You have the right to access, rectify, port and delete your data; to exercise it, contact the publisher or use the "Export my data" function in My data → Backup.',
+legal_archivage_title:'Legal record-keeping', legal_archivage_body:'In accordance with art. L.110-4 of the French Commercial Code and art. 286 I-3° of the French Tax Code, issued invoices are kept with continuous, immutable numbering, viewable in History.',
+legal_responsabilite_title:'Limitation of liability', legal_responsabilite_body:'BILL OPS is provided "as is" without warranty of any kind. The publisher cannot be held liable for data loss, calculation errors, service unavailability or any damage resulting from use of the application, to the extent permitted by applicable law.',
+legal_composants_title:'Third-party components', legal_composants_body:'The application uses open-source libraries (Electron, Supabase JS, html2pdf.js) under their respective licenses (MIT, Apache-2.0). These licenses apply only to the components concerned and do not affect the proprietary nature of BILL OPS as a whole.',
+legal_droit_title:'Governing law', legal_droit_body:'These legal notices are governed by French law. Any dispute falls under the exclusive jurisdiction of the French courts.',
 inv_paiement_reception:'Payment upon receipt of invoice, due within:', inv_jours:'days'
 },
 es:{
@@ -892,10 +901,15 @@ inv_desc:'Descripción', inv_qte:'Cant.', inv_unitaire:'Precio unitario', inv_mo
 inv_sous_total:'Subtotal', inv_tva:'IVA', inv_offert:'Descuento', inv_total_regler:'Total a pagar', inv_reglement:'Pago',
 inv_km:'Gastos de kilometraje', inv_peage:'Peaje', inv_parking:'Aparcamiento', inv_repas:'Comida',
 inv_votre_entreprise:'Tu empresa', inv_titulaire:'Titular',
-legal_intro:'De acuerdo con la ley, aquí está la información de identificación del editor de esta aplicación.',
-legal_editeur:'Editor', legal_hebergement:'Alojamiento', legal_hebergement_txt:'Aplicación local (Mac/PWA): los datos se almacenan en los dispositivos del usuario y se sincronizan mediante Supabase (proveedor: Supabase Inc.).',
-legal_pi:'Propiedad intelectual', legal_pi_txt:'Esta aplicación y su contenido son propiedad de su editor. Queda prohibida su reproducción sin autorización.',
-legal_contact:'Contacto',
+legal_copyright:'© {year} Jérôme Jarrige. Todos los derechos reservados.',
+legal_editeur_title:'Editor', legal_editeur_body:'Jérôme Jarrige — Autónomo (empresario individual)<br>Contacto: <a href="mailto:Jarrige.jerome@hotmail.fr" style="color:var(--gold);text-decoration:none">Jarrige.jerome@hotmail.fr</a>',
+legal_pi_title:'Propiedad intelectual', legal_pi_body:'BILL OPS es una obra original de la que Jérôme Jarrige es el autor y titular exclusivo de los derechos. El código fuente, la arquitectura del software, el diseño, las interfaces y todos los elementos de la aplicación están protegidos por el derecho de autor francés (CPI) y los convenios internacionales. Queda estrictamente prohibida cualquier reproducción, representación, modificación, distribución, ingeniería inversa o uso comercial sin autorización previa por escrito.',
+legal_licence_title:'Licencia de uso', legal_licence_body:'El uso de BILL OPS está reservado a un uso personal y profesional individual. Quedan prohibidas la reventa, la cesión a terceros o cualquier explotación derivada sin autorización.',
+legal_rgpd_title:'Alojamiento y tratamiento de datos (RGPD)', legal_rgpd_body:'Los datos introducidos en la aplicación (empresa, clientes, facturas, planificación) son:<br>• almacenados localmente en tu dispositivo (localStorage)<br>• sincronizados y alojados en Supabase (UE), proveedor conforme al RGPD<br>• transmitidos a SendGrid (Twilio) únicamente al enviar una factura por email, si esta función está configurada<br>El responsable del tratamiento es Jérôme Jarrige. Dispones de derecho de acceso, rectificación, portabilidad y supresión de tus datos; para ejercerlo, contacta con el editor o utiliza la función «Exportar mis datos» en Mis datos → Copia de seguridad.',
+legal_archivage_title:'Archivo legal', legal_archivage_body:'De conformidad con el art. L.110-4 del Código de Comercio francés y el art. 286 I-3° del Código Tributario francés, las facturas emitidas se conservan con numeración continua e inmutable, consultables en Historial.',
+legal_responsabilite_title:'Limitación de responsabilidad', legal_responsabilite_body:'BILL OPS se proporciona "tal cual", sin garantía de ningún tipo. El editor no podrá ser considerado responsable de pérdidas de datos, errores de cálculo, indisponibilidad del servicio o cualquier perjuicio resultante del uso de la aplicación, dentro de los límites permitidos por la ley aplicable.',
+legal_composants_title:'Componentes de terceros', legal_composants_body:'La aplicación utiliza bibliotecas de código abierto (Electron, Supabase JS, html2pdf.js) bajo sus respectivas licencias (MIT, Apache-2.0). Estas licencias solo se aplican a los componentes correspondientes y no afectan al carácter propietario de BILL OPS en su conjunto.',
+legal_droit_title:'Ley aplicable', legal_droit_body:'Los presentes avisos legales se rigen por la ley francesa. Cualquier disputa será competencia exclusiva de los tribunales franceses.',
 inv_paiement_reception:'Pago a la recepción de la factura, plazo:', inv_jours:'días'
 }
 };
@@ -940,13 +954,20 @@ function refreshAllViews(){
   renderClientList(); refreshClientSelect(); renderHistory(); renderCA(); renderPlanning(); renderCalendarTab(); renderDashboard(); render();
 }
 function openLegalModal(){
-  const f = store('from');
+  const sections = [
+    ['legal_editeur_title','legal_editeur_body'],
+    ['legal_pi_title','legal_pi_body'],
+    ['legal_licence_title','legal_licence_body'],
+    ['legal_rgpd_title','legal_rgpd_body'],
+    ['legal_archivage_title','legal_archivage_body'],
+    ['legal_responsabilite_title','legal_responsabilite_body'],
+    ['legal_composants_title','legal_composants_body'],
+    ['legal_droit_title','legal_droit_body'],
+  ];
   legalModalBody.innerHTML = `
-    <p>${t('legal_intro')}</p>
-    <p style="margin-top:10px;"><b>${t('legal_editeur')}</b><br>${f.name||''}<br>${(f.addr||'').replace(/\n/g,'<br>')}<br>SIRET : ${f.siret||'—'}<br>${f.contact||''}</p>
-    <p style="margin-top:10px;"><b>${t('legal_hebergement')}</b><br>${t('legal_hebergement_txt')}</p>
-    <p style="margin-top:10px;"><b>${t('legal_pi')}</b><br>${t('legal_pi_txt')}</p>
-    <p style="margin-top:10px;"><b>${t('legal_contact')}</b><br>${f.contact||''}</p>`;
+    <p style="margin-bottom:6px;"><strong style="color:var(--text);">${t('legal_copyright',{year:new Date().getFullYear()})}</strong></p>
+    ${sections.map(([title,body])=>`<p style="margin-bottom:6px;"><strong style="color:var(--text);">${t(title)}</strong><br>${t(body)}</p>`).join('')}
+  `;
   legalModal.style.display = 'flex';
 }
 function closeLegalModal(){ legalModal.style.display = 'none'; }
