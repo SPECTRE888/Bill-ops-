@@ -270,17 +270,18 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <div style="margin-top:auto;border-top:1px solid var(--border);padding:14px 18px;display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;gap:1px;">
-          <button onclick="setTheme('dark')" id="theme-dark" title="Sombre" data-i18n-title="theme_dark_title" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-radius:3px 0 0 3px;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">●</button>
-          <button onclick="setTheme('auto')" id="theme-auto" title="Auto" data-i18n-title="theme_auto_title" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-left:none;border-radius:0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">A</button>
-          <button onclick="setTheme('light')" id="theme-light" title="Clair" data-i18n-title="theme_light_title" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-left:none;border-radius:0 3px 3px 0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">○</button>
+          <button onclick="setTheme('dark')" id="theme-dark" title="Sombre" data-i18n-title="theme_dark_title" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-radius:3px 0 0 3px;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">●</button>
+          <button onclick="setTheme('auto')" id="theme-auto" title="Auto" data-i18n-title="theme_auto_title" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-left:none;border-radius:0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">A</button>
+          <button onclick="setTheme('light')" id="theme-light" title="Clair" data-i18n-title="theme_light_title" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-left:none;border-radius:0 3px 3px 0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">○</button>
         </div>
         <div style="display:flex;gap:1px;">
-          <button onclick="setLang('fr')" id="lang-fr" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-radius:3px 0 0 3px;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">FR</button>
-          <button onclick="setLang('en')" id="lang-en" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-left:none;border-radius:0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">EN</button>
-          <button onclick="setLang('es')" id="lang-es" style="font-size:9px;padding:4px 8px;border:1px solid var(--border2);border-radius:0 3px 3px 0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">ES</button>
+          <button onclick="setLang('fr')" id="lang-fr" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-radius:3px 0 0 3px;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">FR</button>
+          <button onclick="setLang('en')" id="lang-en" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-left:none;border-radius:0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">EN</button>
+          <button onclick="setLang('es')" id="lang-es" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-radius:0 3px 3px 0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">ES</button>
         </div>
       </div>
-      <button onclick="openLegalModal()" style="font-size:9px;color:var(--text3);background:none;border:none;border-radius:0;padding:0;text-align:center;cursor:pointer;letter-spacing:.08em;font-family:var(--font-body);width:100%;margin-top:auto;">© BILL OPS</button>
+      <button onclick="sidebarDisconnect()" style="font-size:10px;font-weight:400;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:3px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;font-family:var(--font-body);padding:6px;width:100%;" data-i18n="btn_sidebar_disconnect">Déconnexion</button>
+      <button onclick="openLegalModal()" style="font-size:9px;font-weight:400;color:var(--text3);background:none;border:none;border-radius:0;padding:0;text-align:center;cursor:pointer;letter-spacing:.08em;font-family:var(--font-body);width:100%;margin-top:auto;">© BILL OPS</button>
     </div>
   </div>
 
@@ -716,6 +717,7 @@ toast_invoice_sent:'✔ Facture envoyée à {email}.', toast_send_failed:"✕ É
 toast_sync_synced:'✔ Synchronisé', toast_sync_error:'✕ Erreur sync : {msg}', toast_sync_invalid_code:'⚠ Colle un code valide',
 toast_backup_downloaded:'✔ Sauvegarde téléchargée.', toast_backup_imported:'✔ Données importées. Rechargement...', toast_backup_invalid:'✕ Fichier invalide : {msg}',
 toast_code_copied:'✔ Code copié', toast_info_saved:'✔ Infos enregistrées', default_service_label:'Prestation',
+btn_sidebar_disconnect:'Déconnexion', toast_disconnect_soon:'Bientôt disponible — pas encore configuré.',
 preview_title:'Aperçu facture', title_debut:'Début', title_fin:'Fin',
 email_default_body:"Bonjour,\n\nVeuillez trouver ci-joint votre facture {num}.\n\nN'hésitez pas à me contacter pour toute question.\n\nCordialement,\n{name}",
 legal_modal_title:'Mentions légales',
@@ -798,6 +800,7 @@ toast_invoice_sent:'✔ Invoice sent to {email}.', toast_send_failed:'✕ Send f
 toast_sync_synced:'✔ Synced', toast_sync_error:'✕ Sync error: {msg}', toast_sync_invalid_code:'⚠ Paste a valid code',
 toast_backup_downloaded:'✔ Backup downloaded.', toast_backup_imported:'✔ Data imported. Reloading...', toast_backup_invalid:'✕ Invalid file: {msg}',
 toast_code_copied:'✔ Code copied', toast_info_saved:'✔ Info saved', default_service_label:'Service',
+btn_sidebar_disconnect:'Disconnect', toast_disconnect_soon:'Coming soon — not configured yet.',
 preview_title:'Invoice preview', title_debut:'Start', title_fin:'End',
 email_default_body:"Hello,\n\nPlease find attached your invoice {num}.\n\nFeel free to contact me with any questions.\n\nBest regards,\n{name}",
 legal_modal_title:'Legal notice',
@@ -880,6 +883,7 @@ toast_invoice_sent:'✔ Factura enviada a {email}.', toast_send_failed:'✕ Erro
 toast_sync_synced:'✔ Sincronizado', toast_sync_error:'✕ Error de sincronización: {msg}', toast_sync_invalid_code:'⚠ Pega un código válido',
 toast_backup_downloaded:'✔ Copia de seguridad descargada.', toast_backup_imported:'✔ Datos importados. Recargando...', toast_backup_invalid:'✕ Archivo no válido: {msg}',
 toast_code_copied:'✔ Código copiado', toast_info_saved:'✔ Datos guardados', default_service_label:'Servicio',
+btn_sidebar_disconnect:'Desconectar', toast_disconnect_soon:'Próximamente — aún no configurado.',
 preview_title:'Vista previa de factura', title_debut:'Inicio', title_fin:'Fin',
 email_default_body:"Hola,\n\nAdjunto encontrarás tu factura {num}.\n\nNo dudes en contactarme si tienes alguna pregunta.\n\nSaludos,\n{name}",
 legal_modal_title:'Aviso legal',
@@ -923,6 +927,11 @@ function setLang(l){
   applyI18n();
   refreshAllViews();
   queueSync();
+}
+function sidebarDisconnect(){
+  // Pas encore configuré : Bill Ops n'a pas de compte cloud séparé de la synchro Mac/iPhone.
+  // À brancher plus tard (ex. sur disconnectSync(), ou sur un futur compte utilisateur).
+  showToast(t('toast_disconnect_soon'));
 }
 const STATUS_KEYS = {'Enregistrée':'status_enregistree','Mise à jour':'status_maj','Envoyée':'status_envoyee','Payée':'status_payee','Toutes':'status_toutes'};
 function statusLabel(s){ return STATUS_KEYS[s] ? t(STATUS_KEYS[s]) : s; }
