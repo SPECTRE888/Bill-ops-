@@ -291,6 +291,23 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <h2 style="margin-top:0;" data-i18n="data_title">Profil</h2>
 
       <div class="card">
+        <div class="ctitle" data-i18n="data_compte_title">Compte</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;color:var(--gold);flex-shrink:0;" id="compteAvatar">B</div>
+          <div>
+            <div style="font-size:13px;color:var(--text);" id="compteName">Bill Ops</div>
+            <div style="font-size:11px;color:var(--text3);" id="compteStatus"></div>
+          </div>
+        </div>
+        <div style="height:1px;background:var(--border);margin:14px 0;"></div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-label" data-i18n="lbl_appareil">Appareil</div><div class="info-value" id="viewDeviceLabel" data-i18n="cet_appareil">Cet appareil</div></div>
+          <div class="info-item"><div class="info-label" data-i18n="lbl_derniere_synchro">Dernière synchro</div><div class="info-value" id="viewLastSync">—</div></div>
+        </div>
+        <button class="btn-line" onclick="pullSync(true)" data-i18n="btn_force_sync" style="margin-top:14px;">Forcer la synchro</button>
+      </div>
+
+      <div class="card">
         <div class="ctitle" data-i18n="data_info_title">Informations</div>
         <div id="infoView" class="info-grid">
           <div class="info-item"><div class="info-label" data-i18n="lbl_nom">Nom</div><div class="info-value" id="viewName"></div></div>
@@ -299,13 +316,17 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div class="info-item"><div class="info-label" data-i18n="lbl_siret">SIRET</div><div class="info-value" id="viewSiret"></div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_tva_regime">Régime TVA</div><div class="info-value" id="viewTvaLabel"></div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_paiement">Mode de règlement</div><div class="info-value" id="viewPay"></div></div>
+          <div class="info-item"><div class="info-label" data-i18n="lbl_rib">RIB / IBAN</div><div class="info-value" id="viewRib"></div></div>
         </div>
-        <button class="btn-line" id="infoEditBtn" onclick="toggleInfoEdit(true)" data-i18n="btn_edit" style="margin-top:14px;">Modifier</button>
+        <div class="row" style="margin-top:14px;">
+          <button class="btn-line" id="infoEditBtn" onclick="toggleInfoEdit(true)" data-i18n="btn_edit" style="margin-top:0;">Modifier</button>
+          <button class="btn-line" onclick="exportBackup()" data-i18n="btn_export_data" style="margin-top:0;">Exporter mes données</button>
+        </div>
 
         <div id="infoEdit" style="display:none;">
           <label data-i18n="lbl_nom">Nom</label><input id="fromName">
           <label data-i18n="lbl_soustitre">Sous-titre (optionnel, ex. villes)</label><input id="fromTagline" placeholder="Paris · Lyon · Marseille">
-          <label data-i18n="lbl_adresse">Adresse</label><input id="fromAddr">
+          <label data-i18n="lbl_adresse">Adresse</label><textarea id="fromAddr" rows="2"></textarea>
           <label data-i18n="lbl_email_tel">Email / Tel</label><input id="fromContact">
           <label data-i18n="lbl_siret">SIRET</label><input id="fromSiret">
           <label><span data-i18n="lbl_tva_regime">Régime TVA</span> <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;" data-i18n="hint_tva_regime">(basculement automatique à 32 000 € de CA cumulé)</span></label>
@@ -334,7 +355,16 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div id="sgEdit" style="display:none;">
           <label data-i18n="lbl_sg_key">Clé API SendGrid</label><input id="sgKey" type="password" placeholder="SG.xxxxx" oninput="updateSgStatus()">
           <label data-i18n="lbl_sg_from">Email d'envoi (vérifié dans SendGrid)</label><input id="sgFrom" type="email" placeholder="contact@tondomaine.com">
-          <div class="row" style="margin-top:6px;">
+          <div style="height:1px;background:var(--border);margin:14px 0;"></div>
+          <div style="font-size:11px;font-weight:500;color:var(--text);margin-bottom:6px;" data-i18n="sendgrid_howto_title">Comment configurer :</div>
+          <ol style="font-size:11.5px;color:var(--text2);line-height:1.9;margin:0 0 0 16px;padding:0;">
+            <li data-i18n="sendgrid_step1">Va sur sendgrid.com → crée un compte gratuit</li>
+            <li data-i18n="sendgrid_step2">Menu Settings → Sender Authentication → Verify a Single Sender</li>
+            <li data-i18n="sendgrid_step3">Entre ton email pro → vérifie dans ta boîte mail</li>
+            <li data-i18n="sendgrid_step4">Menu Settings → API Keys → Create API Key → Full Access</li>
+            <li data-i18n="sendgrid_step5">Colle la clé SG.xxx + ton email ci-dessus → Enregistrer</li>
+          </ol>
+          <div class="row" style="margin-top:14px;">
             <button class="btn-line" onclick="saveSg()" data-i18n="btn_save" style="margin-top:0;">Enregistrer</button>
             <button class="btn-line" onclick="toggleSgEdit(false)" data-i18n="btn_cancel" style="margin-top:0;">Annuler</button>
           </div>
@@ -652,7 +682,16 @@ fr:{
 nav_accueil:'Tableau de bord', nav_planning:'Planning', nav_calendrier:'Calendrier', nav_facture:'Facture', nav_historique:'Historique', nav_clients:'Mes clients', nav_donnees:'Compte',
 sec_planning:'Planning', sec_facturation:'Facturation', sec_clients:'Clients',
 theme_dark_title:'Sombre', theme_auto_title:'Auto', theme_light_title:'Clair', legal_link:'Mentions légales',
-data_title:'Profil', data_info_title:'Informations',
+data_title:'Profil', data_compte_title:'Compte', data_info_title:'Informations',
+lbl_appareil:'Appareil', cet_appareil:'Cet appareil', lbl_derniere_synchro:'Dernière synchro',
+compte_status_connected:'Synchronisé', compte_status_disconnected:'Non connecté',
+time_just_now:"à l'instant", time_min_ago:'il y a {n} min', time_hour_ago:'il y a {n} h', time_day_ago:'il y a {n} j',
+sendgrid_howto_title:'Comment configurer :',
+sendgrid_step1:'Va sur sendgrid.com → crée un compte gratuit',
+sendgrid_step2:'Menu Settings → Sender Authentication → Verify a Single Sender',
+sendgrid_step3:'Entre ton email pro → vérifie dans ta boîte mail',
+sendgrid_step4:'Menu Settings → API Keys → Create API Key → Full Access',
+sendgrid_step5:'Colle la clé SG.xxx + ton email ci-dessus → Enregistrer',
 lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
 lbl_tva_regime:'Régime TVA', hint_tva_regime:'(basculement automatique à 32 000 € de CA cumulé)',
 opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'TVA applicable',
@@ -740,7 +779,16 @@ en:{
 nav_accueil:'Dashboard', nav_planning:'Schedule', nav_calendrier:'Calendar', nav_facture:'Invoice', nav_historique:'History', nav_clients:'My clients', nav_donnees:'Account',
 sec_planning:'Schedule', sec_facturation:'Billing', sec_clients:'Clients',
 theme_dark_title:'Dark', theme_auto_title:'Auto', theme_light_title:'Light', legal_link:'Legal notice',
-data_title:'Profile', data_info_title:'Information',
+data_title:'Profile', data_compte_title:'Account', data_info_title:'Information',
+lbl_appareil:'Device', cet_appareil:'This device', lbl_derniere_synchro:'Last sync',
+compte_status_connected:'Synced', compte_status_disconnected:'Not connected',
+time_just_now:'just now', time_min_ago:'{n} min ago', time_hour_ago:'{n} h ago', time_day_ago:'{n} d ago',
+sendgrid_howto_title:'How to set up:',
+sendgrid_step1:'Go to sendgrid.com → create a free account',
+sendgrid_step2:'Menu Settings → Sender Authentication → Verify a Single Sender',
+sendgrid_step3:'Enter your work email → verify it in your inbox',
+sendgrid_step4:'Menu Settings → API Keys → Create API Key → Full Access',
+sendgrid_step5:'Paste the SG.xxx key + your email above → Save',
 lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
 lbl_tva_regime:'VAT regime', hint_tva_regime:'(automatically switches at €32,000 cumulative revenue)',
 opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applicable',
@@ -828,7 +876,16 @@ es:{
 nav_accueil:'Dashboard', nav_planning:'Planificación', nav_calendrier:'Calendario', nav_facture:'Factura', nav_historique:'Historial', nav_clients:'Mis clientes', nav_donnees:'Cuenta',
 sec_planning:'Planificación', sec_facturation:'Facturación', sec_clients:'Clientes',
 theme_dark_title:'Oscuro', theme_auto_title:'Auto', theme_light_title:'Claro', legal_link:'Aviso legal',
-data_title:'Perfil', data_info_title:'Información',
+data_title:'Perfil', data_compte_title:'Cuenta', data_info_title:'Información',
+lbl_appareil:'Dispositivo', cet_appareil:'Este dispositivo', lbl_derniere_synchro:'Última sincronización',
+compte_status_connected:'Sincronizado', compte_status_disconnected:'No conectado',
+time_just_now:'justo ahora', time_min_ago:'hace {n} min', time_hour_ago:'hace {n} h', time_day_ago:'hace {n} d',
+sendgrid_howto_title:'Cómo configurarlo:',
+sendgrid_step1:'Ve a sendgrid.com → crea una cuenta gratuita',
+sendgrid_step2:'Menú Settings → Sender Authentication → Verify a Single Sender',
+sendgrid_step3:'Introduce tu email profesional → verifícalo en tu bandeja de entrada',
+sendgrid_step4:'Menú Settings → API Keys → Create API Key → Full Access',
+sendgrid_step5:'Pega la clave SG.xxx + tu email arriba → Guardar',
 lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
 lbl_tva_regime:'Régimen de IVA', hint_tva_regime:'(cambio automático a 32.000 € de facturación acumulada)',
 opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplicable',
@@ -950,7 +1007,7 @@ function sidebarDisconnect(){
 const STATUS_KEYS = {'Enregistrée':'status_enregistree','Mise à jour':'status_maj','Envoyée':'status_envoyee','Payée':'status_payee','Toutes':'status_toutes'};
 function statusLabel(s){ return STATUS_KEYS[s] ? t(STATUS_KEYS[s]) : s; }
 function refreshAllViews(){
-  refreshInfoView(); updateSgStatus();
+  refreshInfoView(); updateSgStatus(); refreshCompteView();
   renderClientList(); refreshClientSelect(); renderHistory(); renderCA(); renderPlanning(); renderCalendarTab(); renderDashboard(); render();
 }
 function openLegalModal(){
@@ -1009,7 +1066,7 @@ function applySyncPayload(data){
   if(data.inv_theme) localStorage.setItem('inv_theme', data.inv_theme);
   if(data.inv_lang) localStorage.setItem('inv_lang', data.inv_lang);
 }
-function updateSyncStatus(msg){ setStatusMsg(document.getElementById('syncStatus'), msg); }
+function updateSyncStatus(msg){ setStatusMsg(document.getElementById('syncStatus'), msg); refreshCompteView(); }
 function renderSyncUI(){
   const code = getSyncCode();
   const box = document.getElementById('syncCodeBox');
@@ -1017,6 +1074,24 @@ function renderSyncUI(){
   const c = document.getElementById('syncConnected'), n = document.getElementById('syncNotConnected');
   if(c) c.style.display = code ? 'block' : 'none';
   if(n) n.style.display = code ? 'none' : 'block';
+  refreshCompteView();
+}
+function relativeTime(iso){
+  if(!iso) return '—';
+  const mins = Math.floor((Date.now() - new Date(iso).getTime())/60000);
+  if(mins < 1) return t('time_just_now');
+  if(mins < 60) return t('time_min_ago',{n:mins});
+  const hours = Math.floor(mins/60);
+  if(hours < 24) return t('time_hour_ago',{n:hours});
+  return t('time_day_ago',{n:Math.floor(hours/24)});
+}
+function refreshCompteView(){
+  const f = store('from');
+  compteName.textContent = f.name || 'Bill Ops';
+  compteAvatar.textContent = (f.name||'B').trim().charAt(0).toUpperCase();
+  const connected = !!getSyncCode();
+  compteStatus.textContent = connected ? t('compte_status_connected') : t('compte_status_disconnected');
+  viewLastSync.textContent = connected ? relativeTime(localStorage.getItem('syncLastAppliedAt')) : '—';
 }
 
 let syncTimer=null, syncBusy=false;
@@ -1170,6 +1245,7 @@ function refreshInfoView(){
   viewSiret.textContent = fromSiret.value;
   viewTvaLabel.textContent = tvaRegimeLabel();
   viewPay.textContent = fromPay.value;
+  viewRib.textContent = fromRib.value;
 }
 function toggleInfoEdit(show){
   infoView.style.display = show ? 'none' : 'grid';
