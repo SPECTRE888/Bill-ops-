@@ -63,14 +63,18 @@ body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-fon
 .nav-list button.active .nav-icon{opacity:1;}
 .nav-section{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);padding:10px 12px 5px;font-weight:400;}
 .panel{background:var(--surface);padding:24px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
-#tab-entreprise{max-width:640px;}
-#tab-entreprise .card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;}
-#tab-entreprise .ctitle{font-size:8px;font-weight:500;text-transform:uppercase;letter-spacing:.2em;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.profile-grid{display:flex;flex-direction:column;gap:12px;}
+.profile-row1{display:grid;grid-template-columns:1fr 2fr;gap:12px;align-items:start;}
+.profile-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;}
+#tab-entreprise .card{background:var(--surface);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:0;}
+#tab-entreprise .ctitle{font-size:8px;font-weight:500;text-transform:uppercase;letter-spacing:.2em;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
 #tab-entreprise .ctitle::after{content:'';flex:1;height:1px;background:var(--border);}
 #tab-entreprise .card label:first-of-type{margin-top:0;}
-.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px 20px;}
-.info-label{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;}
-.info-value{font-size:13px;color:var(--text);white-space:pre-line;}
+#tab-entreprise label{margin:8px 0 4px;}
+#tab-entreprise p{margin:0 0 8px;}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px 14px;}
+.info-label{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;}
+.info-value{font-size:12px;color:var(--text);white-space:pre-line;line-height:1.35;}
 .info-value:empty::before{content:'—';color:var(--text3);}
 .sg-status{font-size:12px;margin:2px 0 10px;}
 .sg-status.on{color:var(--gold);font-weight:500;}
@@ -290,21 +294,23 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <div class="tab" id="tab-entreprise">
       <h2 style="margin-top:0;" data-i18n="data_title">Profil</h2>
 
+      <div class="profile-grid">
+      <div class="profile-row1">
       <div class="card">
         <div class="ctitle" data-i18n="data_compte_title">Compte</div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:40px;height:40px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;color:var(--gold);flex-shrink:0;" id="compteAvatar">B</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:15px;color:var(--gold);flex-shrink:0;" id="compteAvatar">B</div>
           <div>
-            <div style="font-size:13px;color:var(--text);" id="compteName">Bill Ops</div>
-            <div style="font-size:11px;color:var(--text3);" id="compteStatus"></div>
+            <div style="font-size:12px;color:var(--text);" id="compteName">Bill Ops</div>
+            <div style="font-size:10px;color:var(--text3);" id="compteStatus"></div>
           </div>
         </div>
-        <div style="height:1px;background:var(--border);margin:14px 0;"></div>
+        <div style="height:1px;background:var(--border);margin:10px 0;"></div>
         <div class="info-grid">
           <div class="info-item"><div class="info-label" data-i18n="lbl_appareil">Appareil</div><div class="info-value" id="viewDeviceLabel" data-i18n="cet_appareil">Cet appareil</div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_derniere_synchro">Dernière synchro</div><div class="info-value" id="viewLastSync">—</div></div>
         </div>
-        <button class="btn-line" onclick="pullSync(true)" data-i18n="btn_force_sync" style="margin-top:14px;">Forcer la synchro</button>
+        <button class="btn-line" onclick="pullSync(true)" data-i18n="btn_force_sync" style="margin-top:10px;width:100%;">Forcer la synchro</button>
       </div>
 
       <div class="card">
@@ -318,10 +324,15 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div class="info-item"><div class="info-label" data-i18n="lbl_paiement">Mode de règlement</div><div class="info-value" id="viewPay"></div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_rib">RIB / IBAN</div><div class="info-value" id="viewRib"></div></div>
         </div>
-        <div class="row" style="margin-top:14px;">
+        <div class="row" style="margin-top:10px;align-items:flex-end;">
           <button class="btn-line" id="infoEditBtn" onclick="toggleInfoEdit(true)" data-i18n="btn_edit" style="margin-top:0;">Modifier</button>
           <button class="btn-line" onclick="exportBackup()" data-i18n="btn_export_data" style="margin-top:0;">Exporter mes données</button>
+          <div style="flex:1;">
+            <label style="margin:0 0 5px;" data-i18n="lbl_import_backup">Importer une sauvegarde</label>
+            <input type="file" id="importBackupInput" accept="application/json" onchange="importBackup(this)">
+          </div>
         </div>
+        <div id="backupStatus" style="font-size:11px;margin-top:4px;color:var(--gold);"></div>
 
         <div id="infoEdit" style="display:none;">
           <label data-i18n="lbl_nom">Nom</label><input id="fromName">
@@ -344,27 +355,29 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div id="fromStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
         </div>
       </div>
+      </div>
 
+      <div class="profile-row2">
       <div class="card">
-        <div class="ctitle"><span data-i18n="data_sendgrid_title">Envoi (SendGrid)</span> <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0;" data-i18n="data_sendgrid_sub">— envoi automatique des factures</span></div>
+        <div class="ctitle"><span data-i18n="data_sendgrid_title">Envoi (SendGrid)</span> <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0;" data-i18n="data_sendgrid_sub">— envoi automatique</span></div>
         <div id="sgView">
           <div id="sgStatus" class="sg-status off" data-i18n="sg_status_off">Non configurée</div>
           <div class="info-item" id="sgFromViewWrap" style="display:none;"><div class="info-label" data-i18n="lbl_sg_from">Email d'envoi (vérifié dans SendGrid)</div><div class="info-value" id="viewSgFrom"></div></div>
-          <button class="btn-line" onclick="toggleSgEdit(true)" data-i18n="btn_edit" style="margin-top:10px;">Modifier</button>
+          <button class="btn-line" onclick="toggleSgEdit(true)" data-i18n="btn_edit" style="margin-top:8px;">Modifier</button>
         </div>
         <div id="sgEdit" style="display:none;">
           <label data-i18n="lbl_sg_key">Clé API SendGrid</label><input id="sgKey" type="password" placeholder="SG.xxxxx" oninput="updateSgStatus()">
           <label data-i18n="lbl_sg_from">Email d'envoi (vérifié dans SendGrid)</label><input id="sgFrom" type="email" placeholder="contact@tondomaine.com">
-          <div style="height:1px;background:var(--border);margin:14px 0;"></div>
-          <div style="font-size:11px;font-weight:500;color:var(--text);margin-bottom:6px;" data-i18n="sendgrid_howto_title">Comment configurer :</div>
-          <ol style="font-size:11.5px;color:var(--text2);line-height:1.9;margin:0 0 0 16px;padding:0;">
+          <div style="height:1px;background:var(--border);margin:10px 0;"></div>
+          <div style="font-size:10px;font-weight:500;color:var(--text);margin-bottom:5px;" data-i18n="sendgrid_howto_title">Comment configurer :</div>
+          <ol style="font-size:10.5px;color:var(--text2);line-height:1.6;margin:0 0 0 15px;padding:0;">
             <li data-i18n="sendgrid_step1">Va sur sendgrid.com → crée un compte gratuit</li>
             <li data-i18n="sendgrid_step2">Menu Settings → Sender Authentication → Verify a Single Sender</li>
             <li data-i18n="sendgrid_step3">Entre ton email pro → vérifie dans ta boîte mail</li>
             <li data-i18n="sendgrid_step4">Menu Settings → API Keys → Create API Key → Full Access</li>
             <li data-i18n="sendgrid_step5">Colle la clé SG.xxx + ton email ci-dessus → Enregistrer</li>
           </ol>
-          <div class="row" style="margin-top:14px;">
+          <div class="row" style="margin-top:10px;">
             <button class="btn-line" onclick="saveSg()" data-i18n="btn_save" style="margin-top:0;">Enregistrer</button>
             <button class="btn-line" onclick="toggleSgEdit(false)" data-i18n="btn_cancel" style="margin-top:0;">Annuler</button>
           </div>
@@ -374,29 +387,24 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <div class="card">
         <div class="ctitle" data-i18n="data_sync_title">Synchronisation</div>
         <div id="syncNotConnected">
-          <p style="font-size:12px;color:var(--text2);" data-i18n="sync_intro">Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.</p>
+          <p style="font-size:11px;color:var(--text2);" data-i18n="sync_intro">Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.</p>
           <button class="btn-gold" onclick="genSyncCode()" data-i18n="btn_gen_sync">Générer un code de synchro</button>
-          <label style="margin-top:10px;" data-i18n="lbl_paste_sync">Ou coller un code existant</label>
+          <label style="margin-top:8px;" data-i18n="lbl_paste_sync">Ou coller un code existant</label>
           <input id="syncCodeInput" placeholder="Code de synchro" data-i18n-ph="ph_sync_code">
           <button class="btn-line" onclick="connectSyncCode()" data-i18n="btn_connect">Connecter</button>
         </div>
         <div id="syncConnected" style="display:none;">
-          <p style="font-size:12px;color:var(--text2);" data-i18n="sync_code_intro">Code de synchro (à coller sur l'autre appareil) :</p>
-          <div id="syncCodeBox" style="font-family:monospace;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:8px;word-break:break-all;font-size:12px;"></div>
-          <button class="btn-line" onclick="copySyncCode()" data-i18n="btn_copy_code">Copier le code</button>
-          <button class="btn-line" onclick="pullSync(true)" data-i18n="btn_force_sync">Forcer la synchro</button>
+          <p style="font-size:11px;color:var(--text2);" data-i18n="sync_code_intro">Code de synchro (à coller sur l'autre appareil) :</p>
+          <div id="syncCodeBox" style="font-family:monospace;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:7px;word-break:break-all;font-size:11px;"></div>
+          <div class="row" style="margin-top:6px;">
+            <button class="btn-line" onclick="copySyncCode()" data-i18n="btn_copy_code" style="margin-top:0;">Copier le code</button>
+            <button class="btn-line" onclick="pullSync(true)" data-i18n="btn_force_sync" style="margin-top:0;">Forcer la synchro</button>
+          </div>
           <button class="btn-line" onclick="disconnectSync()" style="color:var(--red);" data-i18n="btn_disconnect_device">Déconnecter cet appareil</button>
         </div>
         <div id="syncStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
-
-      <div class="card">
-        <div class="ctitle" data-i18n="data_backup_title">Sauvegarde</div>
-        <p style="font-size:12px;color:var(--text2);" data-i18n="backup_intro">Exporte toutes tes données (entreprise, clients, factures, planning) dans un fichier, à conserver en lieu sûr ou à réimporter sur un autre appareil.</p>
-        <button class="btn-line" onclick="exportBackup()" data-i18n="btn_export_data">Exporter mes données</button>
-        <label style="margin-top:10px;" data-i18n="lbl_import_backup">Importer une sauvegarde</label>
-        <input type="file" id="importBackupInput" accept="application/json" onchange="importBackup(this)">
-        <div id="backupStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+      </div>
       </div>
     </div>
 
