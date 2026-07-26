@@ -8,15 +8,22 @@ const APP_FILE = path.join(__dirname, '..', 'facture.html')
 
 let mainWin = null
 
-// ─── Migration userData depuis l'ancien nom "Bill Ops" (renommage → Helm Ops) ──
+// ─── Migration userData depuis l'ancien nom "bill-ops" (renommage → Helm Ops) ──
 // Sans ça, macOS traite l'app comme nouvelle après le renommage de productName/appId
 // et le thème + le code de synchro locaux semblent perdus au premier lancement.
+// Le dossier userData est nommé d'après le champ "name" du package.json (pas "productName"),
+// donc l'ancien dossier est bien "bill-ops" (pas "Bill Ops"). Electron crée aussi le dossier
+// userData du nouveau nom dès le démarrage (avant même whenReady), donc on ne peut pas se fier
+// à sa simple existence pour savoir si de vraies données y ont déjà été écrites — on vérifie
+// plutôt la présence du Local Storage (leveldb) qui, lui, n'existe que si on a déjà tourné.
 function migrateLegacyUserData() {
   const fs = require('fs')
   const newDir = app.getPath('userData')
-  const oldDir = path.join(path.dirname(newDir), 'Bill Ops')
-  if (!fs.existsSync(oldDir) || fs.existsSync(newDir)) return
+  const oldDir = path.join(path.dirname(newDir), 'bill-ops')
+  const newHasData = fs.existsSync(path.join(newDir, 'Local Storage', 'leveldb'))
+  if (!fs.existsSync(oldDir) || newHasData) return
   try {
+    fs.rmSync(newDir, { recursive: true, force: true })
     fs.cpSync(oldDir, newDir, { recursive: true })
   } catch (e) {
     console.error('[migration]', e?.message || e)
