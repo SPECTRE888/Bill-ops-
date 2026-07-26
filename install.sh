@@ -1,10 +1,10 @@
 #!/bin/bash
-# Bill Ops — Installation automatique macOS
+# Helm Ops — Installation automatique macOS
 # Usage: curl -sL https://raw.githubusercontent.com/SPECTRE888/Bill-ops-/main/install.sh | bash
 
 set -e
 
-APP_NAME="Bill Ops"
+APP_NAME="Helm Ops"
 APP_DEST="/Applications/${APP_NAME}.app"
 REPO="SPECTRE888/Bill-ops-"
 TMP=$(mktemp -d)
@@ -12,7 +12,7 @@ TMP=$(mktemp -d)
 clear
 echo ""
 echo "╔══════════════════════════════════════╗"
-echo "║      Installation de BILL OPS         ║"
+echo "║      Installation de HELM OPS         ║"
 echo "╚══════════════════════════════════════╝"
 echo ""
 
@@ -28,11 +28,11 @@ if [ -z "$ZIP_URL" ]; then
   exit 1
 fi
 
-echo "📦 Téléchargement de Bill Ops ${VERSION}..."
-curl -L --progress-bar -o "${TMP}/BillOps.zip" "$ZIP_URL"
+echo "📦 Téléchargement de Helm Ops ${VERSION}..."
+curl -L --progress-bar -o "${TMP}/HelmOps.zip" "$ZIP_URL"
 
 echo "📂 Extraction..."
-unzip -q "${TMP}/BillOps.zip" -d "${TMP}/extract"
+unzip -q "${TMP}/HelmOps.zip" -d "${TMP}/extract"
 
 NEW_APP=$(find "${TMP}/extract" -maxdepth 2 -name "*.app" -type d | head -1)
 if [ -z "$NEW_APP" ]; then
@@ -58,7 +58,7 @@ codesign --force --deep --sign - --timestamp=none "${APP_DEST}" 2>/dev/null || t
 rm -rf "$TMP"
 
 echo ""
-echo "✅ Bill Ops ${VERSION} est installé !"
+echo "✅ Helm Ops ${VERSION} est installé !"
 echo ""
 sleep 1
 open "${APP_DEST}"

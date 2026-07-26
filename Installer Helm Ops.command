@@ -2,17 +2,17 @@
 
 clear
 echo "╔══════════════════════════════════════╗"
-echo "║      Installation de BILL OPS         ║"
+echo "║      Installation de HELM OPS         ║"
 echo "╚══════════════════════════════════════╝"
 echo ""
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-APP_SRC="$SCRIPT_DIR/Bill Ops.app"
-APP_DEST="/Applications/Bill Ops.app"
+APP_SRC="$SCRIPT_DIR/Helm Ops.app"
+APP_DEST="/Applications/Helm Ops.app"
 
 if [ ! -d "$APP_SRC" ]; then
-  echo "❌ Bill Ops.app introuvable."
-  echo "   Assure-toi que Bill Ops.app est dans le même dossier que ce fichier."
+  echo "❌ Helm Ops.app introuvable."
+  echo "   Assure-toi que Helm Ops.app est dans le même dossier que ce fichier."
   echo ""
   read -p "Appuie sur Entrée pour quitter..."
   exit 1
@@ -26,7 +26,7 @@ xattr -cr "$APP_DEST"
 codesign --force --deep --sign - --timestamp=none "$APP_DEST" 2>/dev/null || true
 
 echo ""
-echo "✅ Bill Ops est installé !"
+echo "✅ Helm Ops est installé !"
 echo "   Lancement en cours..."
 echo ""
 sleep 1
