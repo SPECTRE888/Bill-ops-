@@ -147,7 +147,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .preview-wrap{display:none;background:var(--bg);height:100%;}
 .preview-wrap.active{display:flex;flex-direction:column;}
 .preview-scroll{flex:1;min-height:0;overflow-y:auto;padding:40px;display:flex;justify-content:center;}
-.preview-actionbar{flex-shrink:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 40px;border-top:1px solid var(--border);background:var(--surface);}
+.preview-actionbar{flex-shrink:0;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:14px 40px;border-top:1px solid var(--border);background:var(--surface);}
 .preview-actionbar button{width:100%;margin:0;}
 .invoice-pages{display:flex;flex-direction:column;gap:28px;align-items:center;}
 #invoice,.invoice-page{background:var(--surface);color:var(--text);width:210mm;min-height:285mm;padding:20mm;box-shadow:0 0 20px rgba(0,0,0,.25);border:1px solid var(--border);box-sizing:border-box;}
@@ -625,6 +625,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <button class="btn-gold" onclick="saveInvoice()" data-i18n="btn_save">Enregistrer</button>
       <button class="btn-line" onclick="exportInvoicePdf()" data-i18n="btn_export_pdf">Exporter en PDF</button>
       <button class="btn-line" onclick="sendInvoice()" data-i18n="btn_send_client">Envoyer au client</button>
+      <button class="btn-line" onclick="newInvoiceForm()" data-i18n="btn_new_invoice_form">Nouvelle facture</button>
     </div>
   </div>
 </div>
@@ -722,7 +723,7 @@ fact_frais_title:'Frais déplacement', lbl_km:'Km parcourus', lbl_tarif_km:'Tari
 toggle_offert:'Offert', toggle_email:'Email', toggle_repas:'Repas', lbl_type:'Type', lbl_valeur:'Valeur',
 lbl_objet:'Objet', ph_objet:'Facture (numéro auto si vide)', lbl_message:'Message', ph_message:'Petit mot avant la facture (optionnel)', lbl_montant_repas:'Montant repas',
 fact_prestations_title:'Prestations', btn_add_line:'+ Ajouter une ligne', btn_duplicate:'Dupliquer',
-btn_generate_preview:"Générer l'aperçu", btn_export_pdf:'Exporter en PDF', btn_send_client:'Envoyer au client',
+btn_generate_preview:"Générer l'aperçu", btn_export_pdf:'Exporter en PDF', btn_send_client:'Envoyer au client', btn_new_invoice_form:'Nouvelle facture',
 hist_title:'Factures émises', ph_hist_search:"Rechercher (client, n° de facture, mot-clé d'une prestation)...",
 hist_col_num:'N°', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Statut', hist_col_actions:'Actions',
 btn_view:'Voir', btn_resend:'Renvoyer', empty_invoices:'Aucune facture émise.',
@@ -819,7 +820,7 @@ fact_frais_title:'Travel expenses', lbl_km:'Distance (km)', lbl_tarif_km:'Rate p
 toggle_offert:'Discount', toggle_email:'Email', toggle_repas:'Meal', lbl_type:'Type', lbl_valeur:'Value',
 lbl_objet:'Subject', ph_objet:'Invoice (auto number if empty)', lbl_message:'Message', ph_message:'A short note before the invoice (optional)', lbl_montant_repas:'Meal amount',
 fact_prestations_title:'Services', btn_add_line:'+ Add a line', btn_duplicate:'Duplicate',
-btn_generate_preview:'Generate preview', btn_export_pdf:'Export as PDF', btn_send_client:'Send to client',
+btn_generate_preview:'Generate preview', btn_export_pdf:'Export as PDF', btn_send_client:'Send to client', btn_new_invoice_form:'New invoice',
 hist_title:'Issued invoices', ph_hist_search:'Search (client, invoice no., service keyword)...',
 hist_col_num:'No.', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Status', hist_col_actions:'Actions',
 btn_view:'View', btn_resend:'Resend', empty_invoices:'No invoices issued.',
@@ -916,7 +917,7 @@ fact_frais_title:'Gastos de desplazamiento', lbl_km:'Kilómetros recorridos', lb
 toggle_offert:'Descuento', toggle_email:'Email', toggle_repas:'Comida', lbl_type:'Tipo', lbl_valeur:'Valor',
 lbl_objet:'Asunto', ph_objet:'Factura (número automático si está vacío)', lbl_message:'Mensaje', ph_message:'Una nota antes de la factura (opcional)', lbl_montant_repas:'Importe de la comida',
 fact_prestations_title:'Servicios', btn_add_line:'+ Añadir una línea', btn_duplicate:'Duplicar',
-btn_generate_preview:'Generar vista previa', btn_export_pdf:'Exportar en PDF', btn_send_client:'Enviar al cliente',
+btn_generate_preview:'Generar vista previa', btn_export_pdf:'Exportar en PDF', btn_send_client:'Enviar al cliente', btn_new_invoice_form:'Nueva factura',
 hist_title:'Facturas emitidas', ph_hist_search:'Buscar (cliente, n.º de factura, palabra clave de un servicio)...',
 hist_col_num:'N.º', hist_col_client:'Cliente', hist_col_date:'Fecha', hist_col_total:'Total', hist_col_statut:'Estado', hist_col_actions:'Acciones',
 btn_view:'Ver', btn_resend:'Reenviar', empty_invoices:'Ninguna factura emitida.',
@@ -1456,6 +1457,34 @@ function duplicateInvoice(num){
   showTab('facture');
   showToast(t('toast_invoice_duplicated',{num:invNum.value, from:num}));
 }
+function newInvoiceForm(){
+  clientSelect.value = '';
+  lastNumberedClient = '';
+  invNum.value = '';
+  invDate.value = '';
+  workDate.value = '';
+  tva.value = 0;
+  offType.value = 'pct';
+  offVal.value = 0;
+  offEnabled.checked = false;
+  offFields.style.display = 'none';
+  emailCustomEnabled.checked = false;
+  emailCustomFields.style.display = 'none';
+  emailSubject.value = '';
+  emailMessage.value = '';
+  km.value = 0;
+  kmRate.value = 0.5;
+  peage.value = 0;
+  parking.value = 0;
+  meal.value = 0;
+  mealEnabled.checked = false;
+  mealFields.style.display = 'none';
+  document.querySelectorAll('.item-row').forEach(r=>r.remove());
+  addItem();
+  render();
+  showTab('facture');
+  clientSelect.focus();
+}
 function saveToHistory(status){
   const c = currentClient();
   if(!c || !invNum.value) return;
@@ -1701,7 +1730,7 @@ function dashNewBooking(){
   bkClient.focus();
   bkClient.scrollIntoView({behavior:'smooth', block:'center'});
 }
-function dashNewInvoice(){ showTab('facture'); clientSelect.focus(); }
+function dashNewInvoice(){ newInvoiceForm(); }
 function dashNewClient(){ showTab('clients'); resetClientForm(); cliName.focus(); }
 function computeNextInvoiceNumber(prefix){
   if(!prefix) prefix='FA';
