@@ -1,4 +1,6 @@
-# Bill-Ops — App de facturation
+# Helm Ops — Gestion complète d'activité (clients, planning, facturation)
+
+Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) et la table Supabase (`billops_sync`) gardent leur nom technique historique, décorrélé de la marque affichée.
 
 Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `supabase/functions/` (Edge Functions : `send-invoice` proxy SendGrid, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (version Express équivalente à `send-invoice`, gardée en référence pour qui voudrait s'auto-héberger, mais pas utilisée en prod).
 

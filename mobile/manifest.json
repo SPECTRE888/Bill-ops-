@@ -1,6 +1,6 @@
 {
-  "name": "Bill Ops",
-  "short_name": "Bill Ops",
+  "name": "Helm Ops",
+  "short_name": "Helm Ops",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

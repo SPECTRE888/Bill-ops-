@@ -1,5 +1,5 @@
 /*!
- * Bill Ops — Electron preload bridge
+ * Helm Ops — Electron preload bridge
  */
 const { contextBridge, ipcRenderer } = require('electron');
 

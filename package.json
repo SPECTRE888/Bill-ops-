@@ -1,7 +1,7 @@
 {
-  "name": "bill-ops",
-  "version": "1.0.62",
-  "description": "Bill Ops — application de facturation",
+  "name": "helm-ops",
+  "version": "1.0.63",
+  "description": "Helm Ops — gestion complète d'activité (clients, planning, facturation)",
   "author": "Jérôme Jarrige <Jarrige.jerome@hotmail.fr>",
   "license": "UNLICENSED",
   "private": true,
@@ -14,8 +14,8 @@
     "build:all": "electron-builder --mac --win"
   },
   "build": {
-    "appId": "com.billops.app",
-    "productName": "Bill Ops",
+    "appId": "com.helmops.app",
+    "productName": "Helm Ops",
     "afterPack": "scripts/afterPack.js",
     "directories": {
       "output": "dist"
@@ -32,7 +32,7 @@
       "repo": "Bill-ops-",
       "releaseType": "release"
     },
-    "artifactName": "BillOps-${version}-${arch}-mac.${ext}",
+    "artifactName": "HelmOps-${version}-${arch}-mac.${ext}",
     "mac": {
       "icon": "electron/assets/icon.icns",
       "identity": null,
@@ -52,7 +52,7 @@
       ]
     },
     "dmg": {
-      "title": "Bill Ops"
+      "title": "Helm Ops"
     },
     "nsis": {
       "oneClick": false,

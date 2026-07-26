@@ -1,4 +1,4 @@
-const CACHE_NAME = 'billops-mobile-v7';
+const CACHE_NAME = 'helmops-mobile-v8';
 const SHELL = ['./', 'index.html', 'manifest.json', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -32,7 +32,7 @@ self.addEventListener('fetch', (event) => {
 // texte fixe pour éviter d'implémenter le déchiffrement RFC 8291 côté client.
 self.addEventListener('push', (event) => {
   event.waitUntil(
-    self.registration.showNotification('Bill Ops', {
+    self.registration.showNotification('Helm Ops', {
       body: "Une prestation commence dans ~15 min — pense à pointer ton arrivée.",
       icon: 'icon-192.png',
       badge: 'icon-192.png',

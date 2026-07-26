@@ -43,7 +43,7 @@ jobs:
 
     - name: Ad-hoc sign app
       run: |
-        codesign --force --deep --sign - --timestamp=none "dist/mac-arm64/Bill Ops.app"
+        codesign --force --deep --sign - --timestamp=none "dist/mac-arm64/Helm Ops.app"
 
     - name: Create release & upload assets
       run: |
@@ -55,10 +55,10 @@ jobs:
 
         FILES=()
         for f in \
-          "dist/BillOps-${VERSION}-arm64-mac.zip" \
-          "dist/BillOps-${VERSION}-arm64-mac.zip.blockmap" \
-          "dist/BillOps-${VERSION}-arm64-mac.dmg" \
-          "dist/BillOps-${VERSION}-arm64-mac.dmg.blockmap"
+          "dist/HelmOps-${VERSION}-arm64-mac.zip" \
+          "dist/HelmOps-${VERSION}-arm64-mac.zip.blockmap" \
+          "dist/HelmOps-${VERSION}-arm64-mac.dmg" \
+          "dist/HelmOps-${VERSION}-arm64-mac.dmg.blockmap"
         do
           if [ -f "$f" ]; then
             FILES+=("$f")
@@ -70,7 +70,7 @@ jobs:
 
         gh release create "$TAG" \
           --title "$TAG" \
-          --notes "Bill Ops ${TAG}" \
+          --notes "Helm Ops ${TAG}" \
           "${FILES[@]}"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

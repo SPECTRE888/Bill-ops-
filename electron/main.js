@@ -1,5 +1,5 @@
 /*!
- * Bill Ops — Electron main process
+ * Helm Ops — Electron main process
  */
 const { app, BrowserWindow, shell, ipcMain } = require('electron')
 const path = require('path')
@@ -8,12 +8,27 @@ const APP_FILE = path.join(__dirname, '..', 'facture.html')
 
 let mainWin = null
 
+// ─── Migration userData depuis l'ancien nom "Bill Ops" (renommage → Helm Ops) ──
+// Sans ça, macOS traite l'app comme nouvelle après le renommage de productName/appId
+// et le thème + le code de synchro locaux semblent perdus au premier lancement.
+function migrateLegacyUserData() {
+  const fs = require('fs')
+  const newDir = app.getPath('userData')
+  const oldDir = path.join(path.dirname(newDir), 'Bill Ops')
+  if (!fs.existsSync(oldDir) || fs.existsSync(newDir)) return
+  try {
+    fs.cpSync(oldDir, newDir, { recursive: true })
+  } catch (e) {
+    console.error('[migration]', e?.message || e)
+  }
+}
+
 ipcMain.handle('open-external', (_e, u) => shell.openExternal(u))
 
 ipcMain.handle('open-invoice-window', (_e, { html, title }) => {
   const fs = require('fs')
   const os = require('os')
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bill-ops-inv-'))
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'helm-ops-inv-'))
   const filePath = path.join(tmpDir, 'invoice.html')
   fs.writeFileSync(filePath, html, 'utf8')
   const win = new BrowserWindow({
@@ -40,7 +55,7 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: 'Bill Ops',
+    title: 'Helm Ops',
     icon: path.join(__dirname, 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.icns'),
     webPreferences: {
       nodeIntegration: false,
@@ -95,7 +110,7 @@ function toast(msg) {
 function get(url) {
   return new Promise((resolve, reject) => {
     const follow = (u) => {
-      https.get(u, { headers: { 'User-Agent': 'Bill-Ops-Updater' } }, (res) => {
+      https.get(u, { headers: { 'User-Agent': 'Helm-Ops-Updater' } }, (res) => {
         if (res.statusCode === 301 || res.statusCode === 302)
           return follow(res.headers.location)
         let d = ''
@@ -111,7 +126,7 @@ function download(url, dest) {
   return new Promise((resolve, reject) => {
     const follow = (u, redirects) => {
       if (redirects > 10) return reject(new Error('Trop de redirections'))
-      https.get(u, { headers: { 'User-Agent': 'Bill-Ops-Updater' } }, (res) => {
+      https.get(u, { headers: { 'User-Agent': 'Helm-Ops-Updater' } }, (res) => {
         if ([301, 302, 303, 307, 308].includes(res.statusCode)) {
           res.resume()
           return follow(res.headers.location, redirects + 1)
@@ -156,7 +171,7 @@ async function checkAndUpdate() {
     const asset = release.assets.find(a => a.name.match(/arm64-mac\.zip$/) && !a.name.endsWith('.blockmap'))
     if (!asset) throw new Error('Asset ZIP introuvable dans la release')
 
-    const tmpDir  = fs.mkdtempSync(path.join(os.tmpdir(), 'bill-ops-upd-'))
+    const tmpDir  = fs.mkdtempSync(path.join(os.tmpdir(), 'helm-ops-upd-'))
     const zipPath = path.join(tmpDir, 'update.zip')
 
     await download(asset.browser_download_url, zipPath)
@@ -170,10 +185,10 @@ async function checkAndUpdate() {
     const script = [
       `exec > "${logFile}" 2>&1`,
       `set -ex`,
-      `echo "=== Bill Ops update script ==="`,
+      `echo "=== Helm Ops update script ==="`,
       `sleep 5`,
       `for i in $(seq 1 20); do`,
-      `  pgrep -f "Bill Ops" >/dev/null 2>&1 || break`,
+      `  pgrep -f "Helm Ops" >/dev/null 2>&1 || break`,
       `  sleep 1`,
       `done`,
       `cd "${extractDir}"`,
@@ -210,6 +225,8 @@ function setupUpdater() {
 
 // ─── Boot ───────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
+  if (app.isPackaged) migrateLegacyUserData()
+
   if (process.platform === 'darwin' && app.isPackaged) {
     try {
       const { execSync } = require('child_process')
