@@ -512,7 +512,7 @@ function renderPointage(){
     .sort((a,b)=>(a.from||'').localeCompare(b.from||''));
   const el = document.getElementById('pointageList');
   el.innerHTML = active.length ? active.map(b=>{
-    const info = `<b>${b.client}</b>${b.label?' — '+b.label:''}<br><span style="color:var(--text2);font-size:12px;">${b.from&&b.to?b.from+'-'+b.to:''}</span>`;
+    const info = `<b>${b.client}</b>${b.label?' — '+b.label:''}<br><span style="color:var(--text2);font-size:12px;">Aujourd'hui${b.from&&b.to?' · '+b.from+'-'+b.to:''}</span>`;
     const statusLine = b.checkedInAt ? `<div style="margin-top:6px;font-size:12px;color:var(--gold);">Arrivé à ${localHM(b.checkedInAt)}</div>` : '';
     const btn = !b.checkedInAt
       ? `<button class="btn-gold action-btn" onclick="openClockModal(${b.id},'in')">Je suis arrivé(e)</button>`
@@ -529,7 +529,7 @@ function renderPointage(){
     return `
     <div class="mcard">
       <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
-      <span style="color:var(--text2);font-size:12px;">${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · ${b.actualHours}h réel</span><br>
+      <span style="color:var(--text2);font-size:12px;">${formatFrDate(b.date)} · ${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · ${b.actualHours}h réel</span><br>
       ${invoiced
         ? '<span style="color:var(--green);font-size:12px;font-weight:600;">Facturée</span>'
         : `<button class="btn-gold action-btn" onclick="openInvoiceExtras(${b.id})">Transformer en facture</button>
