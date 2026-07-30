@@ -78,8 +78,6 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .mheader-brand{font-family:var(--font-body);font-size:14px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);}
 .mheader-right{display:flex;align-items:center;gap:10px;}
 .mheader-sync{font-size:10.5px;color:var(--text3);}
-.mheader-disconnect{all:unset;cursor:pointer;color:var(--text3);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:2px 4px;}
-.mheader-disconnect:hover{color:var(--red);}
 .mheader-gear{all:unset;cursor:pointer;color:var(--text3);display:flex;align-items:center;padding:2px;}
 .mheader-gear:hover{color:var(--gold);}
 .mheader-gear.active{color:var(--gold);}
@@ -184,10 +182,8 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     <span class="mheader-brand">HELM OPS</span>
     <div class="mheader-right">
       <span id="syncStatusText" class="mheader-sync"></span>
-      <button id="notifToggle" class="mheader-disconnect" style="display:none;" onclick="enableNotifications()">Activer les notifications</button>
-      <button class="mheader-disconnect" onclick="handleDisconnect()">Déconnecter</button>
-      <button id="settingsGearBtn" class="mheader-gear" onclick="switchTab('parametres')" aria-label="Réglages">
-        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="10" cy="10" r="2.6"/><path d="M10 2v2.4M10 15.6V18M18 10h-2.4M4.4 10H2M15.6 4.4l-1.7 1.7M6.1 13.9l-1.7 1.7M15.6 15.6l-1.7-1.7M6.1 6.1 4.4 4.4"/></svg>
+      <button id="settingsGearBtn" class="mheader-gear" onclick="toggleSettings()" aria-label="Réglages">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
     </div>
   </div>
@@ -233,6 +229,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <h2>Factures</h2>
       <div id="facturesList"></div>
     </section>
+    <section id="tab-historique" style="display:none;">
+      <h2>Historique</h2>
+      <div id="historiqueList"></div>
+    </section>
     <section id="tab-parametres" style="display:none;">
       <h2>Réglages</h2>
       <div class="mcard">
@@ -246,8 +246,9 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <div class="mcard">
         <b>Synchronisation</b><br>
         <span id="syncDiagStatus"></span>
-        <div style="margin-top:10px;">
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn-line" onclick="pullSync(true)">Forcer la synchro</button>
+          <button class="btn-line" style="color:var(--red);" onclick="handleDisconnect()">Déconnecter</button>
         </div>
       </div>
     </section>
@@ -256,6 +257,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     <button data-tab="pointage" class="active" onclick="switchTab('pointage')">Pointage</button>
     <button data-tab="planning" onclick="switchTab('planning')">Planning</button>
     <button data-tab="factures" onclick="switchTab('factures')">Factures</button>
+    <button data-tab="historique" onclick="switchTab('historique')">Historique</button>
   </nav>
 </div>
 
@@ -436,20 +438,9 @@ function urlBase64ToUint8Array(base64){
 function notifSupported(){
   return 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
 }
-function updateNotifUI(){
-  const btn = document.getElementById('notifToggle');
-  if(!btn) return;
-  if(!notifSupported() || Notification.permission==='granted'){ btn.style.display='none'; return; }
-  if(Notification.permission==='denied'){
-    btn.style.display='none';
-    return;
-  }
-  btn.style.display='inline';
-}
 async function enableNotifications(){
   if(!notifSupported()){ showToast('⚠ Notifications non supportées sur ce navigateur.'); return; }
   const perm = await Notification.requestPermission();
-  updateNotifUI();
   if(perm!=='granted'){ showToast('⚠ Notifications refusées.'); return; }
   try{
     const reg = await navigator.serviceWorker.ready;
@@ -488,7 +479,6 @@ async function doConnect(){
     setStatusMsg(statusEl, '✔ Connecté');
     showPairGate(false);
     renderActiveTab();
-    updateNotifUI();
   } else {
     setStatusMsg(statusEl, '⚠ Aucune donnée trouvée pour ce code — vérifie qu\'il correspond à celui affiché sur le Mac.');
   }
@@ -498,7 +488,7 @@ async function doConnect(){
 let activeTab = 'pointage';
 function switchTab(name){
   activeTab = name;
-  ['pointage','planning','factures','parametres'].forEach(t=>{
+  ['pointage','planning','factures','historique','parametres'].forEach(t=>{
     document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
   });
   document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
@@ -509,7 +499,17 @@ function renderActiveTab(){
   if(activeTab==='pointage') renderPointage();
   else if(activeTab==='planning') renderPlanningTab();
   else if(activeTab==='parametres') renderParametres();
+  else if(activeTab==='historique') renderHistoriqueTab();
   else renderFacturesTab();
+}
+let settingsReturnTab = 'pointage';
+function toggleSettings(){
+  if(activeTab==='parametres'){
+    switchTab(settingsReturnTab);
+  } else {
+    settingsReturnTab = activeTab;
+    switchTab('parametres');
+  }
 }
 
 // --- Réglages / diagnostic notifications & synchro ---
@@ -826,35 +826,42 @@ function deleteBookingMobile(id){
 }
 
 // --- Factures ---
+function invoiceCardHtml(i){
+  const color = (i.status==='Envoyée'||i.status==='Payée') ? 'var(--green)' : 'var(--gold)';
+  return `<div class="mcard">
+    <b>${i.num}</b> — ${i.client}<br>
+    <span style="color:var(--text2);font-size:12px;">${i.date||''}</span><br>
+    <span style="font-weight:600;">${i.total}</span>
+    <select onchange="updateInvoiceStatusMobile('${i.num}', this.value)" style="width:auto;display:inline-block;margin-left:8px;padding:3px 8px;font-size:11px;font-weight:600;color:${color};">
+      <option value="Enregistrée"${i.status==='Enregistrée'?' selected':''}>Enregistrée</option>
+      <option value="Mise à jour"${i.status==='Mise à jour'?' selected':''}>Mise à jour</option>
+      <option value="Envoyée"${i.status==='Envoyée'?' selected':''}>Envoyée</option>
+      <option value="Payée"${i.status==='Payée'?' selected':''}>Payée</option>
+    </select>
+    <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn-line" onclick="viewInvoiceMobile('${i.num}')">Aperçu</button>
+      <button class="btn-line" onclick="downloadInvoicePdfMobile('${i.num}')">Télécharger le PDF</button>
+      <button class="btn-line" onclick="sendInvoiceMobile('${i.num}')">Envoyer</button>
+      <button class="btn-line" style="color:var(--red);" onclick="deleteInvoiceMobile('${i.num}')">Supprimer</button>
+    </div>
+  </div>`;
+}
 function renderFacturesTab(){
-  const invoices = storeArr('invoices').slice().reverse();
-  const el = document.getElementById('facturesList');
-  el.innerHTML = invoices.length ? invoices.map(i=>{
-    const settled = i.status==='Payée';
-    const color = (i.status==='Envoyée'||i.status==='Payée') ? 'var(--green)' : 'var(--gold)';
-    return `<div class="mcard"${settled?' style="opacity:.6;"':''}>
-      <b>${i.num}</b> — ${i.client}<br>
-      <span style="color:var(--text2);font-size:12px;">${i.date||''}</span><br>
-      <span style="font-weight:600;">${i.total}</span>
-      <select onchange="updateInvoiceStatusMobile('${i.num}', this.value)" style="width:auto;display:inline-block;margin-left:8px;padding:3px 8px;font-size:11px;font-weight:600;color:${color};">
-        <option value="Enregistrée"${i.status==='Enregistrée'?' selected':''}>Enregistrée</option>
-        <option value="Mise à jour"${i.status==='Mise à jour'?' selected':''}>Mise à jour</option>
-        <option value="Envoyée"${i.status==='Envoyée'?' selected':''}>Envoyée</option>
-        <option value="Payée"${i.status==='Payée'?' selected':''}>Payée</option>
-      </select>
-      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="btn-line" onclick="viewInvoiceMobile('${i.num}')">Aperçu</button>
-        <button class="btn-line" onclick="downloadInvoicePdfMobile('${i.num}')">Télécharger le PDF</button>
-        <button class="btn-line" onclick="sendInvoiceMobile('${i.num}')">Envoyer</button>
-        <button class="btn-line" style="color:var(--red);" onclick="deleteInvoiceMobile('${i.num}')">Supprimer</button>
-      </div>
-    </div>`;
-  }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune facture.</p>';
+  const invoices = storeArr('invoices').filter(i=>i.status!=='Payée').slice().reverse();
+  document.getElementById('facturesList').innerHTML = invoices.length
+    ? invoices.map(invoiceCardHtml).join('')
+    : '<p style="color:var(--text3);font-size:13px;">Aucune facture en cours.</p>';
+}
+function renderHistoriqueTab(){
+  const invoices = storeArr('invoices').filter(i=>i.status==='Payée').slice().reverse();
+  document.getElementById('historiqueList').innerHTML = invoices.length
+    ? invoices.map(invoiceCardHtml).join('')
+    : '<p style="color:var(--text3);font-size:13px;">Aucune facture payée.</p>';
 }
 function deleteInvoiceMobile(num){
   if(!confirm('Supprimer la facture '+num+' ?')) return;
   set('invoices', storeArr('invoices').filter(i=>i.num!==num));
-  renderFacturesTab();
+  renderActiveTab();
   showToast('✔ Facture '+num+' supprimée.');
 }
 function updateInvoiceStatusMobile(num, newStatus){
@@ -863,7 +870,7 @@ function updateInvoiceStatusMobile(num, newStatus){
   if(!inv) return;
   inv.status = newStatus;
   set('invoices', invoices);
-  renderFacturesTab();
+  renderActiveTab();
   showToast('✔ Statut mis à jour.');
 }
 function viewInvoiceMobile(num){
@@ -1105,7 +1112,6 @@ applyTheme();
 if(getSyncCode()){
   showPairGate(false);
   renderActiveTab();
-  updateNotifUI();
   pullSync(false).then(found=>{ if(found){ applyTheme(); renderActiveTab(); } });
 } else {
   showPairGate(true);
