@@ -203,7 +203,6 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       </div>
       <div id="mCal" class="mcal-grid"></div>
       <div id="mCalDayPanel"></div>
-      <button class="btn-gold action-btn" id="btnNewBooking" onclick="openBookingForm()">+ Nouvelle presta</button>
       <div id="bookingFormWrap" style="display:none;margin:14px 0 20px;padding:14px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);">
         <input type="hidden" id="bkEditId" value="">
         <label>Client</label><input id="bkClient" list="clientNames" oninput="prefillBookingClientMobile()">
@@ -733,7 +732,6 @@ function populateClientNames(){
 function openBookingForm(id){
   populateClientNames();
   document.getElementById('bookingFormWrap').style.display = 'block';
-  document.getElementById('btnNewBooking').style.display = 'none';
   if(id){
     const b = storeArr('bookings').find(x=>x.id===id);
     if(!b) return;
@@ -753,7 +751,6 @@ function openBookingForm(id){
 }
 function closeBookingForm(){
   document.getElementById('bookingFormWrap').style.display = 'none';
-  document.getElementById('btnNewBooking').style.display = 'block';
   ['bkEditId','bkClient','bkLabel','bkAddr','bkContact','bkDate','bkFrom','bkTo','bkRate'].forEach(id=>document.getElementById(id).value='');
 }
 function prefillBookingClientMobile(){
