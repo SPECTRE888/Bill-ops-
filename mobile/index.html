@@ -88,6 +88,25 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .mcard{border:1px solid var(--border2);border-radius:6px;padding:12px;margin-bottom:10px;font-size:13px;background:var(--surface2);line-height:1.6;}
 .mcard b{color:var(--text);}
 
+.mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;}
+.mcal-weekday{font-size:9px;color:var(--text3);text-align:center;padding-bottom:2px;}
+.mcal-day{min-height:42px;border-radius:4px;font-size:9px;background:var(--surface2);color:var(--text3);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;line-height:1.2;}
+.mcal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
+.mcal-day.selected{outline:2px solid var(--gold);}
+.mcal-day.empty{background:transparent;cursor:default;}
+.mcal-day.past{opacity:.5;}
+.mcal-day.past.has-booking{background:var(--surface3);border-color:var(--border2);}
+.mcal-day .mcal-daynum{font-size:11px;}
+.mcal-dots{display:flex;gap:2px;margin-top:3px;flex-wrap:wrap;justify-content:center;}
+.mcal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.mcal-day .mcal-ca{font-size:8px;color:var(--gold);font-weight:700;margin-top:auto;}
+.mcal-day-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12.5px;}
+.mcal-day-header{font-family:var(--font-display);font-size:14px;color:var(--gold);margin-bottom:8px;text-transform:capitalize;}
+.mcal-b-row{padding:9px 0;border-bottom:1px solid var(--border);}
+.mcal-b-row:last-child{border-bottom:none;}
+.mcal-b-actions{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap;}
+.mcal-b-actions button{padding:4px 9px;font-size:10px;margin:0;}
+
 .toast-stack{position:fixed;top:20px;right:20px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
 .toast-card{background:var(--surface);border:1px solid var(--gold-border);border-left:3px solid var(--gold);border-radius:var(--radius-lg);padding:12px 16px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:12px;color:var(--text);}
 .toast-card b{color:var(--gold);font-family:var(--font-display);font-size:14px;display:block;margin-bottom:2px;}
@@ -175,7 +194,16 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       </div>
     </section>
     <section id="tab-planning" style="display:none;">
-      <h2>Prestas à venir</h2>
+      <h2>Planning</h2>
+      <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);">Prévisionnel du mois</div>
+      <div id="mCalForecast" style="font-family:var(--font-display);font-size:24px;color:var(--gold);margin-bottom:12px;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <button class="btn-line" style="margin:0;padding:5px 12px;" onclick="calShiftMobile(-1)">‹</button>
+        <span id="mCalLabel" style="font-family:var(--font-display);font-size:15px;color:var(--gold);text-transform:capitalize;"></span>
+        <button class="btn-line" style="margin:0;padding:5px 12px;" onclick="calShiftMobile(1)">›</button>
+      </div>
+      <div id="mCal" class="mcal-grid"></div>
+      <div id="mCalDayPanel"></div>
       <button class="btn-gold action-btn" id="btnNewBooking" onclick="openBookingForm()">+ Nouvelle presta</button>
       <div id="bookingFormWrap" style="display:none;margin:14px 0 20px;padding:14px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);">
         <input type="hidden" id="bkEditId" value="">
@@ -193,7 +221,6 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
         <button class="btn-line action-btn" onclick="closeBookingForm()">Annuler</button>
       </div>
       <datalist id="clientNames"></datalist>
-      <div id="planningList"></div>
     </section>
     <section id="tab-factures" style="display:none;">
       <h2>Factures</h2>
@@ -505,20 +532,37 @@ async function testLocalNotification(){
 }
 
 // --- Pointage ---
+function linkifyPhones(text){
+  if(!text) return '';
+  const re = /(\+33[\s.-]?[1-9](?:[\s.-]?\d{2}){4})|(0[1-9](?:[\s.-]?\d{2}){4})/g;
+  return text.replace(re, m => `<a href="tel:${m.replace(/[\s.-]/g,'')}" style="color:var(--gold);">${m}</a>`);
+}
+function mapsLink(addr){
+  if(!addr) return '';
+  return `<a href="https://maps.apple.com/?q=${encodeURIComponent(addr)}" style="color:var(--text2);text-decoration:underline;">${addr}</a>`;
+}
 function renderPointage(){
   const today = todayStr();
   const bookings = storeArr('bookings');
-  const active = bookings.filter(b=>b.status==='à facturer' && !b.checkedOutAt && b.date===today)
-    .sort((a,b)=>(a.from||'').localeCompare(b.from||''));
+  const active = bookings.filter(b=>b.status==='à facturer' && !b.checkedOutAt && b.date<=today)
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.from||'').localeCompare(b.from||''));
   const el = document.getElementById('pointageList');
   el.innerHTML = active.length ? active.map(b=>{
-    const info = `<b>${b.client}</b>${b.label?' — '+b.label:''}<br><span style="color:var(--text2);font-size:12px;">Aujourd'hui${b.from&&b.to?' · '+b.from+'-'+b.to:''}</span>`;
+    const overdue = b.date < today;
+    const dayLabel = overdue ? formatFrDate(b.date) : "Aujourd'hui";
+    const info = `<b>${b.client}</b>${b.label?' — '+b.label:''}<br><span style="color:var(--text2);font-size:12px;">${dayLabel}${b.from&&b.to?' · '+b.from+'-'+b.to:''}</span>`;
+    const alertLine = overdue ? `<div style="margin-top:4px;font-size:11.5px;color:var(--red);font-weight:600;">⚠ Pointage en retard</div>` : '';
+    const details = [
+      b.addr ? `<div style="margin-top:6px;font-size:11.5px;color:var(--text2);">📍 ${mapsLink(b.addr)}</div>` : '',
+      b.contact ? `<div style="margin-top:2px;font-size:11.5px;color:var(--text2);">☎ ${linkifyPhones(b.contact)}</div>` : '',
+      (b.rate ? `<div style="margin-top:2px;font-size:11.5px;color:var(--text2);">Taux : ${b.rate.toFixed(2)} €/h${b.hours?' · '+b.hours+'h prévues':''}</div>` : '')
+    ].join('');
     const statusLine = b.checkedInAt ? `<div style="margin-top:6px;font-size:12px;color:var(--gold);">Arrivé à ${localHM(b.checkedInAt)}</div>` : '';
     const btn = !b.checkedInAt
       ? `<button class="btn-gold action-btn" onclick="openClockModal(${b.id},'in')">Je suis arrivé(e)</button>`
       : `<button class="btn-gold action-btn" onclick="openClockModal(${b.id},'out')">Je termine</button>`;
-    return `<div class="mcard">${info}${statusLine}${btn}</div>`;
-  }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta aujourd\'hui.</p>';
+    return `<div class="mcard">${info}${alertLine}${details}${statusLine}${btn}</div>`;
+  }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta à pointer.</p>';
 
   const recent = bookings.filter(b=>b.checkedOutAt).sort((a,b)=>(b.checkedOutAt||'').localeCompare(a.checkedOutAt||'')).slice(0,5);
   const recentSection = document.getElementById('recentSection');
@@ -547,7 +591,8 @@ function openClockModal(id, mode){
   if(!b) return;
   clockCtx = {id, mode};
   const existing = mode==='in' ? b.checkedInAt : b.checkedOutAt;
-  const timeVal = existing ? localHM(existing) : new Date().toTimeString().slice(0,5);
+  const scheduled = mode==='in' ? b.from : b.to;
+  const timeVal = existing ? localHM(existing) : (scheduled || new Date().toTimeString().slice(0,5));
   document.getElementById('clockModalTitle').textContent = mode==='in' ? "Heure d'arrivée" : 'Heure de départ';
   document.getElementById('clockTimeInput').value = timeVal;
   document.getElementById('clockModalError').textContent = '';
@@ -585,25 +630,102 @@ function confirmClock(){
   showToast(mode==='in' ? '✔ Arrivée enregistrée.' : '✔ Départ enregistré.');
 }
 
-// --- Planning ---
+// --- Planning (calendrier mensuel, comme sur le Mac) ---
+const CLIENT_PALETTE = ['#d9a637','#8aa9c4','#c48a8a','#7fc49a','#b48ac4','#c4b45a','#6ec4c0','#c47ab0','#9ac47a','#c4907a'];
+function clientColor(name){
+  let hash = 0;
+  const s = name||'';
+  for(let i=0;i<s.length;i++){ hash = (hash*31 + s.charCodeAt(i)) | 0; }
+  return CLIENT_PALETTE[Math.abs(hash) % CLIENT_PALETTE.length];
+}
+let mCalDate = new Date();
+let mSelectedDay = null;
+function calShiftMobile(n){ mCalDate.setMonth(mCalDate.getMonth()+n); mSelectedDay=null; renderPlanningTab(); }
 function renderPlanningTab(){
-  const today = todayStr();
-  const bookings = storeArr('bookings')
-    .filter(b=>b.status==='à facturer' && b.date>=today && !b.checkedOutAt)
-    .sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.from||'').localeCompare(b.from||''));
-  const el = document.getElementById('planningList');
-  el.innerHTML = bookings.length ? bookings.map(b=>`
-    <div class="mcard">
-      <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
-      <span style="color:var(--text2);font-size:12px;">${formatFrDate(b.date)}${b.from&&b.to?' · '+b.from+'-'+b.to:''}</span>
-      ${b.addr?`<br><span style="color:var(--text3);font-size:11.5px;">${b.addr}</span>`:''}<br>
-      <span style="color:var(--gold);font-weight:600;">${(b.hours*b.rate).toFixed(2)} €</span>
-      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="btn-line" onclick="switchTab('pointage')">Pointer</button>
+  const bookings = storeArr('bookings');
+  const y = mCalDate.getFullYear(), m = mCalDate.getMonth();
+  document.getElementById('mCalLabel').textContent = mCalDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  const first = new Date(y,m,1);
+  const startOffset = (first.getDay()+6)%7; // lundi=0
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const byDay = {};
+  bookings.forEach(b=>{
+    if(!b.date) return;
+    const d = new Date(b.date+'T00:00:00');
+    if(d.getFullYear()!==y || d.getMonth()!==m) return;
+    const day = d.getDate();
+    if(!byDay[day]) byDay[day] = {ca:0, clients:[]};
+    byDay[day].ca += (b.actualHours ?? b.hours)*b.rate;
+    if(!byDay[day].clients.includes(b.client)) byDay[day].clients.push(b.client);
+  });
+  const todayKey = todayStr();
+  const weekdayLetters = ['L','M','M','J','V','S','D'];
+  let html = weekdayLetters.map(d=>`<div class="mcal-weekday">${d}</div>`).join('');
+  for(let i=0;i<startOffset;i++) html += `<div class="mcal-day empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const info = byDay[d];
+    const dateKey = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const past = dateKey < todayKey ? ' past' : '';
+    const sel = mSelectedDay===d ? ' selected' : '';
+    if(info){
+      const dots = info.clients.slice(0,4).map(c=>`<span class="mcal-dot" style="background:${clientColor(c)};"></span>`).join('');
+      html += `<div class="mcal-day has-booking${past}${sel}" onclick="selectMobileCalDay(${d})"><span class="mcal-daynum">${d}</span><div class="mcal-dots">${dots}</div><span class="mcal-ca">${info.ca.toFixed(0)}€</span></div>`;
+    } else {
+      html += `<div class="mcal-day${past}${sel}" onclick="selectMobileCalDay(${d})"><span class="mcal-daynum">${d}</span></div>`;
+    }
+  }
+  document.getElementById('mCal').innerHTML = html;
+  const monthKey = y+'-'+String(m+1).padStart(2,'0');
+  const forecast = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey))
+    .reduce((s,b)=>s+(b.actualHours ?? b.hours)*b.rate,0);
+  document.getElementById('mCalForecast').textContent = forecast.toFixed(2)+' € à facturer ce mois-ci';
+  renderMobileCalDayPanel();
+}
+function selectMobileCalDay(d){
+  mSelectedDay = (mSelectedDay===d) ? null : d;
+  renderPlanningTab();
+}
+function renderMobileCalDayPanel(){
+  const panel = document.getElementById('mCalDayPanel');
+  if(!mSelectedDay){ panel.innerHTML=''; return; }
+  const y = mCalDate.getFullYear(), m = mCalDate.getMonth();
+  const dateKey = y+'-'+String(m+1).padStart(2,'0')+'-'+String(mSelectedDay).padStart(2,'0');
+  const bookings = storeArr('bookings').filter(b=>b.date===dateKey)
+    .sort((a,b)=>(a.from||'').localeCompare(b.from||''));
+  const label = new Date(dateKey+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  const rows = bookings.map(b=>{
+    const invoiced = b.status==='facturé';
+    const doneClocking = b.checkedInAt && b.checkedOutAt;
+    const actionHtml = invoiced
+      ? `<span style="color:var(--green);font-size:11px;font-weight:600;">Facturée</span>`
+      : doneClocking
+        ? `<button class="btn-gold" onclick="openInvoiceExtras(${b.id})">Transformer en facture</button>`
+        : `<button class="btn-line" onclick="switchTab('pointage')">Pointer</button>`;
+    const details = [
+      b.addr ? `📍 ${mapsLink(b.addr)}` : '',
+      b.contact ? `☎ ${linkifyPhones(b.contact)}` : ''
+    ].filter(Boolean).join('<br>');
+    return `<div class="mcal-b-row" style="border-left:3px solid ${clientColor(b.client)};padding-left:8px;">
+      <b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' · '+b.from+'-'+b.to:''} — <span style="color:var(--gold);font-weight:600;">${((b.actualHours ?? b.hours)*b.rate).toFixed(2)} €</span>
+      ${details?`<div style="margin-top:5px;font-size:11.5px;color:var(--text2);">${details}</div>`:''}
+      <div class="mcal-b-actions">
+        ${actionHtml}
         <button class="btn-line" onclick="openBookingForm(${b.id})">Modifier</button>
         <button class="btn-line" style="color:var(--red);" onclick="deleteBookingMobile(${b.id})">Supprimer</button>
       </div>
-    </div>`).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta à venir.</p>';
+    </div>`;
+  }).join('');
+  panel.innerHTML = `<div class="mcal-day-panel">
+    <div class="mcal-day-header">${label.charAt(0).toUpperCase()+label.slice(1)}</div>
+    ${rows || '<p style="color:var(--text3);font-size:12px;margin:2px 0;">Aucune presta ce jour.</p>'}
+    <button class="btn-gold action-btn" onclick="addBookingForMobileDay(${mSelectedDay})">+ Ajouter une presta ce jour</button>
+  </div>`;
+}
+function addBookingForMobileDay(day){
+  const y = mCalDate.getFullYear(), m = mCalDate.getMonth();
+  const dateKey = y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+  openBookingForm();
+  document.getElementById('bkDate').value = dateKey;
 }
 
 function populateClientNames(){
