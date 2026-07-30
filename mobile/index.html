@@ -824,11 +824,18 @@ function renderFacturesTab(){
   const invoices = storeArr('invoices').slice().reverse();
   const el = document.getElementById('facturesList');
   el.innerHTML = invoices.length ? invoices.map(i=>{
+    const settled = i.status==='Payée';
     const color = (i.status==='Envoyée'||i.status==='Payée') ? 'var(--green)' : 'var(--gold)';
-    return `<div class="mcard">
+    return `<div class="mcard"${settled?' style="opacity:.6;"':''}>
       <b>${i.num}</b> — ${i.client}<br>
       <span style="color:var(--text2);font-size:12px;">${i.date||''}</span><br>
-      <span style="font-weight:600;">${i.total}</span> · <span style="color:${color};font-weight:600;">${i.status}</span>
+      <span style="font-weight:600;">${i.total}</span>
+      <select onchange="updateInvoiceStatusMobile('${i.num}', this.value)" style="width:auto;display:inline-block;margin-left:8px;padding:3px 8px;font-size:11px;font-weight:600;color:${color};">
+        <option value="Enregistrée"${i.status==='Enregistrée'?' selected':''}>Enregistrée</option>
+        <option value="Mise à jour"${i.status==='Mise à jour'?' selected':''}>Mise à jour</option>
+        <option value="Envoyée"${i.status==='Envoyée'?' selected':''}>Envoyée</option>
+        <option value="Payée"${i.status==='Payée'?' selected':''}>Payée</option>
+      </select>
       <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn-line" onclick="viewInvoiceMobile('${i.num}')">Aperçu</button>
         <button class="btn-line" onclick="downloadInvoicePdfMobile('${i.num}')">Télécharger le PDF</button>
@@ -836,6 +843,15 @@ function renderFacturesTab(){
       </div>
     </div>`;
   }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune facture.</p>';
+}
+function updateInvoiceStatusMobile(num, newStatus){
+  const invoices = storeArr('invoices');
+  const inv = invoices.find(i=>i.num===num);
+  if(!inv) return;
+  inv.status = newStatus;
+  set('invoices', invoices);
+  renderFacturesTab();
+  showToast('✔ Statut mis à jour.');
 }
 function viewInvoiceMobile(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
