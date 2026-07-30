@@ -103,6 +103,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .mcal-day-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12.5px;}
 .mcal-day-header{font-family:var(--font-display);font-size:14px;color:var(--gold);margin-bottom:8px;text-transform:capitalize;}
 .mcal-b-row{padding:9px 0;border-bottom:1px solid var(--border);}
+.mcal-b-row.invoiced{opacity:.55;}
 .mcal-b-row:last-child{border-bottom:none;}
 .mcal-b-actions{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap;}
 .mcal-b-actions button{padding:4px 9px;font-size:10px;margin:0;}
@@ -571,11 +572,12 @@ function renderPointage(){
   document.getElementById('recentList').innerHTML = recent.map(b=>{
     const invoiced = b.status==='facturé';
     return `
-    <div class="mcard">
+    <div class="mcard"${invoiced?' style="opacity:.55;padding:8px 12px;"':''}>
       <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
       <span style="color:var(--text2);font-size:12px;">${formatFrDate(b.date)} · ${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · ${b.actualHours}h réel</span><br>
       ${invoiced
-        ? '<span style="color:var(--green);font-size:12px;font-weight:600;">Facturée</span>'
+        ? `<span style="color:var(--green);font-size:12px;font-weight:600;">Facturée</span>
+           <button class="btn-line" style="margin-left:6px;" onclick="revertBookingStatusMobile(${b.id})">Repasser à facturer</button>`
         : `<button class="btn-gold action-btn" onclick="openInvoiceExtras(${b.id})">Transformer en facture</button>
            <div style="margin-top:8px;">
              <button class="btn-line" style="margin-right:6px;" onclick="openClockModal(${b.id},'in')">Modifier arrivée</button>
@@ -697,16 +699,17 @@ function renderMobileCalDayPanel(){
     const invoiced = b.status==='facturé';
     const doneClocking = b.checkedInAt && b.checkedOutAt;
     const actionHtml = invoiced
-      ? `<span style="color:var(--green);font-size:11px;font-weight:600;">Facturée</span>`
+      ? `<span style="color:var(--green);font-size:11px;font-weight:600;">Facturée</span>
+         <button class="btn-line" onclick="revertBookingStatusMobile(${b.id})">Repasser à facturer</button>`
       : doneClocking
         ? `<button class="btn-gold" onclick="openInvoiceExtras(${b.id})">Transformer en facture</button>`
         : `<button class="btn-line" onclick="switchTab('pointage')">Pointer</button>`;
-    const details = [
+    const details = !invoiced ? [
       b.addr ? `📍 ${mapsLink(b.addr)}` : '',
       b.contact ? `☎ ${linkifyPhones(b.contact)}` : ''
-    ].filter(Boolean).join('<br>');
-    return `<div class="mcal-b-row" style="border-left:3px solid ${clientColor(b.client)};padding-left:8px;">
-      <b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' · '+b.from+'-'+b.to:''} — <span style="color:var(--gold);font-weight:600;">${((b.actualHours ?? b.hours)*b.rate).toFixed(2)} €</span>
+    ].filter(Boolean).join('<br>') : '';
+    return `<div class="mcal-b-row${invoiced?' invoiced':''}" style="border-left:3px solid ${invoiced?'var(--border2)':clientColor(b.client)};padding-left:8px;">
+      <b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' · '+b.from+'-'+b.to:''} — <span style="color:${invoiced?'var(--text2)':'var(--gold)'};font-weight:600;">${((b.actualHours ?? b.hours)*b.rate).toFixed(2)} €</span>
       ${details?`<div style="margin-top:5px;font-size:11.5px;color:var(--text2);">${details}</div>`:''}
       <div class="mcal-b-actions">
         ${actionHtml}
@@ -720,6 +723,16 @@ function renderMobileCalDayPanel(){
     ${rows || '<p style="color:var(--text3);font-size:12px;margin:2px 0;">Aucune presta ce jour.</p>'}
     <button class="btn-gold action-btn" onclick="addBookingForMobileDay(${mSelectedDay})">+ Ajouter une presta ce jour</button>
   </div>`;
+}
+function revertBookingStatusMobile(id){
+  if(!confirm('Repasser cette prestation en "à facturer" ? La facture déjà créée ne sera pas supprimée.')) return;
+  const bookings = storeArr('bookings');
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  b.status = 'à facturer';
+  set('bookings', bookings);
+  renderActiveTab();
+  showToast('✔ Statut remis à "à facturer".');
 }
 function addBookingForMobileDay(day){
   const y = mCalDate.getFullYear(), m = mCalDate.getMonth();
