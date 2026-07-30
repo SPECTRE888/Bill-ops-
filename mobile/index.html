@@ -840,9 +840,16 @@ function renderFacturesTab(){
         <button class="btn-line" onclick="viewInvoiceMobile('${i.num}')">Aperçu</button>
         <button class="btn-line" onclick="downloadInvoicePdfMobile('${i.num}')">Télécharger le PDF</button>
         <button class="btn-line" onclick="sendInvoiceMobile('${i.num}')">Envoyer</button>
+        <button class="btn-line" style="color:var(--red);" onclick="deleteInvoiceMobile('${i.num}')">Supprimer</button>
       </div>
     </div>`;
   }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune facture.</p>';
+}
+function deleteInvoiceMobile(num){
+  if(!confirm('Supprimer la facture '+num+' ?')) return;
+  set('invoices', storeArr('invoices').filter(i=>i.num!==num));
+  renderFacturesTab();
+  showToast('✔ Facture '+num+' supprimée.');
 }
 function updateInvoiceStatusMobile(num, newStatus){
   const invoices = storeArr('invoices');
