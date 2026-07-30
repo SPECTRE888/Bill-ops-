@@ -191,10 +191,6 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     <section id="tab-pointage">
       <h2>Pointage</h2>
       <div id="pointageList"></div>
-      <div id="recentSection" style="display:none;margin-top:24px;">
-        <h2>Récemment pointées</h2>
-        <div id="recentList"></div>
-      </div>
     </section>
     <section id="tab-planning" style="display:none;">
       <h2>Planning</h2>
@@ -231,7 +227,12 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     </section>
     <section id="tab-historique" style="display:none;">
       <h2>Historique</h2>
+      <div class="toggle-row" style="margin:0 0 14px;">
+        <button id="histViewFactures" class="btn-line" style="flex:1;margin:0;" onclick="switchHistoriqueView('factures')">Factures payées</button>
+        <button id="histViewPrestas" class="btn-line" style="flex:1;margin:0;" onclick="switchHistoriqueView('prestas')">Prestas pointées</button>
+      </div>
       <div id="historiqueList"></div>
+      <div id="prestasHistoriqueList" style="display:none;"></div>
     </section>
     <section id="tab-parametres" style="display:none;">
       <h2>Réglages</h2>
@@ -570,27 +571,6 @@ function renderPointage(){
       : `<button class="btn-gold action-btn" onclick="openClockModal(${b.id},'out')">Je termine</button>`;
     return `<div class="mcard">${info}${alertLine}${details}${statusLine}${btn}</div>`;
   }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta à pointer.</p>';
-
-  const recent = bookings.filter(b=>b.checkedOutAt).sort((a,b)=>(b.checkedOutAt||'').localeCompare(a.checkedOutAt||'')).slice(0,5);
-  const recentSection = document.getElementById('recentSection');
-  if(!recent.length){ recentSection.style.display='none'; return; }
-  recentSection.style.display='block';
-  document.getElementById('recentList').innerHTML = recent.map(b=>{
-    const invoiced = b.status==='facturé';
-    return `
-    <div class="mcard"${invoiced?' style="opacity:.55;padding:8px 12px;"':''}>
-      <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
-      <span style="color:var(--text2);font-size:12px;">${formatFrDate(b.date)} · ${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · ${b.actualHours}h réel</span><br>
-      ${invoiced
-        ? `<span style="color:var(--green);font-size:12px;font-weight:600;">Facturée</span>
-           <button class="btn-line" style="margin-left:6px;" onclick="revertBookingStatusMobile(${b.id})">Repasser à facturer</button>`
-        : `<button class="btn-gold action-btn" onclick="openInvoiceExtras(${b.id})">Transformer en facture</button>
-           <div style="margin-top:8px;">
-             <button class="btn-line" style="margin-right:6px;" onclick="openClockModal(${b.id},'in')">Modifier arrivée</button>
-             <button class="btn-line" onclick="openClockModal(${b.id},'out')">Modifier départ</button>
-           </div>`}
-    </div>`;
-  }).join('');
 }
 
 let clockCtx = null;
@@ -634,7 +614,7 @@ function confirmClock(){
   }
   set('bookings', bookings);
   closeClockModal();
-  renderPointage();
+  renderActiveTab();
   showToast(mode==='in' ? '✔ Arrivée enregistrée.' : '✔ Départ enregistré.');
 }
 
@@ -852,11 +832,43 @@ function renderFacturesTab(){
     ? invoices.map(invoiceCardHtml).join('')
     : '<p style="color:var(--text3);font-size:13px;">Aucune facture en cours.</p>';
 }
+let historiqueView = 'factures';
+function switchHistoriqueView(view){
+  historiqueView = view;
+  renderHistoriqueTab();
+}
 function renderHistoriqueTab(){
+  document.getElementById('histViewFactures').classList.toggle('btn-gold', historiqueView==='factures');
+  document.getElementById('histViewFactures').classList.toggle('btn-line', historiqueView!=='factures');
+  document.getElementById('histViewPrestas').classList.toggle('btn-gold', historiqueView==='prestas');
+  document.getElementById('histViewPrestas').classList.toggle('btn-line', historiqueView!=='prestas');
+  document.getElementById('historiqueList').style.display = historiqueView==='factures' ? 'block' : 'none';
+  document.getElementById('prestasHistoriqueList').style.display = historiqueView==='prestas' ? 'block' : 'none';
+  if(historiqueView==='prestas'){ renderPrestasHistorique(); return; }
   const invoices = storeArr('invoices').filter(i=>i.status==='Payée').slice().reverse();
   document.getElementById('historiqueList').innerHTML = invoices.length
     ? invoices.map(invoiceCardHtml).join('')
     : '<p style="color:var(--text3);font-size:13px;">Aucune facture payée.</p>';
+}
+function renderPrestasHistorique(){
+  const done = storeArr('bookings').filter(b=>b.checkedOutAt)
+    .sort((a,b)=>(b.checkedOutAt||'').localeCompare(a.checkedOutAt||''));
+  document.getElementById('prestasHistoriqueList').innerHTML = done.length ? done.map(b=>{
+    const invoiced = b.status==='facturé';
+    return `
+    <div class="mcard"${invoiced?' style="opacity:.55;padding:8px 12px;"':''}>
+      <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
+      <span style="color:var(--text2);font-size:12px;">${formatFrDate(b.date)} · ${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · ${b.actualHours}h réel</span><br>
+      ${invoiced
+        ? `<span style="color:var(--green);font-size:12px;font-weight:600;">Facturée</span>
+           <button class="btn-line" style="margin-left:6px;" onclick="revertBookingStatusMobile(${b.id})">Repasser à facturer</button>`
+        : `<button class="btn-gold action-btn" onclick="openInvoiceExtras(${b.id})">Transformer en facture</button>
+           <div style="margin-top:8px;">
+             <button class="btn-line" style="margin-right:6px;" onclick="openClockModal(${b.id},'in')">Modifier arrivée</button>
+             <button class="btn-line" onclick="openClockModal(${b.id},'out')">Modifier départ</button>
+           </div>`}
+    </div>`;
+  }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta pointée pour l\'instant.</p>';
 }
 function deleteInvoiceMobile(num){
   if(!confirm('Supprimer la facture '+num+' ?')) return;
