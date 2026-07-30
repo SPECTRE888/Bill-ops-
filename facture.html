@@ -578,6 +578,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         </div>
         <div>
           <h2 data-i18n="plan_facturer_title">Prestas à facturer</h2>
+          <div id="groupInvoiceBar" style="display:none;margin-bottom:10px;padding:8px 10px;border:1px solid var(--gold-border);background:var(--gold-bg);border-radius:6px;font-size:11.5px;justify-content:space-between;align-items:center;gap:8px;">
+            <span id="groupInvoiceInfo"></span>
+            <button id="groupInvoiceBtn" class="btn-gold" style="margin:0;padding:5px 10px;font-size:10.5px;flex-shrink:0;" onclick="invoiceSelectedBookings()" data-i18n="btn_group_invoice">Facturer la sélection</button>
+          </div>
           <div id="bkList"></div>
         </div>
       </div>
@@ -739,6 +743,7 @@ home_next_title:'Prochaine prestation', empty_next:'Aucune prestation programmé
 home_actions_title:'Actions rapides', btn_new_booking:'+ Nouvelle prestation', btn_new_invoice:'+ Nouvelle facture', btn_new_client:'+ Ajouter un client',
 plan_venir_title:'Prestas à venir', plan_facturer_title:'Prestas à facturer', empty_venir:'Aucune presta à venir.', empty_facturer:'Aucune presta à facturer.',
 btn_invoice:'Facturer', btn_delete_short:'Suppr.', sans_date:'sans date', pointe_prefix:'Pointé : ',
+btn_group_invoice:'Facturer la sélection', group_invoice_hint_ok:'{n} prestation(s) sélectionnée(s) — {client} — {total} €', group_invoice_hint_multi:'{n} sélectionnées — une facture groupée ne peut réunir qu\'un seul client', toast_group_invoice_created:'✔ {n} prestations regroupées dans une facture — vérifie et enregistre.',
 cal_title:'Calendrier', cal_prev_month:'Prévisionnel du mois', cal_forecast_suffix:' € à facturer ce mois-ci',
 booking_new_title:'Nouveau booking', booking_edit_title:'Modifier le booking', lbl_client:'Client', lbl_nom_prestation:'Nom de la prestation', ph_nom_prestation:'Ex. Prestation Barman',
 lbl_addr_prestation:'Adresse de la prestation', ph_addr_prestation:"Lieu de l'événement", lbl_contact_place:'Contact sur place', ph_contact_place:'Nom / téléphone du contact',
@@ -836,6 +841,7 @@ home_next_title:'Next service', empty_next:'No service scheduled.',
 home_actions_title:'Quick actions', btn_new_booking:'+ New service', btn_new_invoice:'+ New invoice', btn_new_client:'+ Add a client',
 plan_venir_title:'Upcoming services', plan_facturer_title:'Services to invoice', empty_venir:'No upcoming services.', empty_facturer:'No services to invoice.',
 btn_invoice:'Invoice', btn_delete_short:'Del.', sans_date:'no date', pointe_prefix:'Clocked: ',
+btn_group_invoice:'Invoice selection', group_invoice_hint_ok:'{n} service(s) selected — {client} — {total} €', group_invoice_hint_multi:'{n} selected — a grouped invoice can only include one client', toast_group_invoice_created:'✔ {n} services grouped into one invoice — review and save.',
 cal_title:'Calendar', cal_prev_month:'Forecast for the month', cal_forecast_suffix:' € to invoice this month',
 booking_new_title:'New booking', booking_edit_title:'Edit booking', lbl_client:'Client', lbl_nom_prestation:'Service name', ph_nom_prestation:'E.g. Bartending service',
 lbl_addr_prestation:'Service address', ph_addr_prestation:'Event location', lbl_contact_place:'On-site contact', ph_contact_place:'Contact name / phone',
@@ -933,6 +939,7 @@ home_next_title:'Próximo servicio', empty_next:'Ningún servicio programado.',
 home_actions_title:'Acciones rápidas', btn_new_booking:'+ Nuevo servicio', btn_new_invoice:'+ Nueva factura', btn_new_client:'+ Añadir un cliente',
 plan_venir_title:'Servicios próximos', plan_facturer_title:'Servicios a facturar', empty_venir:'Ningún servicio próximo.', empty_facturer:'Ningún servicio a facturar.',
 btn_invoice:'Facturar', btn_delete_short:'Elim.', sans_date:'sin fecha', pointe_prefix:'Fichado: ',
+btn_group_invoice:'Facturar selección', group_invoice_hint_ok:'{n} servicio(s) seleccionado(s) — {client} — {total} €', group_invoice_hint_multi:'{n} seleccionados — una factura agrupada solo puede incluir un cliente', toast_group_invoice_created:'✔ {n} servicios agrupados en una factura — revisa y guarda.',
 cal_title:'Calendario', cal_prev_month:'Previsión del mes', cal_forecast_suffix:' € a facturar este mes',
 booking_new_title:'Nueva reserva', booking_edit_title:'Modificar reserva', lbl_client:'Cliente', lbl_nom_prestation:'Nombre del servicio', ph_nom_prestation:'Ej. Servicio de camarero',
 lbl_addr_prestation:'Dirección del servicio', ph_addr_prestation:'Lugar del evento', lbl_contact_place:'Contacto en el lugar', ph_contact_place:'Nombre / teléfono del contacto',
@@ -1941,6 +1948,50 @@ function invoiceBooking(id){
   set('bookings',bookings);
   showTab('facture');
 }
+let groupSelection = new Set();
+function toggleGroupSelect(id, checked){
+  if(checked) groupSelection.add(id); else groupSelection.delete(id);
+  renderGroupInvoiceBar();
+}
+function renderGroupInvoiceBar(){
+  const bar = document.getElementById('groupInvoiceBar');
+  const bookings = storeArr('bookings').filter(b=>groupSelection.has(b.id));
+  if(!bookings.length){ bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  const clients = [...new Set(bookings.map(b=>b.client))];
+  const total = bookings.reduce((s,b)=>s+(b.actualHours ?? b.hours)*b.rate,0);
+  groupInvoiceInfo.textContent = clients.length>1
+    ? t('group_invoice_hint_multi',{n:bookings.length})
+    : t('group_invoice_hint_ok',{n:bookings.length, client:clients[0], total:total.toFixed(2)});
+  groupInvoiceBtn.disabled = clients.length>1;
+  groupInvoiceBtn.style.opacity = clients.length>1 ? .5 : 1;
+  groupInvoiceBtn.style.cursor = clients.length>1 ? 'not-allowed' : 'pointer';
+}
+function invoiceSelectedBookings(){
+  const bookings = storeArr('bookings');
+  const selected = bookings.filter(b=>groupSelection.has(b.id)).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  if(!selected.length) return;
+  const clients = [...new Set(selected.map(b=>b.client))];
+  if(clients.length>1) return;
+  clientSelect.value = selected[0].client;
+  pickClient();
+  document.querySelectorAll('.item-row').forEach(r=>r.remove());
+  selected.forEach(b=>{
+    const useActual = b.checkedInAt && b.checkedOutAt;
+    const from = useActual ? localHM(b.checkedInAt) : (b.from||'');
+    const to   = useActual ? localHM(b.checkedOutAt) : (b.to||'');
+    const qty  = useActual ? b.actualHours : b.hours;
+    addItem(b.label||t('default_service_label'), qty, b.rate, from, to, b.date ? [b.date] : []);
+    b.status = 'facturé';
+  });
+  const months = [...new Set(selected.map(b=>(b.date||'').slice(0,7)).filter(Boolean))];
+  workDate.value = months.length===1 ? months[0] : '';
+  set('bookings', bookings);
+  groupSelection.clear();
+  renderPlanning();
+  showTab('facture');
+  showToast(t('toast_group_invoice_created',{n:selected.length}));
+}
 function deleteBooking(id){
   set('bookings', storeArr('bookings').filter(x=>x.id!==id));
   renderPlanning();
@@ -1988,15 +2039,19 @@ function renderPlanning(){
   bkList.innerHTML = pending.length ? pending.map(b=>{
     const h = b.actualHours ?? b.hours;
     return `
-    <div class="client-card">
-      <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date?formatFrDate(b.date):t('sans_date')}${b.from&&b.to?' '+t('lbl_de').toLowerCase()+' '+b.from+' '+t('lbl_a').toLowerCase()+' '+b.to:''}<br>
-      ${b.checkedInAt&&b.checkedOutAt?`${t('pointe_prefix')}${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · `:''}${h}h × ${b.rate}€ = <span class="tag">${(h*b.rate).toFixed(2)} €</span><br>
-      <button class="btn-line" onclick="invoiceBooking(${b.id})">${t('btn_invoice')}</button>
-      <button class="btn-line" onclick="viewBooking(${b.id})">${t('btn_view')}</button>
-      <button class="btn-line" onclick="editBooking(${b.id})">${t('btn_edit')}</button>
-      <button class="btn-line" onclick="deleteBooking(${b.id})">${t('btn_delete')}</button>
+    <div class="client-card" style="display:flex;gap:8px;align-items:flex-start;">
+      <input type="checkbox" style="margin-top:4px;flex-shrink:0;" ${groupSelection.has(b.id)?'checked':''} onchange="toggleGroupSelect(${b.id}, this.checked)">
+      <div style="flex:1;min-width:0;">
+        <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date?formatFrDate(b.date):t('sans_date')}${b.from&&b.to?' '+t('lbl_de').toLowerCase()+' '+b.from+' '+t('lbl_a').toLowerCase()+' '+b.to:''}<br>
+        ${b.checkedInAt&&b.checkedOutAt?`${t('pointe_prefix')}${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · `:''}${h}h × ${b.rate}€ = <span class="tag">${(h*b.rate).toFixed(2)} €</span><br>
+        <button class="btn-line" onclick="invoiceBooking(${b.id})">${t('btn_invoice')}</button>
+        <button class="btn-line" onclick="viewBooking(${b.id})">${t('btn_view')}</button>
+        <button class="btn-line" onclick="editBooking(${b.id})">${t('btn_edit')}</button>
+        <button class="btn-line" onclick="deleteBooking(${b.id})">${t('btn_delete')}</button>
+      </div>
     </div>`;
   }).join('') : `<p style="color:var(--text3);font-size:12px;">${t('empty_facturer')}</p>`;
+  renderGroupInvoiceBar();
 }
 
 function calcRange(input){
