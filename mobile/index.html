@@ -56,9 +56,10 @@
 body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-font-smoothing:antialiased;}
 h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;font-weight:400;}
 label{display:block;font-size:9px;color:var(--text3);margin:10px 0 5px;letter-spacing:.12em;text-transform:uppercase;font-weight:400;}
-input,select{width:100%;padding:10px 11px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-weight:300;font-family:var(--font-body);background:var(--surface2);color:var(--text);outline:none;transition:.2s;}
-input:focus,select:focus{border-color:var(--gold);background:var(--surface3);}
-input::placeholder{color:var(--text3);}
+input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-weight:300;font-family:var(--font-body);background:var(--surface2);color:var(--text);outline:none;transition:.2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);background:var(--surface3);}
+input::placeholder,textarea::placeholder{color:var(--text3);}
+textarea{resize:vertical;}
 button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:10px;font-weight:600;font-family:var(--font-body);text-transform:uppercase;letter-spacing:.09em;line-height:1;transition:.2s;}
 .btn-gold{background:var(--gold);color:#080808;border:1px solid var(--gold);}
 .btn-gold:hover{background:var(--gold2);border-color:var(--gold2);}
@@ -263,6 +264,33 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     </section>
     <section id="tab-parametres" style="display:none;">
       <h2>Réglages</h2>
+      <div class="mcard">
+        <b>Mon entreprise</b><br>
+        <div id="fromViewMobile"></div>
+        <div style="margin-top:10px;">
+          <button id="fromEditBtn" class="btn-line" onclick="toggleFromEditMobile(true)">Modifier</button>
+        </div>
+        <div id="fromEditMobile" style="display:none;">
+          <label>Nom</label><input id="fromName">
+          <label>Sous-titre (optionnel, ex. villes)</label><input id="fromTagline" placeholder="Paris · Lyon · Marseille">
+          <label>Adresse</label><textarea id="fromAddr" rows="2"></textarea>
+          <label>Email / Tel</label><input id="fromContact">
+          <label>SIRET</label><input id="fromSiret">
+          <label>Régime TVA</label>
+          <select id="fromTva">
+            <option value="TVA non applicable, art. 293 B du CGI">Franchise en base (auto-entrepreneur)</option>
+            <option value="">TVA applicable</option>
+          </select>
+          <label>Mention RCS/RM</label><input id="fromRcs">
+          <label>Mode de règlement</label><input id="fromPay">
+          <label>RIB / IBAN</label><textarea id="fromRib" rows="2" placeholder="IBAN + BIC"></textarea>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn-gold" style="flex:1;" onclick="saveFromMobile()">Enregistrer</button>
+            <button class="btn-line" style="flex:1;" onclick="toggleFromEditMobile(false)">Annuler</button>
+          </div>
+          <div id="fromStatusMobile" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+        </div>
+      </div>
       <div class="mcard">
         <b>Notifications</b><br>
         <span id="notifDiagStatus"></span>
@@ -601,12 +629,51 @@ function notifPermissionLabel(){
   return {granted:'Autorisées', denied:'Refusées (à réactiver dans Réglages iOS > Notifications)', default:'Pas encore demandées'}[Notification.permission] || 'Inconnu';
 }
 function renderParametres(){
+  refreshFromViewMobile();
   const subs = storeArr('pushSubscriptions');
   notifDiagStatus.innerHTML = `
     Permission : <b>${notifPermissionLabel()}</b><br>
     Installée sur l'écran d'accueil : <b>${isStandalone() ? 'Oui' : "Non — requis sur iOS pour recevoir les notifications"}</b><br>
     Abonnement enregistré sur cet appareil : <b>${subs.length ? 'Oui' : 'Non'}</b>`;
   syncDiagStatus.innerHTML = getSyncCode() ? 'Connecté (code : <code>'+getSyncCode().slice(0,8)+'…</code>)' : 'Non connecté';
+}
+function refreshFromViewMobile(){
+  const f = store('from');
+  document.getElementById('fromViewMobile').innerHTML = f.name
+    ? `${f.name}${f.addr?'<br><span style="color:var(--text2);">'+f.addr.replace(/\n/g,'<br>')+'</span>':''}`
+    : `<span style="color:var(--text2);">Pas encore configuré — nécessaire pour que tes factures aient un en-tête valide.</span>`;
+}
+function toggleFromEditMobile(show){
+  document.getElementById('fromEditMobile').style.display = show ? 'block' : 'none';
+  document.getElementById('fromEditBtn').style.display = show ? 'none' : 'inline-flex';
+  if(show){
+    const f = store('from');
+    document.getElementById('fromName').value = f.name||'';
+    document.getElementById('fromTagline').value = f.tagline||'';
+    document.getElementById('fromAddr').value = f.addr||'';
+    document.getElementById('fromContact').value = f.contact||'';
+    document.getElementById('fromSiret').value = f.siret||'';
+    document.getElementById('fromTva').value = f.tva??'TVA non applicable, art. 293 B du CGI';
+    document.getElementById('fromRcs').value = f.rcs||"Dispensé d'immatriculation au RCS et au RM";
+    document.getElementById('fromPay').value = f.pay||'Virement bancaire';
+    document.getElementById('fromRib').value = f.rib||'';
+  }
+}
+function saveFromMobile(){
+  set('from', {
+    name: document.getElementById('fromName').value,
+    tagline: document.getElementById('fromTagline').value,
+    addr: document.getElementById('fromAddr').value,
+    contact: document.getElementById('fromContact').value,
+    siret: document.getElementById('fromSiret').value,
+    tva: document.getElementById('fromTva').value,
+    rcs: document.getElementById('fromRcs').value,
+    pay: document.getElementById('fromPay').value,
+    rib: document.getElementById('fromRib').value
+  });
+  refreshFromViewMobile();
+  toggleFromEditMobile(false);
+  showToast('✔ Infos entreprise enregistrées.');
 }
 function revealSyncCode(){
   const code = getSyncCode();
