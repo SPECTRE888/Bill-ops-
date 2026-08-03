@@ -15,8 +15,8 @@ Le code peut être généré des deux côtés : Mon entreprise → Synchronisati
 
 ## Onglets (nav gauche, groupés par catégorie)
 Accueil : tableau de bord (CA du mois, prestas à venir, factures en attente, heures prévues, prochaine presta, actions rapides), onglet par défaut, sans catégorie (item unique en haut de nav).
-Catégorie Planning : Planning (prestas à venir uniquement) → Pointage (prestas à facturer, sélection multi-prestas d'un même client → une seule facture via `invoiceSelectedBookings()`) → Calendrier (calendrier CA/jour + prévisionnel du mois + formulaire booking, séparé de Planning).
-Catégorie Facturation : Facture (preview visible seulement ici, formulaire tenant sur un écran sans scroll, prestations scrollables en interne) → Historique (recherche + Voir/Modifier/PDF/Renvoyer + stats CA mois/année/total/par client, liste scrollable en interne sans faire défiler la page).
+Catégorie Planning : Planning (prestas à venir uniquement) → Calendrier (calendrier CA/jour + prévisionnel du mois + formulaire booking, séparé de Planning).
+Catégorie Facturation : Pointage (prestas à facturer, sélection multi-prestas d'un même client → une seule facture via `invoiceSelectedBookings()`) → Facture (preview visible seulement ici, formulaire tenant sur un écran sans scroll, prestations scrollables en interne) → Historique (recherche + Voir/Modifier/PDF/Renvoyer + stats CA mois/année/total/par client, liste scrollable en interne sans faire défiler la page).
 Catégorie Clients : Mes clients.
 Catégorie Paramètres (en bas de nav, après le spacer) : Mon entreprise + sélecteur de thème dark/light/auto.
 
