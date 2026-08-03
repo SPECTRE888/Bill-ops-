@@ -237,6 +237,20 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       </div>
       <datalist id="clientNames"></datalist>
     </section>
+    <section id="tab-clients" style="display:none;">
+      <h2>Mes clients</h2>
+      <div class="mcard">
+        <input type="hidden" id="cliIdx" value="">
+        <label>Nom société</label><input id="cliName">
+        <label>Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase">
+        <label>Email</label><input id="cliEmail">
+        <label>Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78">
+        <label>Adresse</label><input id="cliAddr">
+        <button class="btn-gold action-btn" onclick="saveClientMobile()">Enregistrer le client</button>
+        <button class="btn-line action-btn" onclick="resetClientFormMobile()">Nouveau client</button>
+      </div>
+      <div id="clientListMobile"></div>
+    </section>
     <section id="tab-factures" style="display:none;">
       <h2>Factures</h2>
       <div class="toggle-row" style="margin:0 0 14px;flex-wrap:wrap;">
@@ -272,6 +286,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     <button data-tab="pointage" class="active" onclick="switchTab('pointage')">Pointage</button>
     <button data-tab="planning" onclick="switchTab('planning')">Planning</button>
     <button data-tab="factures" onclick="switchTab('factures')">Factures</button>
+    <button data-tab="clients" onclick="switchTab('clients')">Clients</button>
   </nav>
 </div>
 
@@ -528,7 +543,7 @@ async function enterAppAfterCreate(){
 let activeTab = 'pointage';
 function switchTab(name){
   activeTab = name;
-  ['pointage','planning','factures','parametres'].forEach(t=>{
+  ['pointage','planning','factures','clients','parametres'].forEach(t=>{
     document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
   });
   document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
@@ -539,6 +554,7 @@ function renderActiveTab(){
   if(activeTab==='pointage') renderPointage();
   else if(activeTab==='planning') renderPlanningTab();
   else if(activeTab==='parametres') renderParametres();
+  else if(activeTab==='clients') renderClientListMobile();
   else renderFacturesTab();
 }
 function setSegActive(id, active){
@@ -800,6 +816,61 @@ function addBookingForMobileDay(day){
 
 function populateClientNames(){
   document.getElementById('clientNames').innerHTML = storeArr('clients').map(c=>`<option value="${c.name}">`).join('');
+}
+function isValidEmailMobile(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email||'').trim());
+}
+function resetClientFormMobile(){
+  ['cliIdx','cliName','cliPrefix','cliEmail','cliPhone','cliAddr'].forEach(id=>document.getElementById(id).value='');
+}
+function saveClientMobile(){
+  const email = document.getElementById('cliEmail').value;
+  if(email.trim() && !isValidEmailMobile(email)){ showToast('⚠ Email client invalide : '+email); return; }
+  const idx = document.getElementById('cliIdx').value;
+  const clients = storeArr('clients');
+  const c = {
+    name: document.getElementById('cliName').value,
+    prefix: document.getElementById('cliPrefix').value.toUpperCase(),
+    email: email,
+    phone: document.getElementById('cliPhone').value,
+    addr: document.getElementById('cliAddr').value
+  };
+  if(idx!=='') clients[idx]=c; else clients.push(c);
+  set('clients', clients);
+  resetClientFormMobile();
+  renderClientListMobile();
+  populateClientNames();
+  showToast('✔ Client enregistré.');
+}
+function editClientMobile(i){
+  const c = storeArr('clients')[i];
+  document.getElementById('cliIdx').value = i;
+  document.getElementById('cliName').value = c.name;
+  document.getElementById('cliPrefix').value = c.prefix||'';
+  document.getElementById('cliEmail').value = c.email||'';
+  document.getElementById('cliPhone').value = c.phone||'';
+  document.getElementById('cliAddr').value = c.addr;
+  document.getElementById('tab-clients').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function deleteClientMobile(i){
+  if(!confirm('Supprimer ce client ?')) return;
+  const clients = storeArr('clients');
+  clients.splice(i,1);
+  set('clients', clients);
+  renderClientListMobile();
+  populateClientNames();
+}
+function renderClientListMobile(){
+  const clients = storeArr('clients');
+  document.getElementById('clientListMobile').innerHTML = clients.map((c,i)=>`
+    <div class="mcard">
+      <b>${c.name}</b>${c.prefix?' <span style="color:var(--gold);font-size:11px;">['+c.prefix+']</span>':''}<br>
+      ${c.email||''}${c.phone?' · '+c.phone:''}${c.addr?'<br>'+c.addr:''}
+      <div style="margin-top:8px;display:flex;gap:8px;">
+        <button class="btn-line" onclick="editClientMobile(${i})">Modifier</button>
+        <button class="btn-line" style="color:var(--red);" onclick="deleteClientMobile(${i})">Supprimer</button>
+      </div>
+    </div>`).join('') || `<p style="color:var(--text2);font-size:12px;">Aucun client enregistré.</p>`;
 }
 function openBookingForm(id){
   populateClientNames();
