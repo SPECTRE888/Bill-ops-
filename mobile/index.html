@@ -57,6 +57,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-fon
 h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;font-weight:400;}
 label{display:block;font-size:9px;color:var(--text3);margin:10px 0 5px;letter-spacing:.12em;text-transform:uppercase;font-weight:400;}
 input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-weight:300;font-family:var(--font-body);background:var(--surface2);color:var(--text);outline:none;transition:.2s;}
+input[type=checkbox]{width:auto;height:auto;padding:0;border:none;background:none;border-radius:0;accent-color:var(--gold);}
 input:focus,select:focus,textarea:focus{border-color:var(--gold);background:var(--surface3);}
 input::placeholder,textarea::placeholder{color:var(--text3);}
 textarea{resize:vertical;}
@@ -259,6 +260,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
         <button id="factViewCreees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('creees')">Créées</button>
         <button id="factViewEnvoyees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('envoyees')">Envoyées</button>
         <button id="factViewPayees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('payees')">Payées</button>
+      </div>
+      <div id="groupInvoiceBarMobile" style="display:none;margin-bottom:12px;padding:10px 12px;border:1px solid var(--gold-border);background:var(--gold-bg);border-radius:6px;font-size:12px;align-items:center;justify-content:space-between;gap:10px;">
+        <span id="groupInvoiceInfoMobile"></span>
+        <button id="groupInvoiceBtnMobile" class="btn-gold" style="margin:0;padding:7px 12px;font-size:11px;flex-shrink:0;" onclick="openGroupInvoiceExtras()">Facturer la sélection</button>
       </div>
       <div id="facturesList"></div>
     </section>
@@ -599,16 +604,40 @@ function pointedBookingCardHtml(b){
     b.addr ? `📍 ${mapsLink(b.addr)}` : '',
     b.contact ? `☎ ${linkifyPhones(b.contact)}` : ''
   ].filter(Boolean).join('<br>');
-  return `<div class="mcard">
-    <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
-    <span style="color:var(--text2);font-size:12px;">${formatFrDate(b.date)} · ${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · ${b.actualHours}h réel</span><br>
-    ${details?`<div style="margin:6px 0;font-size:11.5px;color:var(--text2);">${details}</div>`:''}
-    <button class="btn-gold action-btn" onclick="openInvoiceExtras(${b.id})">Transformer en facture</button>
-    <div style="margin-top:8px;">
-      <button class="btn-line" style="margin-right:6px;" onclick="openClockModal(${b.id},'in')">Modifier arrivée</button>
-      <button class="btn-line" onclick="openClockModal(${b.id},'out')">Modifier départ</button>
+  return `<div class="mcard" style="display:flex;gap:10px;align-items:flex-start;">
+    <input type="checkbox" style="width:auto;margin-top:3px;flex-shrink:0;" ${groupSelectionMobile.has(b.id)?'checked':''} onchange="toggleGroupSelectMobile(${b.id}, this.checked)">
+    <div style="flex:1;min-width:0;">
+      <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
+      <span style="color:var(--text2);font-size:12px;">${formatFrDate(b.date)} · ${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · ${b.actualHours}h réel</span><br>
+      ${details?`<div style="margin:6px 0;font-size:11.5px;color:var(--text2);">${details}</div>`:''}
+      <button class="btn-gold action-btn" onclick="openInvoiceExtras(${b.id})">Transformer en facture</button>
+      <div style="margin-top:8px;">
+        <button class="btn-line" style="margin-right:6px;" onclick="openClockModal(${b.id},'in')">Modifier arrivée</button>
+        <button class="btn-line" onclick="openClockModal(${b.id},'out')">Modifier départ</button>
+      </div>
     </div>
   </div>`;
+}
+let groupSelectionMobile = new Set();
+function toggleGroupSelectMobile(id, checked){
+  if(checked) groupSelectionMobile.add(id); else groupSelectionMobile.delete(id);
+  renderGroupInvoiceBarMobile();
+}
+function renderGroupInvoiceBarMobile(){
+  const bar = document.getElementById('groupInvoiceBarMobile');
+  const bookings = pointedBookings().filter(b=>groupSelectionMobile.has(b.id));
+  if(!bookings.length){ bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  const clients = [...new Set(bookings.map(b=>b.client))];
+  const total = bookings.reduce((s,b)=>s+(b.actualHours ?? b.hours)*b.rate,0);
+  const info = document.getElementById('groupInvoiceInfoMobile');
+  const btn = document.getElementById('groupInvoiceBtnMobile');
+  info.textContent = clients.length>1
+    ? `${bookings.length} prestas sélectionnées — un seul client à la fois.`
+    : `${bookings.length} prestas · ${clients[0]} · ${total.toFixed(2)} €`;
+  btn.disabled = clients.length>1;
+  btn.style.opacity = clients.length>1 ? .5 : 1;
+  btn.style.cursor = clients.length>1 ? 'not-allowed' : 'pointer';
 }
 let settingsReturnTab = 'pointage';
 function toggleSettings(){
@@ -1048,8 +1077,10 @@ function renderFacturesTab(){
     const done = pointedBookings();
     el.innerHTML = done.length ? done.map(pointedBookingCardHtml).join('')
       : '<p style="color:var(--text3);font-size:13px;">Aucune presta pointée en attente de facturation.</p>';
+    renderGroupInvoiceBarMobile();
     return;
   }
+  document.getElementById('groupInvoiceBarMobile').style.display = 'none';
   const statuses = {creees:['Enregistrée','Mise à jour'], envoyees:['Envoyée'], payees:['Payée']}[facturesView];
   const invoices = storeArr('invoices').filter(i=>statuses.includes(i.status)).slice().reverse();
   const empty = {creees:'Aucune facture créée.', envoyees:'Aucune facture envoyée.', payees:'Aucune facture payée.'}[facturesView];
@@ -1159,10 +1190,24 @@ function nextInvoiceNumber(prefix){
   return candidate;
 }
 let ieCtx = null;
+let ieGroupIds = null;
 function openInvoiceExtras(id){
   const b = storeArr('bookings').find(x=>x.id===id);
   if(!b || b.status==='facturé') return;
   ieCtx = id;
+  ieGroupIds = null;
+  resetInvoiceExtrasForm();
+}
+function openGroupInvoiceExtras(){
+  const bookings = pointedBookings().filter(b=>groupSelectionMobile.has(b.id));
+  if(!bookings.length) return;
+  const clients = [...new Set(bookings.map(b=>b.client))];
+  if(clients.length>1) return;
+  ieCtx = null;
+  ieGroupIds = bookings.map(b=>b.id);
+  resetInvoiceExtrasForm();
+}
+function resetInvoiceExtrasForm(){
   ['ieKm','iePeage','ieParking','ieOffVal','ieMeal'].forEach(fid=>document.getElementById(fid).value=0);
   document.getElementById('ieKmRate').value = '0.5';
   document.getElementById('ieOffEnabled').checked = false;
@@ -1176,6 +1221,7 @@ function openInvoiceExtras(id){
 function closeInvoiceExtras(){
   document.getElementById('invoiceExtrasModal').style.display = 'none';
   ieCtx = null;
+  ieGroupIds = null;
 }
 function toggleOffertMobile(){
   const on = document.getElementById('ieOffEnabled').checked;
@@ -1189,13 +1235,28 @@ function toggleMealMobile(){
   if(!on) document.getElementById('ieMeal').value = 0;
   updateInvoiceExtrasTotal();
 }
+function invoiceExtrasBookingsList(){
+  const bookings = storeArr('bookings');
+  if(ieGroupIds && ieGroupIds.length){
+    return ieGroupIds.map(id=>bookings.find(x=>x.id===id)).filter(Boolean).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  }
+  const b = bookings.find(x=>x.id===ieCtx);
+  return b ? [b] : [];
+}
 function computeInvoiceExtras(){
-  const b = storeArr('bookings').find(x=>x.id===ieCtx);
-  if(!b) return null;
-  const useActual = b.checkedInAt && b.checkedOutAt;
-  const qty = useActual ? b.actualHours : b.hours;
-  const rate = b.rate||0;
-  const amt = qty*rate;
+  const list = invoiceExtrasBookingsList();
+  if(!list.length) return null;
+  const rowsData = list.map(b=>{
+    const useActual = b.checkedInAt && b.checkedOutAt;
+    const qty = useActual ? b.actualHours : b.hours;
+    const rate = b.rate||0;
+    return {
+      b, qty, rate, amt: qty*rate,
+      from: useActual ? localHM(b.checkedInAt) : (b.from||''),
+      to: useActual ? localHM(b.checkedOutAt) : (b.to||'')
+    };
+  });
+  const amt = rowsData.reduce((s,r)=>s+r.amt,0);
   let sub = amt;
   const km = parseFloat(document.getElementById('ieKm').value)||0;
   const peage = parseFloat(document.getElementById('iePeage').value)||0;
@@ -1222,10 +1283,10 @@ function computeInvoiceExtras(){
   const tvaAmt = sub*tvaPct/100;
   const total = sub+tvaAmt;
 
-  return { b, qty, rate, amt, km, kmRate, kmAmt, peage, parking, meal, offEnabled, offType, offVal, offAmt, sub, invDate, franchiseDepassee, tvaPct, tvaAmt, total };
+  return { list, rowsData, amt, km, kmRate, kmAmt, peage, parking, meal, offEnabled, offType, offVal, offAmt, sub, invDate, franchiseDepassee, tvaPct, tvaAmt, total };
 }
 function updateInvoiceExtrasTotal(){
-  if(!ieCtx) return;
+  if(!ieCtx && !(ieGroupIds && ieGroupIds.length)) return;
   const r = computeInvoiceExtras();
   if(!r) return;
   document.getElementById('ieTotal').textContent = r.total.toFixed(2)+' €';
@@ -1233,21 +1294,20 @@ function updateInvoiceExtrasTotal(){
 function confirmInvoiceExtras(){
   const r = computeInvoiceExtras();
   if(!r) return;
-  const { b, qty, rate, amt, km, kmRate, kmAmt, peage, parking, meal, offType, offVal, offAmt, sub, invDate, franchiseDepassee, tvaPct, tvaAmt, total } = r;
+  const { list, rowsData, km, kmRate, kmAmt, peage, parking, meal, offType, offVal, offAmt, sub, invDate, franchiseDepassee, tvaPct, tvaAmt, total } = r;
   const bookings = storeArr('bookings');
-  const bk = bookings.find(x=>x.id===b.id);
-  const client = storeArr('clients').find(c=>c.name.trim().toLowerCase()===bk.client.trim().toLowerCase()) || {name:bk.client, prefix:'', addr:'', email:''};
+  const firstBk = list[0];
+  const client = storeArr('clients').find(c=>c.name.trim().toLowerCase()===firstBk.client.trim().toLowerCase()) || {name:firstBk.client, prefix:'', addr:'', email:''};
   const from = store('from');
-  const useActual = bk.checkedInAt && bk.checkedOutAt;
-  const timeFrom = useActual ? localHM(bk.checkedInAt) : (bk.from||'');
-  const timeTo = useActual ? localHM(bk.checkedOutAt) : (bk.to||'');
   const num = nextInvoiceNumber(client.prefix);
   const tvaMention = franchiseDepassee
     ? 'TVA applicable au taux en vigueur (franchise en base dépassée, CA cumulé > 32 000 €)'
     : (from.tva || 'TVA non applicable, art. 293 B du CGI');
-  const descCell = [bk.date?`<b>${formatFrDate(bk.date)}</b>`:'', (timeFrom&&timeTo)?`${timeFrom} – ${timeTo}`:'', bk.label||'Prestation'].filter(Boolean).join(' · ');
 
-  let rows = `<tr><td>${descCell}</td><td class="num">${qty||''}</td><td class="num">${rate?rate.toFixed(2)+' €':'-'}</td><td class="num">${amt.toFixed(2)} €</td></tr>`;
+  let rows = rowsData.map(rd=>{
+    const descCell = [rd.b.date?`<b>${formatFrDate(rd.b.date)}</b>`:'', (rd.from&&rd.to)?`${rd.from} – ${rd.to}`:'', rd.b.label||'Prestation'].filter(Boolean).join(' · ');
+    return `<tr><td>${descCell}</td><td class="num">${rd.qty||''}</td><td class="num">${rd.rate?rd.rate.toFixed(2)+' €':'-'}</td><td class="num">${rd.amt.toFixed(2)} €</td></tr>`;
+  }).join('');
   if(km>0) rows += `<tr><td>Frais kilométriques</td><td class="num">${km} km</td><td class="num">${kmRate.toFixed(2)} €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
   if(peage>0) rows += `<tr><td>Péage</td><td class="num">-</td><td class="num">-</td><td class="num">${peage.toFixed(2)} €</td></tr>`;
   if(parking>0) rows += `<tr><td>Parking</td><td class="num">-</td><td class="num">-</td><td class="num">${parking.toFixed(2)} €</td></tr>`;
@@ -1289,27 +1349,30 @@ function confirmInvoiceExtras(){
       En cas de retard de paiement : pénalité de 3× le taux d'intérêt légal + indemnité forfaitaire de recouvrement de 40 €.</div>
   </div>`;
 
+  const months = [...new Set(list.map(b=>(b.date||'').slice(0,7)).filter(Boolean))];
   const invoices = storeArr('invoices');
   invoices.push({
     num,
     client: client.name,
     date: invDate,
-    workDate: bk.date||'',
+    workDate: months.length===1 ? months[0]+'-01' : (firstBk.date||''),
     total: total.toFixed(2)+' €',
     status: 'Enregistrée',
-    bookingId: bk.id,
+    bookingId: list.length===1 ? firstBk.id : null,
+    bookingIds: list.map(b=>b.id),
     state: {
       client: client.name, invDate, tva: tvaPct, offType, offVal, km, peage, parking, meal,
-      items: [{ desc: bk.label||'Prestation', qty, rate, from: timeFrom, to: timeTo, dates: bk.date?[bk.date]:[] }]
+      items: rowsData.map(rd=>({ desc: rd.b.label||'Prestation', qty: rd.qty, rate: rd.rate, from: rd.from, to: rd.to, dates: rd.b.date?[rd.b.date]:[] }))
     },
     html
   });
   set('invoices', invoices);
-  bk.status = 'facturé';
+  list.forEach(bk=>{ const b2 = bookings.find(x=>x.id===bk.id); if(b2) b2.status = 'facturé'; });
   set('bookings', bookings);
+  groupSelectionMobile.clear();
   closeInvoiceExtras();
   renderActiveTab();
-  showToast('✔ Facture '+num+' créée.');
+  showToast(list.length>1 ? `✔ Facture ${num} créée (${list.length} prestas).` : `✔ Facture ${num} créée.`);
 }
 
 // --- Boot ---
