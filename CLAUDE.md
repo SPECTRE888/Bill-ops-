@@ -15,7 +15,7 @@ Le code peut être généré des deux côtés : Mon entreprise → Synchronisati
 
 ## Onglets (nav gauche, groupés par catégorie)
 Accueil : tableau de bord (CA du mois, prestas à venir, factures en attente, heures prévues, prochaine presta, actions rapides), onglet par défaut, sans catégorie (item unique en haut de nav).
-Catégorie Planning : Planning (prestas à venir condensées + formulaire booking + bookings à facturer) → Calendrier (calendrier CA/jour + prévisionnel du mois, séparé de Planning).
+Catégorie Planning : Planning (prestas à venir uniquement) → Pointage (prestas à facturer, sélection multi-prestas d'un même client → une seule facture via `invoiceSelectedBookings()`) → Calendrier (calendrier CA/jour + prévisionnel du mois + formulaire booking, séparé de Planning).
 Catégorie Facturation : Facture (preview visible seulement ici, formulaire tenant sur un écran sans scroll, prestations scrollables en interne) → Historique (recherche + Voir/Modifier/PDF/Renvoyer + stats CA mois/année/total/par client, liste scrollable en interne sans faire défiler la page).
 Catégorie Clients : Mes clients.
 Catégorie Paramètres (en bas de nav, après le spacer) : Mon entreprise + sélecteur de thème dark/light/auto.
@@ -38,6 +38,7 @@ https://github.com/SPECTRE888/Bill-ops-.git (branche main)
 
 ## Backlog fonctionnel en attente
 - Autonomie mobile complète (usage sans Mac) : génération de code de synchro, onglet Clients, et Mon entreprise (dans Réglages, formulaire repliable) faits côté mobile. Aucun point bloquant connu restant sur cet axe.
+- Facturation groupée (plusieurs prestas d'un même client → une facture) : faite sur Mac (onglet Pointage) et sur mobile (Factures → À facturer, sélection multi-cases + "Facturer la sélection"). Sur les deux, le bouton se désactive si les prestas sélectionnées n'ont pas toutes le même client.
 - PDF (html2pdf.js) et proxy SendGrid (Edge Function `send-invoice`) sont en prod.
 
 ## Contraintes de style utilisateur
