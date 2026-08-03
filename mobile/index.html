@@ -167,13 +167,26 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 <body>
 
 <div id="pairGate" class="pair-gate">
-  <div class="pair-box">
+  <div class="pair-box" id="pairBoxExisting">
     <div class="pair-title">HELM OPS</div>
-    <p style="color:var(--text2);font-size:13px;text-align:center;">Colle le code de synchro généré sur le Mac (Mon entreprise → Synchronisation) pour retrouver ton planning et tes factures.</p>
+    <p style="color:var(--text2);font-size:13px;text-align:center;">Colle le code de synchro généré sur un autre appareil (Mac ou téléphone déjà connecté) pour retrouver ton planning et tes factures.</p>
     <label>Code de synchro</label>
     <input id="pairCodeInput" placeholder="Code de synchro">
     <button class="btn-gold action-btn" onclick="doConnect()">Connecter</button>
     <div id="pairStatus" style="font-size:12px;margin-top:8px;text-align:center;color:var(--gold);"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin:22px 0;color:var(--text3);font-size:11px;letter-spacing:.1em;text-transform:uppercase;">
+      <div style="flex:1;height:1px;background:var(--border2);"></div>ou<div style="flex:1;height:1px;background:var(--border2);"></div>
+    </div>
+    <p style="color:var(--text2);font-size:13px;text-align:center;">Pas encore de compte ? Démarre directement depuis ce téléphone, sans Mac.</p>
+    <button class="btn-line action-btn" onclick="showNewAccountBox()">Créer un compte</button>
+  </div>
+  <div class="pair-box" id="pairBoxNew" style="display:none;">
+    <div class="pair-title">HELM OPS</div>
+    <p style="color:var(--text2);font-size:13px;text-align:center;">Note bien ce code : il te permettra de retrouver tes données depuis un autre appareil (Mac, autre téléphone) plus tard. Tu pourras aussi le retrouver dans Réglages → Synchronisation.</p>
+    <div id="newAccountCodeBox" style="font-family:monospace;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:10px;word-break:break-all;font-size:13px;text-align:center;margin:12px 0;"></div>
+    <button class="btn-line action-btn" onclick="copyNewAccountCode()">Copier le code</button>
+    <button class="btn-gold action-btn" onclick="enterAppAfterCreate()">Continuer</button>
+    <button class="btn-line action-btn" style="color:var(--text3);" onclick="showExistingAccountBox()">Annuler</button>
   </div>
 </div>
 
@@ -249,6 +262,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
         <span id="syncDiagStatus"></span>
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn-line" onclick="pullSync(true)">Forcer la synchro</button>
+          <button class="btn-line" onclick="revealSyncCode()">Voir le code</button>
           <button class="btn-line" style="color:var(--red);" onclick="handleDisconnect()">Déconnecter</button>
         </div>
       </div>
@@ -421,6 +435,10 @@ function connectSyncCode(code){
   localStorage.setItem('syncCode', code);
   localStorage.removeItem('syncLastAppliedAt');
 }
+function genSyncCodeMobile(){
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(bytes, b=>b.toString(16).padStart(2,'0')).join('');
+}
 function handleDisconnect(){
   if(!confirm('Déconnecter cet appareil de la synchronisation ?')) return;
   localStorage.removeItem('syncCode');
@@ -482,6 +500,28 @@ async function doConnect(){
   } else {
     setStatusMsg(statusEl, '⚠ Aucune donnée trouvée pour ce code — vérifie qu\'il correspond à celui affiché sur le Mac.');
   }
+}
+function showNewAccountBox(){
+  document.getElementById('pairBoxExisting').style.display = 'none';
+  document.getElementById('pairBoxNew').style.display = 'block';
+  document.getElementById('newAccountCodeBox').textContent = genSyncCodeMobile();
+}
+function showExistingAccountBox(){
+  document.getElementById('pairBoxNew').style.display = 'none';
+  document.getElementById('pairBoxExisting').style.display = 'block';
+}
+function copyNewAccountCode(){
+  const code = document.getElementById('newAccountCodeBox').textContent;
+  navigator.clipboard?.writeText(code);
+  showToast('✔ Code copié');
+}
+async function enterAppAfterCreate(){
+  const code = document.getElementById('newAccountCodeBox').textContent;
+  connectSyncCode(code);
+  await pushSync();
+  applyTheme();
+  showPairGate(false);
+  renderActiveTab();
 }
 
 // --- Tabs ---
@@ -551,6 +591,12 @@ function renderParametres(){
     Installée sur l'écran d'accueil : <b>${isStandalone() ? 'Oui' : "Non — requis sur iOS pour recevoir les notifications"}</b><br>
     Abonnement enregistré sur cet appareil : <b>${subs.length ? 'Oui' : 'Non'}</b>`;
   syncDiagStatus.innerHTML = getSyncCode() ? 'Connecté (code : <code>'+getSyncCode().slice(0,8)+'…</code>)' : 'Non connecté';
+}
+function revealSyncCode(){
+  const code = getSyncCode();
+  if(!code) return;
+  navigator.clipboard?.writeText(code);
+  alert('Code de synchro (copié) :\n\n'+code);
 }
 async function testLocalNotification(){
   if(!notifSupported()){ showToast('⚠ Notifications non supportées sur ce navigateur.'); return; }
