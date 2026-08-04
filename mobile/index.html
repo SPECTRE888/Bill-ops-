@@ -297,6 +297,18 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
         </div>
       </div>
       <div class="mcard">
+        <b>Envoi de factures</b><br>
+        <div id="gmailNotConnected">
+          <p style="color:var(--text2);font-size:12px;margin:6px 0 10px;">Connecte ton compte Gmail pour envoyer tes factures directement depuis ta propre adresse.</p>
+          <button class="btn-gold action-btn" onclick="connectGmail()">Connecter mon Gmail</button>
+        </div>
+        <div id="gmailConnected" style="display:none;">
+          <p style="color:var(--text2);font-size:12px;margin:6px 0 10px;" id="gmailConnectedAs"></p>
+          <button class="btn-line" style="color:var(--red);" onclick="disconnectGmail()">Déconnecter</button>
+        </div>
+        <div id="gmailStatusMobile" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+      </div>
+      <div class="mcard">
         <b>Notifications</b><br>
         <span id="notifDiagStatus"></span>
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
@@ -423,8 +435,11 @@ function todayStr(){
 const SUPABASE_URL = 'https://chlmqnrvnrgeaihryreb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobG1xbnJ2bnJnZWFpaHJ5cmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNTQ1MjMsImV4cCI6MjA5ODczMDUyM30.ErgkAYc0mVv6iyEeIDtJ8kKaX6ExyNi4ribi_rvqX6s';
 const SYNC_TABLE = 'billops_sync';
-const SENDGRID_PROXY_URL = SUPABASE_URL + '/functions/v1/send-invoice';
-const SYNC_KEYS = { from:'{}', sg:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}', pushSubscriptions:'[]' };
+const SEND_INVOICE_URL = SUPABASE_URL + '/functions/v1/send-invoice';
+const APP_RELAY_SECRET = '364ae57df352752832e9c6cb52ad7b040740ad481628839b';
+const GOOGLE_CLIENT_ID = '227340982582-vsr5ftuqo0slrkl2k15c1lqshrl2mbpj.apps.googleusercontent.com';
+const GOOGLE_OAUTH_REDIRECT_URI = SUPABASE_URL + '/functions/v1/oauth-google-callback';
+const SYNC_KEYS = { from:'{}', gmailAuth:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}', pushSubscriptions:'[]' };
 const VAPID_PUBLIC_KEY = 'BNAR3mX4w7cbnSefEGzsl0dBxIIEBr7ZuzPbXQf6UQCAntPLdFohiSp4dXeop7pwVFsMYL9PMwxJ4rc2_rZ8zaY';
 let sb = null;
 function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); return sb; }
@@ -659,12 +674,55 @@ function notifPermissionLabel(){
 }
 function renderParametres(){
   refreshFromViewMobile();
+  renderGmailUI();
   const subs = storeArr('pushSubscriptions');
   notifDiagStatus.innerHTML = `
     Permission : <b>${notifPermissionLabel()}</b><br>
     Installée sur l'écran d'accueil : <b>${isStandalone() ? 'Oui' : "Non — requis sur iOS pour recevoir les notifications"}</b><br>
     Abonnement enregistré sur cet appareil : <b>${subs.length ? 'Oui' : 'Non'}</b>`;
   syncDiagStatus.innerHTML = getSyncCode() ? 'Connecté (code : <code>'+getSyncCode().slice(0,8)+'…</code>)' : 'Non connecté';
+}
+function renderGmailUI(){
+  const g = store('gmailAuth');
+  const connected = !!(g.refreshToken && g.email);
+  document.getElementById('gmailNotConnected').style.display = connected ? 'none' : 'block';
+  document.getElementById('gmailConnected').style.display = connected ? 'block' : 'none';
+  if(connected) document.getElementById('gmailConnectedAs').textContent = 'Connecté : '+g.email;
+}
+const GOOGLE_OAUTH_POLL_URL = SUPABASE_URL + '/functions/v1/oauth-google-poll';
+function connectGmail(){
+  const state = crypto.getRandomValues(new Uint32Array(4)).join('-');
+  const scope = encodeURIComponent('openid email https://www.googleapis.com/auth/gmail.send');
+  const url = 'https://accounts.google.com/o/oauth2/v2/auth'
+    + '?client_id=' + encodeURIComponent(GOOGLE_CLIENT_ID)
+    + '&redirect_uri=' + encodeURIComponent(GOOGLE_OAUTH_REDIRECT_URI)
+    + '&response_type=code&access_type=offline&prompt=consent&scope=' + scope
+    + '&state=' + encodeURIComponent(state);
+  const popup = window.open(url, 'gmailAuth', 'width=480,height=640');
+  const statusEl = document.getElementById('gmailStatusMobile');
+  if(!popup){ setStatusMsg(statusEl, '✕ Popup bloquée — autorise les popups pour ce site.'); return; }
+  setStatusMsg(statusEl, '⏳ Connexion en cours...');
+  let attempts = 0;
+  const timer = setInterval(async ()=>{
+    attempts++;
+    if(popup && popup.closed && attempts > 1){ clearInterval(timer); setStatusMsg(statusEl, ''); return; }
+    if(attempts > 80){ clearInterval(timer); setStatusMsg(statusEl, '✕ Délai dépassé, réessaie.'); return; }
+    try{
+      const res = await fetch(GOOGLE_OAUTH_POLL_URL + '?state=' + encodeURIComponent(state), { headers:{'x-app-secret':APP_RELAY_SECRET} });
+      const data = await res.json();
+      if(data.refreshToken){
+        clearInterval(timer);
+        if(popup && !popup.closed) popup.close();
+        set('gmailAuth', {refreshToken: data.refreshToken, email: data.email});
+        renderGmailUI();
+        setStatusMsg(statusEl, '✔ Gmail connecté : '+data.email);
+      }
+    }catch(e){ /* on retente au prochain tick */ }
+  }, 1500);
+}
+function disconnectGmail(){
+  set('gmailAuth', {});
+  renderGmailUI();
 }
 function refreshFromViewMobile(){
   const f = store('from');
@@ -1124,13 +1182,14 @@ function isValidEmail(email){
 async function sendInvoiceMobile(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   const c = storeArr('clients').find(cl=>cl.name===inv.client);
-  const sg = store('sg');
-  if(!(sg.from||'').trim() || !c){ showToast('⚠ Configuration SendGrid ou client manquant (à régler sur le Mac).'); return; }
+  const f = store('from');
+  const g = store('gmailAuth');
+  if(!g.refreshToken || !c){ showToast('⚠ Connecte ton Gmail dans Réglages → Envoi de factures, ou client manquant.'); return; }
   if(!isValidEmail(c.email)){ showToast('⚠ Email client invalide : '+c.email); return; }
   try{
-    const res = await fetch(SENDGRID_PROXY_URL, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({apiKey: sg.key, from: sg.from.trim(), to: c.email, subject:'Facture '+inv.num, html: inv.html})
+    const res = await fetch(SEND_INVOICE_URL, {
+      method:'POST', headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
+      body: JSON.stringify({refreshToken: g.refreshToken, fromEmail: g.email, to: c.email, subject:'Facture '+inv.num, html: inv.html, fromName: f.name})
     });
     showToast(res.ok ? '✔ Facture envoyée à '+c.email+'.' : '✕ Échec de l\'envoi.');
     if(res.ok){

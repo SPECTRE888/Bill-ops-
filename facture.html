@@ -76,9 +76,6 @@ body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-fon
 .info-label{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;}
 .info-value{font-size:12px;color:var(--text);white-space:pre-line;line-height:1.35;}
 .info-value:empty::before{content:'—';color:var(--text3);}
-.sg-status{font-size:12px;margin:2px 0 10px;}
-.sg-status.on{color:var(--gold);font-weight:500;}
-.sg-status.off{color:var(--text3);}
 #histSearch{max-width:420px;}
 .tab{display:none;} .tab.active{display:block;}
 h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:400;}
@@ -361,29 +358,16 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
       <div class="profile-row2">
       <div class="card">
-        <div class="ctitle"><span data-i18n="data_sendgrid_title">Envoi (SendGrid)</span> <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0;" data-i18n="data_sendgrid_sub">— envoi automatique</span></div>
-        <div id="sgView">
-          <div id="sgStatus" class="sg-status off" data-i18n="sg_status_off">Non configurée</div>
-          <div class="info-item" id="sgFromViewWrap" style="display:none;"><div class="info-label" data-i18n="lbl_sg_from">Email d'envoi (vérifié dans SendGrid)</div><div class="info-value" id="viewSgFrom"></div></div>
-          <button class="btn-line" onclick="toggleSgEdit(true)" data-i18n="btn_edit" style="margin-top:8px;">Modifier</button>
+        <div class="ctitle" data-i18n="data_gmail_title">Envoi de factures</div>
+        <div id="gmailNotConnected">
+          <p style="font-size:11px;color:var(--text2);" data-i18n="gmail_intro">Connecte ton compte Gmail pour envoyer tes factures directement depuis ta propre adresse.</p>
+          <button class="btn-gold" onclick="connectGmail()" data-i18n="btn_connect_gmail">Connecter mon Gmail</button>
         </div>
-        <div id="sgEdit" style="display:none;">
-          <label data-i18n="lbl_sg_key">Clé API SendGrid</label><input id="sgKey" type="password" placeholder="SG.xxxxx" oninput="updateSgStatus()">
-          <label data-i18n="lbl_sg_from">Email d'envoi (vérifié dans SendGrid)</label><input id="sgFrom" type="email" placeholder="contact@tondomaine.com">
-          <div style="height:1px;background:var(--border);margin:10px 0;"></div>
-          <div style="font-size:10px;font-weight:500;color:var(--text);margin-bottom:5px;" data-i18n="sendgrid_howto_title">Comment configurer :</div>
-          <ol style="font-size:10.5px;color:var(--text2);line-height:1.6;margin:0 0 0 15px;padding:0;">
-            <li data-i18n="sendgrid_step1">Va sur sendgrid.com → crée un compte gratuit</li>
-            <li data-i18n="sendgrid_step2">Menu Settings → Sender Authentication → Verify a Single Sender</li>
-            <li data-i18n="sendgrid_step3">Entre ton email pro → vérifie dans ta boîte mail</li>
-            <li data-i18n="sendgrid_step4">Menu Settings → API Keys → Create API Key → Full Access</li>
-            <li data-i18n="sendgrid_step5">Colle la clé SG.xxx + ton email ci-dessus → Enregistrer</li>
-          </ol>
-          <div class="row" style="margin-top:10px;">
-            <button class="btn-line" onclick="saveSg()" data-i18n="btn_save" style="margin-top:0;">Enregistrer</button>
-            <button class="btn-line" onclick="toggleSgEdit(false)" data-i18n="btn_cancel" style="margin-top:0;">Annuler</button>
-          </div>
+        <div id="gmailConnected" style="display:none;">
+          <p style="font-size:11px;color:var(--text2);" id="gmailConnectedAs"></p>
+          <button class="btn-line" style="color:var(--red);" onclick="disconnectGmail()" data-i18n="btn_disconnect_gmail">Déconnecter</button>
         </div>
+        <div id="gmailStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
 
       <div class="card">
@@ -698,20 +682,13 @@ data_title:'Profil', data_compte_title:'Compte', data_info_title:'Informations',
 lbl_appareil:'Appareil', cet_appareil:'Cet appareil', lbl_derniere_synchro:'Dernière synchro',
 compte_status_connected:'Synchronisé', compte_status_disconnected:'Non connecté',
 time_just_now:"à l'instant", time_min_ago:'il y a {n} min', time_hour_ago:'il y a {n} h', time_day_ago:'il y a {n} j',
-sendgrid_howto_title:'Comment configurer :',
-sendgrid_step1:'Va sur sendgrid.com → crée un compte gratuit',
-sendgrid_step2:'Menu Settings → Sender Authentication → Verify a Single Sender',
-sendgrid_step3:'Entre ton email pro → vérifie dans ta boîte mail',
-sendgrid_step4:'Menu Settings → API Keys → Create API Key → Full Access',
-sendgrid_step5:'Colle la clé SG.xxx + ton email ci-dessus → Enregistrer',
 lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
+data_gmail_title:'Envoi de factures', gmail_intro:'Connecte ton compte Gmail pour envoyer tes factures directement depuis ta propre adresse.',
+btn_connect_gmail:'Connecter mon Gmail', gmail_connected_as:'Connecté : {email}', btn_disconnect_gmail:'Déconnecter',
 lbl_tva_regime:'Régime TVA', hint_tva_regime:'(basculement automatique à 32 000 € de CA cumulé)',
 opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'TVA applicable',
 lbl_rcs:'Mention RCS/RM', lbl_paiement:'Mode de règlement', lbl_rib:'RIB / IBAN', ph_rib:'IBAN + BIC',
 btn_save:'Enregistrer', btn_edit:'Modifier', btn_save_info:'Enregistrer mes infos',
-data_sendgrid_title:'Envoi (SendGrid)', data_sendgrid_sub:'— envoi automatique des factures',
-sg_status_on:'Configurée', sg_status_off:'Non configurée',
-lbl_sg_key:"Clé API SendGrid", lbl_sg_from:"Email d'envoi (vérifié dans SendGrid)",
 data_sync_title:'Synchronisation', sync_intro:'Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.',
 btn_gen_sync:'Générer un code de synchro', lbl_paste_sync:'Ou coller un code existant', ph_sync_code:'Code de synchro', btn_connect:'Connecter',
 sync_code_intro:'Code de synchro (à coller sur l\'autre appareil) :', btn_copy_code:'Copier le code', btn_force_sync:'Forcer la synchro', btn_disconnect_device:'Déconnecter cet appareil',
@@ -757,12 +734,12 @@ toast_invoice_loaded:'✎ Facture {num} chargée pour modification.',
 toast_invoice_duplicated:'✔ Nouvelle facture {num} créée à partir de {from}.',
 toast_invoice_sent_status:'✔ Facture {num} envoyée.', toast_invoice_saved:'✔ Facture {num} enregistrée.',
 toast_invoice_not_found:'⚠ Facture introuvable.',
-toast_sendgrid_missing:"⚠ Configuration SendGrid (email d'envoi) ou client manquant.",
+toast_sendgrid_missing:"⚠ Connecte ton Gmail dans Profil, ou client manquant.",
 toast_invoice_resent:'✔ Facture renvoyée à {email}.', toast_resend_failed:'✕ Échec du renvoi.', toast_error_generic:'✕ Erreur : {msg}',
 confirm_delete_invoice:'Supprimer définitivement la facture {num} ?', toast_invoice_deleted:'✔ Facture {num} supprimée.',
 toast_status_updated:'✔ Statut de la facture {num} : {status}.', toast_booking_updated:'✔ Booking modifié.', toast_preview_updated:'✔ Aperçu mis à jour.',
 toast_select_client_save:"⚠ Sélectionne un client avant d'enregistrer.",
-toast_set_sendgrid_email:"⚠ Renseigne l'email d'envoi dans Mes données → Envoi (SendGrid).",
+toast_set_sendgrid_email:"⚠ Connecte ton Gmail dans Profil → Envoi de factures.",
 toast_select_client_send:"⚠ Sélectionne un client avant d'envoyer.", toast_sending:'Envoi en cours…',
 toast_invoice_sent:'✔ Facture envoyée à {email}.', toast_send_failed:"✕ Échec de l'envoi{detail}", toast_send_error:"✕ Erreur d'envoi : {msg}",
 toast_sync_synced:'✔ Synchronisé', toast_sync_error:'✕ Erreur sync : {msg}', toast_sync_invalid_code:'⚠ Colle un code valide',
@@ -781,7 +758,7 @@ legal_copyright:'© {year} Jérôme Jarrige. Tous droits réservés.',
 legal_editeur_title:'Éditeur', legal_editeur_body:'Jérôme Jarrige — Entrepreneur individuel<br>Contact : <a href="mailto:Jarrige.jerome@hotmail.fr" style="color:var(--gold);text-decoration:none">Jarrige.jerome@hotmail.fr</a>',
 legal_pi_title:'Propriété intellectuelle', legal_pi_body:"HELM OPS est une œuvre originale dont Jérôme Jarrige est l'auteur et le titulaire exclusif des droits. Le code source, l'architecture logicielle, le design, les interfaces et l'ensemble des éléments de l'application sont protégés par le droit d'auteur français (CPI) et les conventions internationales. Toute reproduction, représentation, modification, distribution, ingénierie inverse ou utilisation à des fins commerciales sans autorisation écrite préalable est strictement interdite.",
 legal_licence_title:"Licence d'utilisation", legal_licence_body:"L'utilisation de HELM OPS est réservée à un usage personnel et professionnel individuel. La revente, le partage à des tiers ou toute exploitation dérivée sans autorisation sont interdits.",
-legal_rgpd_title:'Hébergement et traitement des données (RGPD)', legal_rgpd_body:"Les données saisies dans l'application (entreprise, clients, factures, planning) sont :<br>• stockées localement sur votre appareil (localStorage)<br>• synchronisées et hébergées sur Supabase (UE), prestataire conforme RGPD<br>• transmises à SendGrid (Twilio) uniquement lors de l'envoi d'une facture par email, si cette fonctionnalité est configurée<br>Le responsable de traitement est Jérôme Jarrige. Vous disposez d'un droit d'accès, de rectification, de portabilité et de suppression de vos données ; pour l'exercer, contactez l'éditeur ou utilisez la fonction « Exporter mes données » dans Mes données → Sauvegarde.",
+legal_rgpd_title:'Hébergement et traitement des données (RGPD)', legal_rgpd_body:"Les données saisies dans l'application (entreprise, clients, factures, planning) sont :<br>• stockées localement sur votre appareil (localStorage)<br>• synchronisées et hébergées sur Supabase (UE), prestataire conforme RGPD<br>• transmises au relais d'envoi email de l'éditeur uniquement lors de l'envoi d'une facture par email (adresse email du client, contenu de la facture)<br>Le responsable de traitement est Jérôme Jarrige. Vous disposez d'un droit d'accès, de rectification, de portabilité et de suppression de vos données ; pour l'exercer, contactez l'éditeur ou utilisez la fonction « Exporter mes données » dans Mes données → Sauvegarde.",
 legal_archivage_title:'Archivage légal', legal_archivage_body:"Conformément à l'art. L.110-4 du Code de commerce et à l'art. 286 I-3° du CGI, les factures émises sont conservées avec numérotation continue et immuable, consultables dans Historique.",
 legal_responsabilite_title:'Limitation de responsabilité', legal_responsabilite_body:'HELM OPS est fourni "en l\'état" sans garantie d\'aucune sorte. L\'éditeur ne saurait être tenu responsable de pertes de données, erreurs de calcul, indisponibilité de service ou de tout préjudice résultant de l\'utilisation de l\'application, dans les limites permises par le droit applicable.',
 legal_composants_title:'Composants tiers', legal_composants_body:"L'application utilise des bibliothèques open-source (Electron, Supabase JS, html2pdf.js) sous leurs licences respectives (MIT, Apache-2.0). Ces licences ne s'appliquent qu'aux composants concernés et n'affectent pas la nature propriétaire de HELM OPS dans son ensemble.",
@@ -796,20 +773,13 @@ data_title:'Profile', data_compte_title:'Account', data_info_title:'Information'
 lbl_appareil:'Device', cet_appareil:'This device', lbl_derniere_synchro:'Last sync',
 compte_status_connected:'Synced', compte_status_disconnected:'Not connected',
 time_just_now:'just now', time_min_ago:'{n} min ago', time_hour_ago:'{n} h ago', time_day_ago:'{n} d ago',
-sendgrid_howto_title:'How to set up:',
-sendgrid_step1:'Go to sendgrid.com → create a free account',
-sendgrid_step2:'Menu Settings → Sender Authentication → Verify a Single Sender',
-sendgrid_step3:'Enter your work email → verify it in your inbox',
-sendgrid_step4:'Menu Settings → API Keys → Create API Key → Full Access',
-sendgrid_step5:'Paste the SG.xxx key + your email above → Save',
 lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
+data_gmail_title:'Sending invoices', gmail_intro:'Connect your Gmail account to send invoices directly from your own address.',
+btn_connect_gmail:'Connect my Gmail', gmail_connected_as:'Connected: {email}', btn_disconnect_gmail:'Disconnect',
 lbl_tva_regime:'VAT regime', hint_tva_regime:'(automatically switches at €32,000 cumulative revenue)',
 opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applicable',
 lbl_rcs:'Trade register notice', lbl_paiement:'Payment method', lbl_rib:'Bank details / IBAN', ph_rib:'IBAN + BIC',
 btn_save:'Save', btn_edit:'Edit', btn_save_info:'Save my info',
-data_sendgrid_title:'Sending (SendGrid)', data_sendgrid_sub:'— automatic invoice sending',
-sg_status_on:'Configured', sg_status_off:'Not configured',
-lbl_sg_key:'SendGrid API key', lbl_sg_from:'Sending email (verified in SendGrid)',
 data_sync_title:'Sync', sync_intro:'Link this device to another one (Mac / iPhone) to share clients, invoices and schedule.',
 btn_gen_sync:'Generate a sync code', lbl_paste_sync:'Or paste an existing code', ph_sync_code:'Sync code', btn_connect:'Connect',
 sync_code_intro:'Sync code (paste it on the other device):', btn_copy_code:'Copy code', btn_force_sync:'Force sync', btn_disconnect_device:'Disconnect this device',
@@ -855,12 +825,12 @@ toast_invoice_loaded:'✎ Invoice {num} loaded for editing.',
 toast_invoice_duplicated:'✔ New invoice {num} created from {from}.',
 toast_invoice_sent_status:'✔ Invoice {num} sent.', toast_invoice_saved:'✔ Invoice {num} saved.',
 toast_invoice_not_found:'⚠ Invoice not found.',
-toast_sendgrid_missing:'⚠ Missing SendGrid configuration (sending email) or client.',
+toast_sendgrid_missing:'⚠ Connect your Gmail in Profile, or missing client.',
 toast_invoice_resent:'✔ Invoice resent to {email}.', toast_resend_failed:'✕ Resend failed.', toast_error_generic:'✕ Error: {msg}',
 confirm_delete_invoice:'Permanently delete invoice {num}?', toast_invoice_deleted:'✔ Invoice {num} deleted.',
 toast_status_updated:'✔ Invoice {num} status: {status}.', toast_booking_updated:'✔ Booking updated.', toast_preview_updated:'✔ Preview updated.',
 toast_select_client_save:'⚠ Select a client before saving.',
-toast_set_sendgrid_email:'⚠ Set the sending email in My data → Sending (SendGrid).',
+toast_set_sendgrid_email:'⚠ Connect your Gmail in Profile → Sending invoices.',
 toast_select_client_send:'⚠ Select a client before sending.', toast_sending:'Sending…',
 toast_invoice_sent:'✔ Invoice sent to {email}.', toast_send_failed:'✕ Send failed{detail}', toast_send_error:'✕ Sending error: {msg}',
 toast_sync_synced:'✔ Synced', toast_sync_error:'✕ Sync error: {msg}', toast_sync_invalid_code:'⚠ Paste a valid code',
@@ -879,7 +849,7 @@ legal_copyright:'© {year} Jérôme Jarrige. All rights reserved.',
 legal_editeur_title:'Publisher', legal_editeur_body:'Jérôme Jarrige — Sole proprietor<br>Contact: <a href="mailto:Jarrige.jerome@hotmail.fr" style="color:var(--gold);text-decoration:none">Jarrige.jerome@hotmail.fr</a>',
 legal_pi_title:'Intellectual property', legal_pi_body:'HELM OPS is an original work of which Jérôme Jarrige is the author and sole rights holder. The source code, software architecture, design, interfaces and all elements of the application are protected by French copyright law (CPI) and international conventions. Any reproduction, representation, modification, distribution, reverse engineering or commercial use without prior written authorization is strictly prohibited.',
 legal_licence_title:'License to use', legal_licence_body:'Use of HELM OPS is reserved for personal and individual professional use. Resale, sharing with third parties or any derivative exploitation without authorization is prohibited.',
-legal_rgpd_title:'Hosting and data processing (GDPR)', legal_rgpd_body:'Data entered in the application (company, clients, invoices, schedule) is:<br>• stored locally on your device (localStorage)<br>• synced and hosted on Supabase (EU), a GDPR-compliant provider<br>• sent to SendGrid (Twilio) only when sending an invoice by email, if that feature is configured<br>The data controller is Jérôme Jarrige. You have the right to access, rectify, port and delete your data; to exercise it, contact the publisher or use the "Export my data" function in My data → Backup.',
+legal_rgpd_title:'Hosting and data processing (GDPR)', legal_rgpd_body:'Data entered in the application (company, clients, invoices, schedule) is:<br>• stored locally on your device (localStorage)<br>• synced and hosted on Supabase (EU), a GDPR-compliant provider<br>• sent to the publisher\'s email relay only when sending an invoice by email (client email address, invoice content)<br>The data controller is Jérôme Jarrige. You have the right to access, rectify, port and delete your data; to exercise it, contact the publisher or use the "Export my data" function in My data → Backup.',
 legal_archivage_title:'Legal record-keeping', legal_archivage_body:'In accordance with art. L.110-4 of the French Commercial Code and art. 286 I-3° of the French Tax Code, issued invoices are kept with continuous, immutable numbering, viewable in History.',
 legal_responsabilite_title:'Limitation of liability', legal_responsabilite_body:'HELM OPS is provided "as is" without warranty of any kind. The publisher cannot be held liable for data loss, calculation errors, service unavailability or any damage resulting from use of the application, to the extent permitted by applicable law.',
 legal_composants_title:'Third-party components', legal_composants_body:'The application uses open-source libraries (Electron, Supabase JS, html2pdf.js) under their respective licenses (MIT, Apache-2.0). These licenses apply only to the components concerned and do not affect the proprietary nature of HELM OPS as a whole.',
@@ -894,20 +864,13 @@ data_title:'Perfil', data_compte_title:'Cuenta', data_info_title:'Información',
 lbl_appareil:'Dispositivo', cet_appareil:'Este dispositivo', lbl_derniere_synchro:'Última sincronización',
 compte_status_connected:'Sincronizado', compte_status_disconnected:'No conectado',
 time_just_now:'justo ahora', time_min_ago:'hace {n} min', time_hour_ago:'hace {n} h', time_day_ago:'hace {n} d',
-sendgrid_howto_title:'Cómo configurarlo:',
-sendgrid_step1:'Ve a sendgrid.com → crea una cuenta gratuita',
-sendgrid_step2:'Menú Settings → Sender Authentication → Verify a Single Sender',
-sendgrid_step3:'Introduce tu email profesional → verifícalo en tu bandeja de entrada',
-sendgrid_step4:'Menú Settings → API Keys → Create API Key → Full Access',
-sendgrid_step5:'Pega la clave SG.xxx + tu email arriba → Guardar',
 lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
+data_gmail_title:'Envío de facturas', gmail_intro:'Conecta tu cuenta de Gmail para enviar tus facturas directamente desde tu propia dirección.',
+btn_connect_gmail:'Conectar mi Gmail', gmail_connected_as:'Conectado: {email}', btn_disconnect_gmail:'Desconectar',
 lbl_tva_regime:'Régimen de IVA', hint_tva_regime:'(cambio automático a 32.000 € de facturación acumulada)',
 opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplicable',
 lbl_rcs:'Mención Registro Mercantil', lbl_paiement:'Forma de pago', lbl_rib:'Datos bancarios / IBAN', ph_rib:'IBAN + BIC',
 btn_save:'Guardar', btn_edit:'Modificar', btn_save_info:'Guardar mis datos',
-data_sendgrid_title:'Envío (SendGrid)', data_sendgrid_sub:'— envío automático de facturas',
-sg_status_on:'Configurada', sg_status_off:'No configurada',
-lbl_sg_key:'Clave API de SendGrid', lbl_sg_from:'Email de envío (verificado en SendGrid)',
 data_sync_title:'Sincronización', sync_intro:'Vincula este dispositivo con otro (Mac / iPhone) para compartir clientes, facturas y planificación.',
 btn_gen_sync:'Generar un código de sincronización', lbl_paste_sync:'O pega un código existente', ph_sync_code:'Código de sincronización', btn_connect:'Conectar',
 sync_code_intro:'Código de sincronización (pégalo en el otro dispositivo):', btn_copy_code:'Copiar código', btn_force_sync:'Forzar sincronización', btn_disconnect_device:'Desconectar este dispositivo',
@@ -953,12 +916,12 @@ toast_invoice_loaded:'✎ Factura {num} cargada para editar.',
 toast_invoice_duplicated:'✔ Nueva factura {num} creada a partir de {from}.',
 toast_invoice_sent_status:'✔ Factura {num} enviada.', toast_invoice_saved:'✔ Factura {num} guardada.',
 toast_invoice_not_found:'⚠ Factura no encontrada.',
-toast_sendgrid_missing:'⚠ Falta la configuración de SendGrid (email de envío) o el cliente.',
+toast_sendgrid_missing:'⚠ Conecta tu Gmail en Perfil, o falta el cliente.',
 toast_invoice_resent:'✔ Factura reenviada a {email}.', toast_resend_failed:'✕ Error al reenviar.', toast_error_generic:'✕ Error: {msg}',
 confirm_delete_invoice:'¿Eliminar definitivamente la factura {num}?', toast_invoice_deleted:'✔ Factura {num} eliminada.',
 toast_status_updated:'✔ Estado de la factura {num}: {status}.', toast_booking_updated:'✔ Reserva modificada.', toast_preview_updated:'✔ Vista previa actualizada.',
 toast_select_client_save:'⚠ Selecciona un cliente antes de guardar.',
-toast_set_sendgrid_email:'⚠ Indica el email de envío en Mis datos → Envío (SendGrid).',
+toast_set_sendgrid_email:'⚠ Conecta tu Gmail en Perfil → Envío de facturas.',
 toast_select_client_send:'⚠ Selecciona un cliente antes de enviar.', toast_sending:'Enviando…',
 toast_invoice_sent:'✔ Factura enviada a {email}.', toast_send_failed:'✕ Error al enviar{detail}', toast_send_error:'✕ Error de envío: {msg}',
 toast_sync_synced:'✔ Sincronizado', toast_sync_error:'✕ Error de sincronización: {msg}', toast_sync_invalid_code:'⚠ Pega un código válido',
@@ -977,7 +940,7 @@ legal_copyright:'© {year} Jérôme Jarrige. Todos los derechos reservados.',
 legal_editeur_title:'Editor', legal_editeur_body:'Jérôme Jarrige — Autónomo (empresario individual)<br>Contacto: <a href="mailto:Jarrige.jerome@hotmail.fr" style="color:var(--gold);text-decoration:none">Jarrige.jerome@hotmail.fr</a>',
 legal_pi_title:'Propiedad intelectual', legal_pi_body:'HELM OPS es una obra original de la que Jérôme Jarrige es el autor y titular exclusivo de los derechos. El código fuente, la arquitectura del software, el diseño, las interfaces y todos los elementos de la aplicación están protegidos por el derecho de autor francés (CPI) y los convenios internacionales. Queda estrictamente prohibida cualquier reproducción, representación, modificación, distribución, ingeniería inversa o uso comercial sin autorización previa por escrito.',
 legal_licence_title:'Licencia de uso', legal_licence_body:'El uso de HELM OPS está reservado a un uso personal y profesional individual. Quedan prohibidas la reventa, la cesión a terceros o cualquier explotación derivada sin autorización.',
-legal_rgpd_title:'Alojamiento y tratamiento de datos (RGPD)', legal_rgpd_body:'Los datos introducidos en la aplicación (empresa, clientes, facturas, planificación) son:<br>• almacenados localmente en tu dispositivo (localStorage)<br>• sincronizados y alojados en Supabase (UE), proveedor conforme al RGPD<br>• transmitidos a SendGrid (Twilio) únicamente al enviar una factura por email, si esta función está configurada<br>El responsable del tratamiento es Jérôme Jarrige. Dispones de derecho de acceso, rectificación, portabilidad y supresión de tus datos; para ejercerlo, contacta con el editor o utiliza la función «Exportar mis datos» en Mis datos → Copia de seguridad.',
+legal_rgpd_title:'Alojamiento y tratamiento de datos (RGPD)', legal_rgpd_body:'Los datos introducidos en la aplicación (empresa, clientes, facturas, planificación) son:<br>• almacenados localmente en tu dispositivo (localStorage)<br>• sincronizados y alojados en Supabase (UE), proveedor conforme al RGPD<br>• transmitidos al relé de envío de email del editor únicamente al enviar una factura por email (dirección de email del cliente, contenido de la factura)<br>El responsable del tratamiento es Jérôme Jarrige. Dispones de derecho de acceso, rectificación, portabilidad y supresión de tus datos; para ejercerlo, contacta con el editor o utiliza la función «Exportar mis datos» en Mis datos → Copia de seguridad.',
 legal_archivage_title:'Archivo legal', legal_archivage_body:'De conformidad con el art. L.110-4 del Código de Comercio francés y el art. 286 I-3° del Código Tributario francés, las facturas emitidas se conservan con numeración continua e inmutable, consultables en Historial.',
 legal_responsabilite_title:'Limitación de responsabilidad', legal_responsabilite_body:'HELM OPS se proporciona "tal cual", sin garantía de ningún tipo. El editor no podrá ser considerado responsable de pérdidas de datos, errores de cálculo, indisponibilidad del servicio o cualquier perjuicio resultante del uso de la aplicación, dentro de los límites permitidos por la ley aplicable.',
 legal_composants_title:'Componentes de terceros', legal_composants_body:'La aplicación utiliza bibliotecas de código abierto (Electron, Supabase JS, html2pdf.js) bajo sus respectivas licencias (MIT, Apache-2.0). Estas licencias solo se aplican a los componentes correspondientes y no afectan al carácter propietario de HELM OPS en su conjunto.',
@@ -1022,7 +985,7 @@ function sidebarDisconnect(){
 const STATUS_KEYS = {'Enregistrée':'status_enregistree','Mise à jour':'status_maj','Envoyée':'status_envoyee','Payée':'status_payee','Toutes':'status_toutes'};
 function statusLabel(s){ return STATUS_KEYS[s] ? t(STATUS_KEYS[s]) : s; }
 function refreshAllViews(){
-  refreshInfoView(); updateSgStatus(); refreshCompteView();
+  refreshInfoView(); refreshCompteView(); renderGmailUI();
   renderClientList(); refreshClientSelect(); renderHistory(); renderCA(); renderPlanning(); renderCalendarTab(); renderDashboard(); render();
 }
 function openLegalModal(){
@@ -1058,13 +1021,16 @@ function setStatusMsg(el, msg){
   el.style.color = msg.startsWith('✔') ? 'var(--green)' : (msg.startsWith('✕')||msg.startsWith('⚠')) ? 'var(--red)' : 'var(--gold)';
 }
 const SUPABASE_URL = 'https://chlmqnrvnrgeaihryreb.supabase.co';
-const SENDGRID_PROXY_URL = SUPABASE_URL + '/functions/v1/send-invoice';
+const SEND_INVOICE_URL = SUPABASE_URL + '/functions/v1/send-invoice';
+const APP_RELAY_SECRET = '364ae57df352752832e9c6cb52ad7b040740ad481628839b';
+const GOOGLE_CLIENT_ID = '227340982582-vsr5ftuqo0slrkl2k15c1lqshrl2mbpj.apps.googleusercontent.com';
+const GOOGLE_OAUTH_REDIRECT_URI = SUPABASE_URL + '/functions/v1/oauth-google-callback';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobG1xbnJ2bnJnZWFpaHJ5cmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNTQ1MjMsImV4cCI6MjA5ODczMDUyM30.ErgkAYc0mVv6iyEeIDtJ8kKaX6ExyNi4ribi_rvqX6s';
 const SYNC_TABLE = 'billops_sync';
 // pushSubscriptions n'est jamais écrit depuis le Mac (les notifs sont gérées par mobile/index.html),
 // mais doit rester listé ici : pushSync() remplace tout le blob à chaque écriture, donc l'omettre
 // effacerait silencieusement l'abonnement du téléphone à la prochaine sauvegarde depuis le Mac.
-const SYNC_KEYS = { from:'{}', sg:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}', pushSubscriptions:'[]' };
+const SYNC_KEYS = { from:'{}', gmailAuth:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}', pushSubscriptions:'[]' };
 let sb = null;
 function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); return sb; }
 function getSyncCode(){ return localStorage.getItem('syncCode') || ''; }
@@ -1263,6 +1229,48 @@ function refreshInfoView(){
   viewPay.textContent = fromPay.value;
   viewRib.textContent = fromRib.value;
 }
+function renderGmailUI(){
+  const g = store('gmailAuth');
+  const connected = !!(g.refreshToken && g.email);
+  document.getElementById('gmailNotConnected').style.display = connected ? 'none' : 'block';
+  document.getElementById('gmailConnected').style.display = connected ? 'block' : 'none';
+  if(connected) document.getElementById('gmailConnectedAs').textContent = t('gmail_connected_as',{email:g.email});
+}
+const GOOGLE_OAUTH_POLL_URL = SUPABASE_URL + '/functions/v1/oauth-google-poll';
+function connectGmail(){
+  const state = crypto.getRandomValues(new Uint32Array(4)).join('-');
+  const scope = encodeURIComponent('openid email https://www.googleapis.com/auth/gmail.send');
+  const url = 'https://accounts.google.com/o/oauth2/v2/auth'
+    + '?client_id=' + encodeURIComponent(GOOGLE_CLIENT_ID)
+    + '&redirect_uri=' + encodeURIComponent(GOOGLE_OAUTH_REDIRECT_URI)
+    + '&response_type=code&access_type=offline&prompt=consent&scope=' + scope
+    + '&state=' + encodeURIComponent(state);
+  const popup = window.open(url, 'gmailAuth', 'width=480,height=640');
+  const statusEl = document.getElementById('gmailStatus');
+  if(!popup){ setStatusMsg(statusEl, '✕ Popup bloquée par le navigateur — autorise les popups pour ce site.'); return; }
+  setStatusMsg(statusEl, '⏳ Connexion en cours...');
+  let attempts = 0;
+  const timer = setInterval(async ()=>{
+    attempts++;
+    if(popup && popup.closed && attempts > 1){ clearInterval(timer); setStatusMsg(statusEl, ''); return; }
+    if(attempts > 80){ clearInterval(timer); setStatusMsg(statusEl, '✕ Délai dépassé, réessaie.'); return; }
+    try{
+      const res = await fetch(GOOGLE_OAUTH_POLL_URL + '?state=' + encodeURIComponent(state), { headers:{'x-app-secret':APP_RELAY_SECRET} });
+      const data = await res.json();
+      if(data.refreshToken){
+        clearInterval(timer);
+        if(popup && !popup.closed) popup.close();
+        set('gmailAuth', {refreshToken: data.refreshToken, email: data.email});
+        renderGmailUI();
+        setStatusMsg(statusEl, '✔ Gmail connecté : '+data.email);
+      }
+    }catch(e){ /* on retente au prochain tick */ }
+  }, 1500);
+}
+function disconnectGmail(){
+  set('gmailAuth', {});
+  renderGmailUI();
+}
 function toggleInfoEdit(show){
   infoView.style.display = show ? 'none' : 'grid';
   infoEditBtn.style.display = show ? 'none' : 'inline-flex';
@@ -1317,20 +1325,6 @@ function formatFrDatesGrouped(dates){
   }
   return parsed.map(dt=>formatFrDate(dt.toISOString().slice(0,10))).join(', ');
 }
-function toggleSgEdit(show){
-  sgView.style.display = show ? 'none' : 'block';
-  sgEdit.style.display = show ? 'block' : 'none';
-}
-function saveSg(){ set('sg', {key:sgKey.value, from:sgFrom.value}); updateSgStatus(); toggleSgEdit(false); }
-function loadSg(){ const s=store('sg'); sgKey.value=s.key||''; sgFrom.value=s.from||''; updateSgStatus(); }
-function updateSgStatus(){
-  const on = !!sgKey.value.trim();
-  sgStatus.textContent = on ? t('sg_status_on') : t('sg_status_off');
-  sgStatus.className = 'sg-status ' + (on ? 'on' : 'off');
-  sgFromViewWrap.style.display = on && sgFrom.value.trim() ? 'block' : 'none';
-  viewSgFrom.textContent = sgFrom.value;
-}
-
 function suggestPrefix(){
   if(cliPrefix.value) return;
   const words = cliName.value.trim().split(/\s+/).filter(Boolean);
@@ -1568,12 +1562,14 @@ function downloadInvoicePdf(num){
 async function resendInvoice(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   const c = storeArr('clients').find(cl=>cl.name===inv.client);
-  if(!sgFrom.value.trim() || !c){ showToast(t('toast_sendgrid_missing')); return; }
+  const f = store('from');
+  const g = store('gmailAuth');
+  if(!g.refreshToken || !c){ showToast(t('toast_sendgrid_missing')); return; }
   if(!isValidEmail(c.email)){ showToast(t('toast_client_email_invalid',{email:c.email})); return; }
   try{
-    const res = await fetch(SENDGRID_PROXY_URL, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({apiKey: sgKey.value, from: sgFrom.value.trim(), to: c.email, subject:t('inv_facture_label')+' '+inv.num, html: inv.html})
+    const res = await fetch(SEND_INVOICE_URL, {
+      method:'POST', headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
+      body: JSON.stringify({refreshToken: g.refreshToken, fromEmail: g.email, to: c.email, subject:t('inv_facture_label')+' '+inv.num, html: inv.html, fromName: f.name})
     });
     showToast(res.ok ? t('toast_invoice_resent',{email:c.email}) : t('toast_resend_failed'));
     if(res.ok){
@@ -2340,22 +2336,25 @@ function saveInvoice(){
 async function sendInvoice(){
   render();
   const c = currentClient();
-  if(!sgFrom.value.trim()){ showToast(t('toast_set_sendgrid_email')); return; }
+  const f = store('from');
+  const g = store('gmailAuth');
+  if(!g.refreshToken){ showToast(t('toast_set_sendgrid_email')); return; }
   if(!c){ showToast(t('toast_select_client_send')); return; }
   if(!isValidEmail(c.email)){ showToast(t('toast_client_email_invalid',{email:c.email||'(vide)'})); return; }
   showToast(t('toast_sending'), 2000);
   const msg = emailMessage.value.trim();
   const bodyHtml = (msg ? `<p>${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</p><hr>` : '') + document.getElementById('invoice').outerHTML;
   try{
-    const res = await fetch(SENDGRID_PROXY_URL, {
+    const res = await fetch(SEND_INVOICE_URL, {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
       body: JSON.stringify({
-        apiKey: sgKey.value,
-        from: sgFrom.value.trim(),
+        refreshToken: g.refreshToken,
+        fromEmail: g.email,
         to: c.email,
         subject: emailSubject.value.trim() || (t('inv_facture_label') + ' ' + invNum.value),
-        html: bodyHtml
+        html: bodyHtml,
+        fromName: f.name
       })
     });
     if(res.ok){
@@ -2369,7 +2368,7 @@ async function sendInvoice(){
 }
 
 applyI18n();
-loadFrom(); loadSg(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
+loadFrom(); renderGmailUI(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
 renderSyncUI();
 if(getSyncCode()) pullSync(false);
 setInterval(()=>{ if(getSyncCode()) pullSync(false); }, 60000);
