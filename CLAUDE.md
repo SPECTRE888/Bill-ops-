@@ -2,7 +2,7 @@
 
 Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) et la table Supabase (`billops_sync`) gardent leur nom technique historique, décorrélé de la marque affichée.
 
-Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `supabase/functions/` (Edge Functions : `send-invoice` envoi via Gmail API au nom de l'utilisateur, `oauth-google-callback`/`oauth-google-poll` handoff du flux OAuth Google, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
+Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `mobile/oauth-relay.html` (page statique de relais pour le login Google côté Electron, voir Login + abonnement ci-dessous), `supabase/functions/` (Edge Functions : `send-invoice` envoi via Gmail API au nom de l'utilisateur, `oauth-google-callback`/`oauth-google-poll` handoff du flux OAuth Gmail-send, `check-access`/`stripe-checkout`/`stripe-webhook`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
 
 ## Stack
 HTML/CSS/JS vanilla, localStorage (from, clients, invoices, bookings, invCounters, inv_theme).
@@ -66,6 +66,45 @@ Risque connu non encore validé en prod : si l'app OAuth Google Cloud reste en m
 de consentement non publié/vérifié), seuls les comptes ajoutés comme testeurs peuvent se connecter
 et les refresh tokens expirent au bout de 7 jours — à vérifier/passer en production côté Google
 Cloud Console avant un usage multi-utilisateurs réel.
+
+## Login Google + abonnement Stripe (porte d'entrée de l'app)
+Depuis le 2026-08-04 : l'app est gated par une connexion Google (Supabase Auth) + une vérification
+d'abonnement Stripe, indépendante du système "connecter mon Gmail" (envoi de factures) et du code
+de synchro (pairing d'appareils) — trois mécanismes distincts qui ne se recoupent pas. Même compte
+Stripe que BAR OPS (décision explicite, "ça facilite les paiements"), produit/prix et webhook
+dédiés à Helm dans ce même compte. Prix actuel : 9,90 €/mois (placeholder, modifiable dans Stripe).
+
+Ordre des portes au boot (`bootAuth()` dans `facture.html`, `bootApp()` dans `mobile/index.html`) :
+pas de session Supabase → écran de connexion (`#loginGate`) ; session mais `check-access` refuse
+→ écran d'abonnement (`#paywallGate`, prix + bouton "S'abonner" + "Gérer mon abonnement") ; sinon
+→ comportement normal (le `pairGate` du code de synchro reste une couche indépendante, déclenchée
+seulement après ces deux contrôles). Annulation d'abonnement : accès conservé jusqu'à
+`expires_at` (fin de période déjà payée), pas de coupure immédiate.
+
+Flux OAuth : flow implicite Supabase (`flowType:'implicit'` sur `getSb()`, tokens dans le fragment
+d'URL, pas de PKCE — nécessaire car le flux desktop termine dans un contexte navigateur différent
+de celui qui l'a initié).
+- **Mobile** (déjà en https réel via GitHub Pages) : redirection directe
+  (`signInWithOAuth({redirectTo: <page elle-même>})`), tokens repris dans `location.hash` au
+  chargement.
+- **Desktop Electron** (`file://`, pas d'origine https locale) : `connectLogin()` ouvre le flow
+  avec `redirectTo` pointant vers `mobile/oauth-relay.html?state=...` (`skipBrowserRedirect:true`),
+  Electron force l'URL vers le navigateur système (`shell.openExternal`, `window.open()` renvoie
+  `null` — ne pas s'y fier, cf. `connectGmail()`), la page de relais dépose les tokens via
+  `auth-relay-deposit` et l'app les récupère par polling (`auth-relay-poll`, table `login_relay`,
+  usage unique) — même principe que `oauth-google-callback`/`oauth-google-poll` pour Gmail-send.
+
+Tables Supabase : `profiles` (id/email, remplie par un trigger `handle_new_user` sur `auth.users`,
+lecture seule côté client), `subscriptions` (`user_id, status, plan, period, expires_at,
+stripe_customer_id, stripe_subscription_id` — écrite uniquement par les Edge Functions via
+service role, `check-access` fait foi), `login_relay` (handoff desktop, cf. ci-dessus).
+
+Étapes manuelles restantes (voir `supabase/README.md` pour le détail) : créer le produit/prix
+Stripe + le webhook dédié à Helm, activer le provider Google dans Supabase Auth Dashboard + ajouter
+les redirect URLs autorisées, ajouter le callback Supabase comme 2e "Authorized redirect URI" sur
+le client OAuth Google Cloud déjà utilisé pour Gmail-send. Tant que ces étapes manuelles n'ont pas
+été faites, le login/abonnement ne fonctionne pas encore en pratique (code déployé mais secrets
+Stripe pas encore posés).
 
 ## Repo cible
 https://github.com/SPECTRE888/Bill-ops-.git (branche main)

@@ -244,6 +244,25 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 </style>
 </head>
 <body>
+<div class="modal-overlay" id="loginGate" style="display:none;z-index:20000;">
+  <div class="modal-box" style="text-align:center;">
+    <div style="font-family:var(--font-display);font-size:30px;color:var(--gold);letter-spacing:.1em;margin-bottom:16px;">HELM OPS</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">Connecte-toi avec ton compte Google pour accéder à l'application.</p>
+    <button class="btn-gold" style="width:100%;" onclick="connectLogin()">Se connecter avec Google</button>
+    <div id="loginStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="paywallGate" style="display:none;z-index:20000;">
+  <div class="modal-box" style="text-align:center;">
+    <div style="font-family:var(--font-display);font-size:30px;color:var(--gold);letter-spacing:.1em;margin-bottom:16px;">HELM OPS</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">Abonnement Helm Ops — 9,90 €/mois.</p>
+    <button class="btn-gold" style="width:100%;" onclick="subscribeNow()">S'abonner</button>
+    <button class="btn-line" style="width:100%;margin-top:8px;" onclick="openBillingPortal()">Gérer mon abonnement</button>
+    <div id="paywallStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
+  </div>
+</div>
+
 <div class="app no-preview" id="appRoot">
   <div class="nav">
     <div class="nav-logo">
@@ -357,6 +376,14 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       </div>
 
       <div class="profile-row2">
+      <div class="card" style="grid-column:1/-1;">
+        <div class="ctitle">Mon compte</div>
+        <p style="font-size:11px;color:var(--text2);" id="accountEmail"></p>
+        <div class="row">
+          <button class="btn-line" onclick="openBillingPortal()">Gérer mon abonnement</button>
+          <button class="btn-line" style="color:var(--red);" onclick="logoutAccount()">Se déconnecter</button>
+        </div>
+      </div>
       <div class="card">
         <div class="ctitle" data-i18n="data_gmail_title">Envoi de factures</div>
         <div id="gmailNotConnected">
@@ -1032,7 +1059,7 @@ const SYNC_TABLE = 'billops_sync';
 // effacerait silencieusement l'abonnement du téléphone à la prochaine sauvegarde depuis le Mac.
 const SYNC_KEYS = { from:'{}', gmailAuth:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}', pushSubscriptions:'[]' };
 let sb = null;
-function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); return sb; }
+function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {auth:{flowType:'implicit'}}); return sb; }
 function getSyncCode(){ return localStorage.getItem('syncCode') || ''; }
 
 function collectSyncPayload(){
@@ -1247,7 +1274,10 @@ function connectGmail(){
     + '&state=' + encodeURIComponent(state);
   const popup = window.open(url, 'gmailAuth', 'width=480,height=640');
   const statusEl = document.getElementById('gmailStatus');
-  if(!popup){ setStatusMsg(statusEl, '✕ Popup bloquée par le navigateur — autorise les popups pour ce site.'); return; }
+  // popup peut être null même quand la fenêtre s'est bien ouverte : dans l'app Electron,
+  // setWindowOpenHandler refuse la popup mais ouvre quand même l'URL dans le navigateur système
+  // (shell.openExternal) — on ne peut donc pas se fier à la valeur de retour pour détecter un vrai
+  // blocage, on poll dans tous les cas.
   setStatusMsg(statusEl, '⏳ Connexion en cours...');
   let attempts = 0;
   const timer = setInterval(async ()=>{
@@ -1270,6 +1300,116 @@ function connectGmail(){
 function disconnectGmail(){
   set('gmailAuth', {});
   renderGmailUI();
+}
+
+// --- Login Google + abonnement Stripe (porte d'entrée, indépendante du code de synchro et de
+// "Connecter mon Gmail" ci-dessus). Electron n'a pas d'origine https locale pour recevoir un
+// redirectTo direct : le flow OAuth ouvre le navigateur système vers une page de relais hébergée
+// sur GitHub Pages (mobile/oauth-relay.html), qui dépose les tokens via auth-relay-deposit ; on
+// les récupère ici par polling, même principe que connectGmail()/oauth-google-poll ci-dessus. ---
+const CHECK_ACCESS_URL = SUPABASE_URL + '/functions/v1/check-access';
+const STRIPE_CHECKOUT_URL = SUPABASE_URL + '/functions/v1/stripe-checkout';
+const AUTH_RELAY_POLL_URL = SUPABASE_URL + '/functions/v1/auth-relay-poll';
+const AUTH_RELAY_URL = 'https://spectre888.github.io/Bill-ops-/oauth-relay.html';
+
+function showAuthGate(which){
+  document.getElementById('loginGate').style.display = which==='login' ? 'flex' : 'none';
+  document.getElementById('paywallGate').style.display = which==='paywall' ? 'flex' : 'none';
+}
+
+function connectLogin(){
+  const state = crypto.getRandomValues(new Uint32Array(4)).join('-');
+  const statusEl = document.getElementById('loginStatus');
+  setStatusMsg(statusEl, '⏳ Connexion en cours...');
+  getSb().auth.signInWithOAuth({
+    provider:'google',
+    options:{ redirectTo: AUTH_RELAY_URL + '?state=' + encodeURIComponent(state), skipBrowserRedirect:true }
+  }).then(({data, error})=>{
+    if(error || !data?.url){ setStatusMsg(statusEl, '✕ '+(error?.message||'Erreur de connexion.')); return; }
+    const popup = window.open(data.url, 'googleLogin', 'width=480,height=640');
+    // Comme pour connectGmail() : popup peut être null en Electron même si l'URL s'est bien ouverte
+    // dans le navigateur système, donc on poll dans tous les cas.
+    let attempts = 0;
+    const timer = setInterval(async ()=>{
+      attempts++;
+      if(popup && popup.closed && attempts > 1){ clearInterval(timer); setStatusMsg(statusEl, ''); return; }
+      if(attempts > 80){ clearInterval(timer); setStatusMsg(statusEl, '✕ Délai dépassé, réessaie.'); return; }
+      try{
+        const res = await fetch(AUTH_RELAY_POLL_URL + '?state=' + encodeURIComponent(state), { headers:{'x-app-secret':APP_RELAY_SECRET} });
+        const relayData = await res.json();
+        if(relayData.accessToken){
+          clearInterval(timer);
+          if(popup && !popup.closed) popup.close();
+          await getSb().auth.setSession({access_token: relayData.accessToken, refresh_token: relayData.refreshToken});
+          bootAuth();
+        }
+      }catch(e){ /* on retente au prochain tick */ }
+    }, 1500);
+  });
+}
+
+async function logoutAccount(){
+  if(!confirm('Se déconnecter de Helm Ops ?')) return;
+  await getSb().auth.signOut();
+  location.reload();
+}
+
+async function checkAccess(){
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return {loggedIn:false};
+  try{
+    const res = await fetch(CHECK_ACCESS_URL, {headers:{Authorization:'Bearer '+session.access_token}});
+    const data = await res.json();
+    return Object.assign({loggedIn:true, session}, data);
+  }catch(e){
+    return {loggedIn:true, session, allowed:false, error:'network'};
+  }
+}
+
+async function subscribeNow(){
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return;
+  const statusEl = document.getElementById('paywallStatus');
+  setStatusMsg(statusEl, '⏳ Redirection vers le paiement...');
+  try{
+    const res = await fetch(STRIPE_CHECKOUT_URL, {method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+session.access_token}, body: JSON.stringify({action:'subscribe'})});
+    const data = await res.json();
+    if(data.url){
+      window.open(data.url, 'stripeCheckout');
+      pollCheckAccessAfterCheckout(statusEl);
+    } else setStatusMsg(statusEl, '✕ '+(data.error||'Erreur'));
+  }catch(e){ setStatusMsg(statusEl, '✕ Erreur réseau'); }
+}
+
+function pollCheckAccessAfterCheckout(statusEl){
+  let attempts = 0;
+  const timer = setInterval(async ()=>{
+    attempts++;
+    if(attempts > 15){ clearInterval(timer); setStatusMsg(statusEl, 'Paiement en cours de validation — clique sur "S\'abonner" à nouveau si besoin dans quelques instants.'); return; }
+    const access = await checkAccess();
+    if(access.allowed){ clearInterval(timer); bootAuth(); }
+  }, 2000);
+}
+
+async function openBillingPortal(){
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return;
+  try{
+    const res = await fetch(STRIPE_CHECKOUT_URL, {method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+session.access_token}, body: JSON.stringify({action:'portal'})});
+    const data = await res.json();
+    if(data.url) window.open(data.url, 'stripePortal');
+    else showToast('⚠ '+(data.error||'Erreur'));
+  }catch(e){ showToast('⚠ Erreur réseau'); }
+}
+
+async function bootAuth(){
+  const access = await checkAccess();
+  if(!access.loggedIn){ showAuthGate('login'); return; }
+  const emailEl = document.getElementById('accountEmail');
+  if(emailEl) emailEl.textContent = access.session.user.email || '';
+  if(!access.allowed){ showAuthGate('paywall'); return; }
+  showAuthGate(null);
+  bootApp();
 }
 function toggleInfoEdit(show){
   infoView.style.display = show ? 'none' : 'grid';
@@ -2368,11 +2508,14 @@ async function sendInvoice(){
 }
 
 applyI18n();
-loadFrom(); renderGmailUI(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
-renderSyncUI();
-if(getSyncCode()) pullSync(false);
+function bootApp(){
+  loadFrom(); renderGmailUI(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
+  renderSyncUI();
+  if(getSyncCode()) pullSync(false);
+}
 setInterval(()=>{ if(getSyncCode()) pullSync(false); }, 60000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && getSyncCode()) pullSync(false); });
+bootAuth();
 </script>
 </body>
 </html>

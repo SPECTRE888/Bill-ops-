@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Connexion — Helm Ops</title>
+<style>
+:root{--bg:#080808;--surface:#0f0f0f;--text:#ede8e0;--text2:#a09890;--gold:#c4a46b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+.box{background:var(--surface);border:1px solid #222;border-radius:8px;padding:40px 32px;max-width:400px}
+h1{font-size:20px;font-weight:500;letter-spacing:.08em;color:var(--gold);margin-bottom:14px}
+p{font-size:13px;color:var(--text2);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>HELM OPS</h1>
+  <p id="msg">Connexion en cours…</p>
+</div>
+<script>
+(function(){
+  var AUTH_RELAY_DEPOSIT_URL = 'https://chlmqnrvnrgeaihryreb.supabase.co/functions/v1/auth-relay-deposit';
+  var APP_RELAY_SECRET = '364ae57df352752832e9c6cb52ad7b040740ad481628839b';
+  var msgEl = document.getElementById('msg');
+
+  var state = new URLSearchParams(location.search).get('state');
+  var hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+  var accessToken = hash.get('access_token');
+  var refreshToken = hash.get('refresh_token');
+  var authError = hash.get('error_description') || new URLSearchParams(location.search).get('error_description');
+
+  if(authError){
+    msgEl.textContent = 'Connexion refusée (' + authError + '). Tu peux fermer cette fenêtre.';
+    return;
+  }
+  if(!state || !accessToken || !refreshToken){
+    msgEl.textContent = 'Requête invalide. Tu peux fermer cette fenêtre.';
+    return;
+  }
+
+  fetch(AUTH_RELAY_DEPOSIT_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json', 'x-app-secret': APP_RELAY_SECRET},
+    body: JSON.stringify({state: state, accessToken: accessToken, refreshToken: refreshToken})
+  }).then(function(res){
+    if(res.ok){ msgEl.textContent = 'Connexion réussie. Tu peux fermer cette fenêtre.'; }
+    else { msgEl.textContent = 'Erreur lors de la connexion. Tu peux fermer cette fenêtre.'; }
+  }).catch(function(){
+    msgEl.textContent = 'Erreur réseau. Tu peux fermer cette fenêtre.';
+  });
+})();
+</script>
+</body>
+</html>

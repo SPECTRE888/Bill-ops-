@@ -1,6 +1,6 @@
 # Edge Functions Supabase — état déployé
 
-Quatre fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill-ops) :
+Neuf fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill-ops) :
 
 - **`send-invoice`** — envoi via l'API Gmail au nom de l'utilisateur lui-même (plus de SendGrid ni
   de relais SMTP centralisé, abandonnés ; remplace aussi `send-invoice-server.js`, jamais hébergé,
@@ -18,30 +18,80 @@ Quatre fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bi
 - **`notify-upcoming-bookings`** — rappel push ~15 min avant le début d'une presta pointée.
   Planifié via `pg_cron` toutes les 3 minutes (job `notify-upcoming-bookings`, voir
   `select * from cron.job;`).
+- **`check-access`** — GET, bearer token Supabase Auth. Résout l'utilisateur, lit la dernière
+  ligne `subscriptions`, retourne `{allowed, status, plan, period, expiresAt}` (`allowed` basé sur
+  `expires_at > now`, pas sur `status` seul — accès conservé jusqu'à fin de période après
+  annulation).
+- **`stripe-checkout`** — POST, bearer token. `{action:'subscribe'}` crée/retrouve le Customer
+  Stripe et une Checkout Session (`STRIPE_PRICE_ID_MONTHLY`) ; `{action:'portal'}` crée une session
+  de portail de facturation. Retourne `{url}` à ouvrir/rediriger côté client.
+- **`stripe-webhook`** — POST, signature Stripe (`STRIPE_WEBHOOK_SECRET`, body brut). Synchronise
+  `subscriptions` sur `customer.subscription.created/updated/deleted` et `invoice.payment_failed`.
+  Même compte Stripe que BAR OPS, produit/prix et endpoint webhook dédiés à Helm.
+- **`auth-relay-deposit`**/**`auth-relay-poll`** — handoff des tokens de session Supabase Auth pour
+  le login Google côté Electron desktop (pas d'origine https locale pour un `redirectTo` direct) :
+  `mobile/oauth-relay.html` dépose les tokens via `auth-relay-deposit`, l'app les récupère par
+  polling sur `auth-relay-poll` (table `login_relay`, usage unique) — même principe que
+  `oauth-google-callback`/`oauth-google-poll` ci-dessus, table séparée (`oauth_pending` reste
+  dédiée au seul flux Gmail-send).
 
-Les quatre sont déployées avec `--no-verify-jwt` (appelées directement en `fetch()` depuis
+Les neuf sont déployées avec `--no-verify-jwt` (appelées directement en `fetch()` depuis
 `facture.html`/`mobile/index.html`, ou par `pg_cron` — pas par un client Supabase authentifié).
-`notify-upcoming-bookings` vérifie un header `x-cron-secret` ; `send-invoice` et
-`oauth-google-poll` vérifient un header `x-app-secret` (constante `APP_RELAY_SECRET`, identique
-dans les deux fichiers client et dans le secret `APP_RELAY_SECRET` côté fonction) — protection
-légère contre le scan automatisé, pas une vraie auth (le secret est dans du code client public).
-`oauth-google-callback` n'a pas cette protection (appelée par une redirection Google, pas par le
-client) — sa seule protection est le `state` à usage unique. Si ça devient un vrai produit
-multi-utilisateurs, prévoir mieux (auth par utilisateur + rate limit en base) : voir le commentaire
-en tête de `supabase/functions/send-invoice/index.ts`.
+`notify-upcoming-bookings` vérifie un header `x-cron-secret` ; `send-invoice`, `oauth-google-poll`
+et `auth-relay-deposit`/`auth-relay-poll` vérifient un header `x-app-secret` (constante
+`APP_RELAY_SECRET`, identique dans les deux fichiers client et dans le secret `APP_RELAY_SECRET`
+côté fonction) — protection légère contre le scan automatisé, pas une vraie auth (le secret est
+dans du code client public). `check-access` et `stripe-checkout` vérifient à la place un vrai
+`Authorization: Bearer <token Supabase>` (l'utilisateur doit être réellement connecté).
+`stripe-webhook` vérifie la signature Stripe, pas de secret partagé (appelée par Stripe, pas par le
+client). `oauth-google-callback` n'a pas de protection (appelée par une redirection Google) — sa
+seule protection est le `state` à usage unique. Si ça devient un vrai produit multi-utilisateurs à
+plus grande échelle, prévoir mieux (rate limit en base) : voir le commentaire en tête de
+`supabase/functions/send-invoice/index.ts`.
 
 ## Table `oauth_pending`
-Handoff temporaire pour le flux OAuth Gmail (voir ci-dessus). Colonnes : `state` (clé, nonce
+Handoff temporaire pour le flux OAuth Gmail-send (voir ci-dessus). Colonnes : `state` (clé, nonce
 généré côté client), `refresh_token`, `email`, `created_at`. RLS activé (accès uniquement via
 service role key, utilisée par les deux fonctions `oauth-google-*`) ; purge automatique des lignes
 > 10 min faite par `oauth-google-callback` à chaque appel, et suppression immédiate dès lecture par
 `oauth-google-poll` (usage unique).
+
+## Tables `profiles` / `subscriptions` / `login_relay`
+Login Google + abonnement Stripe (voir la section dédiée dans `CLAUDE.md` pour le flux complet).
+`profiles` (`id, email, full_name, avatar_url`) est remplie automatiquement par un trigger
+`handle_new_user` sur `auth.users` — jamais écrite côté client, lecture seule (`select using
+(auth.uid() = id)`). `subscriptions` (`user_id, status, plan, period, expires_at,
+stripe_customer_id, stripe_subscription_id`) n'est écrite que par les Edge Functions (service
+role) ; le contrôle d'accès faisant foi est toujours `check-access`, jamais une lecture directe
+côté client. `login_relay` (`state, access_token, refresh_token`) est le handoff desktop décrit
+ci-dessus, RLS activé sans policy (service role only), purge > 2 min + suppression à la lecture.
+Migration versionnée : `supabase/migrations/20260804102232_login_paywall.sql`.
 
 ## Secrets configurés
 `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
 `APP_RELAY_SECRET` (via `supabase secrets set`, jamais commités).
 `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` sont injectés automatiquement par Supabase dans toute
 Edge Function.
+
+**Restent à poser** (bloquent `check-access`/`stripe-checkout`/`stripe-webhook` tant qu'ils sont
+absents) : `STRIPE_SECRET_KEY` (même compte Stripe que BAR OPS), `STRIPE_WEBHOOK_SECRET` (signing
+secret de l'endpoint webhook **dédié à Helm**, créé séparément de celui de BAR OPS même si le
+compte est le même), `STRIPE_PRICE_ID_MONTHLY` (Price ID du produit "Helm Ops" à créer dans ce
+compte, 9,90 €/mois placeholder). Une fois obtenus depuis le dashboard Stripe :
+
+```
+npx supabase secrets set STRIPE_SECRET_KEY=<clé secrète du compte Stripe> \
+  STRIPE_WEBHOOK_SECRET=<signing secret de l'endpoint Helm> \
+  STRIPE_PRICE_ID_MONTHLY=<price id du produit Helm Ops>
+```
+
+Manque aussi côté Supabase Dashboard (`chlmqnrvnrgeaihryreb`) : Authentication → Providers →
+Google (activer, avec le même Client ID/Secret que `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`) ;
+Authentication → URL Configuration → ajouter `https://spectre888.github.io/Bill-ops-/` et
+`https://spectre888.github.io/Bill-ops-/oauth-relay.html` aux redirect URLs autorisées (sans ça,
+Supabase rejette silencieusement le `redirectTo` demandé). Et côté Google Cloud Console : ajouter
+`https://chlmqnrvnrgeaihryreb.supabase.co/auth/v1/callback` comme second "Authorized redirect URI"
+sur le client OAuth déjà utilisé pour Gmail-send (pas besoin d'en créer un second).
 
 `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` viennent d'un identifiant OAuth "Web application" créé
 dans Google Cloud Console (API activée : Gmail API), avec comme URI de redirection autorisée
@@ -66,6 +116,11 @@ npx supabase link --project-ref chlmqnrvnrgeaihryreb   # si pas déjà lié dans
 npx supabase functions deploy send-invoice --no-verify-jwt
 npx supabase functions deploy oauth-google-callback --no-verify-jwt
 npx supabase functions deploy oauth-google-poll --no-verify-jwt
+npx supabase functions deploy check-access --no-verify-jwt
+npx supabase functions deploy stripe-checkout --no-verify-jwt
+npx supabase functions deploy stripe-webhook --no-verify-jwt
+npx supabase functions deploy auth-relay-deposit --no-verify-jwt
+npx supabase functions deploy auth-relay-poll --no-verify-jwt
 npx supabase functions deploy notify-upcoming-bookings --no-verify-jwt
 ```
 

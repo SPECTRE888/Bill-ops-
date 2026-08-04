@@ -168,6 +168,25 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 </head>
 <body>
 
+<div id="loginGate" class="pair-gate" style="display:none;">
+  <div class="pair-box">
+    <div class="pair-title">HELM OPS</div>
+    <p style="color:var(--text2);font-size:13px;text-align:center;">Connecte-toi avec ton compte Google pour accéder à l'application.</p>
+    <button class="btn-gold action-btn" onclick="connectLoginMobile()">Se connecter avec Google</button>
+    <div id="loginStatus" style="font-size:12px;margin-top:8px;text-align:center;color:var(--gold);"></div>
+  </div>
+</div>
+
+<div id="paywallGate" class="pair-gate" style="display:none;">
+  <div class="pair-box">
+    <div class="pair-title">HELM OPS</div>
+    <p style="color:var(--text2);font-size:13px;text-align:center;">Abonnement Helm Ops — 9,90 €/mois.</p>
+    <button class="btn-gold action-btn" onclick="subscribeNow()">S'abonner</button>
+    <button class="btn-line action-btn" onclick="openBillingPortal()">Gérer mon abonnement</button>
+    <div id="paywallStatus" style="font-size:12px;margin-top:8px;text-align:center;color:var(--gold);"></div>
+  </div>
+</div>
+
 <div id="pairGate" class="pair-gate">
   <div class="pair-box" id="pairBoxExisting">
     <div class="pair-title">HELM OPS</div>
@@ -269,6 +288,14 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     </section>
     <section id="tab-parametres" style="display:none;">
       <h2>Réglages</h2>
+      <div class="mcard">
+        <b>Mon compte</b><br>
+        <p style="color:var(--text2);font-size:12px;margin:6px 0 10px;" id="accountEmail"></p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-line" onclick="openBillingPortal()">Gérer mon abonnement</button>
+          <button class="btn-line" style="color:var(--red);" onclick="logoutAccount()">Se déconnecter</button>
+        </div>
+      </div>
       <div class="mcard">
         <b>Mon entreprise</b><br>
         <div id="fromViewMobile"></div>
@@ -442,7 +469,7 @@ const GOOGLE_OAUTH_REDIRECT_URI = SUPABASE_URL + '/functions/v1/oauth-google-cal
 const SYNC_KEYS = { from:'{}', gmailAuth:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}', pushSubscriptions:'[]' };
 const VAPID_PUBLIC_KEY = 'BNAR3mX4w7cbnSefEGzsl0dBxIIEBr7ZuzPbXQf6UQCAntPLdFohiSp4dXeop7pwVFsMYL9PMwxJ4rc2_rZ8zaY';
 let sb = null;
-function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); return sb; }
+function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {auth:{flowType:'implicit'}}); return sb; }
 function getSyncCode(){ return localStorage.getItem('syncCode') || ''; }
 
 function collectSyncPayload(){
@@ -507,6 +534,97 @@ function handleDisconnect(){
   localStorage.removeItem('syncCode');
   localStorage.removeItem('syncLastAppliedAt');
   location.reload();
+}
+
+// --- Login Google + abonnement Stripe (porte d'entrée, indépendante du code de synchro) ---
+const CHECK_ACCESS_URL = SUPABASE_URL + '/functions/v1/check-access';
+const STRIPE_CHECKOUT_URL = SUPABASE_URL + '/functions/v1/stripe-checkout';
+
+function showAuthGate(which){
+  document.getElementById('loginGate').style.display = which==='login' ? 'flex' : 'none';
+  document.getElementById('paywallGate').style.display = which==='paywall' ? 'flex' : 'none';
+}
+
+async function handleLoginRedirect(){
+  if(!location.hash.includes('access_token=')) return;
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const accessToken = hash.get('access_token');
+  const refreshToken = hash.get('refresh_token');
+  history.replaceState(null, '', location.pathname);
+  if(accessToken && refreshToken){
+    await getSb().auth.setSession({access_token:accessToken, refresh_token:refreshToken});
+  }
+}
+
+function connectLoginMobile(){
+  const statusEl = document.getElementById('loginStatus');
+  setStatusMsg(statusEl, '⏳ Redirection vers Google...');
+  getSb().auth.signInWithOAuth({provider:'google', options:{redirectTo: location.origin+location.pathname}});
+}
+
+async function logoutAccount(){
+  if(!confirm('Se déconnecter de Helm Ops ?')) return;
+  await getSb().auth.signOut();
+  location.reload();
+}
+
+async function checkAccess(){
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return {loggedIn:false};
+  try{
+    const res = await fetch(CHECK_ACCESS_URL, {headers:{Authorization:'Bearer '+session.access_token}});
+    const data = await res.json();
+    return Object.assign({loggedIn:true, session}, data);
+  }catch(e){
+    return {loggedIn:true, session, allowed:false, error:'network'};
+  }
+}
+
+async function subscribeNow(){
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return;
+  const statusEl = document.getElementById('paywallStatus');
+  setStatusMsg(statusEl, '⏳ Redirection vers le paiement...');
+  try{
+    const res = await fetch(STRIPE_CHECKOUT_URL, {method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+session.access_token}, body: JSON.stringify({action:'subscribe'})});
+    const data = await res.json();
+    if(data.url) location.href = data.url;
+    else setStatusMsg(statusEl, '✕ '+(data.error||'Erreur'));
+  }catch(e){ setStatusMsg(statusEl, '✕ Erreur réseau'); }
+}
+
+async function openBillingPortal(){
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return;
+  try{
+    const res = await fetch(STRIPE_CHECKOUT_URL, {method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+session.access_token}, body: JSON.stringify({action:'portal'})});
+    const data = await res.json();
+    if(data.url) location.href = data.url;
+    else showToast('⚠ '+(data.error||'Erreur'));
+  }catch(e){ showToast('⚠ Erreur réseau'); }
+}
+
+async function bootApp(){
+  await handleLoginRedirect();
+  const access = await checkAccess();
+  if(!access.loggedIn){
+    showAuthGate('login');
+    return;
+  }
+  document.getElementById('accountEmail').textContent = access.session.user.email || '';
+  if(!access.allowed){
+    showAuthGate('paywall');
+    return;
+  }
+  showAuthGate(null);
+  applyTheme();
+  if(getSyncCode()){
+    showPairGate(false);
+    renderActiveTab();
+    pullSync(false).then(found=>{ if(found){ applyTheme(); renderActiveTab(); } });
+  } else {
+    showPairGate(true);
+  }
 }
 
 // --- Notifications push (rappel à l'heure de début d'une presta) ---
@@ -1435,14 +1553,7 @@ function confirmInvoiceExtras(){
 }
 
 // --- Boot ---
-applyTheme();
-if(getSyncCode()){
-  showPairGate(false);
-  renderActiveTab();
-  pullSync(false).then(found=>{ if(found){ applyTheme(); renderActiveTab(); } });
-} else {
-  showPairGate(true);
-}
+bootApp();
 setInterval(()=>{ if(getSyncCode()) pullSync(false).then(found=>{ if(found){ applyTheme(); renderActiveTab(); } }); }, 60000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && getSyncCode()) pullSync(false).then(found=>{ if(found){ applyTheme(); renderActiveTab(); } }); });
 
