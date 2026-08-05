@@ -187,10 +187,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
   </div>
 </div>
 
-<div id="pairGate" class="pair-gate">
+<div id="pairGate" class="pair-gate" style="display:none;">
   <div class="pair-box" id="pairBoxExisting">
     <div class="pair-title">HELM OPS</div>
-    <p style="color:var(--text2);font-size:13px;text-align:center;">Colle le code de synchro généré sur un autre appareil (Mac ou téléphone déjà connecté) pour retrouver ton planning et tes factures.</p>
+    <p style="color:var(--text2);font-size:13px;text-align:center;">Relie cet appareil à ton compte : colle le code de synchro généré sur un autre appareil (Mac ou téléphone déjà connecté) pour retrouver ton planning et tes factures.</p>
     <label>Code de synchro</label>
     <input id="pairCodeInput" placeholder="Code de synchro">
     <button class="btn-gold action-btn" onclick="doConnect()">Connecter</button>
@@ -198,8 +198,8 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     <div style="display:flex;align-items:center;gap:10px;margin:22px 0;color:var(--text3);font-size:11px;letter-spacing:.1em;text-transform:uppercase;">
       <div style="flex:1;height:1px;background:var(--border2);"></div>ou<div style="flex:1;height:1px;background:var(--border2);"></div>
     </div>
-    <p style="color:var(--text2);font-size:13px;text-align:center;">Pas encore de compte ? Démarre directement depuis ce téléphone, sans Mac.</p>
-    <button class="btn-line action-btn" onclick="showNewAccountBox()">Créer un compte</button>
+    <p style="color:var(--text2);font-size:13px;text-align:center;">Premier appareil ? Génère un nouveau code pour démarrer tes données ici.</p>
+    <button class="btn-line action-btn" onclick="showNewAccountBox()">Générer un code</button>
   </div>
   <div class="pair-box" id="pairBoxNew" style="display:none;">
     <div class="pair-title">HELM OPS</div>
@@ -543,6 +543,13 @@ const STRIPE_CHECKOUT_URL = SUPABASE_URL + '/functions/v1/stripe-checkout';
 function showAuthGate(which){
   document.getElementById('loginGate').style.display = which==='login' ? 'flex' : 'none';
   document.getElementById('paywallGate').style.display = which==='paywall' ? 'flex' : 'none';
+  if(which){
+    // pairGate est visible par défaut (CSS) tant que bootApp() n'a pas tranché — il faut le
+    // masquer explicitement ici, sinon il passe au-dessus de la porte login/abonnement (même
+    // z-index, plus tard dans le DOM).
+    document.getElementById('pairGate').style.display = 'none';
+    document.getElementById('appShell').style.display = 'none';
+  }
 }
 
 async function handleLoginRedirect(){
