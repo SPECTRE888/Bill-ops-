@@ -674,6 +674,15 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <button class="btn-gold" style="width:100%;margin-top:20px;" onclick="closeLegalModal()" data-i18n="btn_close">Fermer</button>
   </div>
 </div>
+<div class="modal-overlay" id="confirmModal" style="display:none;z-index:10001;" onclick="if(event.target===this) confirmModalResolve(false)">
+  <div class="modal-box" style="max-width:360px;text-align:center;">
+    <p id="confirmModalMsg" style="font-size:13px;color:var(--text);margin:0 0 20px;"></p>
+    <div class="row">
+      <button class="btn-line" onclick="confirmModalResolve(false)" data-i18n="btn_cancel">Annuler</button>
+      <button class="btn-gold" id="confirmModalOkBtn" onclick="confirmModalResolve(true)" data-i18n="btn_confirm">Confirmer</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -730,7 +739,7 @@ cal_title:'Calendrier', cal_prev_month:'Prévisionnel du mois', cal_forecast_suf
 booking_new_title:'Nouveau booking', booking_edit_title:'Modifier le booking', lbl_client:'Client', lbl_nom_prestation:'Nom de la prestation', ph_nom_prestation:'Ex. Prestation Barman',
 lbl_addr_prestation:'Adresse de la prestation', ph_addr_prestation:"Lieu de l'événement", lbl_contact_place:'Contact sur place', ph_contact_place:'Nom / téléphone du contact',
 lbl_date_prestation:'Date prestation', lbl_de:'De', lbl_a:'À', lbl_taux:'Taux €/h',
-btn_add_planning:'Ajouter au planning', btn_save_changes:'Enregistrer les modifications', btn_cancel:'Annuler',
+btn_add_planning:'Ajouter au planning', btn_save_changes:'Enregistrer les modifications', btn_cancel:'Annuler', btn_confirm:'Confirmer',
 empty_day:'Aucune prestation ce jour.', btn_add_service_day:'+ Ajouter une prestation',
 modal_booking_title:'Détail de la prestation', btn_close:'Fermer',
 row_client:'Client', row_prestation:'Prestation', row_date:'Date', row_horaires:'Horaires', row_reel:'Réel (pointé)', row_taux:'Taux', row_total:'Total', row_adresse:'Adresse', row_contact:'Contact',
@@ -821,7 +830,7 @@ cal_title:'Calendar', cal_prev_month:'Forecast for the month', cal_forecast_suff
 booking_new_title:'New booking', booking_edit_title:'Edit booking', lbl_client:'Client', lbl_nom_prestation:'Service name', ph_nom_prestation:'E.g. Bartending service',
 lbl_addr_prestation:'Service address', ph_addr_prestation:'Event location', lbl_contact_place:'On-site contact', ph_contact_place:'Contact name / phone',
 lbl_date_prestation:'Service date', lbl_de:'From', lbl_a:'To', lbl_taux:'Rate €/h',
-btn_add_planning:'Add to schedule', btn_save_changes:'Save changes', btn_cancel:'Cancel',
+btn_add_planning:'Add to schedule', btn_save_changes:'Save changes', btn_cancel:'Cancel', btn_confirm:'Confirm',
 empty_day:'No service that day.', btn_add_service_day:'+ Add a service',
 modal_booking_title:'Service detail', btn_close:'Close',
 row_client:'Client', row_prestation:'Service', row_date:'Date', row_horaires:'Hours', row_reel:'Actual (clocked)', row_taux:'Rate', row_total:'Total', row_adresse:'Address', row_contact:'Contact',
@@ -912,7 +921,7 @@ cal_title:'Calendario', cal_prev_month:'Previsión del mes', cal_forecast_suffix
 booking_new_title:'Nueva reserva', booking_edit_title:'Modificar reserva', lbl_client:'Cliente', lbl_nom_prestation:'Nombre del servicio', ph_nom_prestation:'Ej. Servicio de camarero',
 lbl_addr_prestation:'Dirección del servicio', ph_addr_prestation:'Lugar del evento', lbl_contact_place:'Contacto en el lugar', ph_contact_place:'Nombre / teléfono del contacto',
 lbl_date_prestation:'Fecha del servicio', lbl_de:'Desde', lbl_a:'Hasta', lbl_taux:'Tarifa €/h',
-btn_add_planning:'Añadir a la planificación', btn_save_changes:'Guardar cambios', btn_cancel:'Cancelar',
+btn_add_planning:'Añadir a la planificación', btn_save_changes:'Guardar cambios', btn_cancel:'Cancelar', btn_confirm:'Confirmar',
 empty_day:'Ningún servicio ese día.', btn_add_service_day:'+ Añadir un servicio',
 modal_booking_title:'Detalle del servicio', btn_close:'Cerrar',
 row_client:'Cliente', row_prestation:'Servicio', row_date:'Fecha', row_horaires:'Horario', row_reel:'Real (fichado)', row_taux:'Tarifa', row_total:'Total', row_adresse:'Dirección', row_contact:'Contacto',
@@ -1010,6 +1019,22 @@ function openLegalModal(){
   legalModal.style.display = 'flex';
 }
 function closeLegalModal(){ legalModal.style.display = 'none'; }
+// Remplace window.confirm() (dialogue OS générique, hors charte) par un modal maison cohérent
+// avec le reste de l'app. Retourne une Promise<boolean> : await confirmDialog('...').
+let confirmModalResolver = null;
+function confirmDialog(message, okLabel){
+  return new Promise(resolve=>{
+    confirmModalResolver = resolve;
+    document.getElementById('confirmModalMsg').textContent = message;
+    document.getElementById('confirmModalOkBtn').textContent = okLabel || t('btn_confirm');
+    document.getElementById('confirmModal').style.display = 'flex';
+  });
+}
+function confirmModalResolve(v){
+  document.getElementById('confirmModal').style.display = 'none';
+  if(confirmModalResolver) confirmModalResolver(v);
+  confirmModalResolver = null;
+}
 function showToast(msg, duration){
   const stack = document.getElementById('toastStack');
   if(!stack) return;
@@ -1402,7 +1427,7 @@ function connectLogin(){
 }
 
 async function logoutAccount(){
-  if(!confirm('Se déconnecter de Helm Ops ?')) return;
+  if(!await confirmDialog('Se déconnecter de Helm Ops ?')) return;
   await getSb().auth.signOut();
   location.reload();
 }
@@ -1820,8 +1845,8 @@ function renderHistory(){
     </tr>`).join('')}</tbody></table>
   ` : `<p style="color:var(--text3);font-size:12px;">${t('empty_invoices')}</p>`;
 }
-function deleteInvoice(num){
-  if(!confirm(t('confirm_delete_invoice',{num}))) return;
+async function deleteInvoice(num){
+  if(!await confirmDialog(t('confirm_delete_invoice',{num}))) return;
   set('invoices', storeArr('invoices').filter(i=>i.num!==num));
   renderHistory();
   renderCA();

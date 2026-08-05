@@ -389,6 +389,16 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
   </div>
 </div>
 
+<div class="modal-overlay" id="confirmModal" style="display:none;z-index:10001;" onclick="if(event.target===this) confirmModalResolve(false)">
+  <div class="modal-box" style="text-align:center;">
+    <p id="confirmModalMsg" style="font-size:14px;color:var(--text);margin:0 0 20px;"></p>
+    <div class="row">
+      <button class="btn-line action-btn" onclick="confirmModalResolve(false)">Annuler</button>
+      <button class="btn-gold action-btn" id="confirmModalOkBtn" onclick="confirmModalResolve(true)">Confirmer</button>
+    </div>
+  </div>
+</div>
+
 <div class="invoice-preview-overlay" id="invoicePreviewOverlay">
   <div class="invoice-preview-bar"><button class="invoice-preview-close" onclick="closeInvoicePreview()">Fermer ×</button></div>
   <div class="invoice-preview-body" id="invoicePreviewBody" data-theme="light"></div>
@@ -476,7 +486,7 @@ function connectLoginMobile(){
 }
 
 async function logoutAccount(){
-  if(!confirm('Se déconnecter de Helm Ops ?')) return;
+  if(!await confirmDialog('Se déconnecter de Helm Ops ?')) return;
   await getSb().auth.signOut();
   location.reload();
 }
@@ -964,6 +974,22 @@ function openClockModal(id, mode){
   document.getElementById('clockModal').style.display = 'flex';
 }
 function closeClockModal(){ document.getElementById('clockModal').style.display='none'; clockCtx=null; }
+// Remplace window.confirm() (dialogue OS générique, hors charte) par un modal maison cohérent
+// avec le reste de l'app. Retourne une Promise<boolean> : await confirmDialog('...').
+let confirmModalResolver = null;
+function confirmDialog(message, okLabel){
+  return new Promise(resolve=>{
+    confirmModalResolver = resolve;
+    document.getElementById('confirmModalMsg').textContent = message;
+    document.getElementById('confirmModalOkBtn').textContent = okLabel || 'Confirmer';
+    document.getElementById('confirmModal').style.display = 'flex';
+  });
+}
+function confirmModalResolve(v){
+  document.getElementById('confirmModal').style.display = 'none';
+  if(confirmModalResolver) confirmModalResolver(v);
+  confirmModalResolver = null;
+}
 function confirmClock(){
   if(!clockCtx) return;
   const { id, mode } = clockCtx;
@@ -1131,8 +1157,8 @@ function editClientMobile(i){
   document.getElementById('cliAddr').value = c.addr;
   document.getElementById('tab-clients').scrollIntoView({behavior:'smooth', block:'start'});
 }
-function deleteClientMobile(i){
-  if(!confirm('Supprimer ce client ?')) return;
+async function deleteClientMobile(i){
+  if(!await confirmDialog('Supprimer ce client ?')) return;
   const clients = storeArr('clients');
   clients.splice(i,1);
   set('clients', clients);
@@ -1217,8 +1243,8 @@ function saveBookingForm(){
   renderActiveTab();
   showToast(editId ? '✔ Presta modifiée.' : '✔ Presta ajoutée.');
 }
-function deleteBookingMobile(id){
-  if(!confirm('Supprimer cette prestation ?')) return;
+async function deleteBookingMobile(id){
+  if(!await confirmDialog('Supprimer cette prestation ?')) return;
   set('bookings', storeArr('bookings').filter(x=>x.id!==id));
   renderActiveTab();
   showToast('✔ Prestation supprimée.');
@@ -1269,8 +1295,8 @@ function renderFacturesTab(){
   const empty = {creees:'Aucune facture créée.', envoyees:'Aucune facture envoyée.', payees:'Aucune facture payée.'}[facturesView];
   el.innerHTML = invoices.length ? invoices.map(invoiceCardHtml).join('') : `<p style="color:var(--text3);font-size:13px;">${empty}</p>`;
 }
-function deleteInvoiceMobile(num){
-  if(!confirm('Supprimer la facture '+num+' ?')) return;
+async function deleteInvoiceMobile(num){
+  if(!await confirmDialog('Supprimer la facture '+num+' ?')) return;
   const invoices = storeArr('invoices');
   const inv = invoices.find(i=>i.num===num);
   set('invoices', invoices.filter(i=>i.num!==num));
