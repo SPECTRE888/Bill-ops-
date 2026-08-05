@@ -105,6 +105,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .btn-gold:active{transform:scale(.98);}
 .btn-line{background:transparent;border:1px solid var(--border);color:var(--text2);margin-top:6px;}
 .btn-line:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-bg);}
+/* margin-top:6px ci-dessus est pensé pour un bouton isolé sous un label/champ — dans une rangée
+   flex (.row), cette marge grignote la hauteur du bouton par rapport à ses voisins sans marge
+   (ex. .btn-gold), le rendant visiblement plus petit malgré un stretch flex identique. */
+.row .btn-line{margin-top:0;}
 /* Bouton "Annuler" du modal de confirmation : même gabarit exact que le contour standard
    (aucune différence de taille), mais rempli pour peser visuellement autant que le bouton doré
    à côté — un contour fin à côté d'un bouton plein paraît toujours plus petit à l'œil. */
