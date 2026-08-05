@@ -328,7 +328,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div class="info-item"><div class="info-label" data-i18n="lbl_appareil">Appareil</div><div class="info-value" id="viewDeviceLabel" data-i18n="cet_appareil">Cet appareil</div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_derniere_synchro">Dernière synchro</div><div class="info-value" id="viewLastSync">—</div></div>
         </div>
-        <button class="btn-line" onclick="pullSync(true)" data-i18n="btn_force_sync" style="margin-top:10px;width:100%;">Forcer la synchro</button>
+        <button class="btn-line" onclick="forceCloudRefresh()" data-i18n="btn_force_sync" style="margin-top:10px;width:100%;">Forcer la synchro</button>
       </div>
 
       <div class="card">
@@ -397,26 +397,6 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div id="gmailStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
 
-      <div class="card">
-        <div class="ctitle" data-i18n="data_sync_title">Synchronisation</div>
-        <div id="syncNotConnected">
-          <p style="font-size:11px;color:var(--text2);" data-i18n="sync_intro">Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.</p>
-          <button class="btn-gold" onclick="genSyncCode()" data-i18n="btn_gen_sync">Générer un code de synchro</button>
-          <label style="margin-top:8px;" data-i18n="lbl_paste_sync">Ou coller un code existant</label>
-          <input id="syncCodeInput" placeholder="Code de synchro" data-i18n-ph="ph_sync_code">
-          <button class="btn-line" onclick="connectSyncCode()" data-i18n="btn_connect">Connecter</button>
-        </div>
-        <div id="syncConnected" style="display:none;">
-          <p style="font-size:11px;color:var(--text2);" data-i18n="sync_code_intro">Code de synchro (à coller sur l'autre appareil) :</p>
-          <div id="syncCodeBox" style="font-family:monospace;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:7px;word-break:break-all;font-size:11px;"></div>
-          <div class="row" style="margin-top:6px;">
-            <button class="btn-line" onclick="copySyncCode()" data-i18n="btn_copy_code" style="margin-top:0;">Copier le code</button>
-            <button class="btn-line" onclick="pullSync(true)" data-i18n="btn_force_sync" style="margin-top:0;">Forcer la synchro</button>
-          </div>
-          <button class="btn-line" onclick="disconnectSync()" style="color:var(--red);" data-i18n="btn_disconnect_device">Déconnecter cet appareil</button>
-        </div>
-        <div id="syncStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
-      </div>
       </div>
       </div>
     </div>
@@ -1002,12 +982,9 @@ function setLang(l){
   localStorage.setItem('inv_lang', l);
   applyI18n();
   refreshAllViews();
-  queueSync();
 }
 function sidebarDisconnect(){
-  // Pas encore configuré : Helm Ops n'a pas de compte cloud séparé de la synchro Mac/iPhone.
-  // À brancher plus tard (ex. sur disconnectSync(), ou sur un futur compte utilisateur).
-  showToast(t('toast_disconnect_soon'));
+  logoutAccount();
 }
 const STATUS_KEYS = {'Enregistrée':'status_enregistree','Mise à jour':'status_maj','Envoyée':'status_envoyee','Payée':'status_payee','Toutes':'status_toutes'};
 function statusLabel(s){ return STATUS_KEYS[s] ? t(STATUS_KEYS[s]) : s; }
@@ -1053,36 +1030,23 @@ const APP_RELAY_SECRET = '364ae57df352752832e9c6cb52ad7b040740ad481628839b';
 const GOOGLE_CLIENT_ID = '227340982582-vsr5ftuqo0slrkl2k15c1lqshrl2mbpj.apps.googleusercontent.com';
 const GOOGLE_OAUTH_REDIRECT_URI = SUPABASE_URL + '/functions/v1/oauth-google-callback';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobG1xbnJ2bnJnZWFpaHJ5cmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNTQ1MjMsImV4cCI6MjA5ODczMDUyM30.ErgkAYc0mVv6iyEeIDtJ8kKaX6ExyNi4ribi_rvqX6s';
-const SYNC_TABLE = 'billops_sync';
-// pushSubscriptions n'est jamais écrit depuis le Mac (les notifs sont gérées par mobile/index.html),
-// mais doit rester listé ici : pushSync() remplace tout le blob à chaque écriture, donc l'omettre
-// effacerait silencieusement l'abonnement du téléphone à la prochaine sauvegarde depuis le Mac.
-const SYNC_KEYS = { from:'{}', gmailAuth:'{}', clients:'[]', invoices:'[]', bookings:'[]', invCounters:'{}', pushSubscriptions:'[]' };
 let sb = null;
 function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {auth:{flowType:'implicit'}}); return sb; }
-function getSyncCode(){ return localStorage.getItem('syncCode') || ''; }
 
-function collectSyncPayload(){
+// Sauvegarde manuelle (export/import fichier JSON local) — indépendante du cloud, garde une copie
+// hors-ligne des données métier + préférences.
+const BACKUP_KEYS = { from:'{}', clients:'[]', invoices:'[]', bookings:'[]', gmailAuth:'{}', pushSubscriptions:'[]' };
+function collectBackupPayload(){
   const data = {};
-  Object.keys(SYNC_KEYS).forEach(k=>{ data[k] = JSON.parse(localStorage.getItem(k) || SYNC_KEYS[k]); });
+  Object.keys(BACKUP_KEYS).forEach(k=>{ data[k] = JSON.parse(localStorage.getItem(k) || BACKUP_KEYS[k]); });
   data.inv_theme = localStorage.getItem('inv_theme') || 'auto';
   data.inv_lang = localStorage.getItem('inv_lang') || 'fr';
   return data;
 }
-function applySyncPayload(data){
-  Object.keys(SYNC_KEYS).forEach(k=>{ if(data[k]!==undefined) localStorage.setItem(k, JSON.stringify(data[k])); });
+function applyBackupPayload(data){
+  Object.keys(BACKUP_KEYS).forEach(k=>{ if(data[k]!==undefined) localStorage.setItem(k, JSON.stringify(data[k])); });
   if(data.inv_theme) localStorage.setItem('inv_theme', data.inv_theme);
   if(data.inv_lang) localStorage.setItem('inv_lang', data.inv_lang);
-}
-function updateSyncStatus(msg){ setStatusMsg(document.getElementById('syncStatus'), msg); refreshCompteView(); }
-function renderSyncUI(){
-  const code = getSyncCode();
-  const box = document.getElementById('syncCodeBox');
-  if(box) box.textContent = code || '—';
-  const c = document.getElementById('syncConnected'), n = document.getElementById('syncNotConnected');
-  if(c) c.style.display = code ? 'block' : 'none';
-  if(n) n.style.display = code ? 'none' : 'block';
-  refreshCompteView();
 }
 function relativeTime(iso){
   if(!iso) return '—';
@@ -1093,72 +1057,23 @@ function relativeTime(iso){
   if(hours < 24) return t('time_hour_ago',{n:hours});
   return t('time_day_ago',{n:Math.floor(hours/24)});
 }
-function refreshCompteView(){
+async function refreshCompteView(){
   const f = store('from');
   compteName.textContent = f.name || 'Helm Ops';
   compteAvatar.textContent = (f.name||'H').trim().charAt(0).toUpperCase();
-  const connected = !!getSyncCode();
-  compteStatus.textContent = connected ? t('compte_status_connected') : t('compte_status_disconnected');
-  viewLastSync.textContent = connected ? relativeTime(localStorage.getItem('syncLastAppliedAt')) : '—';
+  const { data:{session} } = await getSb().auth.getSession();
+  compteStatus.textContent = session ? t('compte_status_connected') : t('compte_status_disconnected');
+  const lastSync = localStorage.getItem('lastCloudSyncAt');
+  viewLastSync.textContent = lastSync ? relativeTime(lastSync) : '—';
 }
-
-let syncTimer=null, syncBusy=false;
-function queueSync(){
-  if(syncBusy || !getSyncCode()) return;
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(pushSync, 1200);
-}
-async function pushSync(){
-  const code = getSyncCode();
-  if(!code) return;
-  try{
-    const { data, error } = await getSb().from(SYNC_TABLE)
-      .upsert({ sync_code: code, data: collectSyncPayload(), updated_at: new Date().toISOString() })
-      .select('updated_at').single();
-    if(error){ updateSyncStatus(t('toast_sync_error',{msg:error.message})); return; }
-    localStorage.setItem('syncLastAppliedAt', data.updated_at);
-    updateSyncStatus(t('toast_sync_synced'));
-  }catch(e){ updateSyncStatus(t('toast_sync_error',{msg:e.message})); }
-}
-async function pullSync(force){
-  const code = getSyncCode();
-  if(!code) return;
-  try{
-    const { data: row, error } = await getSb().from(SYNC_TABLE).select('data,updated_at').eq('sync_code', code).maybeSingle();
-    if(error){ updateSyncStatus(t('toast_sync_error',{msg:error.message})); return; }
-    if(!row){ if(force) await pushSync(); return; }
-    const lastApplied = localStorage.getItem('syncLastAppliedAt');
-    if(!force && lastApplied===row.updated_at) return;
-    syncBusy = true;
-    applySyncPayload(row.data);
-    localStorage.setItem('syncLastAppliedAt', row.updated_at);
-    syncBusy = false;
-    if(lastApplied!==row.updated_at) location.reload();
-  }catch(e){ updateSyncStatus(t('toast_sync_error',{msg:e.message})); syncBusy=false; }
-}
-function genSyncCode(){
-  const bytes = crypto.getRandomValues(new Uint8Array(16));
-  const code = Array.from(bytes, b=>b.toString(16).padStart(2,'0')).join('');
-  localStorage.setItem('syncCode', code);
-  renderSyncUI();
-  pushSync();
-}
-function connectSyncCode(){
-  const code = (document.getElementById('syncCodeInput').value||'').trim();
-  if(!code){ updateSyncStatus(t('toast_sync_invalid_code')); return; }
-  localStorage.setItem('syncCode', code);
-  localStorage.removeItem('syncLastAppliedAt');
-  renderSyncUI();
-  pullSync(true);
-}
-function disconnectSync(){
-  localStorage.removeItem('syncCode');
-  localStorage.removeItem('syncLastAppliedAt');
-  renderSyncUI();
-  updateSyncStatus('');
+async function forceCloudRefresh(){
+  await hydrateFromCloud();
+  bootApp();
+  refreshCompteView();
+  showToast('✔ Synchronisé');
 }
 function exportBackup(){
-  const blob = new Blob([JSON.stringify(collectSyncPayload(), null, 2)], {type:'application/json'});
+  const blob = new Blob([JSON.stringify(collectBackupPayload(), null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -1174,7 +1089,7 @@ function importBackup(input){
   reader.onload = ()=>{
     try{
       const data = JSON.parse(reader.result);
-      applySyncPayload(data);
+      applyBackupPayload(data);
       setStatusMsg(document.getElementById('backupStatus'), t('toast_backup_imported'));
       setTimeout(()=>location.reload(), 800);
     }catch(e){ setStatusMsg(document.getElementById('backupStatus'), t('toast_backup_invalid',{msg:e.message})); }
@@ -1182,17 +1097,10 @@ function importBackup(input){
   reader.readAsText(file);
   input.value = '';
 }
-function copySyncCode(){
-  const code = getSyncCode();
-  if(!code) return;
-  navigator.clipboard?.writeText(code);
-  updateSyncStatus(t('toast_code_copied'));
-}
 
 function setTheme(mode){
   localStorage.setItem('inv_theme',mode);
   applyTheme();
-  queueSync();
 }
 function applyTheme(){
   const theme = localStorage.getItem('inv_theme')||'auto';
@@ -1213,7 +1121,7 @@ applyTheme();
 
 const store = k => JSON.parse(localStorage.getItem(k) || '{}');
 const storeArr = k => JSON.parse(localStorage.getItem(k) || '[]');
-const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueSync(); queueCloudPush(k); };
+const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueCloudPush(k); };
 
 // --- Stockage cloud (remplace localStorage comme source de vérité) ---
 // store()/storeArr() ne changent pas : elles restent la lecture synchrone habituelle, localStorage
@@ -1348,6 +1256,7 @@ async function hydrateFromCloud(isRetry){
   localStorage.setItem('bookings', nextBookings);
   localStorage.setItem('invoices', nextInvoices);
   if(companyRes.data) localStorage.setItem('from', JSON.stringify(fromDbRow('from', companyRes.data)));
+  localStorage.setItem('lastCloudSyncAt', new Date().toISOString());
   return changed;
 }
 async function refreshFromCloudIfIdle(){
@@ -2654,11 +2563,8 @@ async function sendInvoice(){
 applyI18n();
 function bootApp(){
   loadFrom(); renderGmailUI(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
-  renderSyncUI();
-  if(getSyncCode()) pullSync(false);
+  refreshCompteView();
 }
-setInterval(()=>{ if(getSyncCode()) pullSync(false); }, 60000);
-document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && getSyncCode()) pullSync(false); });
 setInterval(refreshFromCloudIfIdle, 60000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') refreshFromCloudIfIdle(); });
 bootAuth();
