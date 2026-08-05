@@ -556,7 +556,9 @@ async function enableNotifications(){
     const subJson = sub.toJSON();
     const subs = storeArr('pushSubscriptions').filter(s=>s.endpoint!==subJson.endpoint);
     subs.push(subJson);
-    set('pushSubscriptions', subs);
+    localStorage.setItem('pushSubscriptions', JSON.stringify(subs));
+    const { data:{session} } = await getSb().auth.getSession();
+    if(session) await getSb().from('push_subscriptions').upsert({ endpoint: subJson.endpoint, user_id: session.user.id, subscription: subJson });
     showToast('✔ Notifications activées.');
   }catch(e){ showToast('✕ Erreur : '+e.message); }
 }

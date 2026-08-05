@@ -6,7 +6,8 @@ Neuf fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill
   de relais SMTP centralisé, abandonnés ; remplace aussi `send-invoice-server.js`, jamais hébergé,
   devenu une référence obsolète). Chaque utilisateur connecte son propre compte Gmail une fois
   (bouton "Connecter mon Gmail"), le `refresh_token` obtenu est stocké côté client (`gmailAuth`,
-  syncé) et envoyé à chaque appel. URL codée en dur dans `facture.html`/`mobile/index.html`
+  **pas synchronisé entre appareils depuis le retrait du code de synchro**, voir `CLAUDE.md`) et
+  envoyé à chaque appel. URL codée en dur dans `facture.html`/`mobile/index.html`
   (constante `SEND_INVOICE_URL`, dérivée de `SUPABASE_URL`) :
   `https://chlmqnrvnrgeaihryreb.supabase.co/functions/v1/send-invoice`
 - **`oauth-google-callback`** — reçoit le `code` OAuth après consentement Google, l'échange contre
@@ -15,9 +16,12 @@ Neuf fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill
   `oauth-google-callback` (la CSP des Edge Functions bloque le `postMessage()` direct depuis la
   page de callback, d'où ce détour). Voir la section "Envoi de factures" de `CLAUDE.md` pour le
   détail du flux.
-- **`notify-upcoming-bookings`** — rappel push ~15 min avant le début d'une presta pointée.
-  Planifié via `pg_cron` toutes les 3 minutes (job `notify-upcoming-bookings`, voir
-  `select * from cron.job;`).
+- **`notify-upcoming-bookings`** — rappel push ~15 min avant le début d'une presta pointée. Lit
+  directement les tables `bookings`/`push_subscriptions` (voir plus bas) depuis le 2026-08-05 —
+  avant ça lisait/écrivait tout dans `billops_sync`, migré en même temps que le reste pour ne pas
+  arrêter de fonctionner silencieusement une fois le code de synchro retiré côté client. Planifié
+  via `pg_cron` toutes les 3 minutes (job `notify-upcoming-bookings`, voir `select * from
+  cron.job;`).
 - **`check-access`** — GET, bearer token Supabase Auth. Résout l'utilisateur, lit la dernière
   ligne `subscriptions`, retourne `{allowed, status, plan, period, expiresAt}` (`allowed` basé sur
   `expires_at > now`, pas sur `status` seul — accès conservé jusqu'à fin de période après
@@ -56,6 +60,19 @@ service role key, utilisée par les deux fonctions `oauth-google-*`) ; purge aut
 > 10 min faite par `oauth-google-callback` à chaque appel, et suppression immédiate dès lecture par
 `oauth-google-poll` (usage unique).
 
+## Tables `clients` / `bookings` / `invoices` / `company_info` / `push_subscriptions`
+Stockage cloud par utilisateur (voir la section "Stockage cloud" de `CLAUDE.md` pour le détail
+du flux — migration, hydrateFromCloud, flags par clé). Toutes scindées par `user_id
+references auth.users(id)`, RLS complète select/insert/update/delete `using (auth.uid() =
+user_id)` — contrairement à `profiles`/`subscriptions`, ces tables sont écrites directement par
+le client via son JWT de session, pas par une Edge Function. `push_subscriptions` a `endpoint`
+comme clé primaire (identifiant naturel côté navigateur), pas de policy update (juste
+select/insert/delete). Migrations : `supabase/migrations/20260805122943_cloud_storage.sql` et
+`20260805131409_push_subscriptions.sql`.
+Remplace l'ancienne table `billops_sync` (blob JSON unique par "code de synchro", sans notion de
+compte) — celle-ci existe toujours côté Supabase mais n'est plus lue/écrite par le client ni par
+`notify-upcoming-bookings`.
+
 ## Tables `profiles` / `subscriptions` / `login_relay`
 Login Google + abonnement Stripe (voir la section dédiée dans `CLAUDE.md` pour le flux complet).
 `profiles` (`id, email, full_name, avatar_url`) est remplie automatiquement par un trigger
@@ -73,25 +90,31 @@ Migration versionnée : `supabase/migrations/20260804102232_login_paywall.sql`.
 `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` sont injectés automatiquement par Supabase dans toute
 Edge Function.
 
-**Restent à poser** (bloquent `check-access`/`stripe-checkout`/`stripe-webhook` tant qu'ils sont
-absents) : `STRIPE_SECRET_KEY` (même compte Stripe que BAR OPS), `STRIPE_WEBHOOK_SECRET` (signing
-secret de l'endpoint webhook **dédié à Helm**, créé séparément de celui de BAR OPS même si le
-compte est le même), `STRIPE_PRICE_ID_MONTHLY` (Price ID du produit "Helm Ops" à créer dans ce
-compte, 9,90 €/mois placeholder). Une fois obtenus depuis le dashboard Stripe :
+`STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET`/`STRIPE_PRICE_ID_MONTHLY` sont posés et fonctionnels
+depuis le 2026-08-05 (login/abonnement vérifié en usage réel) — **en mode Stripe Test**. Pour
+passer en Live : recréer le produit/prix "Helm Ops" et l'endpoint webhook en mode Live dans le
+même compte Stripe (que BAR OPS), puis reposer les 3 secrets avec les valeurs Live :
 
 ```
-npx supabase secrets set STRIPE_SECRET_KEY=<clé secrète du compte Stripe> \
-  STRIPE_WEBHOOK_SECRET=<signing secret de l'endpoint Helm> \
-  STRIPE_PRICE_ID_MONTHLY=<price id du produit Helm Ops>
+npx supabase secrets set STRIPE_SECRET_KEY=<clé secrète live> \
+  STRIPE_WEBHOOK_SECRET=<signing secret live de l'endpoint Helm> \
+  STRIPE_PRICE_ID_MONTHLY=<price id live du produit Helm Ops>
 ```
 
-Manque aussi côté Supabase Dashboard (`chlmqnrvnrgeaihryreb`) : Authentication → Providers →
-Google (activer, avec le même Client ID/Secret que `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`) ;
-Authentication → URL Configuration → ajouter `https://spectre888.github.io/Bill-ops-/` et
-`https://spectre888.github.io/Bill-ops-/oauth-relay.html` aux redirect URLs autorisées (sans ça,
-Supabase rejette silencieusement le `redirectTo` demandé). Et côté Google Cloud Console : ajouter
-`https://chlmqnrvnrgeaihryreb.supabase.co/auth/v1/callback` comme second "Authorized redirect URI"
-sur le client OAuth déjà utilisé pour Gmail-send (pas besoin d'en créer un second).
+⚠️ Le webhook Stripe n'est pas filtré par produit — la destination Helm reçoit tous les events des
+types écoutés sur l'ensemble du compte, y compris ceux de BAR OPS. `stripe-checkout` tague chaque
+abonnement Helm avec `metadata.app='helm'` et `stripe-webhook` ignore tout ce qui n'a pas ce
+marqueur (voir le commentaire en tête de `supabase/functions/stripe-webhook/index.ts`) — pas
+vérifié côté BAR OPS que leur webhook fait de même avec les events Helm.
+
+Côté Supabase Dashboard (`chlmqnrvnrgeaihryreb`), déjà configuré : Authentication → Providers →
+Google (Client ID/Secret = `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`) ; Authentication → URL
+Configuration → `https://spectre888.github.io/Bill-ops-/**` et
+`https://spectre888.github.io/Bill-ops-/oauth-relay.html**` dans les redirect URLs autorisées (le
+wildcard `**` est nécessaire — le `redirectTo` du flux desktop porte un `?state=...` dynamique qui
+ne matche pas une entrée sans wildcard, Supabase retombe alors silencieusement sur le Site URL par
+défaut du projet). Et côté Google Cloud Console : `https://chlmqnrvnrgeaihryreb.supabase.co/auth/v1/callback`
+ajouté comme second "Authorized redirect URI" sur le client OAuth déjà utilisé pour Gmail-send.
 
 `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` viennent d'un identifiant OAuth "Web application" créé
 dans Google Cloud Console (API activée : Gmail API), avec comme URI de redirection autorisée
@@ -137,7 +160,8 @@ npx supabase db query --linked "select status_code, created, left(content::text,
 
 # Test manuel de notify-upcoming-bookings (remplacer <CRON_SECRET>)
 curl -i -X POST 'https://chlmqnrvnrgeaihryreb.supabase.co/functions/v1/notify-upcoming-bookings' -H 'x-cron-secret: <CRON_SECRET>'
-
-# Logs d'une fonction
-npx supabase functions logs notify-upcoming-bookings
 ```
+
+`npx supabase functions logs <nom>` n'existe plus dans les versions récentes de la CLI
+(`supabase functions` n'a que `list/delete/download/deploy/new/serve`) — passer par le Dashboard
+(Edge Functions → la fonction → Logs) pour consulter les logs runtime.
