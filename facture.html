@@ -105,15 +105,14 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .btn-gold:active{transform:scale(.98);}
 .btn-line{background:transparent;border:1px solid var(--border);color:var(--text2);margin-top:6px;}
 .btn-line:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-bg);}
-/* margin-top:6px ci-dessus est pensé pour un bouton isolé sous un label/champ — dans une rangée
-   flex (.row), cette marge grignote la hauteur du bouton par rapport à ses voisins sans marge
-   (ex. .btn-gold), le rendant visiblement plus petit malgré un stretch flex identique. */
-.row .btn-line{margin-top:0;}
-/* Bouton "Annuler" du modal de confirmation : même gabarit exact que le contour standard
-   (aucune différence de taille), mais rempli pour peser visuellement autant que le bouton doré
-   à côté — un contour fin à côté d'un bouton plein paraît toujours plus petit à l'œil. */
-#confirmModal .btn-line{background:var(--surface3);border-color:var(--border2);color:var(--text);}
-#confirmModal .btn-line:hover{background:var(--border2);border-color:var(--border2);color:var(--text);}
+/* Rangées d'actions groupées (.row, .dash-actions) mêlant .btn-gold (action principale, plein)
+   et .btn-line (action secondaire, contour) : le margin-top:6px de .btn-line — pensé pour un
+   bouton isolé sous un label/champ — grignote sa hauteur dans une rangée flex par rapport à ses
+   voisins sans marge, et son contour fin à côté d'un bouton plein paraît toujours plus petit à
+   l'œil même à taille égale. On neutralise la marge et on donne un fond neutre plein pour peser
+   visuellement autant que le bouton doré à côté. */
+.row .btn-line,.dash-actions .btn-line{margin-top:0;background:var(--surface3);border-color:var(--border2);color:var(--text);}
+.row .btn-line:hover,.dash-actions .btn-line:hover{background:var(--border2);border-color:var(--border2);color:var(--text);}
 .row{display:flex;gap:6px;}
 .row>*{flex:1;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
