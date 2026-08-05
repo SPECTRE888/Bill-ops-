@@ -266,7 +266,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <div class="mcard">
         <b>Mon compte</b><br>
         <p style="color:var(--text2);font-size:12px;margin:6px 0 10px;" id="accountEmail"></p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div class="row" style="flex-wrap:wrap;">
           <button class="btn-line" onclick="openBillingPortal()">Gérer mon abonnement</button>
           <button class="btn-line" style="color:var(--red);" onclick="logoutAccount()">Se déconnecter</button>
         </div>
@@ -291,9 +291,9 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
           <label>Mention RCS/RM</label><input id="fromRcs">
           <label>Mode de règlement</label><input id="fromPay">
           <label>RIB / IBAN</label><textarea id="fromRib" rows="2" placeholder="IBAN + BIC"></textarea>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="btn-gold" style="flex:1;" onclick="saveFromMobile()">Enregistrer</button>
-            <button class="btn-line" style="flex:1;" onclick="toggleFromEditMobile(false)">Annuler</button>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn-gold" onclick="saveFromMobile()">Enregistrer</button>
+            <button class="btn-line" onclick="toggleFromEditMobile(false)">Annuler</button>
           </div>
           <div id="fromStatusMobile" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
         </div>
@@ -313,7 +313,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <div class="mcard">
         <b>Notifications</b><br>
         <span id="notifDiagStatus"></span>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <div class="row" style="margin-top:10px;flex-wrap:wrap;">
           <button class="btn-line" onclick="enableNotifications()">Activer</button>
           <button class="btn-line" onclick="testLocalNotification()">Tester en local</button>
         </div>
@@ -393,8 +393,8 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
   <div class="modal-box" style="text-align:center;">
     <p id="confirmModalMsg" style="font-size:14px;color:var(--text);margin:0 0 20px;"></p>
     <div class="row">
-      <button class="btn-line action-btn" onclick="confirmModalResolve(false)">Annuler</button>
-      <button class="btn-gold action-btn" id="confirmModalOkBtn" onclick="confirmModalResolve(true)">Confirmer</button>
+      <button class="btn-line" onclick="confirmModalResolve(false)">Annuler</button>
+      <button class="btn-gold" id="confirmModalOkBtn" onclick="confirmModalResolve(true)">Confirmer</button>
     </div>
   </div>
 </div>
