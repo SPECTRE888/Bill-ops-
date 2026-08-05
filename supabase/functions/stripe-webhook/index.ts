@@ -3,6 +3,12 @@
 // `expires_at` est lu directement depuis `current_period_end` de l'objet Subscription — pas
 // d'appel Stripe supplémentaire. Un abonnement annulé garde `expires_at` tel quel : l'accès
 // continue jusqu'à la fin de la période déjà payée (voir check-access).
+//
+// Important : les webhooks Stripe ne sont pas filtrés par produit — cette destination reçoit
+// TOUS les events des types écoutés sur l'ensemble du compte, y compris ceux générés par BAR OPS
+// (même compte Stripe, décision explicite pour simplifier les paiements). On ignore donc tout
+// abonnement qui n'a pas metadata.app==='helm' (posé par stripe-checkout) pour ne jamais créer de
+// ligne pour un abonnement qui n'appartient pas à Helm.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import Stripe from 'npm:stripe@17';
@@ -21,6 +27,7 @@ function mapStatus(stripeStatus: string): 'active' | 'past_due' | 'cancelled' {
 }
 
 async function upsertFromSubscription(supabase: ReturnType<typeof createClient>, sub: Stripe.Subscription) {
+  if (sub.metadata?.app !== 'helm') return; // event d'un autre produit du même compte Stripe (ex. BAR OPS) — ignoré
   const userId = sub.metadata?.user_id;
   if (!userId) return;
   const row = {

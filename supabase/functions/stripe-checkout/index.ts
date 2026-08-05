@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
   try {
     if (action === 'subscribe') {
       if (!customerId) {
-        const customer = await stripeRequest('customers', { email: user.email || '', 'metadata[user_id]': user.id });
+        const customer = await stripeRequest('customers', { email: user.email || '', 'metadata[user_id]': user.id, 'metadata[app]': 'helm' });
         customerId = customer.id;
       }
       const session = await stripeRequest('checkout/sessions', {
@@ -73,7 +73,12 @@ Deno.serve(async (req) => {
         'line_items[0][price]': STRIPE_PRICE_ID_MONTHLY,
         'line_items[0][quantity]': '1',
         client_reference_id: user.id,
+        // 'app':'helm' est le marqueur que stripe-webhook utilise pour ignorer les events des
+        // autres produits du même compte Stripe (ex. BAR OPS) — les webhooks Stripe ne sont pas
+        // filtrés par produit, une destination reçoit tous les events du type écouté sur tout le
+        // compte, il faut donc filtrer soi-même côté code.
         'subscription_data[metadata][user_id]': user.id,
+        'subscription_data[metadata][app]': 'helm',
         success_url: APP_URL,
         cancel_url: APP_URL,
       });
