@@ -26,14 +26,26 @@ function mapStatus(stripeStatus: string): 'active' | 'past_due' | 'cancelled' {
   return 'cancelled';
 }
 
+function getCurrentPeriodEnd(sub: Stripe.Subscription): number | undefined {
+  // Depuis les versions récentes de l'API Stripe, current_period_end n'est plus à la racine de
+  // l'objet Subscription (déplacé au niveau de chaque subscription item, pour gérer plusieurs
+  // prix par abonnement) — on essaie les deux emplacements.
+  const legacy = (sub as unknown as { current_period_end?: number }).current_period_end;
+  if (typeof legacy === 'number') return legacy;
+  const itemPeriodEnd = sub.items?.data?.[0]?.current_period_end;
+  return typeof itemPeriodEnd === 'number' ? itemPeriodEnd : undefined;
+}
+
 async function upsertFromSubscription(supabase: ReturnType<typeof createClient>, sub: Stripe.Subscription) {
   if (sub.metadata?.app !== 'helm') return; // event d'un autre produit du même compte Stripe (ex. BAR OPS) — ignoré
   const userId = sub.metadata?.user_id;
   if (!userId) return;
+  const periodEnd = getCurrentPeriodEnd(sub);
+  if (!periodEnd) throw new Error('current_period_end introuvable sur la Subscription Stripe.');
   const row = {
     user_id: userId,
     status: mapStatus(sub.status),
-    expires_at: new Date(sub.current_period_end * 1000).toISOString(),
+    expires_at: new Date(periodEnd * 1000).toISOString(),
     stripe_customer_id: typeof sub.customer === 'string' ? sub.customer : sub.customer.id,
     stripe_subscription_id: sub.id,
     updated_at: new Date().toISOString(),
