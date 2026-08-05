@@ -1213,7 +1213,123 @@ applyTheme();
 
 const store = k => JSON.parse(localStorage.getItem(k) || '{}');
 const storeArr = k => JSON.parse(localStorage.getItem(k) || '[]');
-const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueSync(); };
+const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueSync(); queueCloudPush(k); };
+
+// --- Stockage cloud (remplace localStorage comme source de vérité) ---
+// store()/storeArr() ne changent pas : elles restent la lecture synchrone habituelle, localStorage
+// devient un cache hydraté depuis Supabase plutôt que la donnée elle-même. set() écrit toujours
+// immédiatement en local (UI instantanée), puis pousse en tâche de fond vers la table Supabase
+// correspondante (debounce, comme l'ancien queueSync() mais table par table).
+const CLOUD_TABLES = { clients:'clients', bookings:'bookings', invoices:'invoices' };
+function toDbRow(k, obj, uid){
+  if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr };
+  if(k==='bookings') return { id:obj.id, user_id:uid, client:obj.client, label:obj.label, addr:obj.addr, contact:obj.contact, date:obj.date, time_from:obj.from, time_to:obj.to, hours:obj.hours, rate:obj.rate, status:obj.status, checked_in_at:obj.checkedInAt||null, checked_out_at:obj.checkedOutAt||null, actual_hours:obj.actualHours||null, notified_at:obj.notifiedAt||null };
+  if(k==='invoices') return { id:obj.id, user_id:uid, num:obj.num, client:obj.client, date:obj.date, work_date:obj.workDate, total:obj.total, status:obj.status, state:obj.state, html:obj.html, booking_id:obj.bookingId||null, booking_ids:obj.bookingIds||null };
+  if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib };
+}
+function fromDbRow(k, row){
+  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr };
+  if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
+  if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:row.total, status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
+  if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib };
+}
+const cloudPushTimers = {}, cloudPushBusy = {};
+function queueCloudPush(k){
+  if(!CLOUD_TABLES[k] && k!=='from') return;
+  clearTimeout(cloudPushTimers[k]);
+  cloudPushTimers[k] = setTimeout(()=>pushCloudKey(k), 1200);
+}
+async function pushCloudKey(k){
+  if(cloudPushBusy[k]){ cloudPushTimers[k] = setTimeout(()=>pushCloudKey(k), 1200); return; }
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return;
+  cloudPushBusy[k] = true;
+  try{
+    if(k==='from'){
+      const obj = store('from');
+      if(Object.keys(obj).length) await getSb().from('company_info').upsert(toDbRow('from', obj, session.user.id));
+    } else {
+      const table = CLOUD_TABLES[k];
+      const localArr = storeArr(k).filter(x=>x.id);
+      const { data: existing } = await getSb().from(table).select('id').eq('user_id', session.user.id);
+      const existingIds = new Set((existing||[]).map(r=>r.id));
+      const localIds = new Set(localArr.map(x=>x.id));
+      const toDelete = [...existingIds].filter(id=>!localIds.has(id));
+      const rows = localArr.map(x=>toDbRow(k, x, session.user.id));
+      if(rows.length) await getSb().from(table).upsert(rows);
+      if(toDelete.length) await getSb().from(table).delete().in('id', toDelete);
+    }
+  }catch(e){ /* la prochaine écriture locale retentera */ }
+  cloudPushBusy[k] = false;
+}
+async function migrateLocalToCloud(uid){
+  const clients = storeArr('clients');
+  const bookings = storeArr('bookings');
+  const invoices = storeArr('invoices');
+  const from = store('from');
+  const idMap = {};
+  clients.forEach(c=>{ if(!c.id) c.id = crypto.randomUUID(); });
+  bookings.forEach(b=>{
+    if(!b.id || typeof b.id !== 'string'){ const newId = crypto.randomUUID(); idMap[b.id] = newId; b.id = newId; }
+  });
+  invoices.forEach(inv=>{
+    if(!inv.id) inv.id = crypto.randomUUID();
+    if(inv.bookingId && idMap[inv.bookingId]) inv.bookingId = idMap[inv.bookingId];
+    if(Array.isArray(inv.bookingIds)) inv.bookingIds = inv.bookingIds.map(id=>idMap[id]||id);
+  });
+  try{
+    if(clients.length) await getSb().from('clients').insert(clients.map(c=>toDbRow('clients',c,uid)));
+    if(bookings.length) await getSb().from('bookings').insert(bookings.map(b=>toDbRow('bookings',b,uid)));
+    if(invoices.length) await getSb().from('invoices').insert(invoices.map(i=>toDbRow('invoices',i,uid)));
+    if(Object.keys(from).length) await getSb().from('company_info').upsert(toDbRow('from', from, uid));
+    localStorage.setItem('clients', JSON.stringify(clients));
+    localStorage.setItem('bookings', JSON.stringify(bookings));
+    localStorage.setItem('invoices', JSON.stringify(invoices));
+    localStorage.setItem('cloudMigrated', '1');
+  }catch(e){
+    showToast('✕ Échec de la migration vers le cloud, nouvelle tentative au prochain démarrage.');
+  }
+}
+async function hydrateFromCloud(){
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return false;
+  const uid = session.user.id;
+  const [clientsRes, bookingsRes, invoicesRes, companyRes] = await Promise.all([
+    getSb().from('clients').select('*').eq('user_id',uid),
+    getSb().from('bookings').select('*').eq('user_id',uid),
+    getSb().from('invoices').select('*').eq('user_id',uid),
+    getSb().from('company_info').select('*').eq('user_id',uid).maybeSingle(),
+  ]);
+  const hasCloudData = (clientsRes.data?.length||0) + (bookingsRes.data?.length||0) + (invoicesRes.data?.length||0) > 0;
+  if(hasCloudData){
+    const nextClients = JSON.stringify((clientsRes.data||[]).map(r=>fromDbRow('clients',r)));
+    const nextBookings = JSON.stringify((bookingsRes.data||[]).map(r=>fromDbRow('bookings',r)));
+    const nextInvoices = JSON.stringify((invoicesRes.data||[]).map(r=>fromDbRow('invoices',r)));
+    const changed = nextClients!==localStorage.getItem('clients') || nextBookings!==localStorage.getItem('bookings') || nextInvoices!==localStorage.getItem('invoices');
+    localStorage.setItem('clients', nextClients);
+    localStorage.setItem('bookings', nextBookings);
+    localStorage.setItem('invoices', nextInvoices);
+    if(companyRes.data) localStorage.setItem('from', JSON.stringify(fromDbRow('from', companyRes.data)));
+    localStorage.setItem('cloudMigrated', '1');
+    return changed;
+  }
+  const localHasData = storeArr('clients').length || storeArr('bookings').length || storeArr('invoices').length;
+  if(localHasData && localStorage.getItem('cloudMigrated')!=='1'){
+    showToast('⏳ Migration de tes données vers le cloud…');
+    await migrateLocalToCloud(uid);
+  } else {
+    localStorage.setItem('cloudMigrated', '1');
+  }
+  return false;
+}
+async function refreshFromCloudIfIdle(){
+  if(Object.values(cloudPushTimers).some(t=>t)) return; // écriture en attente, ne pas écraser
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return;
+  const changed = await hydrateFromCloud();
+  if(changed) location.reload();
+}
+
 const invoiceAmt = i => parseFloat((i.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
 // Mois (YYYY-MM) auquel rattacher le CA d'une facture : basé sur la date de la prestation
 // (première date de la première ligne datée), pas sur la date d'émission de la facture —
@@ -1409,6 +1525,7 @@ async function bootAuth(){
   if(emailEl) emailEl.textContent = access.session.user.email || '';
   if(!access.allowed){ showAuthGate('paywall'); return; }
   showAuthGate(null);
+  await hydrateFromCloud();
   bootApp();
 }
 function toggleInfoEdit(show){
@@ -1484,7 +1601,7 @@ function saveClient(){
   }
   const clients = storeArr('clients');
   const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value};
-  if(cliIdx.value!=='') clients[cliIdx.value]=c; else clients.push(c);
+  if(cliIdx.value!==''){ c.id = clients[cliIdx.value]?.id || crypto.randomUUID(); clients[cliIdx.value]=c; } else { c.id = crypto.randomUUID(); clients.push(c); }
   set('clients', clients);
   resetClientForm(); renderClientList(); refreshClientSelect();
 }
@@ -1636,6 +1753,7 @@ function saveToHistory(status){
     render();
   }
   const entry = {
+    id: idx>=0 ? (invoices[idx].id || crypto.randomUUID()) : crypto.randomUUID(),
     num: invNum.value,
     client: c.name,
     date: invDate.value,
@@ -1901,12 +2019,10 @@ function peekInvoiceNumber(prefix){
   return computeNextInvoiceNumber(prefix).candidate;
 }
 // Réserve réellement le prochain numéro (à appeler seulement au moment de l'enregistrement effectif).
+// Le "compteur" n'existe plus comme donnée séparée : computeNextInvoiceNumber() scanne déjà
+// directement les factures existantes (source de vérité unique, cloud via storeArr('invoices')).
 function nextInvoiceNumber(prefix){
-  const { key, next, candidate } = computeNextInvoiceNumber(prefix);
-  const counters = store('invCounters');
-  counters[key] = next;
-  set('invCounters', counters);
-  return candidate;
+  return computeNextInvoiceNumber(prefix).candidate;
 }
 
 let calDate = new Date();
@@ -1975,8 +2091,8 @@ function renderCalDayPanel(){
         ${(b.addr||b.contact) ? `<br><span style="font-size:11px;color:var(--text2);">${[b.addr,b.contact].filter(Boolean).join(' · ')}</span>` : ''}
       </span>
       <span>
-        <button class="btn-line" onclick="editBooking(${b.id})">${t('btn_edit')}</button>
-        <button class="btn-line" onclick="deleteBooking(${b.id})">${t('btn_delete_short')}</button>
+        <button class="btn-line" onclick="editBooking('${b.id}')">${t('btn_edit')}</button>
+        <button class="btn-line" onclick="deleteBooking('${b.id}')">${t('btn_delete_short')}</button>
       </span>
     </div>`).join('');
   bkDayPanel.innerHTML = `<div class="cal-day-panel">${rows || `<p style="color:var(--text3);font-size:11px;margin:2px 0;">${t('empty_day')}</p>`}
@@ -2005,11 +2121,11 @@ function addBooking(){
   const bookings = storeArr('bookings');
   const editId = bkEditId.value;
   if(editId){
-    const b = bookings.find(x=>x.id===Number(editId));
+    const b = bookings.find(x=>x.id===editId);
     if(b){ Object.assign(b, {client:bkClient.value,label:bkLabel.value,addr:bkAddr.value,contact:bkContact.value,date:bkDate.value,from:bkFrom.value,to:bkTo.value,hours,rate:parseFloat(bkRate.value)||0}); }
     showToast(t('toast_booking_updated'));
   } else {
-    bookings.push({id:Date.now(),client:bkClient.value,label:bkLabel.value,addr:bkAddr.value,contact:bkContact.value,date:bkDate.value,from:bkFrom.value,to:bkTo.value,hours,rate:parseFloat(bkRate.value)||0,status:'à facturer'});
+    bookings.push({id:crypto.randomUUID(),client:bkClient.value,label:bkLabel.value,addr:bkAddr.value,contact:bkContact.value,date:bkDate.value,from:bkFrom.value,to:bkTo.value,hours,rate:parseFloat(bkRate.value)||0,status:'à facturer'});
   }
   set('bookings',bookings);
   cancelEditBooking();
@@ -2150,9 +2266,9 @@ function renderAccueil(){
     <div class="acc-row">
       <span class="cal-dot" style="background:${clientColor(b.client)};"></span>
       <div class="acc-info"><b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' · '+b.from+'-'+b.to:''} · <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span></div>
-      <button class="btn-line" onclick="viewBooking(${b.id})">${t('btn_view')}</button>
-      <button class="btn-line" onclick="editBooking(${b.id})">${t('btn_edit')}</button>
-      <button class="btn-line" onclick="deleteBooking(${b.id})">${t('btn_delete_short')}</button>
+      <button class="btn-line" onclick="viewBooking('${b.id}')">${t('btn_view')}</button>
+      <button class="btn-line" onclick="editBooking('${b.id}')">${t('btn_edit')}</button>
+      <button class="btn-line" onclick="deleteBooking('${b.id}')">${t('btn_delete_short')}</button>
     </div>`;
   });
   accList.innerHTML = html;
@@ -2175,14 +2291,14 @@ function renderPlanning(){
     const h = b.actualHours ?? b.hours;
     return `
     <div class="client-card" style="display:flex;gap:8px;align-items:flex-start;">
-      <input type="checkbox" style="margin-top:4px;flex-shrink:0;" ${groupSelection.has(b.id)?'checked':''} onchange="toggleGroupSelect(${b.id}, this.checked)">
+      <input type="checkbox" style="margin-top:4px;flex-shrink:0;" ${groupSelection.has(b.id)?'checked':''} onchange="toggleGroupSelect('${b.id}', this.checked)">
       <div style="flex:1;min-width:0;">
         <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date?formatFrDate(b.date):t('sans_date')}${b.from&&b.to?' '+t('lbl_de').toLowerCase()+' '+b.from+' '+t('lbl_a').toLowerCase()+' '+b.to:''}<br>
         ${b.checkedInAt&&b.checkedOutAt?`${t('pointe_prefix')}${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · `:''}${h}h × ${b.rate}€ = <span class="tag">${(h*b.rate).toFixed(2)} €</span><br>
-        <button class="btn-line" onclick="invoiceBooking(${b.id})">${t('btn_invoice')}</button>
-        <button class="btn-line" onclick="viewBooking(${b.id})">${t('btn_view')}</button>
-        <button class="btn-line" onclick="editBooking(${b.id})">${t('btn_edit')}</button>
-        <button class="btn-line" onclick="deleteBooking(${b.id})">${t('btn_delete')}</button>
+        <button class="btn-line" onclick="invoiceBooking('${b.id}')">${t('btn_invoice')}</button>
+        <button class="btn-line" onclick="viewBooking('${b.id}')">${t('btn_view')}</button>
+        <button class="btn-line" onclick="editBooking('${b.id}')">${t('btn_edit')}</button>
+        <button class="btn-line" onclick="deleteBooking('${b.id}')">${t('btn_delete')}</button>
       </div>
     </div>`;
   }).join('') : `<p style="color:var(--text3);font-size:12px;">${t('empty_facturer')}</p>`;
@@ -2515,6 +2631,8 @@ function bootApp(){
 }
 setInterval(()=>{ if(getSyncCode()) pullSync(false); }, 60000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && getSyncCode()) pullSync(false); });
+setInterval(refreshFromCloudIfIdle, 60000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') refreshFromCloudIfIdle(); });
 bootAuth();
 </script>
 </body>
