@@ -268,7 +268,9 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <h2>Réglages</h2>
       <div class="mcard">
         <b>Mon compte</b><br>
-        <p style="color:var(--text2);font-size:12px;margin:6px 0 10px;" id="accountEmail"></p>
+        <p style="color:var(--text2);font-size:12px;margin:6px 0 2px;" id="accountEmail"></p>
+        <p style="color:var(--text2);font-size:12px;margin:0 0 2px;" id="accountPlan"></p>
+        <p style="color:var(--text2);font-size:12px;margin:0 0 10px;" id="accountRenewal"></p>
         <div class="row" style="flex-wrap:wrap;">
           <button class="btn-line" onclick="openBillingPortal()">Gérer mon abonnement</button>
           <button class="btn-line" style="color:var(--red);" onclick="logoutAccount()">Se déconnecter</button>
@@ -505,6 +507,16 @@ async function checkAccess(){
     return {loggedIn:true, session, allowed:false, error:'network'};
   }
 }
+function renderAccountCard(access){
+  const statusLabels = {active:'Actif', past_due:'Paiement en retard', cancelled:"Annulé (actif jusqu'au renouvellement)"};
+  const periodLabels = {monthly:'mensuel', yearly:'annuel'};
+  const emailEl = document.getElementById('accountEmail');
+  const planEl = document.getElementById('accountPlan');
+  const renewalEl = document.getElementById('accountRenewal');
+  if(emailEl) emailEl.textContent = access.session?.user?.email || '';
+  if(planEl) planEl.textContent = access.plan ? 'Formule : '+access.plan.charAt(0).toUpperCase()+access.plan.slice(1)+' — '+(periodLabels[access.period]||access.period)+' ('+(statusLabels[access.status]||access.status)+')' : '';
+  if(renewalEl) renewalEl.textContent = access.expiresAt ? 'Renouvellement le '+new Date(access.expiresAt).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : '';
+}
 
 async function subscribeNow(){
   const { data:{session} } = await getSb().auth.getSession();
@@ -537,12 +549,12 @@ async function bootApp(){
     showAuthGate('login');
     return;
   }
-  document.getElementById('accountEmail').textContent = access.session.user.email || '';
   if(!access.allowed){
     showAuthGate('paywall');
     return;
   }
   showAuthGate(null);
+  renderAccountCard(access);
   await hydrateFromCloud();
   applyTheme();
   document.getElementById('appShell').style.display = 'flex';
