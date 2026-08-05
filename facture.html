@@ -1224,13 +1224,15 @@ const CLOUD_TABLES = { clients:'clients', bookings:'bookings', invoices:'invoice
 function toDbRow(k, obj, uid){
   if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr };
   if(k==='bookings') return { id:obj.id, user_id:uid, client:obj.client, label:obj.label, addr:obj.addr, contact:obj.contact, date:obj.date, time_from:obj.from, time_to:obj.to, hours:obj.hours, rate:obj.rate, status:obj.status, checked_in_at:obj.checkedInAt||null, checked_out_at:obj.checkedOutAt||null, actual_hours:obj.actualHours||null, notified_at:obj.notifiedAt||null };
-  if(k==='invoices') return { id:obj.id, user_id:uid, num:obj.num, client:obj.client, date:obj.date, work_date:obj.workDate, total:obj.total, status:obj.status, state:obj.state, html:obj.html, booking_id:obj.bookingId||null, booking_ids:obj.bookingIds||null };
+  // total est stocké localement comme une chaîne formatée ("2652.00 €"), mais la colonne cloud
+  // est numeric — on la parse ici (même logique que invoiceAmt()) et on la reformate au retour.
+  if(k==='invoices') return { id:obj.id, user_id:uid, num:obj.num, client:obj.client, date:obj.date, work_date:obj.workDate, total:parseFloat(String(obj.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0, status:obj.status, state:obj.state, html:obj.html, booking_id:obj.bookingId||null, booking_ids:obj.bookingIds||null };
   if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib };
 }
 function fromDbRow(k, row){
   if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr };
   if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
-  if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:row.total, status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
+  if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:(typeof row.total==='number'?row.total.toFixed(2):row.total)+' €', status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
   if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib };
 }
 const cloudPushTimers = {}, cloudPushBusy = {};
@@ -1247,7 +1249,10 @@ async function pushCloudKey(k){
   try{
     if(k==='from'){
       const obj = store('from');
-      if(Object.keys(obj).length) await getSb().from('company_info').upsert(toDbRow('from', obj, session.user.id));
+      if(Object.keys(obj).length){
+        const { error } = await getSb().from('company_info').upsert(toDbRow('from', obj, session.user.id));
+        if(error) console.error('push cloud (from) échoué', error);
+      }
     } else {
       const table = CLOUD_TABLES[k];
       const localArr = storeArr(k).filter(x=>x.id);
@@ -1256,12 +1261,17 @@ async function pushCloudKey(k){
       const localIds = new Set(localArr.map(x=>x.id));
       const toDelete = [...existingIds].filter(id=>!localIds.has(id));
       const rows = localArr.map(x=>toDbRow(k, x, session.user.id));
-      if(rows.length) await getSb().from(table).upsert(rows);
+      if(rows.length){ const { error } = await getSb().from(table).upsert(rows); if(error) console.error('push cloud ('+k+') échoué', error); }
       if(toDelete.length) await getSb().from(table).delete().in('id', toDelete);
     }
   }catch(e){ /* la prochaine écriture locale retentera */ }
   cloudPushBusy[k] = false;
 }
+// Migration : une clé n'est marquée "migrée" (cloudMigrated_<clé>) qu'après un upsert cloud
+// effectivement réussi (erreur vérifiée, pas seulement absence d'exception) — sinon on la
+// retentera au prochain boot plutôt que de risquer de considérer une migration partielle comme
+// terminée (vécu : une erreur de type sur "total" faisait échouer l'upsert des factures sans
+// jamais lever d'exception, et l'ancien code marquait quand même la migration comme faite).
 async function migrateLocalToCloud(uid){
   const clients = storeArr('clients');
   const bookings = storeArr('bookings');
@@ -1277,20 +1287,38 @@ async function migrateLocalToCloud(uid){
     if(inv.bookingId && idMap[inv.bookingId]) inv.bookingId = idMap[inv.bookingId];
     if(Array.isArray(inv.bookingIds)) inv.bookingIds = inv.bookingIds.map(id=>idMap[id]||id);
   });
-  try{
-    if(clients.length) await getSb().from('clients').insert(clients.map(c=>toDbRow('clients',c,uid)));
-    if(bookings.length) await getSb().from('bookings').insert(bookings.map(b=>toDbRow('bookings',b,uid)));
-    if(invoices.length) await getSb().from('invoices').insert(invoices.map(i=>toDbRow('invoices',i,uid)));
-    if(Object.keys(from).length) await getSb().from('company_info').upsert(toDbRow('from', from, uid));
-    localStorage.setItem('clients', JSON.stringify(clients));
-    localStorage.setItem('bookings', JSON.stringify(bookings));
-    localStorage.setItem('invoices', JSON.stringify(invoices));
-    localStorage.setItem('cloudMigrated', '1');
-  }catch(e){
-    showToast('✕ Échec de la migration vers le cloud, nouvelle tentative au prochain démarrage.');
+  // Les id générés (et le remap bookingId/bookingIds) sont persistés localement tout de suite,
+  // indépendamment du succès réseau — jamais perdus même si l'envoi cloud échoue.
+  localStorage.setItem('clients', JSON.stringify(clients));
+  localStorage.setItem('bookings', JSON.stringify(bookings));
+  localStorage.setItem('invoices', JSON.stringify(invoices));
+
+  const failed = [];
+  async function pushArr(k, table, arr){
+    if(!arr.length){ localStorage.setItem('cloudMigrated_'+k, '1'); return; }
+    try{
+      const { error } = await getSb().from(table).upsert(arr.map(x=>toDbRow(k,x,uid)));
+      if(error){ failed.push(k); console.error('migration ('+k+') échouée', error); }
+      else localStorage.setItem('cloudMigrated_'+k, '1');
+    }catch(e){ failed.push(k); console.error('migration ('+k+') échouée', e); }
   }
+  await pushArr('clients', 'clients', clients);
+  await pushArr('bookings', 'bookings', bookings);
+  await pushArr('invoices', 'invoices', invoices);
+  if(Object.keys(from).length){
+    try{
+      const { error } = await getSb().from('company_info').upsert(toDbRow('from', from, uid));
+      if(error){ failed.push('from'); console.error('migration (from) échouée', error); }
+      else localStorage.setItem('cloudMigrated_from', '1');
+    }catch(e){ failed.push('from'); console.error('migration (from) échouée', e); }
+  } else localStorage.setItem('cloudMigrated_from', '1');
+
+  if(failed.length) showToast('✕ Échec de la migration cloud ('+failed.join(', ')+'), nouvelle tentative au prochain démarrage.');
 }
-async function hydrateFromCloud(){
+// Ne considère le cloud comme faisant foi pour une clé donnée que si cette clé a réellement des
+// lignes côté cloud, OU que sa migration a explicitement réussi — jamais seulement parce qu'une
+// AUTRE clé a des données. Ça évite d'écraser un cache local pas encore migré avec un cloud vide.
+async function hydrateFromCloud(isRetry){
   const { data:{session} } = await getSb().auth.getSession();
   if(!session) return false;
   const uid = session.user.id;
@@ -1300,27 +1328,27 @@ async function hydrateFromCloud(){
     getSb().from('invoices').select('*').eq('user_id',uid),
     getSb().from('company_info').select('*').eq('user_id',uid).maybeSingle(),
   ]);
-  const hasCloudData = (clientsRes.data?.length||0) + (bookingsRes.data?.length||0) + (invoicesRes.data?.length||0) > 0;
-  if(hasCloudData){
-    const nextClients = JSON.stringify((clientsRes.data||[]).map(r=>fromDbRow('clients',r)));
-    const nextBookings = JSON.stringify((bookingsRes.data||[]).map(r=>fromDbRow('bookings',r)));
-    const nextInvoices = JSON.stringify((invoicesRes.data||[]).map(r=>fromDbRow('invoices',r)));
-    const changed = nextClients!==localStorage.getItem('clients') || nextBookings!==localStorage.getItem('bookings') || nextInvoices!==localStorage.getItem('invoices');
-    localStorage.setItem('clients', nextClients);
-    localStorage.setItem('bookings', nextBookings);
-    localStorage.setItem('invoices', nextInvoices);
-    if(companyRes.data) localStorage.setItem('from', JSON.stringify(fromDbRow('from', companyRes.data)));
-    localStorage.setItem('cloudMigrated', '1');
-    return changed;
-  }
-  const localHasData = storeArr('clients').length || storeArr('bookings').length || storeArr('invoices').length;
-  if(localHasData && localStorage.getItem('cloudMigrated')!=='1'){
+  const resByKey = { clients:clientsRes, bookings:bookingsRes, invoices:invoicesRes };
+  const needsMigration = ['clients','bookings','invoices'].some(k=>
+    (resByKey[k].data?.length||0)===0 && localStorage.getItem('cloudMigrated_'+k)!=='1' && storeArr(k).length>0
+  ) || (!companyRes.data && localStorage.getItem('cloudMigrated_from')!=='1' && Object.keys(store('from')).length>0);
+
+  if(needsMigration){
     showToast('⏳ Migration de tes données vers le cloud…');
     await migrateLocalToCloud(uid);
-  } else {
-    localStorage.setItem('cloudMigrated', '1');
+    if(!isRetry) return await hydrateFromCloud(true);
+    return false; // toujours pas migré après une tentative : on ne touche pas au cache local
   }
-  return false;
+
+  const nextClients = JSON.stringify((clientsRes.data||[]).map(r=>fromDbRow('clients',r)));
+  const nextBookings = JSON.stringify((bookingsRes.data||[]).map(r=>fromDbRow('bookings',r)));
+  const nextInvoices = JSON.stringify((invoicesRes.data||[]).map(r=>fromDbRow('invoices',r)));
+  const changed = nextClients!==localStorage.getItem('clients') || nextBookings!==localStorage.getItem('bookings') || nextInvoices!==localStorage.getItem('invoices');
+  localStorage.setItem('clients', nextClients);
+  localStorage.setItem('bookings', nextBookings);
+  localStorage.setItem('invoices', nextInvoices);
+  if(companyRes.data) localStorage.setItem('from', JSON.stringify(fromDbRow('from', companyRes.data)));
+  return changed;
 }
 async function refreshFromCloudIfIdle(){
   if(Object.values(cloudPushTimers).some(t=>t)) return; // écriture en attente, ne pas écraser
