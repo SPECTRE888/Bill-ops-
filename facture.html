@@ -186,6 +186,18 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .acc-row button{padding:4px 8px;font-size:10.5px;margin:0;flex-shrink:0;}
 .acc-day-header{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:500;margin:14px 0 6px;}
 .acc-day-header:first-child{margin-top:0;}
+.ptg-row{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:6px;}
+.ptg-row .cal-dot{margin-top:5px;}
+.ptg-main{flex:1;min-width:0;}
+.ptg-title{font-size:12px;color:var(--text);display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+.ptg-title .tag{margin-left:auto;font-size:12.5px;color:var(--gold);font-weight:700;}
+.ptg-sub{font-size:10.5px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.ptg-badge{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:20px;font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;}
+.ptg-badge.done{background:var(--green-bg);color:var(--green);border:1px solid var(--green);}
+.ptg-badge.pending{background:var(--surface);color:var(--text3);border:1px solid var(--border2);}
+.ptg-actions{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;margin-top:1px;}
+.ptg-actions button{margin:0;padding:4px 9px;font-size:10.5px;}
+.ptg-actions button.ptg-danger:hover{border-color:var(--red);color:var(--red);background:var(--red-bg);}
 #accList{margin-bottom:4px;}
 .tab#tab-facture.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 .facture-scroll{flex:1;min-height:0;overflow-y:auto;}
@@ -676,6 +688,25 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <button class="btn-gold" style="width:100%;margin-top:14px;" onclick="closeBookingModal()" data-i18n="btn_close">Fermer</button>
   </div>
 </div>
+<div class="modal-overlay" id="pointageModal" style="display:none;" onclick="if(event.target===this) closePointageModal()">
+  <div class="modal-box" style="max-width:360px;">
+    <div class="modal-header">
+      <span data-i18n="modal_pointage_title">Modifier le pointage</span>
+      <button type="button" class="modal-close" onclick="closePointageModal()">×</button>
+    </div>
+    <p id="pointageModalSub" style="font-size:11px;color:var(--text3);margin:0 0 14px;"></p>
+    <div class="row">
+      <div><label data-i18n="lbl_arrivee_reelle">Heure d'arrivée</label><input id="pointageInTime" type="time"></div>
+      <div><label data-i18n="lbl_depart_reel">Heure de départ</label><input id="pointageOutTime" type="time"></div>
+    </div>
+    <p id="pointageModalError" style="font-size:11px;color:var(--red);margin:6px 0 0;min-height:14px;"></p>
+    <div class="row" style="margin-top:10px;">
+      <button class="btn-line" id="pointageClearBtn" style="display:none;color:var(--red);" onclick="clearPointageEdit()" data-i18n="btn_retirer_pointage">Retirer le pointage</button>
+      <button class="btn-line" onclick="closePointageModal()" data-i18n="btn_cancel">Annuler</button>
+      <button class="btn-gold" onclick="savePointageEdit()" data-i18n="btn_save_changes">Enregistrer</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="legalModal" style="display:none;background:rgba(0,0,0,.65);" onclick="if(event.target===this) closeLegalModal()">
   <div class="modal-box" style="max-width:560px;width:92%;border-radius:14px;padding:28px;max-height:85vh;overflow-y:auto;position:relative;">
     <button type="button" class="modal-close" onclick="closeLegalModal()" style="position:absolute;top:20px;right:20px;">×</button>
@@ -745,6 +776,9 @@ home_next_title:'Prochaine prestation', empty_next:'Aucune prestation programmé
 home_actions_title:'Actions rapides', btn_new_booking:'+ Nouvelle prestation', btn_new_invoice:'+ Nouvelle facture', btn_new_client:'+ Ajouter un client',
 plan_venir_title:'Prestas à venir', plan_facturer_title:'Prestas à facturer', empty_venir:'Aucune presta à venir.', empty_facturer:'Aucune presta à facturer.',
 btn_invoice:'Facturer', btn_delete_short:'Suppr.', sans_date:'sans date', pointe_prefix:'Pointé : ',
+modal_pointage_title:'Modifier le pointage', lbl_arrivee_reelle:"Heure d'arrivée", lbl_depart_reel:'Heure de départ',
+btn_pointage:'Pointage', btn_retirer_pointage:'Retirer le pointage', badge_pointe:'Pointé', badge_prevu:'Prévu',
+toast_pointage_saved:'✔ Pointage enregistré', toast_pointage_cleared:'✔ Pointage retiré',
 btn_group_invoice:'Facturer la sélection', group_invoice_hint_ok:'{n} prestation(s) sélectionnée(s) — {client} — {total} €', group_invoice_hint_multi:'{n} sélectionnées — une facture groupée ne peut réunir qu\'un seul client', toast_group_invoice_created:'✔ {n} prestations regroupées dans une facture — vérifie et enregistre.',
 cal_title:'Calendrier', cal_prev_month:'Prévisionnel du mois', cal_forecast_suffix:' € à facturer ce mois-ci',
 booking_new_title:'Nouveau booking', booking_edit_title:'Modifier le booking', lbl_client:'Client', lbl_nom_prestation:'Nom de la prestation', ph_nom_prestation:'Ex. Prestation Barman',
@@ -836,6 +870,9 @@ home_next_title:'Next service', empty_next:'No service scheduled.',
 home_actions_title:'Quick actions', btn_new_booking:'+ New service', btn_new_invoice:'+ New invoice', btn_new_client:'+ Add a client',
 plan_venir_title:'Upcoming services', plan_facturer_title:'Services to invoice', empty_venir:'No upcoming services.', empty_facturer:'No services to invoice.',
 btn_invoice:'Invoice', btn_delete_short:'Del.', sans_date:'no date', pointe_prefix:'Clocked: ',
+modal_pointage_title:'Edit clocked time', lbl_arrivee_reelle:'Clock-in time', lbl_depart_reel:'Clock-out time',
+btn_pointage:'Clock', btn_retirer_pointage:'Remove clocked time', badge_pointe:'Clocked', badge_prevu:'Scheduled',
+toast_pointage_saved:'✔ Clocked time saved', toast_pointage_cleared:'✔ Clocked time removed',
 btn_group_invoice:'Invoice selection', group_invoice_hint_ok:'{n} service(s) selected — {client} — {total} €', group_invoice_hint_multi:'{n} selected — a grouped invoice can only include one client', toast_group_invoice_created:'✔ {n} services grouped into one invoice — review and save.',
 cal_title:'Calendar', cal_prev_month:'Forecast for the month', cal_forecast_suffix:' € to invoice this month',
 booking_new_title:'New booking', booking_edit_title:'Edit booking', lbl_client:'Client', lbl_nom_prestation:'Service name', ph_nom_prestation:'E.g. Bartending service',
@@ -927,6 +964,9 @@ home_next_title:'Próximo servicio', empty_next:'Ningún servicio programado.',
 home_actions_title:'Acciones rápidas', btn_new_booking:'+ Nuevo servicio', btn_new_invoice:'+ Nueva factura', btn_new_client:'+ Añadir un cliente',
 plan_venir_title:'Servicios próximos', plan_facturer_title:'Servicios a facturar', empty_venir:'Ningún servicio próximo.', empty_facturer:'Ningún servicio a facturar.',
 btn_invoice:'Facturar', btn_delete_short:'Elim.', sans_date:'sin fecha', pointe_prefix:'Fichado: ',
+modal_pointage_title:'Modificar el fichaje', lbl_arrivee_reelle:'Hora de entrada', lbl_depart_reel:'Hora de salida',
+btn_pointage:'Fichaje', btn_retirer_pointage:'Quitar el fichaje', badge_pointe:'Fichado', badge_prevu:'Previsto',
+toast_pointage_saved:'✔ Fichaje guardado', toast_pointage_cleared:'✔ Fichaje eliminado',
 btn_group_invoice:'Facturar selección', group_invoice_hint_ok:'{n} servicio(s) seleccionado(s) — {client} — {total} €', group_invoice_hint_multi:'{n} seleccionados — una factura agrupada solo puede incluir un cliente', toast_group_invoice_created:'✔ {n} servicios agrupados en una factura — revisa y guarda.',
 cal_title:'Calendario', cal_prev_month:'Previsión del mes', cal_forecast_suffix:' € a facturar este mes',
 booking_new_title:'Nueva reserva', booking_edit_title:'Modificar reserva', lbl_client:'Cliente', lbl_nom_prestation:'Nombre del servicio', ph_nom_prestation:'Ej. Servicio de camarero',
@@ -2235,6 +2275,58 @@ function deleteBooking(id){
   renderPlanning();
   renderCalendarTab();
 }
+let pointageEditId = null;
+function openPointageModal(id){
+  const b = storeArr('bookings').find(x=>x.id===id);
+  if(!b) return;
+  pointageEditId = id;
+  pointageModalSub.textContent = `${b.client}${b.label?' — '+b.label:''} · ${b.date?formatFrDate(b.date):t('sans_date')}`;
+  pointageInTime.value = b.checkedInAt ? localHM(b.checkedInAt) : (b.from||'');
+  pointageOutTime.value = b.checkedOutAt ? localHM(b.checkedOutAt) : (b.to||'');
+  pointageModalError.textContent = '';
+  pointageClearBtn.style.display = (b.checkedInAt || b.checkedOutAt) ? 'inline-flex' : 'none';
+  pointageModal.style.display = 'flex';
+}
+function closePointageModal(){
+  pointageModal.style.display = 'none';
+  pointageEditId = null;
+}
+function savePointageEdit(){
+  if(!pointageEditId) return;
+  const bookings = storeArr('bookings');
+  const b = bookings.find(x=>x.id===pointageEditId);
+  if(!b) return;
+  const inVal = pointageInTime.value, outVal = pointageOutTime.value;
+  if(!inVal || !outVal){ pointageModalError.textContent = '⚠ '+t('lbl_arrivee_reelle')+' / '+t('lbl_depart_reel'); return; }
+  const baseDate = b.date || todayStr();
+  const inIso = new Date(baseDate+'T'+inVal+':00').toISOString();
+  let outIso = new Date(baseDate+'T'+outVal+':00').toISOString();
+  if(new Date(outIso) <= new Date(inIso)){
+    const nextDay = new Date(baseDate+'T00:00:00'); nextDay.setDate(nextDay.getDate()+1);
+    outIso = new Date(nextDay.toISOString().slice(0,10)+'T'+outVal+':00').toISOString();
+  }
+  if(new Date(outIso) <= new Date(inIso)){ pointageModalError.textContent = '⚠ '+t('lbl_depart_reel'); return; }
+  b.checkedInAt = inIso;
+  b.checkedOutAt = outIso;
+  b.actualHours = Math.round(((new Date(outIso)-new Date(inIso))/3600000)*4)/4;
+  set('bookings', bookings);
+  closePointageModal();
+  renderPlanning();
+  renderCalendarTab();
+  showToast(t('toast_pointage_saved'));
+}
+function clearPointageEdit(){
+  if(!pointageEditId) return;
+  const bookings = storeArr('bookings');
+  const b = bookings.find(x=>x.id===pointageEditId);
+  if(!b) return;
+  delete b.checkedInAt; delete b.checkedOutAt; delete b.actualHours;
+  set('bookings', bookings);
+  closePointageModal();
+  renderPlanning();
+  renderCalendarTab();
+  showToast(t('toast_pointage_cleared'));
+}
 function renderAccueil(){
   const today = todayStr();
   const bookings = storeArr('bookings')
@@ -2273,19 +2365,29 @@ function renderPlanning(){
   renderAccueil();
   const today = todayStr();
   const bookings = storeArr('bookings');
-  const pending = bookings.filter(b=>b.status==='à facturer' && (!b.date || b.date < today || b.checkedOutAt));
+  const pending = bookings.filter(b=>b.status==='à facturer' && (!b.date || b.date < today || b.checkedOutAt))
+    .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   bkList.innerHTML = pending.length ? pending.map(b=>{
     const h = b.actualHours ?? b.hours;
+    const pointed = b.checkedInAt && b.checkedOutAt;
+    const timesLabel = pointed ? `${localHM(b.checkedInAt)}–${localHM(b.checkedOutAt)}` : (b.from&&b.to ? `${b.from}–${b.to}` : '');
     return `
-    <div class="client-card" style="display:flex;gap:8px;align-items:flex-start;">
-      <input type="checkbox" style="margin-top:4px;flex-shrink:0;" ${groupSelection.has(b.id)?'checked':''} onchange="toggleGroupSelect('${b.id}', this.checked)">
-      <div style="flex:1;min-width:0;">
-        <b>${b.client}</b>${b.label?' — '+b.label:''} — ${b.date?formatFrDate(b.date):t('sans_date')}${b.from&&b.to?' '+t('lbl_de').toLowerCase()+' '+b.from+' '+t('lbl_a').toLowerCase()+' '+b.to:''}<br>
-        ${b.checkedInAt&&b.checkedOutAt?`${t('pointe_prefix')}${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · `:''}${h}h × ${b.rate}€ = <span class="tag">${(h*b.rate).toFixed(2)} €</span><br>
+    <div class="ptg-row">
+      <input type="checkbox" style="margin-top:5px;flex-shrink:0;" ${groupSelection.has(b.id)?'checked':''} onchange="toggleGroupSelect('${b.id}', this.checked)">
+      <span class="cal-dot" style="background:${clientColor(b.client)};"></span>
+      <div class="ptg-main">
+        <div class="ptg-title"><b>${b.client}</b>${b.label?' — '+b.label:''}<span class="tag">${(h*b.rate).toFixed(2)} €</span></div>
+        <div class="ptg-sub">
+          <span class="ptg-badge ${pointed?'done':'pending'}">${pointed?t('badge_pointe'):t('badge_prevu')}</span>
+          <span>${b.date?formatFrDate(b.date):t('sans_date')}${timesLabel?' · '+timesLabel:''} · ${h}h × ${b.rate}€</span>
+        </div>
+      </div>
+      <div class="ptg-actions">
         <button class="btn-line" onclick="invoiceBooking('${b.id}')">${t('btn_invoice')}</button>
         <button class="btn-line" onclick="viewBooking('${b.id}')">${t('btn_view')}</button>
         <button class="btn-line" onclick="editBooking('${b.id}')">${t('btn_edit')}</button>
-        <button class="btn-line" onclick="deleteBooking('${b.id}')">${t('btn_delete')}</button>
+        <button class="btn-line" onclick="openPointageModal('${b.id}')">${t('btn_pointage')}</button>
+        <button class="btn-line ptg-danger" onclick="deleteBooking('${b.id}')">${t('btn_delete')}</button>
       </div>
     </div>`;
   }).join('') : `<p style="color:var(--text3);font-size:12px;">${t('empty_facturer')}</p>`;
