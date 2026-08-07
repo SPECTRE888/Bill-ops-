@@ -53,16 +53,45 @@ async function getAccessToken(refreshToken: string): Promise<string> {
   return data.access_token;
 }
 
-function buildRawMime(opts: { fromName: string; fromEmail: string; to: string; subject: string; html: string }): string {
-  const lines = [
+function chunk76(b64: string): string {
+  return b64.replace(/(.{76})/g, '$1\r\n');
+}
+
+function buildRawMime(opts: {
+  fromName: string; fromEmail: string; to: string; subject: string; html: string;
+  pdfBase64?: string; pdfFilename?: string;
+}): string {
+  const headers = [
     `From: "${opts.fromName.replace(/"/g, "'")}" <${opts.fromEmail}>`,
     `To: ${opts.to}`,
     `Subject: ${encodeMimeWord(opts.subject)}`,
     'MIME-Version: 1.0',
+  ];
+
+  if (!opts.pdfBase64) {
+    return [...headers, 'Content-Type: text/html; charset="UTF-8"', 'Content-Transfer-Encoding: base64', '', utf8ToBase64(opts.html)].join('\r\n');
+  }
+
+  const boundary = `boundary_${crypto.randomUUID().replace(/-/g, '')}`;
+  const filename = (opts.pdfFilename || 'facture.pdf').replace(/"/g, "'");
+  const lines = [
+    ...headers,
+    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    '',
+    `--${boundary}`,
     'Content-Type: text/html; charset="UTF-8"',
     'Content-Transfer-Encoding: base64',
     '',
     utf8ToBase64(opts.html),
+    '',
+    `--${boundary}`,
+    `Content-Type: application/pdf; name="${filename}"`,
+    `Content-Disposition: attachment; filename="${filename}"`,
+    'Content-Transfer-Encoding: base64',
+    '',
+    chunk76(opts.pdfBase64),
+    '',
+    `--${boundary}--`,
   ];
   return lines.join('\r\n');
 }
@@ -82,7 +111,7 @@ Deno.serve(async (req) => {
     return new Response('Invalid JSON', { status: 400, headers: CORS_HEADERS });
   }
 
-  const { refreshToken, fromEmail, fromName, to, subject, html } = body ?? {};
+  const { refreshToken, fromEmail, fromName, to, subject, html, pdfBase64, pdfFilename } = body ?? {};
   if (!refreshToken || typeof refreshToken !== 'string') {
     return new Response('Compte Gmail non connecté.', { status: 400, headers: CORS_HEADERS });
   }
@@ -104,6 +133,8 @@ Deno.serve(async (req) => {
       to,
       subject: safeSubject,
       html: html || '',
+      pdfBase64: typeof pdfBase64 === 'string' && pdfBase64 ? pdfBase64 : undefined,
+      pdfFilename: typeof pdfFilename === 'string' ? pdfFilename : undefined,
     }));
     const sendRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
       method: 'POST',

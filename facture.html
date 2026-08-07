@@ -370,6 +370,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div class="info-item"><div class="info-label" data-i18n="lbl_paiement">Mode de règlement</div><div class="info-value" id="viewPay"></div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_rib">RIB / IBAN</div><div class="info-value" id="viewRib"></div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_bic">BIC</div><div class="info-value" id="viewBic"></div></div>
+          <div class="info-item"><div class="info-label" data-i18n="lbl_email_body_default">Formule de politesse</div><div class="info-value" id="viewEmailBody"></div></div>
         </div>
         <div class="row" style="margin-top:10px;align-items:flex-end;">
           <button class="btn-line" id="infoEditBtn" onclick="toggleInfoEdit(true)" data-i18n="btn_edit" style="margin-top:0;">Modifier</button>
@@ -398,6 +399,8 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
             <div style="flex:2;"><label data-i18n="lbl_rib">RIB / IBAN</label><textarea id="fromRib" rows="2" placeholder="IBAN + BIC"></textarea></div>
             <div style="flex:1;"><label data-i18n="lbl_bic">BIC</label><input id="fromBic" placeholder="BIC"></div>
           </div>
+          <label><span data-i18n="lbl_email_body_default">Formule de politesse (email de facture)</span> <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;" data-i18n="hint_email_body_default">(utilisée par défaut à l'envoi, sauf si un client a sa propre formule)</span></label>
+          <textarea id="fromEmailBody" rows="4"></textarea>
           <div class="row" style="margin-top:6px;">
             <button class="btn-gold" onclick="saveFrom()" data-i18n="btn_save_info">Enregistrer mes infos</button>
             <button class="btn-line" onclick="toggleInfoEdit(false)" data-i18n="btn_cancel" style="margin-top:0;">Annuler</button>
@@ -437,6 +440,8 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div><label data-i18n="lbl_telephone">Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78"></div>
         </div>
         <label data-i18n="lbl_adresse">Adresse</label><input id="cliAddr">
+        <label><span data-i18n="lbl_email_body">Formule de politesse (facture)</span> <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;" data-i18n="hint_email_body">(optionnel, sinon la formule par défaut de Mon entreprise est utilisée)</span></label>
+        <textarea id="cliEmailBody" rows="3" placeholder="Bonjour,&#10;&#10;Veuillez trouver ci-joint votre facture..." data-i18n-ph="ph_email_body"></textarea>
         <button class="btn-gold" onclick="saveClient()" data-i18n="btn_save_client">Enregistrer le client</button>
         <button class="btn-line" onclick="resetClientForm()" data-i18n="btn_new_client">Nouveau client</button>
       </div>
@@ -746,6 +751,7 @@ btn_connect_gmail:'Connecter mon Gmail', gmail_connected_as:'Connecté : {email}
 lbl_tva_regime:'Régime TVA', hint_tva_regime:'(basculement automatique à 32 000 € de CA cumulé)',
 opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'TVA applicable',
 lbl_rcs:'Mention RCS/RM', lbl_paiement:'Mode de règlement', lbl_rib:'RIB / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
+lbl_email_body_default:'Formule de politesse (email de facture)', hint_email_body_default:"(utilisée par défaut à l'envoi, sauf si un client a sa propre formule)",
 btn_save:'Enregistrer', btn_edit:'Modifier', btn_save_info:'Enregistrer mes infos',
 data_sync_title:'Synchronisation', sync_intro:'Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.',
 btn_gen_sync:'Générer un code de synchro', lbl_paste_sync:'Ou coller un code existant', ph_sync_code:'Code de synchro', btn_connect:'Connecter',
@@ -753,6 +759,7 @@ sync_code_intro:'Code de synchro (à coller sur l\'autre appareil) :', btn_copy_
 data_backup_title:'Sauvegarde', backup_intro:'Exporte toutes tes données (entreprise, clients, factures, planning) dans un fichier, à conserver en lieu sûr ou à réimporter sur un autre appareil.',
 btn_export_data:'Exporter mes données', lbl_import_backup:'Importer une sauvegarde',
 clients_add_title:'Ajouter / modifier un client', lbl_nom_societe:'Nom société', lbl_prefixe:'Préfixe facture (2-3 lettres)', lbl_email:'Email', lbl_telephone:'Téléphone',
+lbl_email_body:'Formule de politesse (facture)', hint_email_body:'(optionnel, sinon la formule par défaut de Mon entreprise est utilisée)', ph_email_body:"Bonjour,\n\nVeuillez trouver ci-joint votre facture...",
 btn_save_client:'Enregistrer le client', btn_new_client:'Nouveau client', clients_list_title:'Clients enregistrés', empty_clients:'Aucun client.', btn_delete:'Supprimer',
 fact_client_title:'Client', ph_client_search:'Tape le nom du client...', fact_invoice_title:'Facture', lbl_num_facture:'N° facture', lbl_date:'Date',
 lbl_date_travaillee:'Date travaillée', hint_date_travaillee:'(pour rattacher le CA au bon mois)', lbl_tva_pct:'TVA (%)',
@@ -763,7 +770,7 @@ fact_prestations_title:'Prestations', btn_add_line:'+ Ajouter une ligne', btn_du
 btn_generate_preview:"Générer l'aperçu", btn_export_pdf:'Exporter en PDF', btn_send_client:'Envoyer au client', btn_new_invoice_form:'Nouvelle facture',
 hist_title:'Factures émises', ph_hist_search:"Rechercher (client, n° de facture, mot-clé d'une prestation)...",
 hist_col_num:'N°', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Statut', hist_col_actions:'Actions',
-btn_view:'Voir', btn_resend:'Renvoyer', empty_invoices:'Aucune facture émise.',
+btn_view:'Voir', btn_resend:'Renvoyer', btn_send_short:'Envoyer', empty_invoices:'Aucune facture émise.',
 status_toutes:'Toutes', status_enregistree:'Enregistrée', status_maj:'Mise à jour', status_envoyee:'Envoyée', status_payee:'Payée',
 ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette année', stat_total:'Total',
 ca_col_client:'Client', ca_col_generated:'CA généré', empty_data:'Aucune donnée.',
@@ -840,6 +847,7 @@ btn_connect_gmail:'Connect my Gmail', gmail_connected_as:'Connected: {email}', b
 lbl_tva_regime:'VAT regime', hint_tva_regime:'(automatically switches at €32,000 cumulative revenue)',
 opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applicable',
 lbl_rcs:'Trade register notice', lbl_paiement:'Payment method', lbl_rib:'Bank details / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
+lbl_email_body_default:'Default invoice email message', hint_email_body_default:"(used by default when sending, unless a client has its own message)",
 btn_save:'Save', btn_edit:'Edit', btn_save_info:'Save my info',
 data_sync_title:'Sync', sync_intro:'Link this device to another one (Mac / iPhone) to share clients, invoices and schedule.',
 btn_gen_sync:'Generate a sync code', lbl_paste_sync:'Or paste an existing code', ph_sync_code:'Sync code', btn_connect:'Connect',
@@ -847,6 +855,7 @@ sync_code_intro:'Sync code (paste it on the other device):', btn_copy_code:'Copy
 data_backup_title:'Backup', backup_intro:'Export all your data (company, clients, invoices, schedule) to a file, to keep safe or re-import on another device.',
 btn_export_data:'Export my data', lbl_import_backup:'Import a backup',
 clients_add_title:'Add / edit a client', lbl_nom_societe:'Company name', lbl_prefixe:'Invoice prefix (2-3 letters)', lbl_email:'Email', lbl_telephone:'Phone',
+lbl_email_body:'Invoice email message', hint_email_body:'(optional, otherwise the default from My company is used)', ph_email_body:"Hello,\n\nPlease find attached your invoice...",
 btn_save_client:'Save client', btn_new_client:'New client', clients_list_title:'Saved clients', empty_clients:'No clients.', btn_delete:'Delete',
 fact_client_title:'Client', ph_client_search:"Type the client's name...", fact_invoice_title:'Invoice', lbl_num_facture:'Invoice no.', lbl_date:'Date',
 lbl_date_travaillee:'Work date', hint_date_travaillee:'(to attribute revenue to the right month)', lbl_tva_pct:'VAT (%)',
@@ -857,7 +866,7 @@ fact_prestations_title:'Services', btn_add_line:'+ Add a line', btn_duplicate:'D
 btn_generate_preview:'Generate preview', btn_export_pdf:'Export as PDF', btn_send_client:'Send to client', btn_new_invoice_form:'New invoice',
 hist_title:'Issued invoices', ph_hist_search:'Search (client, invoice no., service keyword)...',
 hist_col_num:'No.', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Status', hist_col_actions:'Actions',
-btn_view:'View', btn_resend:'Resend', empty_invoices:'No invoices issued.',
+btn_view:'View', btn_resend:'Resend', btn_send_short:'Send', empty_invoices:'No invoices issued.',
 status_toutes:'All', status_enregistree:'Saved', status_maj:'Updated', status_envoyee:'Sent', status_payee:'Paid',
 ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', stat_total:'Total',
 ca_col_client:'Client', ca_col_generated:'Revenue generated', empty_data:'No data.',
@@ -934,6 +943,7 @@ btn_connect_gmail:'Conectar mi Gmail', gmail_connected_as:'Conectado: {email}', 
 lbl_tva_regime:'Régimen de IVA', hint_tva_regime:'(cambio automático a 32.000 € de facturación acumulada)',
 opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplicable',
 lbl_rcs:'Mención Registro Mercantil', lbl_paiement:'Forma de pago', lbl_rib:'Datos bancarios / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
+lbl_email_body_default:'Fórmula de cortesía (email de factura)', hint_email_body_default:'(usada por defecto al enviar, salvo que un cliente tenga su propia fórmula)',
 btn_save:'Guardar', btn_edit:'Modificar', btn_save_info:'Guardar mis datos',
 data_sync_title:'Sincronización', sync_intro:'Vincula este dispositivo con otro (Mac / iPhone) para compartir clientes, facturas y planificación.',
 btn_gen_sync:'Generar un código de sincronización', lbl_paste_sync:'O pega un código existente', ph_sync_code:'Código de sincronización', btn_connect:'Conectar',
@@ -941,6 +951,7 @@ sync_code_intro:'Código de sincronización (pégalo en el otro dispositivo):', 
 data_backup_title:'Copia de seguridad', backup_intro:'Exporta todos tus datos (empresa, clientes, facturas, planificación) a un archivo, para guardar en un lugar seguro o reimportar en otro dispositivo.',
 btn_export_data:'Exportar mis datos', lbl_import_backup:'Importar una copia de seguridad',
 clients_add_title:'Añadir / modificar un cliente', lbl_nom_societe:'Nombre de la empresa', lbl_prefixe:'Prefijo de factura (2-3 letras)', lbl_email:'Email', lbl_telephone:'Teléfono',
+lbl_email_body:'Fórmula de cortesía (factura)', hint_email_body:'(opcional, si no se usa la fórmula por defecto de Mi empresa)', ph_email_body:"Hola,\n\nAdjunto encontrarás tu factura...",
 btn_save_client:'Guardar cliente', btn_new_client:'Nuevo cliente', clients_list_title:'Clientes guardados', empty_clients:'Ningún cliente.', btn_delete:'Eliminar',
 fact_client_title:'Cliente', ph_client_search:'Escribe el nombre del cliente...', fact_invoice_title:'Factura', lbl_num_facture:'N.º factura', lbl_date:'Fecha',
 lbl_date_travaillee:'Fecha de trabajo', hint_date_travaillee:'(para asignar la facturación al mes correcto)', lbl_tva_pct:'IVA (%)',
@@ -951,7 +962,7 @@ fact_prestations_title:'Servicios', btn_add_line:'+ Añadir una línea', btn_dup
 btn_generate_preview:'Generar vista previa', btn_export_pdf:'Exportar en PDF', btn_send_client:'Enviar al cliente', btn_new_invoice_form:'Nueva factura',
 hist_title:'Facturas emitidas', ph_hist_search:'Buscar (cliente, n.º de factura, palabra clave de un servicio)...',
 hist_col_num:'N.º', hist_col_client:'Cliente', hist_col_date:'Fecha', hist_col_total:'Total', hist_col_statut:'Estado', hist_col_actions:'Acciones',
-btn_view:'Ver', btn_resend:'Reenviar', empty_invoices:'Ninguna factura emitida.',
+btn_view:'Ver', btn_resend:'Reenviar', btn_send_short:'Enviar', empty_invoices:'Ninguna factura emitida.',
 status_toutes:'Todas', status_enregistree:'Guardada', status_maj:'Actualizada', status_envoyee:'Enviada', status_payee:'Pagada',
 ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', stat_total:'Total',
 ca_col_client:'Cliente', ca_col_generated:'Facturación generada', empty_data:'Sin datos.',
@@ -1204,18 +1215,18 @@ const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueCloudPus
 // correspondante (debounce, comme l'ancien queueSync() mais table par table).
 const CLOUD_TABLES = { clients:'clients', bookings:'bookings', invoices:'invoices' };
 function toDbRow(k, obj, uid){
-  if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr };
+  if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr, email_body:obj.emailBody };
   if(k==='bookings') return { id:obj.id, user_id:uid, client:obj.client, label:obj.label, addr:obj.addr, contact:obj.contact, date:obj.date, time_from:obj.from, time_to:obj.to, hours:obj.hours, rate:obj.rate, status:obj.status, checked_in_at:obj.checkedInAt||null, checked_out_at:obj.checkedOutAt||null, actual_hours:obj.actualHours||null, notified_at:obj.notifiedAt||null };
   // total est stocké localement comme une chaîne formatée ("2652.00 €"), mais la colonne cloud
   // est numeric — on la parse ici (même logique que invoiceAmt()) et on la reformate au retour.
   if(k==='invoices') return { id:obj.id, user_id:uid, num:obj.num, client:obj.client, date:obj.date, work_date:obj.workDate, total:parseFloat(String(obj.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0, status:obj.status, state:obj.state, html:obj.html, booking_id:obj.bookingId||null, booking_ids:obj.bookingIds||null };
-  if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, bic:obj.bic };
+  if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, bic:obj.bic, email_body:obj.emailBody };
 }
 function fromDbRow(k, row){
-  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr };
+  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, emailBody:row.email_body };
   if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
   if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:(typeof row.total==='number'?row.total.toFixed(2):row.total)+' €', status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
-  if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, bic:row.bic };
+  if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, bic:row.bic, emailBody:row.email_body };
 }
 const cloudPushTimers = {}, cloudPushBusy = {};
 function queueCloudPush(k){
@@ -1385,6 +1396,7 @@ function refreshInfoView(){
   viewPay.textContent = fromPay.value;
   viewRib.textContent = fromRib.value;
   viewBic.textContent = fromBic.value;
+  viewEmailBody.textContent = fromEmailBody.value;
 }
 function renderGmailUI(){
   const g = store('gmailAuth');
@@ -1560,7 +1572,7 @@ function toggleInfoEdit(show){
   infoEdit.style.display = show ? 'block' : 'none';
 }
 function saveFrom(){
-  set('from', {name:fromName.value,tagline:fromTagline.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value,tva:fromTva.value,rcs:fromRcs.value,pay:fromPay.value,rib:fromRib.value,bic:fromBic.value});
+  set('from', {name:fromName.value,tagline:fromTagline.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value,tva:fromTva.value,rcs:fromRcs.value,pay:fromPay.value,rib:fromRib.value,bic:fromBic.value,emailBody:fromEmailBody.value});
   refreshInfoView();
   toggleInfoEdit(false);
   setStatusMsg(fromStatus, t('toast_info_saved'));
@@ -1572,6 +1584,7 @@ function loadFrom(){
   fromTva.value=f.tva??'TVA non applicable, art. 293 B du CGI'; fromRcs.value=f.rcs||"Dispensé d'immatriculation au RCS et au RM"; fromPay.value=f.pay||'Virement bancaire';
   fromRib.value=f.rib||'IBAN : FR76 1741 8000 0100 0110 3467 090\nBIC : SNNNFR22XXX';
   fromBic.value=f.bic||'';
+  fromEmailBody.value = f.emailBody ?? t('email_default_body');
   refreshInfoView();
 }
 function formatFrDate(d){
@@ -1616,7 +1629,7 @@ function suggestPrefix(){
   cliPrefix.value = p.toUpperCase().slice(0,3);
 }
 function resetClientForm(){
-  cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliPhone.value=''; cliAddr.value='';
+  cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliPhone.value=''; cliAddr.value=''; cliEmailBody.value='';
 }
 function isValidEmail(email){
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email||'').trim());
@@ -1627,14 +1640,14 @@ function saveClient(){
     return;
   }
   const clients = storeArr('clients');
-  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value};
+  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value, emailBody:cliEmailBody.value};
   if(cliIdx.value!==''){ c.id = clients[cliIdx.value]?.id || crypto.randomUUID(); clients[cliIdx.value]=c; } else { c.id = crypto.randomUUID(); clients.push(c); }
   set('clients', clients);
   resetClientForm(); renderClientList(); refreshClientSelect();
 }
 function editClient(i){
   const c = storeArr('clients')[i];
-  cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliPhone.value=c.phone||''; cliAddr.value=c.addr;
+  cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliPhone.value=c.phone||''; cliAddr.value=c.addr; cliEmailBody.value=c.emailBody||'';
 }
 function deleteClient(i){
   const clients = storeArr('clients'); clients.splice(i,1); set('clients',clients);
@@ -1834,6 +1847,29 @@ function exportInvoicePdf(){
   const filename = (invNum.value||'facture')+'.pdf';
   html2pdf().set(pdfOptions(filename)).from(document.getElementById('invoice')).save();
 }
+async function pdfBase64FromElement(el){
+  const dataUri = await html2pdf().set(pdfOptions('facture.pdf')).from(el).toPdf().output('datauristring');
+  return dataUri.split(',').pop();
+}
+async function pdfBase64FromHtml(html){
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;background:#fff;';
+  container.setAttribute('data-theme','light');
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  try{ return await pdfBase64FromElement(container.firstElementChild); }
+  finally{ container.remove(); }
+}
+function fillEmailTemplate(tpl, num){
+  return String(tpl||'').replace(/\{num\}/g, num||'').replace(/\{name\}/g, store('from').name||'');
+}
+function resolveEmailBody(clientObj, num){
+  const tpl = (clientObj && clientObj.emailBody) || store('from').emailBody || t('email_default_body');
+  return fillEmailTemplate(tpl, num);
+}
+function emailBodyHtml(text){
+  return '<p>'+String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</p>';
+}
 function downloadInvoicePdf(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   if(!inv){ showToast(t('toast_invoice_not_found')); return; }
@@ -1852,9 +1888,10 @@ async function resendInvoice(num){
   if(!g.refreshToken || !c){ showToast(t('toast_sendgrid_missing')); return; }
   if(!isValidEmail(c.email)){ showToast(t('toast_client_email_invalid',{email:c.email})); return; }
   try{
+    const pdfBase64 = await pdfBase64FromHtml(inv.html);
     const res = await fetch(SEND_INVOICE_URL, {
       method:'POST', headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
-      body: JSON.stringify({refreshToken: g.refreshToken, fromEmail: g.email, to: c.email, subject:t('inv_facture_label')+' '+inv.num, html: inv.html, fromName: f.name})
+      body: JSON.stringify({refreshToken: g.refreshToken, fromEmail: g.email, to: c.email, subject:t('inv_facture_label')+' '+inv.num, html: emailBodyHtml(resolveEmailBody(c, inv.num)), pdfBase64, pdfFilename: inv.num+'.pdf', fromName: f.name})
     });
     showToast(res.ok ? t('toast_invoice_resent',{email:c.email}) : t('toast_resend_failed'));
     if(res.ok){
@@ -1904,7 +1941,7 @@ function renderHistory(){
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="editInvoice('${i.num}')">${t('btn_edit')}</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="duplicateInvoice('${i.num}')">${t('btn_duplicate')}</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="downloadInvoicePdf('${i.num}')">PDF</button>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="resendInvoice('${i.num}')">${t('btn_resend')}</button>
+        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="resendInvoice('${i.num}')">${(i.status==='Envoyée'||i.status==='Payée')?t('btn_resend'):t('btn_send_short')}</button>
         <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0;color:var(--red);" onclick="deleteInvoice('${i.num}')">${t('btn_delete')}</button>
       </td>
     </tr>`).join('')}</tbody></table>
@@ -2469,7 +2506,7 @@ function toggleOffert(){
   render();
 }
 function defaultEmailMessage(){
-  return t('email_default_body',{num:invNum.value||'', name:fromName.value||''});
+  return resolveEmailBody(currentClient(), invNum.value||'');
 }
 function refreshEmailDefaults(){
   if(!emailCustomEnabled.checked) return;
@@ -2688,9 +2725,10 @@ async function sendInvoice(){
   if(!c){ showToast(t('toast_select_client_send')); return; }
   if(!isValidEmail(c.email)){ showToast(t('toast_client_email_invalid',{email:c.email||'(vide)'})); return; }
   showToast(t('toast_sending'), 2000);
-  const msg = emailMessage.value.trim();
-  const bodyHtml = (msg ? `<p>${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</p><hr>` : '') + document.getElementById('invoice').outerHTML;
+  const num = invNum.value||'';
+  const msg = emailMessage.value.trim() || resolveEmailBody(c, num);
   try{
+    const pdfBase64 = await pdfBase64FromElement(document.getElementById('invoice'));
     const res = await fetch(SEND_INVOICE_URL, {
       method:'POST',
       headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
@@ -2698,8 +2736,10 @@ async function sendInvoice(){
         refreshToken: g.refreshToken,
         fromEmail: g.email,
         to: c.email,
-        subject: emailSubject.value.trim() || (t('inv_facture_label') + ' ' + invNum.value),
-        html: bodyHtml,
+        subject: emailSubject.value.trim() || (t('inv_facture_label') + ' ' + num),
+        html: emailBodyHtml(msg),
+        pdfBase64,
+        pdfFilename: (num||'facture')+'.pdf',
         fromName: f.name
       })
     });
