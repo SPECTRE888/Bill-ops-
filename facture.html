@@ -64,7 +64,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-fon
 .nav-section{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);padding:10px 12px 5px;font-weight:400;}
 .panel{background:var(--bg);padding:24px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
 .profile-grid{display:flex;flex-direction:column;gap:12px;}
-.profile-row1{display:grid;grid-template-columns:1fr 2fr;gap:12px;align-items:stretch;}
+.profile-row1{display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:stretch;}
 .profile-row2{display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:stretch;}
 #tab-entreprise .card{background:var(--surface);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:0;display:flex;flex-direction:column;}
 #tab-entreprise .ctitle{font-size:8px;font-weight:500;text-transform:uppercase;letter-spacing:.2em;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
@@ -76,11 +76,6 @@ body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-fon
 .info-label{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;}
 .info-value{font-size:12px;color:var(--text);white-space:pre-line;line-height:1.35;}
 .info-value:empty::before{content:'—';color:var(--text3);}
-.status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;line-height:1.4;}
-.status-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;}
-.status-badge.active,.status-badge.connected{background:var(--green-bg);color:var(--green);border:1px solid var(--green);}
-.status-badge.past_due{background:var(--red-bg);color:var(--red);border:1px solid var(--red);}
-.status-badge.cancelled,.status-badge.disconnected{background:var(--surface2);color:var(--text3);border:1px solid var(--border2);}
 #histSearch{max-width:420px;}
 .tab{display:none;} .tab.active{display:block;}
 h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:400;}
@@ -331,11 +326,17 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div class="ctitle" data-i18n="data_compte_title">Compte</div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="width:38px;height:38px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:var(--gold);flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.08);" id="compteAvatar">H</div>
-          <div>
-            <div style="font-size:12px;color:var(--text);margin-bottom:4px;" id="compteName">Helm Ops</div>
-            <span class="status-badge" id="compteStatus"></span>
+          <div style="min-width:0;">
+            <div style="font-size:12px;color:var(--text);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="accountEmail">—</div>
+            <div style="font-size:10px;color:var(--text3);" id="compteStatus"></div>
           </div>
         </div>
+        <div style="height:1px;background:var(--border);margin:10px 0;"></div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-label">Plan</div><div class="info-value" id="accountPlan" style="font-weight:500;">—</div></div>
+          <div class="info-item"><div class="info-label">Renouvellement</div><div class="info-value" id="accountRenewal">—</div></div>
+        </div>
+        <button class="btn-line" onclick="openBillingPortal()" style="margin-top:10px;width:100%;">Gérer mon abonnement</button>
         <div style="height:1px;background:var(--border);margin:10px 0;"></div>
         <div class="info-grid">
           <div class="info-item"><div class="info-label" data-i18n="lbl_appareil">Appareil</div><div class="info-value" id="viewDeviceLabel" data-i18n="cet_appareil">Cet appareil</div></div>
@@ -345,6 +346,21 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       </div>
 
       <div class="card">
+        <div class="ctitle" data-i18n="data_gmail_title">Envoi de factures</div>
+        <div id="gmailNotConnected">
+          <p style="font-size:11px;color:var(--text2);" data-i18n="gmail_intro">Connecte ton compte Gmail pour envoyer tes factures directement depuis ta propre adresse.</p>
+          <button class="btn-gold" onclick="connectGmail()" data-i18n="btn_connect_gmail">Connecter mon Gmail</button>
+        </div>
+        <div id="gmailConnected" style="display:none;">
+          <p style="font-size:11px;color:var(--text2);" id="gmailConnectedAs"></p>
+          <button class="btn-line" style="color:var(--red);" onclick="disconnectGmail()" data-i18n="btn_disconnect_gmail">Déconnecter</button>
+        </div>
+        <div id="gmailStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+      </div>
+      </div>
+
+      <div class="profile-row2">
+      <div class="card" style="grid-column:1/-1;">
         <div class="ctitle" data-i18n="data_info_title">Informations</div>
         <div id="infoView" class="info-grid">
           <div class="info-item"><div class="info-label" data-i18n="lbl_nom">Nom</div><div class="info-value" id="viewName"></div></div>
@@ -385,35 +401,6 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           </div>
           <div id="fromStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
         </div>
-      </div>
-      </div>
-
-      <div class="profile-row2">
-      <div class="card">
-        <div class="ctitle">Mon compte</div>
-        <div class="info-grid">
-          <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="accountEmail">—</div></div>
-          <div class="info-item"><div class="info-label">Statut</div><div class="info-value"><span class="status-badge" id="accountStatus">—</span></div></div>
-          <div class="info-item"><div class="info-label">Formule</div><div class="info-value" id="accountPlan">—</div></div>
-          <div class="info-item"><div class="info-label">Durée</div><div class="info-value" id="accountPeriod">—</div></div>
-          <div class="info-item"><div class="info-label">Renouvellement</div><div class="info-value" id="accountRenewal">—</div></div>
-        </div>
-        <div class="row" style="margin-top:10px;">
-          <button class="btn-line" onclick="openBillingPortal()">Gérer mon abonnement</button>
-          <button class="btn-line" style="color:var(--red);" onclick="logoutAccount()">Se déconnecter</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="ctitle" data-i18n="data_gmail_title">Envoi de factures</div>
-        <div id="gmailNotConnected">
-          <p style="font-size:11px;color:var(--text2);" data-i18n="gmail_intro">Connecte ton compte Gmail pour envoyer tes factures directement depuis ta propre adresse.</p>
-          <button class="btn-gold" onclick="connectGmail()" data-i18n="btn_connect_gmail">Connecter mon Gmail</button>
-        </div>
-        <div id="gmailConnected" style="display:none;">
-          <p style="font-size:11px;color:var(--text2);" id="gmailConnectedAs"></p>
-          <button class="btn-line" style="color:var(--red);" onclick="disconnectGmail()" data-i18n="btn_disconnect_gmail">Déconnecter</button>
-        </div>
-        <div id="gmailStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
 
       </div>
@@ -715,7 +702,7 @@ sec_planning:'Planning', sec_facturation:'Facturation', sec_clients:'Clients', s
 theme_dark_title:'Sombre', theme_auto_title:'Auto', theme_light_title:'Clair', legal_link:'Mentions légales',
 data_title:'Profil', data_compte_title:'Compte', data_info_title:'Informations',
 lbl_appareil:'Appareil', cet_appareil:'Cet appareil', lbl_derniere_synchro:'Dernière synchro',
-compte_status_connected:'Synchronisé', compte_status_disconnected:'Non connecté',
+compte_status_connected:'Connecté au cloud', compte_status_disconnected:'Non connecté',
 time_just_now:"à l'instant", time_min_ago:'il y a {n} min', time_hour_ago:'il y a {n} h', time_day_ago:'il y a {n} j',
 lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
 data_gmail_title:'Envoi de factures', gmail_intro:'Connecte ton compte Gmail pour envoyer tes factures directement depuis ta propre adresse.',
@@ -806,7 +793,7 @@ sec_planning:'Schedule', sec_facturation:'Billing', sec_clients:'Clients', sec_c
 theme_dark_title:'Dark', theme_auto_title:'Auto', theme_light_title:'Light', legal_link:'Legal notice',
 data_title:'Profile', data_compte_title:'Account', data_info_title:'Information',
 lbl_appareil:'Device', cet_appareil:'This device', lbl_derniere_synchro:'Last sync',
-compte_status_connected:'Synced', compte_status_disconnected:'Not connected',
+compte_status_connected:'Connected to cloud', compte_status_disconnected:'Not connected',
 time_just_now:'just now', time_min_ago:'{n} min ago', time_hour_ago:'{n} h ago', time_day_ago:'{n} d ago',
 lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
 data_gmail_title:'Sending invoices', gmail_intro:'Connect your Gmail account to send invoices directly from your own address.',
@@ -897,7 +884,7 @@ sec_planning:'Planificación', sec_facturation:'Facturación', sec_clients:'Clie
 theme_dark_title:'Oscuro', theme_auto_title:'Auto', theme_light_title:'Claro', legal_link:'Aviso legal',
 data_title:'Perfil', data_compte_title:'Cuenta', data_info_title:'Información',
 lbl_appareil:'Dispositivo', cet_appareil:'Este dispositivo', lbl_derniere_synchro:'Última sincronización',
-compte_status_connected:'Sincronizado', compte_status_disconnected:'No conectado',
+compte_status_connected:'Conectado a la nube', compte_status_disconnected:'No conectado',
 time_just_now:'justo ahora', time_min_ago:'hace {n} min', time_hour_ago:'hace {n} h', time_day_ago:'hace {n} d',
 lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
 data_gmail_title:'Envío de facturas', gmail_intro:'Conecta tu cuenta de Gmail para enviar tus facturas directamente desde tu propia dirección.',
@@ -1102,12 +1089,9 @@ function relativeTime(iso){
   return t('time_day_ago',{n:Math.floor(hours/24)});
 }
 async function refreshCompteView(){
-  const f = store('from');
-  compteName.textContent = f.name || 'Helm Ops';
-  compteAvatar.textContent = (f.name||'H').trim().charAt(0).toUpperCase();
   const { data:{session} } = await getSb().auth.getSession();
+  compteAvatar.textContent = (session?.user?.email||'H').trim().charAt(0).toUpperCase();
   compteStatus.textContent = session ? t('compte_status_connected') : t('compte_status_disconnected');
-  compteStatus.className = 'status-badge ' + (session ? 'connected' : 'disconnected');
   const lastSync = localStorage.getItem('lastCloudSyncAt');
   viewLastSync.textContent = lastSync ? relativeTime(lastSync) : '—';
 }
@@ -1511,16 +1495,15 @@ async function bootAuth(){
 }
 function renderAccountCard(access){
   const emailEl = document.getElementById('accountEmail');
-  const statusEl = document.getElementById('accountStatus');
   const planEl = document.getElementById('accountPlan');
-  const periodEl = document.getElementById('accountPeriod');
   const renewalEl = document.getElementById('accountRenewal');
-  const statusLabels = {active:'Actif', past_due:'Paiement en retard', cancelled:'Annulé (actif jusqu\'au renouvellement)'};
-  const periodLabels = {monthly:'Mensuel', yearly:'Annuel'};
+  const periodLabels = {monthly:'mensuel', yearly:'annuel'};
+  const statusColors = {active:'var(--gold)', past_due:'var(--red)', cancelled:'var(--text3)'};
   if(emailEl) emailEl.textContent = access.session?.user?.email || '—';
-  if(statusEl){ statusEl.textContent = statusLabels[access.status] || '—'; statusEl.className = 'status-badge ' + (access.status||''); }
-  if(planEl) planEl.textContent = access.plan ? (access.plan.charAt(0).toUpperCase()+access.plan.slice(1)) : '—';
-  if(periodEl) periodEl.textContent = periodLabels[access.period] || access.period || '—';
+  if(planEl){
+    planEl.textContent = access.plan ? (access.plan.charAt(0).toUpperCase()+access.plan.slice(1)+' — '+(periodLabels[access.period]||access.period)) : '—';
+    planEl.style.color = statusColors[access.status] || 'var(--text)';
+  }
   if(renewalEl) renewalEl.textContent = access.expiresAt ? new Date(access.expiresAt).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
 }
 function toggleInfoEdit(show){
