@@ -2,7 +2,7 @@
 
 Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) garde son nom technique historique, décorrélé de la marque affichée. La table `billops_sync` (ancien mécanisme de sync par code, voir Historique en bas de section Stockage cloud) n'est plus utilisée par le client mais n'a pas été supprimée côté Supabase.
 
-Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `mobile/oauth-relay.html` (page statique de relais pour le login Google côté Electron, voir Login + abonnement ci-dessous), `supabase/functions/` (Edge Functions : `send-invoice` envoi via Gmail API au nom de l'utilisateur, `oauth-google-callback`/`oauth-google-poll` handoff du flux OAuth Gmail-send, `check-access`/`stripe-checkout`/`stripe-webhook`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
+Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `mobile/oauth-relay.html` (page statique de relais pour le login Google côté Electron, voir Login + abonnement ci-dessous), `supabase/functions/` (Edge Functions : `send-invoice` envoi de factures par SMTP (mot de passe d'application Gmail), `oauth-google-callback`/`oauth-google-poll` mortes depuis le passage au SMTP (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
 
 ## Stack
 HTML/CSS/JS vanilla. `localStorage` sert de **cache local** (from, clients, invoices, bookings, inv_theme, inv_lang, gmailAuth, pushSubscriptions) — la source de vérité pour les données métier (clients/bookings/invoices/from) est Supabase, scindée par utilisateur (voir Stockage cloud ci-dessous).
@@ -81,40 +81,49 @@ Déploiement : `.github/workflows/pages.yml` publie le dossier `mobile/` sur Git
 Web Push standard (VAPID), supporté par Safari iOS 16.4+ pour les PWA installées sur l'écran d'accueil. Bouton "Activer les notifications" dans le header mobile → abonnement stocké localement (`pushSubscriptions`) et poussé dans la table cloud `push_subscriptions` (clé = `endpoint`, scindée par `user_id`, RLS select/insert/delete). Une Edge Function Supabase (`supabase/functions/notify-upcoming-bookings`), déclenchée toutes les ~3 min par pg_cron, lit directement la table `bookings` (statut à facturer, non pointé, non notifié) et filtre celles dont l'heure de début tombe dans une fenêtre ~10-20 min à venir (viser un rappel ~15 min avant, tolérant un tick pg_cron manqué), envoie une notification à chaque abonnement `push_subscriptions` de l'utilisateur concerné (sans contenu chiffré, texte fixe géré par `mobile/sw.js`), puis pose `notified_at` sur les bookings correspondants pour ne pas re-notifier. Les abonnements qui répondent 404/410 (révoqués côté navigateur) sont supprimés automatiquement de `push_subscriptions`. Avant le 2026-08-05, cette fonction lisait/écrivait tout depuis le blob unique `billops_sync` (voir Stockage cloud plus haut) — migrée en même temps que le reste pour ne pas silencieusement arrêter de fonctionner une fois le code de synchro retiré côté client.
 Déploiement des Edge Functions (`send-invoice`, `notify-upcoming-bookings`) : voir `supabase/README.md` — nécessite un compte Supabase authentifié en CLI (login une fois via navigateur ; link/deploy/secrets ensuite automatisables).
 
-## Envoi de factures (OAuth Gmail par utilisateur, plus de SMTP relais commun)
-Depuis le 2026-08-04 : chaque utilisateur connecte son propre compte Gmail une fois (bouton
-"Connecter mon Gmail" dans Mon entreprise / Réglages), et l'envoi se fait via l'API Gmail au nom de
-l'utilisateur lui-même — plus de compte mail technique partagé (l'étape SMTP centralisé du
-2026-08-03 est abandonnée). Le mail part littéralement depuis l'adresse Gmail de l'utilisateur
-(l'API Gmail n'accepte que l'adresse du compte authentifié en `From:`), donc plus besoin de
-Reply-To ni de `from.email` séparé pour ça.
+## Envoi de factures (mot de passe d'application Gmail + SMTP, plus d'OAuth)
+Depuis le 2026-08-08 : remplace le flux OAuth Gmail (2026-08-04 → abandonné) et le SMTP relais
+commun (2026-08-03 → abandonné). Raison de l'abandon de l'OAuth : tant que l'app Google Cloud
+n'est pas passée en mode "Production" (vérification Google requise, potentiellement coûteuse pour
+le scope `gmail.send`), chaque nouveau client devait être ajouté manuellement comme "testeur" dans
+la Search Console — invivable pour un vrai multi-utilisateurs en self-service. Le SMTP relais
+commun avait lui été abandonné parce que le mail partait d'une adresse technique partagée au lieu
+de celle du client — ce nouveau système résout les deux : le mail part bien depuis l'adresse Gmail
+du client, sans repasser par Google Cloud Console.
 
-Flux OAuth (Authorization Code, `access_type=offline&prompt=consent` pour obtenir un
-`refresh_token`) :
-1. `connectGmail()` (`facture.html`/`mobile/index.html`) ouvre une popup vers
-   `accounts.google.com/o/oauth2/v2/auth` avec un `state` aléatoire, scope
-   `openid email https://www.googleapis.com/auth/gmail.send`.
-2. Google redirige vers l'Edge Function `oauth-google-callback` (redirect URI enregistrée côté
-   Google Cloud Console), qui échange le `code` contre un `refresh_token` et le dépose dans la
-   table `oauth_pending` (clé = `state`, purge auto après 10 min).
-3. Le client poll `oauth-google-poll` toutes les 1.5s avec ce `state` (via `x-app-secret`) ; la
-   ligne est supprimée dès qu'elle est lue (usage unique). Pas de `postMessage()` possible : la CSP
-   des Edge Functions Supabase bloque le JS inline sur la page de callback, d'où ce détour par
-   handoff en base + polling.
-4. Le `refreshToken`/`email` obtenus sont stockés dans `gmailAuth` (localStorage). Pas synchronisé
-   entre appareils depuis le retrait du code de synchro — régression connue, voir Stockage cloud
-   plus haut.
-5. À l'envoi, `send-invoice` échange le `refreshToken` contre un `access_token` (endpoint standard
-   Google), construit le MIME brut et appelle `gmail.googleapis.com/.../messages/send`. Payload
-   client : `{refreshToken, fromEmail, fromName, to, subject, html}`, protégé par le même header
-   `x-app-secret` que le reste (scan automatisé, pas une vraie auth).
+Chaque utilisateur génère une fois un **mot de passe d'application** dans son propre compte Google
+(`myaccount.google.com` → validation en 2 étapes → mots de passe des applications) et le colle
+dans Helm Ops (Mon entreprise / Réglages → Envoi de factures) avec son adresse Gmail — un lien
+dépliant dans l'UI rappelle ces étapes. Stocké dans `from.smtpEmail`/`from.smtpAppPassword`
+(synchronisé cross-device via `company_info.smtp_email`/`smtp_app_password`, comme le reste des
+infos entreprise — corrige au passage la régression de sync inter-appareils qu'avait `gmailAuth`).
+`connectGmail()`/`disconnectGmail()` (`facture.html`/`mobile/index.html`) valident juste le format
+email + que le domaine est `gmail.com`/`googlemail.com`, puis appellent `set('from', {...})`.
 
-Secrets nécessaires : `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` (credentials OAuth Web côté Google
-Cloud Console, redirect URI = URL de `oauth-google-callback`). Voir `supabase/README.md`.
-Risque connu non encore validé en prod : si l'app OAuth Google Cloud reste en mode "Testing" (écran
-de consentement non publié/vérifié), seuls les comptes ajoutés comme testeurs peuvent se connecter
-et les refresh tokens expirent au bout de 7 jours — à vérifier/passer en production côté Google
-Cloud Console avant un usage multi-utilisateurs réel.
+**Gmail uniquement pour l'instant** : `send-invoice` envoie via SMTP (`smtp.gmail.com:465`, TLS
+implicite, `npm:nodemailer`) avec l'email + mot de passe d'application comme identifiants —
+Outlook/Office365 n'accepte le SMTP AUTH qu'en port 587 (STARTTLS), et les Edge Functions Supabase
+bloquent ce port en sortie (25 et 587 interdits, seul 465 fonctionne) ; Microsoft désactive de plus
+en plus l'auth SMTP par défaut sur les nouveaux comptes Outlook.com. Support Outlook = à revoir un
+jour via Microsoft Graph OAuth (`Mail.Send`), un flux distinct à part entière, pas fait.
+
+Payload client → `send-invoice` : `{email, appPassword, to, subject, html, pdfBase64,
+pdfFilename, fromName}`, protégé par le même header `x-app-secret` que le reste (scan automatisé,
+pas une vraie auth — la vraie protection est que la requête doit porter un mot de passe
+d'application Gmail valide). Le corps de l'email n'est plus la facture en HTML brut : c'est une
+formule de politesse (vouvoiement par défaut, tutoiement activable par un interrupteur sur la fiche
+client — `clients.tutoiement`, formule figée dans le code, pas éditable par l'utilisateur) + la
+facture en **PDF joint** (généré client-side via `html2pdf` → `toPdf().output('datauristring')`,
+voir `pdfBase64FromElement()`/`pdfBase64FromHtml()` dans `facture.html`).
+
+Les Edge Functions `oauth-google-callback`/`oauth-google-poll` et la table `oauth_pending`
+existent encore côté Supabase mais ne sont plus appelées par aucun client (flux OAuth mort, pas
+supprimé — pas de raison de le faire tant que ça ne gêne pas).
+
+**Piège vécu en dev** : `saveFrom()`/`saveFromMobile()` (formulaire "Mon entreprise") remplaçaient
+tout l'objet `from` sans repartir de `store('from')` — modifier son nom/adresse effaçait
+silencieusement `smtpEmail`/`smtpAppPassword` (et `bic`) déjà enregistrés. Fix : toujours
+`set('from', {...store('from'), ...champsModifiés})`, jamais un objet neuf en dur.
 
 ## Login Google + abonnement Stripe (porte d'entrée de l'app)
 Depuis le 2026-08-04 : l'app est gated par une connexion Google (Supabase Auth) + une vérification
@@ -163,7 +172,7 @@ https://github.com/SPECTRE888/Bill-ops-.git (branche main)
 ## Backlog fonctionnel en attente
 - Autonomie mobile complète (usage sans Mac) : se connecter avec un compte Google suffit désormais (plus de code à générer), onglet Clients et Mon entreprise faits côté mobile. Aucun point bloquant connu restant sur cet axe.
 - Facturation groupée (plusieurs prestas d'un même client → une facture) : faite sur Mac (onglet Pointage) et sur mobile (Factures → À facturer, sélection multi-cases + "Facturer la sélection"). Sur les deux, le bouton se désactive si les prestas sélectionnées n'ont pas toutes le même client.
-- PDF (html2pdf.js) en prod. Envoi de factures OAuth Gmail testé et fonctionnel en usage réel, mais toujours pas synchronisé entre appareils (régression connue, voir Stockage cloud) ; statut de publication de l'écran de consentement Google Cloud toujours pas vérifié (mode "Testing" probable, limite à 7 jours de validité du refresh token pour les comptes non-testeurs).
+- PDF (html2pdf.js) en prod, envoyé en pièce jointe (plus en texte brut dans le corps du mail). Envoi de factures désormais par mot de passe d'application Gmail + SMTP (plus d'OAuth Google, plus d'écran "app non vérifiée", auto-service complet, synchronisé entre appareils) — voir Envoi de factures. Outlook non supporté (blocage port SMTP côté Edge Functions Supabase + désactivation croissante de l'auth SMTP par Microsoft), à revoir un jour via Microsoft Graph OAuth si demandé.
 - Login/abonnement Stripe toujours en mode **test** — bascule en mode live à faire manuellement (voir section dédiée).
 
 ## Contraintes de style utilisateur
