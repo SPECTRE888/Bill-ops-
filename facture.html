@@ -420,13 +420,6 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         </div>
         <div id="gmailStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
-      <div class="card">
-        <div class="ctitle" data-i18n="data_email_body_title">Message de facture</div>
-        <p style="font-size:11px;color:var(--text2);" data-i18n="hint_email_body_default">Utilisée par défaut à l'envoi, sauf si un client a sa propre formule.</p>
-        <textarea id="fromEmailBody" style="height:56px;"></textarea>
-        <button class="btn-gold" onclick="saveEmailBodyDefault()" style="margin-top:10px;" data-i18n="btn_save_message">Enregistrer le message</button>
-        <div id="emailBodyStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
-      </div>
       </div>
       </div>
     </div>
@@ -444,8 +437,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div><label data-i18n="lbl_telephone">Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78"></div>
         </div>
         <label data-i18n="lbl_adresse">Adresse</label><input id="cliAddr">
-        <label><span data-i18n="lbl_email_body">Formule de politesse (facture)</span> <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;" data-i18n="hint_email_body">(optionnel, sinon la formule par défaut de Mon entreprise est utilisée)</span></label>
-        <textarea id="cliEmailBody" rows="3" placeholder="Bonjour,&#10;&#10;Veuillez trouver ci-joint votre facture..." data-i18n-ph="ph_email_body"></textarea>
+        <div class="toggle-item" style="max-width:220px;margin-top:8px;">
+          <span data-i18n="toggle_tutoiement">Tutoiement (email facture)</span>
+          <label class="switch">
+            <input type="checkbox" id="cliTutoiement">
+            <span class="switch-track"></span>
+          </label>
+        </div>
         <button class="btn-gold" onclick="saveClient()" data-i18n="btn_save_client">Enregistrer le client</button>
         <button class="btn-line" onclick="resetClientForm()" data-i18n="btn_new_client">Nouveau client</button>
       </div>
@@ -751,20 +749,18 @@ compte_status_connected:'Connecté au cloud', compte_status_disconnected:'Non co
 time_just_now:"à l'instant", time_min_ago:'il y a {n} min', time_hour_ago:'il y a {n} h', time_day_ago:'il y a {n} j',
 lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
 data_gmail_title:'Envoi de factures', gmail_intro:'Connecte ton compte Gmail pour envoyer tes factures directement depuis ta propre adresse.',
-data_email_body_title:'Message de facture',
 btn_connect_gmail:'Connecter mon Gmail', gmail_connected_as:'Connecté : {email}', btn_disconnect_gmail:'Déconnecter',
 lbl_tva_regime:'Régime TVA', hint_tva_regime:'(basculement automatique à 32 000 € de CA cumulé)',
 opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'TVA applicable',
 lbl_rcs:'Mention RCS/RM', lbl_paiement:'Mode de règlement', lbl_rib:'RIB / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
-hint_email_body_default:"Utilisée par défaut à l'envoi, sauf si un client a sa propre formule.",
-btn_save:'Enregistrer', btn_edit:'Modifier', btn_save_info:'Enregistrer mes infos', btn_save_message:'Enregistrer le message',
+btn_save:'Enregistrer', btn_edit:'Modifier', btn_save_info:'Enregistrer mes infos',
 data_sync_title:'Synchronisation', sync_intro:'Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.',
 btn_gen_sync:'Générer un code de synchro', lbl_paste_sync:'Ou coller un code existant', ph_sync_code:'Code de synchro', btn_connect:'Connecter',
 sync_code_intro:'Code de synchro (à coller sur l\'autre appareil) :', btn_copy_code:'Copier le code', btn_force_sync:'Forcer la synchro', btn_disconnect_device:'Déconnecter cet appareil',
 data_backup_title:'Sauvegarde', backup_intro:'Exporte toutes tes données (entreprise, clients, factures, planning) dans un fichier, à conserver en lieu sûr ou à réimporter sur un autre appareil.',
 btn_export_data:'Exporter mes données', lbl_import_backup:'Importer une sauvegarde',
 clients_add_title:'Ajouter / modifier un client', lbl_nom_societe:'Nom société', lbl_prefixe:'Préfixe facture (2-3 lettres)', lbl_email:'Email', lbl_telephone:'Téléphone',
-lbl_email_body:'Formule de politesse (facture)', hint_email_body:'(optionnel, sinon la formule par défaut de Mon entreprise est utilisée)', ph_email_body:"Bonjour,\n\nVeuillez trouver ci-joint votre facture...",
+toggle_tutoiement:'Tutoiement (email facture)',
 btn_save_client:'Enregistrer le client', btn_new_client:'Nouveau client', clients_list_title:'Clients enregistrés', empty_clients:'Aucun client.', btn_delete:'Supprimer',
 fact_client_title:'Client', ph_client_search:'Tape le nom du client...', fact_invoice_title:'Facture', lbl_num_facture:'N° facture', lbl_date:'Date',
 lbl_date_travaillee:'Date travaillée', hint_date_travaillee:'(pour rattacher le CA au bon mois)', lbl_tva_pct:'TVA (%)',
@@ -820,7 +816,8 @@ toast_backup_downloaded:'✔ Sauvegarde téléchargée.', toast_backup_imported:
 toast_code_copied:'✔ Code copié', toast_info_saved:'✔ Infos enregistrées', default_service_label:'Prestation',
 btn_sidebar_disconnect:'Déconnexion', toast_disconnect_soon:'Bientôt disponible — pas encore configuré.',
 preview_title:'Aperçu facture', title_debut:'Début', title_fin:'Fin',
-email_default_body:"Bonjour,\n\nVeuillez trouver ci-joint votre facture {num}.\n\nN'hésitez pas à me contacter pour toute question.\n\nCordialement,\n{name}",
+email_default_body_vous:"Bonjour,\n\nVeuillez trouver ci-joint votre facture {num}.\n\nN'hésitez pas à me contacter pour toute question.\n\nCordialement,\n{name}",
+email_default_body_tu:"Salut,\n\nTu trouveras ci-joint ta facture {num}.\n\nN'hésite pas à me contacter pour toute question.\n\nÀ bientôt,\n{name}",
 legal_modal_title:'Mentions légales',
 inv_facture_label:'Facture', inv_num:'N° de facture', inv_date:'Date', inv_de:'De', inv_a:'À',
 inv_desc:'Description', inv_qte:'Qté', inv_unitaire:'Unitaire', inv_montant:'Montant',
@@ -848,20 +845,18 @@ compte_status_connected:'Connected to cloud', compte_status_disconnected:'Not co
 time_just_now:'just now', time_min_ago:'{n} min ago', time_hour_ago:'{n} h ago', time_day_ago:'{n} d ago',
 lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
 data_gmail_title:'Sending invoices', gmail_intro:'Connect your Gmail account to send invoices directly from your own address.',
-data_email_body_title:'Invoice message',
 btn_connect_gmail:'Connect my Gmail', gmail_connected_as:'Connected: {email}', btn_disconnect_gmail:'Disconnect',
 lbl_tva_regime:'VAT regime', hint_tva_regime:'(automatically switches at €32,000 cumulative revenue)',
 opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applicable',
 lbl_rcs:'Trade register notice', lbl_paiement:'Payment method', lbl_rib:'Bank details / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
-hint_email_body_default:"Used by default when sending, unless a client has its own message.",
-btn_save:'Save', btn_edit:'Edit', btn_save_info:'Save my info', btn_save_message:'Save message',
+btn_save:'Save', btn_edit:'Edit', btn_save_info:'Save my info',
 data_sync_title:'Sync', sync_intro:'Link this device to another one (Mac / iPhone) to share clients, invoices and schedule.',
 btn_gen_sync:'Generate a sync code', lbl_paste_sync:'Or paste an existing code', ph_sync_code:'Sync code', btn_connect:'Connect',
 sync_code_intro:'Sync code (paste it on the other device):', btn_copy_code:'Copy code', btn_force_sync:'Force sync', btn_disconnect_device:'Disconnect this device',
 data_backup_title:'Backup', backup_intro:'Export all your data (company, clients, invoices, schedule) to a file, to keep safe or re-import on another device.',
 btn_export_data:'Export my data', lbl_import_backup:'Import a backup',
 clients_add_title:'Add / edit a client', lbl_nom_societe:'Company name', lbl_prefixe:'Invoice prefix (2-3 letters)', lbl_email:'Email', lbl_telephone:'Phone',
-lbl_email_body:'Invoice email message', hint_email_body:'(optional, otherwise the default from My company is used)', ph_email_body:"Hello,\n\nPlease find attached your invoice...",
+toggle_tutoiement:'Informal tone (invoice email)',
 btn_save_client:'Save client', btn_new_client:'New client', clients_list_title:'Saved clients', empty_clients:'No clients.', btn_delete:'Delete',
 fact_client_title:'Client', ph_client_search:"Type the client's name...", fact_invoice_title:'Invoice', lbl_num_facture:'Invoice no.', lbl_date:'Date',
 lbl_date_travaillee:'Work date', hint_date_travaillee:'(to attribute revenue to the right month)', lbl_tva_pct:'VAT (%)',
@@ -917,7 +912,8 @@ toast_backup_downloaded:'✔ Backup downloaded.', toast_backup_imported:'✔ Dat
 toast_code_copied:'✔ Code copied', toast_info_saved:'✔ Info saved', default_service_label:'Service',
 btn_sidebar_disconnect:'Disconnect', toast_disconnect_soon:'Coming soon — not configured yet.',
 preview_title:'Invoice preview', title_debut:'Start', title_fin:'End',
-email_default_body:"Hello,\n\nPlease find attached your invoice {num}.\n\nFeel free to contact me with any questions.\n\nBest regards,\n{name}",
+email_default_body_vous:"Hello,\n\nPlease find attached your invoice {num}.\n\nFeel free to contact me with any questions.\n\nBest regards,\n{name}",
+email_default_body_tu:"Hi,\n\nHere's your invoice {num}, attached.\n\nFeel free to reach out with any questions.\n\nCheers,\n{name}",
 legal_modal_title:'Legal notice',
 inv_facture_label:'Invoice', inv_num:'Invoice no.', inv_date:'Date', inv_de:'From', inv_a:'To',
 inv_desc:'Description', inv_qte:'Qty', inv_unitaire:'Unit price', inv_montant:'Amount',
@@ -945,20 +941,18 @@ compte_status_connected:'Conectado a la nube', compte_status_disconnected:'No co
 time_just_now:'justo ahora', time_min_ago:'hace {n} min', time_hour_ago:'hace {n} h', time_day_ago:'hace {n} d',
 lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
 data_gmail_title:'Envío de facturas', gmail_intro:'Conecta tu cuenta de Gmail para enviar tus facturas directamente desde tu propia dirección.',
-data_email_body_title:'Mensaje de factura',
 btn_connect_gmail:'Conectar mi Gmail', gmail_connected_as:'Conectado: {email}', btn_disconnect_gmail:'Desconectar',
 lbl_tva_regime:'Régimen de IVA', hint_tva_regime:'(cambio automático a 32.000 € de facturación acumulada)',
 opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplicable',
 lbl_rcs:'Mención Registro Mercantil', lbl_paiement:'Forma de pago', lbl_rib:'Datos bancarios / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
-hint_email_body_default:'Usada por defecto al enviar, salvo que un cliente tenga su propia fórmula.',
-btn_save:'Guardar', btn_edit:'Modificar', btn_save_info:'Guardar mis datos', btn_save_message:'Guardar el mensaje',
+btn_save:'Guardar', btn_edit:'Modificar', btn_save_info:'Guardar mis datos',
 data_sync_title:'Sincronización', sync_intro:'Vincula este dispositivo con otro (Mac / iPhone) para compartir clientes, facturas y planificación.',
 btn_gen_sync:'Generar un código de sincronización', lbl_paste_sync:'O pega un código existente', ph_sync_code:'Código de sincronización', btn_connect:'Conectar',
 sync_code_intro:'Código de sincronización (pégalo en el otro dispositivo):', btn_copy_code:'Copiar código', btn_force_sync:'Forzar sincronización', btn_disconnect_device:'Desconectar este dispositivo',
 data_backup_title:'Copia de seguridad', backup_intro:'Exporta todos tus datos (empresa, clientes, facturas, planificación) a un archivo, para guardar en un lugar seguro o reimportar en otro dispositivo.',
 btn_export_data:'Exportar mis datos', lbl_import_backup:'Importar una copia de seguridad',
 clients_add_title:'Añadir / modificar un cliente', lbl_nom_societe:'Nombre de la empresa', lbl_prefixe:'Prefijo de factura (2-3 letras)', lbl_email:'Email', lbl_telephone:'Teléfono',
-lbl_email_body:'Fórmula de cortesía (factura)', hint_email_body:'(opcional, si no se usa la fórmula por defecto de Mi empresa)', ph_email_body:"Hola,\n\nAdjunto encontrarás tu factura...",
+toggle_tutoiement:'Tono informal (email de factura)',
 btn_save_client:'Guardar cliente', btn_new_client:'Nuevo cliente', clients_list_title:'Clientes guardados', empty_clients:'Ningún cliente.', btn_delete:'Eliminar',
 fact_client_title:'Cliente', ph_client_search:'Escribe el nombre del cliente...', fact_invoice_title:'Factura', lbl_num_facture:'N.º factura', lbl_date:'Fecha',
 lbl_date_travaillee:'Fecha de trabajo', hint_date_travaillee:'(para asignar la facturación al mes correcto)', lbl_tva_pct:'IVA (%)',
@@ -1014,7 +1008,8 @@ toast_backup_downloaded:'✔ Copia de seguridad descargada.', toast_backup_impor
 toast_code_copied:'✔ Código copiado', toast_info_saved:'✔ Datos guardados', default_service_label:'Servicio',
 btn_sidebar_disconnect:'Desconectar', toast_disconnect_soon:'Próximamente — aún no configurado.',
 preview_title:'Vista previa de factura', title_debut:'Inicio', title_fin:'Fin',
-email_default_body:"Hola,\n\nAdjunto encontrarás tu factura {num}.\n\nNo dudes en contactarme si tienes alguna pregunta.\n\nSaludos,\n{name}",
+email_default_body_vous:"Hola,\n\nAdjunto encontrará su factura {num}.\n\nNo dude en contactarme si tiene alguna pregunta.\n\nSaludos cordiales,\n{name}",
+email_default_body_tu:"Hola,\n\nAdjunto encontrarás tu factura {num}.\n\nNo dudes en contactarme si tienes alguna pregunta.\n\nSaludos,\n{name}",
 legal_modal_title:'Aviso legal',
 inv_facture_label:'Factura', inv_num:'N.º de factura', inv_date:'Fecha', inv_de:'De', inv_a:'Para',
 inv_desc:'Descripción', inv_qte:'Cant.', inv_unitaire:'Precio unitario', inv_montant:'Importe',
@@ -1222,18 +1217,18 @@ const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueCloudPus
 // correspondante (debounce, comme l'ancien queueSync() mais table par table).
 const CLOUD_TABLES = { clients:'clients', bookings:'bookings', invoices:'invoices' };
 function toDbRow(k, obj, uid){
-  if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr, email_body:obj.emailBody };
+  if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr, tutoiement:!!obj.tutoiement };
   if(k==='bookings') return { id:obj.id, user_id:uid, client:obj.client, label:obj.label, addr:obj.addr, contact:obj.contact, date:obj.date, time_from:obj.from, time_to:obj.to, hours:obj.hours, rate:obj.rate, status:obj.status, checked_in_at:obj.checkedInAt||null, checked_out_at:obj.checkedOutAt||null, actual_hours:obj.actualHours||null, notified_at:obj.notifiedAt||null };
   // total est stocké localement comme une chaîne formatée ("2652.00 €"), mais la colonne cloud
   // est numeric — on la parse ici (même logique que invoiceAmt()) et on la reformate au retour.
   if(k==='invoices') return { id:obj.id, user_id:uid, num:obj.num, client:obj.client, date:obj.date, work_date:obj.workDate, total:parseFloat(String(obj.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0, status:obj.status, state:obj.state, html:obj.html, booking_id:obj.bookingId||null, booking_ids:obj.bookingIds||null };
-  if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, bic:obj.bic, email_body:obj.emailBody };
+  if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, bic:obj.bic };
 }
 function fromDbRow(k, row){
-  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, emailBody:row.email_body };
+  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, tutoiement:row.tutoiement };
   if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
   if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:(typeof row.total==='number'?row.total.toFixed(2):row.total)+' €', status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
-  if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, bic:row.bic, emailBody:row.email_body };
+  if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, bic:row.bic };
 }
 const cloudPushTimers = {}, cloudPushBusy = {};
 function queueCloudPush(k){
@@ -1578,16 +1573,11 @@ function toggleInfoEdit(show){
   infoEdit.style.display = show ? 'block' : 'none';
 }
 function saveFrom(){
-  set('from', {name:fromName.value,tagline:fromTagline.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value,tva:fromTva.value,rcs:fromRcs.value,pay:fromPay.value,rib:fromRib.value,bic:fromBic.value,emailBody:fromEmailBody.value});
+  set('from', {name:fromName.value,tagline:fromTagline.value,addr:fromAddr.value,contact:fromContact.value,siret:fromSiret.value,tva:fromTva.value,rcs:fromRcs.value,pay:fromPay.value,rib:fromRib.value,bic:fromBic.value});
   refreshInfoView();
   toggleInfoEdit(false);
   setStatusMsg(fromStatus, t('toast_info_saved'));
   setTimeout(()=>fromStatus.textContent='',2000);
-}
-function saveEmailBodyDefault(){
-  set('from', {...store('from'), emailBody:fromEmailBody.value});
-  setStatusMsg(emailBodyStatus, t('toast_info_saved'));
-  setTimeout(()=>emailBodyStatus.textContent='',2000);
 }
 function loadFrom(){
   const f = store('from');
@@ -1595,7 +1585,6 @@ function loadFrom(){
   fromTva.value=f.tva??'TVA non applicable, art. 293 B du CGI'; fromRcs.value=f.rcs||"Dispensé d'immatriculation au RCS et au RM"; fromPay.value=f.pay||'Virement bancaire';
   fromRib.value=f.rib||'IBAN : FR76 1741 8000 0100 0110 3467 090\nBIC : SNNNFR22XXX';
   fromBic.value=f.bic||'';
-  fromEmailBody.value = f.emailBody ?? t('email_default_body');
   refreshInfoView();
 }
 function formatFrDate(d){
@@ -1640,7 +1629,7 @@ function suggestPrefix(){
   cliPrefix.value = p.toUpperCase().slice(0,3);
 }
 function resetClientForm(){
-  cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliPhone.value=''; cliAddr.value=''; cliEmailBody.value='';
+  cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliPhone.value=''; cliAddr.value=''; cliTutoiement.checked=false;
 }
 function isValidEmail(email){
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email||'').trim());
@@ -1651,14 +1640,14 @@ function saveClient(){
     return;
   }
   const clients = storeArr('clients');
-  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value, emailBody:cliEmailBody.value};
+  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value, tutoiement:cliTutoiement.checked};
   if(cliIdx.value!==''){ c.id = clients[cliIdx.value]?.id || crypto.randomUUID(); clients[cliIdx.value]=c; } else { c.id = crypto.randomUUID(); clients.push(c); }
   set('clients', clients);
   resetClientForm(); renderClientList(); refreshClientSelect();
 }
 function editClient(i){
   const c = storeArr('clients')[i];
-  cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliPhone.value=c.phone||''; cliAddr.value=c.addr; cliEmailBody.value=c.emailBody||'';
+  cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliPhone.value=c.phone||''; cliAddr.value=c.addr; cliTutoiement.checked=!!c.tutoiement;
 }
 function deleteClient(i){
   const clients = storeArr('clients'); clients.splice(i,1); set('clients',clients);
@@ -1875,7 +1864,7 @@ function fillEmailTemplate(tpl, num){
   return String(tpl||'').replace(/\{num\}/g, num||'').replace(/\{name\}/g, store('from').name||'');
 }
 function resolveEmailBody(clientObj, num){
-  const tpl = (clientObj && clientObj.emailBody) || store('from').emailBody || t('email_default_body');
+  const tpl = t(clientObj && clientObj.tutoiement ? 'email_default_body_tu' : 'email_default_body_vous');
   return fillEmailTemplate(tpl, num);
 }
 function emailBodyHtml(text){
