@@ -306,8 +306,8 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <div class="mcard">
         <b>Envoi de factures</b><br>
         <p style="color:var(--text2);font-size:12px;margin:6px 0 10px;">Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent par défaut sur ton adresse de connexion, modifiable ici :</p>
-        <input id="replyToInput" type="email" placeholder="ton@email.com">
-        <button class="btn-gold action-btn" style="margin-top:10px;" onclick="saveReplyTo()">Enregistrer</button>
+        <input id="replyToInput" type="email" placeholder="ton@email.com" disabled>
+        <button class="btn-gold action-btn" id="replyToBtn" onclick="toggleReplyToEdit(true)" style="margin-top:10px;">Modifier</button>
         <div id="replyToStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
       <div class="mcard">
@@ -840,12 +840,23 @@ function resolveReplyTo(){
 function renderGmailUI(){
   const el = document.getElementById('replyToInput');
   if(el) el.value = store('from').replyTo || sessionEmail || '';
+  toggleReplyToEdit(false);
+}
+function toggleReplyToEdit(edit){
+  const el = document.getElementById('replyToInput');
+  const btn = document.getElementById('replyToBtn');
+  if(!el || !btn) return;
+  el.disabled = !edit;
+  btn.textContent = edit ? 'Enregistrer' : 'Modifier';
+  btn.onclick = edit ? saveReplyTo : ()=>toggleReplyToEdit(true);
+  if(edit) el.focus();
 }
 function saveReplyTo(){
   const val = (document.getElementById('replyToInput').value||'').trim();
   const statusEl = document.getElementById('replyToStatus');
   if(val && !isValidEmail(val)){ setStatusMsg(statusEl, '⚠ Adresse email invalide.'); return; }
   set('from', {...store('from'), replyTo: val});
+  toggleReplyToEdit(false);
   setStatusMsg(statusEl, '✔ Enregistré.');
   setTimeout(()=>statusEl.textContent='',2000);
 }
