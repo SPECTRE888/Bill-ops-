@@ -98,11 +98,13 @@ pas SendGrid). `send-invoice` envoie via l'API Brevo (`https://api.brevo.com/v3/
 - `sender` = toujours `mail@ops-suite.fr`, mais avec le **nom** affiché réglé sur `from.name` du
   client (ex. "Jerome Jarrige") — c'est ce que voit le destinataire dans sa boîte de réception,
   l'adresse technique brute n'étant visible que s'il inspecte les détails du mail (rare).
-- `replyTo` = l'adresse de connexion Google de l'utilisateur (`sessionEmail`, capturée dans
-  `renderAccountCard()` au boot depuis `access.session.user.email`, variable globale réutilisée
-  par `sendInvoice()`/`resendInvoice()`) — donc les réponses du client arrivent bien dans la vraie
-  boîte de l'utilisateur, sans qu'il ait à configurer quoi que ce soit : son compte de connexion
-  Helm Ops sert aussi d'adresse d'envoi/réponse.
+- `replyTo` = par défaut l'adresse de connexion Google de l'utilisateur (`sessionEmail`, capturée
+  dans `renderAccountCard()` au boot depuis `access.session.user.email`) — donc les réponses du
+  client arrivent bien dans la vraie boîte de l'utilisateur, sans qu'il ait à configurer quoi que
+  ce soit au départ. Overridable : champ `from.replyTo` (carte "Envoi de factures" dans Mon
+  entreprise / Réglages, synchronisé via `company_info.reply_to`) pour recevoir les réponses sur
+  une autre adresse que celle de connexion — `resolveReplyTo()` (`facture.html`/`mobile/index.html`)
+  retombe sur `sessionEmail` si le champ est vide ou invalide.
 - Payload : `{replyTo, fromName, to, subject, html, pdfBase64, pdfFilename}`, protégé par le même
   header `x-app-secret` que le reste (scan automatisé, pas une vraie auth).
 

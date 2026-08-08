@@ -305,8 +305,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       </div>
       <div class="mcard">
         <b>Envoi de factures</b><br>
-        <p style="color:var(--text2);font-size:12px;margin:6px 0 10px;">Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent directement sur ton adresse de connexion :</p>
-        <p style="color:var(--gold);font-size:13px;font-weight:500;" id="gmailConnectedAs"></p>
+        <p style="color:var(--text2);font-size:12px;margin:6px 0 10px;">Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent par défaut sur ton adresse de connexion, modifiable ici :</p>
+        <input id="replyToInput" type="email" placeholder="ton@email.com">
+        <button class="btn-gold action-btn" style="margin-top:10px;" onclick="saveReplyTo()">Enregistrer</button>
+        <div id="replyToStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
       <div class="mcard">
         <b>Notifications</b><br>
@@ -595,13 +597,13 @@ function toDbRow(k, obj, uid){
   // total est stocké localement comme une chaîne formatée ("2652.00 €"), mais la colonne cloud
   // est numeric — on la parse ici et on la reformate au retour (fromDbRow).
   if(k==='invoices') return { id:obj.id, user_id:uid, num:obj.num, client:obj.client, date:obj.date, work_date:obj.workDate, total:parseFloat(String(obj.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0, status:obj.status, state:obj.state, html:obj.html, booking_id:obj.bookingId||null, booking_ids:obj.bookingIds||null };
-  if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib };
+  if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, reply_to:obj.replyTo };
 }
 function fromDbRow(k, row){
   if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr };
   if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
   if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:(typeof row.total==='number'?row.total.toFixed(2):row.total)+' €', status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
-  if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib };
+  if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, replyTo:row.reply_to };
 }
 const cloudPushTimers = {}, cloudPushBusy = {};
 function queueCloudPush(k){
@@ -831,9 +833,21 @@ function relativeTimeMobile(iso){
   if(hours < 24) return 'il y a '+hours+'h';
   return 'il y a '+Math.floor(hours/24)+'j';
 }
+function resolveReplyTo(){
+  const f = store('from');
+  return (f.replyTo && isValidEmail(f.replyTo)) ? f.replyTo : sessionEmail;
+}
 function renderGmailUI(){
-  const el = document.getElementById('gmailConnectedAs');
-  if(el) el.textContent = sessionEmail || '—';
+  const el = document.getElementById('replyToInput');
+  if(el) el.value = store('from').replyTo || sessionEmail || '';
+}
+function saveReplyTo(){
+  const val = (document.getElementById('replyToInput').value||'').trim();
+  const statusEl = document.getElementById('replyToStatus');
+  if(val && !isValidEmail(val)){ setStatusMsg(statusEl, '⚠ Adresse email invalide.'); return; }
+  set('from', {...store('from'), replyTo: val});
+  setStatusMsg(statusEl, '✔ Enregistré.');
+  setTimeout(()=>statusEl.textContent='',2000);
 }
 function refreshFromViewMobile(){
   const f = store('from');
@@ -1310,7 +1324,7 @@ async function sendInvoiceMobile(num){
   try{
     const res = await fetch(SEND_INVOICE_URL, {
       method:'POST', headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
-      body: JSON.stringify({replyTo: sessionEmail, to: c.email, subject:'Facture '+inv.num, html: inv.html, fromName: f.name})
+      body: JSON.stringify({replyTo: resolveReplyTo(), to: c.email, subject:'Facture '+inv.num, html: inv.html, fromName: f.name})
     });
     showToast(res.ok ? '✔ Facture envoyée à '+c.email+'.' : '✕ Échec de l\'envoi.');
     if(res.ok){
