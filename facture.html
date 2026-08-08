@@ -410,26 +410,8 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <div class="profile-row2">
       <div class="card">
         <div class="ctitle" data-i18n="data_gmail_title">Envoi de factures</div>
-        <div id="gmailNotConnected">
-          <p style="font-size:11px;color:var(--text2);" data-i18n="gmail_intro">Connecte ton adresse Gmail pour envoyer tes factures directement depuis ta propre adresse.</p>
-          <details style="margin-bottom:10px;">
-            <summary style="font-size:10px;color:var(--gold);cursor:pointer;" data-i18n="gmail_help_summary">Comment obtenir le mot de passe d'application ?</summary>
-            <ol style="font-size:10.5px;color:var(--text2);margin:6px 0 0;padding-left:16px;line-height:1.6;">
-              <li data-i18n="gmail_help_1">Ouvre myaccount.google.com sur ton compte Gmail</li>
-              <li data-i18n="gmail_help_2">Vérifie que la validation en 2 étapes est activée</li>
-              <li data-i18n="gmail_help_3">Menu "Mots de passe des applications" → crée-en un (ex. "Helm Ops")</li>
-              <li data-i18n="gmail_help_4">Copie le code à 16 caractères et colle-le ci-dessous</li>
-            </ol>
-          </details>
-          <label data-i18n="lbl_gmail_address">Adresse Gmail</label><input id="smtpEmailInput" type="email" placeholder="toi@gmail.com">
-          <label data-i18n="lbl_app_password">Mot de passe d'application</label><input id="smtpAppPasswordInput" type="password" placeholder="xxxx xxxx xxxx xxxx">
-          <button class="btn-gold" onclick="connectGmail()" style="margin-top:10px;" data-i18n="btn_connect_gmail">Connecter mon Gmail</button>
-        </div>
-        <div id="gmailConnected" style="display:none;">
-          <p style="font-size:11px;color:var(--text2);" id="gmailConnectedAs"></p>
-          <button class="btn-line" style="color:var(--red);" onclick="disconnectGmail()" data-i18n="btn_disconnect_gmail">Déconnecter</button>
-        </div>
-        <div id="gmailStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+        <p style="font-size:11px;color:var(--text2);" data-i18n="gmail_intro">Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent directement sur ton adresse de connexion :</p>
+        <p style="font-size:12px;color:var(--gold);font-weight:500;" id="gmailConnectedAs"></p>
       </div>
       </div>
       </div>
@@ -759,13 +741,7 @@ lbl_appareil:'Appareil', cet_appareil:'Cet appareil', lbl_derniere_synchro:'Dern
 compte_status_connected:'Connecté au cloud', compte_status_disconnected:'Non connecté',
 time_just_now:"à l'instant", time_min_ago:'il y a {n} min', time_hour_ago:'il y a {n} h', time_day_ago:'il y a {n} j',
 lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
-data_gmail_title:'Envoi de factures', gmail_intro:"Connecte ton adresse Gmail pour envoyer tes factures directement depuis ta propre adresse.",
-gmail_help_summary:"Comment obtenir le mot de passe d'application ?",
-gmail_help_1:'Ouvre myaccount.google.com sur ton compte Gmail', gmail_help_2:'Vérifie que la validation en 2 étapes est activée',
-gmail_help_3:'Menu "Mots de passe des applications" → crée-en un (ex. "Helm Ops")', gmail_help_4:'Copie le code à 16 caractères et colle-le ci-dessous',
-lbl_gmail_address:'Adresse Gmail', lbl_app_password:"Mot de passe d'application",
-btn_connect_gmail:'Connecter mon Gmail', gmail_connected_as:'Connecté : {email}', btn_disconnect_gmail:'Déconnecter',
-toast_gmail_only:'Seules les adresses Gmail sont supportées pour le moment.', toast_app_password_missing:"Renseigne le mot de passe d'application.", toast_gmail_connected:'✔ Gmail connecté : {email}',
+data_gmail_title:'Envoi de factures', gmail_intro:"Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent directement sur ton adresse de connexion :",
 lbl_tva_regime:'Régime TVA', hint_tva_regime:'(basculement automatique à 32 000 € de CA cumulé)',
 opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'TVA applicable',
 lbl_rcs:'Mention RCS/RM', lbl_paiement:'Mode de règlement', lbl_rib:'RIB / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
@@ -819,12 +795,11 @@ toast_invoice_loaded:'✎ Facture {num} chargée pour modification.',
 toast_invoice_duplicated:'✔ Nouvelle facture {num} créée à partir de {from}.',
 toast_invoice_sent_status:'✔ Facture {num} envoyée.', toast_invoice_saved:'✔ Facture {num} enregistrée.',
 toast_invoice_not_found:'⚠ Facture introuvable.',
-toast_sendgrid_missing:"⚠ Connecte ton Gmail dans Profil, ou client manquant.",
+toast_sendgrid_missing:"⚠ Client introuvable pour cette facture.",
 toast_invoice_resent:'✔ Facture renvoyée à {email}.', toast_resend_failed:'✕ Échec du renvoi.', toast_error_generic:'✕ Erreur : {msg}',
 confirm_delete_invoice:'Supprimer définitivement la facture {num} ?', toast_invoice_deleted:'✔ Facture {num} supprimée.',
 toast_status_updated:'✔ Statut de la facture {num} : {status}.', toast_booking_updated:'✔ Booking modifié.', toast_preview_updated:'✔ Aperçu mis à jour.',
 toast_select_client_save:"⚠ Sélectionne un client avant d'enregistrer.",
-toast_set_sendgrid_email:"⚠ Connecte ton Gmail dans Profil → Envoi de factures.",
 toast_select_client_send:"⚠ Sélectionne un client avant d'envoyer.", toast_sending:'Envoi en cours…',
 toast_invoice_sent:'✔ Facture envoyée à {email}.', toast_send_failed:"✕ Échec de l'envoi{detail}", toast_send_error:"✕ Erreur d'envoi : {msg}",
 toast_sync_synced:'✔ Synchronisé', toast_sync_error:'✕ Erreur sync : {msg}', toast_sync_invalid_code:'⚠ Colle un code valide',
@@ -860,13 +835,7 @@ lbl_appareil:'Device', cet_appareil:'This device', lbl_derniere_synchro:'Last sy
 compte_status_connected:'Connected to cloud', compte_status_disconnected:'Not connected',
 time_just_now:'just now', time_min_ago:'{n} min ago', time_hour_ago:'{n} h ago', time_day_ago:'{n} d ago',
 lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
-data_gmail_title:'Sending invoices', gmail_intro:'Connect your Gmail address to send invoices directly from your own address.',
-gmail_help_summary:'How do I get an app password?',
-gmail_help_1:'Open myaccount.google.com on your Gmail account', gmail_help_2:'Make sure 2-Step Verification is turned on',
-gmail_help_3:'"App passwords" menu → create one (e.g. "Helm Ops")', gmail_help_4:'Copy the 16-character code and paste it below',
-lbl_gmail_address:'Gmail address', lbl_app_password:'App password',
-btn_connect_gmail:'Connect my Gmail', gmail_connected_as:'Connected: {email}', btn_disconnect_gmail:'Disconnect',
-toast_gmail_only:'Only Gmail addresses are supported for now.', toast_app_password_missing:'Enter the app password.', toast_gmail_connected:'✔ Gmail connected: {email}',
+data_gmail_title:'Sending invoices', gmail_intro:'Your invoices are sent automatically, nothing to configure. Replies from your clients land directly in your login address:',
 lbl_tva_regime:'VAT regime', hint_tva_regime:'(automatically switches at €32,000 cumulative revenue)',
 opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applicable',
 lbl_rcs:'Trade register notice', lbl_paiement:'Payment method', lbl_rib:'Bank details / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
@@ -920,12 +889,11 @@ toast_invoice_loaded:'✎ Invoice {num} loaded for editing.',
 toast_invoice_duplicated:'✔ New invoice {num} created from {from}.',
 toast_invoice_sent_status:'✔ Invoice {num} sent.', toast_invoice_saved:'✔ Invoice {num} saved.',
 toast_invoice_not_found:'⚠ Invoice not found.',
-toast_sendgrid_missing:'⚠ Connect your Gmail in Profile, or missing client.',
+toast_sendgrid_missing:'⚠ Client not found for this invoice.',
 toast_invoice_resent:'✔ Invoice resent to {email}.', toast_resend_failed:'✕ Resend failed.', toast_error_generic:'✕ Error: {msg}',
 confirm_delete_invoice:'Permanently delete invoice {num}?', toast_invoice_deleted:'✔ Invoice {num} deleted.',
 toast_status_updated:'✔ Invoice {num} status: {status}.', toast_booking_updated:'✔ Booking updated.', toast_preview_updated:'✔ Preview updated.',
 toast_select_client_save:'⚠ Select a client before saving.',
-toast_set_sendgrid_email:'⚠ Connect your Gmail in Profile → Sending invoices.',
 toast_select_client_send:'⚠ Select a client before sending.', toast_sending:'Sending…',
 toast_invoice_sent:'✔ Invoice sent to {email}.', toast_send_failed:'✕ Send failed{detail}', toast_send_error:'✕ Sending error: {msg}',
 toast_sync_synced:'✔ Synced', toast_sync_error:'✕ Sync error: {msg}', toast_sync_invalid_code:'⚠ Paste a valid code',
@@ -961,13 +929,7 @@ lbl_appareil:'Dispositivo', cet_appareil:'Este dispositivo', lbl_derniere_synchr
 compte_status_connected:'Conectado a la nube', compte_status_disconnected:'No conectado',
 time_just_now:'justo ahora', time_min_ago:'hace {n} min', time_hour_ago:'hace {n} h', time_day_ago:'hace {n} d',
 lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
-data_gmail_title:'Envío de facturas', gmail_intro:'Conecta tu dirección de Gmail para enviar tus facturas directamente desde tu propia dirección.',
-gmail_help_summary:'¿Cómo obtengo una contraseña de aplicación?',
-gmail_help_1:'Abre myaccount.google.com en tu cuenta de Gmail', gmail_help_2:'Comprueba que la verificación en dos pasos esté activada',
-gmail_help_3:'Menú "Contraseñas de aplicaciones" → crea una (ej. "Helm Ops")', gmail_help_4:'Copia el código de 16 caracteres y pégalo abajo',
-lbl_gmail_address:'Dirección de Gmail', lbl_app_password:'Contraseña de aplicación',
-btn_connect_gmail:'Conectar mi Gmail', gmail_connected_as:'Conectado: {email}', btn_disconnect_gmail:'Desconectar',
-toast_gmail_only:'Solo se admiten direcciones de Gmail por ahora.', toast_app_password_missing:'Introduce la contraseña de aplicación.', toast_gmail_connected:'✔ Gmail conectado: {email}',
+data_gmail_title:'Envío de facturas', gmail_intro:'Tus facturas se envían automáticamente, sin nada que configurar. Las respuestas de tus clientes llegan directamente a tu dirección de conexión:',
 lbl_tva_regime:'Régimen de IVA', hint_tva_regime:'(cambio automático a 32.000 € de facturación acumulada)',
 opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplicable',
 lbl_rcs:'Mención Registro Mercantil', lbl_paiement:'Forma de pago', lbl_rib:'Datos bancarios / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
@@ -1021,12 +983,11 @@ toast_invoice_loaded:'✎ Factura {num} cargada para editar.',
 toast_invoice_duplicated:'✔ Nueva factura {num} creada a partir de {from}.',
 toast_invoice_sent_status:'✔ Factura {num} enviada.', toast_invoice_saved:'✔ Factura {num} guardada.',
 toast_invoice_not_found:'⚠ Factura no encontrada.',
-toast_sendgrid_missing:'⚠ Conecta tu Gmail en Perfil, o falta el cliente.',
+toast_sendgrid_missing:'⚠ Cliente no encontrado para esta factura.',
 toast_invoice_resent:'✔ Factura reenviada a {email}.', toast_resend_failed:'✕ Error al reenviar.', toast_error_generic:'✕ Error: {msg}',
 confirm_delete_invoice:'¿Eliminar definitivamente la factura {num}?', toast_invoice_deleted:'✔ Factura {num} eliminada.',
 toast_status_updated:'✔ Estado de la factura {num}: {status}.', toast_booking_updated:'✔ Reserva modificada.', toast_preview_updated:'✔ Vista previa actualizada.',
 toast_select_client_save:'⚠ Selecciona un cliente antes de guardar.',
-toast_set_sendgrid_email:'⚠ Conecta tu Gmail en Perfil → Envío de facturas.',
 toast_select_client_send:'⚠ Selecciona un cliente antes de enviar.', toast_sending:'Enviando…',
 toast_invoice_sent:'✔ Factura enviada a {email}.', toast_send_failed:'✕ Error al enviar{detail}', toast_send_error:'✕ Error de envío: {msg}',
 toast_sync_synced:'✔ Sincronizado', toast_sync_error:'✕ Error de sincronización: {msg}', toast_sync_invalid_code:'⚠ Pega un código válido',
@@ -1246,13 +1207,13 @@ function toDbRow(k, obj, uid){
   // total est stocké localement comme une chaîne formatée ("2652.00 €"), mais la colonne cloud
   // est numeric — on la parse ici (même logique que invoiceAmt()) et on la reformate au retour.
   if(k==='invoices') return { id:obj.id, user_id:uid, num:obj.num, client:obj.client, date:obj.date, work_date:obj.workDate, total:parseFloat(String(obj.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0, status:obj.status, state:obj.state, html:obj.html, booking_id:obj.bookingId||null, booking_ids:obj.bookingIds||null };
-  if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, bic:obj.bic, smtp_email:obj.smtpEmail, smtp_app_password:obj.smtpAppPassword };
+  if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, bic:obj.bic };
 }
 function fromDbRow(k, row){
   if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, tutoiement:row.tutoiement };
   if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
   if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:(typeof row.total==='number'?row.total.toFixed(2):row.total)+' €', status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
-  if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, bic:row.bic, smtpEmail:row.smtp_email, smtpAppPassword:row.smtp_app_password };
+  if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, bic:row.bic };
 }
 const cloudPushTimers = {}, cloudPushBusy = {};
 function queueCloudPush(k){
@@ -1424,37 +1385,15 @@ function refreshInfoView(){
   viewBic.textContent = fromBic.value;
 }
 function renderGmailUI(){
-  const f = store('from');
-  const connected = !!(f.smtpEmail && f.smtpAppPassword);
-  document.getElementById('gmailNotConnected').style.display = connected ? 'none' : 'block';
-  document.getElementById('gmailConnected').style.display = connected ? 'block' : 'none';
-  if(connected) document.getElementById('gmailConnectedAs').textContent = t('gmail_connected_as',{email:f.smtpEmail});
-}
-function isGmailAddress(email){
-  const domain = (email||'').split('@')[1]?.toLowerCase() || '';
-  return domain==='gmail.com' || domain==='googlemail.com';
-}
-function connectGmail(){
-  const statusEl = document.getElementById('gmailStatus');
-  const email = (document.getElementById('smtpEmailInput').value||'').trim();
-  const appPassword = (document.getElementById('smtpAppPasswordInput').value||'').trim().replace(/\s+/g,'');
-  if(!isValidEmail(email)){ setStatusMsg(statusEl, '⚠ '+t('toast_client_email_invalid',{email})); return; }
-  if(!isGmailAddress(email)){ setStatusMsg(statusEl, '⚠ '+t('toast_gmail_only')); return; }
-  if(!appPassword){ setStatusMsg(statusEl, '⚠ '+t('toast_app_password_missing')); return; }
-  set('from', {...store('from'), smtpEmail:email, smtpAppPassword:appPassword});
-  renderGmailUI();
-  setStatusMsg(statusEl, t('toast_gmail_connected',{email}));
-}
-function disconnectGmail(){
-  set('from', {...store('from'), smtpEmail:'', smtpAppPassword:''});
-  renderGmailUI();
+  const el = document.getElementById('gmailConnectedAs');
+  if(el) el.textContent = sessionEmail || '—';
 }
 
-// --- Login Google + abonnement Stripe (porte d'entrée, indépendante du code de synchro et de
-// "Connecter mon Gmail" ci-dessus). Electron n'a pas d'origine https locale pour recevoir un
-// redirectTo direct : le flow OAuth ouvre le navigateur système vers une page de relais hébergée
-// sur GitHub Pages (mobile/oauth-relay.html), qui dépose les tokens via auth-relay-deposit ; on
-// les récupère ici par polling, même principe que connectGmail()/oauth-google-poll ci-dessus. ---
+// --- Login Google + abonnement Stripe (porte d'entrée, indépendante du code de synchro).
+// Electron n'a pas d'origine https locale pour recevoir un redirectTo direct : le flow OAuth
+// ouvre le navigateur système vers une page de relais hébergée sur GitHub Pages
+// (mobile/oauth-relay.html), qui dépose les tokens via auth-relay-deposit ; on les récupère ici
+// par polling (auth-relay-poll). ---
 const CHECK_ACCESS_URL = SUPABASE_URL + '/functions/v1/check-access';
 const STRIPE_CHECKOUT_URL = SUPABASE_URL + '/functions/v1/stripe-checkout';
 const AUTH_RELAY_POLL_URL = SUPABASE_URL + '/functions/v1/auth-relay-poll';
@@ -1475,8 +1414,8 @@ function connectLogin(){
   }).then(({data, error})=>{
     if(error || !data?.url){ setStatusMsg(statusEl, '✕ '+(error?.message||'Erreur de connexion.')); return; }
     const popup = window.open(data.url, 'googleLogin', 'width=480,height=640');
-    // Comme pour connectGmail() : popup peut être null en Electron même si l'URL s'est bien ouverte
-    // dans le navigateur système, donc on poll dans tous les cas.
+    // popup peut être null en Electron même si l'URL s'est bien ouverte dans le navigateur
+    // système, donc on poll dans tous les cas.
     let attempts = 0;
     const timer = setInterval(async ()=>{
       attempts++;
@@ -1559,7 +1498,9 @@ async function bootAuth(){
   await hydrateFromCloud();
   bootApp();
 }
+let sessionEmail = null;
 function renderAccountCard(access){
+  sessionEmail = access.session?.user?.email || null;
   const emailEl = document.getElementById('accountEmail');
   const planEl = document.getElementById('accountPlan');
   const renewalEl = document.getElementById('accountRenewal');
@@ -1889,13 +1830,13 @@ async function resendInvoice(num){
   const inv = storeArr('invoices').find(i=>i.num===num);
   const c = storeArr('clients').find(cl=>cl.name===inv.client);
   const f = store('from');
-  if(!f.smtpEmail || !f.smtpAppPassword || !c){ showToast(t('toast_sendgrid_missing')); return; }
+  if(!c){ showToast(t('toast_sendgrid_missing')); return; }
   if(!isValidEmail(c.email)){ showToast(t('toast_client_email_invalid',{email:c.email})); return; }
   try{
     const pdfBase64 = await pdfBase64FromHtml(inv.html);
     const res = await fetch(SEND_INVOICE_URL, {
       method:'POST', headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
-      body: JSON.stringify({email: f.smtpEmail, appPassword: f.smtpAppPassword, to: c.email, subject:t('inv_facture_label')+' '+inv.num, html: emailBodyHtml(resolveEmailBody(c, inv.num)), pdfBase64, pdfFilename: inv.num+'.pdf', fromName: f.name})
+      body: JSON.stringify({replyTo: sessionEmail, to: c.email, subject:t('inv_facture_label')+' '+inv.num, html: emailBodyHtml(resolveEmailBody(c, inv.num)), pdfBase64, pdfFilename: inv.num+'.pdf', fromName: f.name})
     });
     showToast(res.ok ? t('toast_invoice_resent',{email:c.email}) : t('toast_resend_failed'));
     if(res.ok){
@@ -2724,7 +2665,6 @@ async function sendInvoice(){
   render();
   const c = currentClient();
   const f = store('from');
-  if(!f.smtpEmail || !f.smtpAppPassword){ showToast(t('toast_set_sendgrid_email')); return; }
   if(!c){ showToast(t('toast_select_client_send')); return; }
   if(!isValidEmail(c.email)){ showToast(t('toast_client_email_invalid',{email:c.email||'(vide)'})); return; }
   showToast(t('toast_sending'), 2000);
@@ -2736,8 +2676,7 @@ async function sendInvoice(){
       method:'POST',
       headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
       body: JSON.stringify({
-        email: f.smtpEmail,
-        appPassword: f.smtpAppPassword,
+        replyTo: sessionEmail,
         to: c.email,
         subject: emailSubject.value.trim() || (t('inv_facture_label') + ' ' + num),
         html: emailBodyHtml(msg),

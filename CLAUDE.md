@@ -2,7 +2,7 @@
 
 Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) garde son nom technique historique, décorrélé de la marque affichée. La table `billops_sync` (ancien mécanisme de sync par code, voir Historique en bas de section Stockage cloud) n'est plus utilisée par le client mais n'a pas été supprimée côté Supabase.
 
-Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `mobile/oauth-relay.html` (page statique de relais pour le login Google côté Electron, voir Login + abonnement ci-dessous), `supabase/functions/` (Edge Functions : `send-invoice` envoi de factures par SMTP (mot de passe d'application Gmail), `oauth-google-callback`/`oauth-google-poll` mortes depuis le passage au SMTP (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
+Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `mobile/oauth-relay.html` (page statique de relais pour le login Google côté Electron, voir Login + abonnement ci-dessous), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, `oauth-google-callback`/`oauth-google-poll` mortes depuis l'abandon de l'OAuth Gmail (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
 
 ## Stack
 HTML/CSS/JS vanilla. `localStorage` sert de **cache local** (from, clients, invoices, bookings, inv_theme, inv_lang, gmailAuth, pushSubscriptions) — la source de vérité pour les données métier (clients/bookings/invoices/from) est Supabase, scindée par utilisateur (voir Stockage cloud ci-dessous).
@@ -81,49 +81,60 @@ Déploiement : `.github/workflows/pages.yml` publie le dossier `mobile/` sur Git
 Web Push standard (VAPID), supporté par Safari iOS 16.4+ pour les PWA installées sur l'écran d'accueil. Bouton "Activer les notifications" dans le header mobile → abonnement stocké localement (`pushSubscriptions`) et poussé dans la table cloud `push_subscriptions` (clé = `endpoint`, scindée par `user_id`, RLS select/insert/delete). Une Edge Function Supabase (`supabase/functions/notify-upcoming-bookings`), déclenchée toutes les ~3 min par pg_cron, lit directement la table `bookings` (statut à facturer, non pointé, non notifié) et filtre celles dont l'heure de début tombe dans une fenêtre ~10-20 min à venir (viser un rappel ~15 min avant, tolérant un tick pg_cron manqué), envoie une notification à chaque abonnement `push_subscriptions` de l'utilisateur concerné (sans contenu chiffré, texte fixe géré par `mobile/sw.js`), puis pose `notified_at` sur les bookings correspondants pour ne pas re-notifier. Les abonnements qui répondent 404/410 (révoqués côté navigateur) sont supprimés automatiquement de `push_subscriptions`. Avant le 2026-08-05, cette fonction lisait/écrivait tout depuis le blob unique `billops_sync` (voir Stockage cloud plus haut) — migrée en même temps que le reste pour ne pas silencieusement arrêter de fonctionner une fois le code de synchro retiré côté client.
 Déploiement des Edge Functions (`send-invoice`, `notify-upcoming-bookings`) : voir `supabase/README.md` — nécessite un compte Supabase authentifié en CLI (login une fois via navigateur ; link/deploy/secrets ensuite automatisables).
 
-## Envoi de factures (mot de passe d'application Gmail + SMTP, plus d'OAuth)
-Depuis le 2026-08-08 : remplace le flux OAuth Gmail (2026-08-04 → abandonné) et le SMTP relais
-commun (2026-08-03 → abandonné). Raison de l'abandon de l'OAuth : tant que l'app Google Cloud
-n'est pas passée en mode "Production" (vérification Google requise, potentiellement coûteuse pour
-le scope `gmail.send`), chaque nouveau client devait être ajouté manuellement comme "testeur" dans
-la Search Console — invivable pour un vrai multi-utilisateurs en self-service. Le SMTP relais
-commun avait lui été abandonné parce que le mail partait d'une adresse technique partagée au lieu
-de celle du client — ce nouveau système résout les deux : le mail part bien depuis l'adresse Gmail
-du client, sans repasser par Google Cloud Console.
+## Envoi de factures (centralisé via Brevo, zéro configuration côté utilisateur)
+Depuis le 2026-08-08 : troisième architecture d'envoi en une journée, après l'OAuth Gmail
+(2026-08-04 → abandonné, vérification Google trop lourde pour du self-service) et le mot de passe
+d'application Gmail + SMTP par utilisateur (2026-08-08 matin → abandonné aussi, car les mots de
+passe d'application ne sont pas fiables : Google les masque/désactive pour de plus en plus de
+comptes — programme de protection avancée, comptes récents — donc "ça ne marche pas pour tout le
+monde" quoi qu'on fasse côté UX). Décision utilisateur explicite : centraliser complètement
+l'envoi, quitte à ce que l'adresse technique brute ne soit pas celle du client, du moment que le
+**nom affiché** au destinataire reste bien le sien (compromis accepté : "on s'en fout de l'aspect
+technique, je veux juste le nom du client qui envoie la facture").
 
-Chaque utilisateur génère une fois un **mot de passe d'application** dans son propre compte Google
-(`myaccount.google.com` → validation en 2 étapes → mots de passe des applications) et le colle
-dans Helm Ops (Mon entreprise / Réglages → Envoi de factures) avec son adresse Gmail — un lien
-dépliant dans l'UI rappelle ces étapes. Stocké dans `from.smtpEmail`/`from.smtpAppPassword`
-(synchronisé cross-device via `company_info.smtp_email`/`smtp_app_password`, comme le reste des
-infos entreprise — corrige au passage la régression de sync inter-appareils qu'avait `gmailAuth`).
-`connectGmail()`/`disconnectGmail()` (`facture.html`/`mobile/index.html`) valident juste le format
-email + que le domaine est `gmail.com`/`googlemail.com`, puis appellent `set('from', {...})`.
+Toutes les factures (tous utilisateurs confondus) partent du domaine mutualisé `mail.ops-suite.fr`
+(acheté chez IONOS, authentifié SPF/DKIM/DMARC côté **Brevo** — voir plus bas pourquoi Brevo et
+pas SendGrid). `send-invoice` envoie via l'API Brevo (`https://api.brevo.com/v3/smtp/email`) avec :
+- `sender` = toujours `mail@ops-suite.fr`, mais avec le **nom** affiché réglé sur `from.name` du
+  client (ex. "Jerome Jarrige") — c'est ce que voit le destinataire dans sa boîte de réception,
+  l'adresse technique brute n'étant visible que s'il inspecte les détails du mail (rare).
+- `replyTo` = l'adresse de connexion Google de l'utilisateur (`sessionEmail`, capturée dans
+  `renderAccountCard()` au boot depuis `access.session.user.email`, variable globale réutilisée
+  par `sendInvoice()`/`resendInvoice()`) — donc les réponses du client arrivent bien dans la vraie
+  boîte de l'utilisateur, sans qu'il ait à configurer quoi que ce soit : son compte de connexion
+  Helm Ops sert aussi d'adresse d'envoi/réponse.
+- Payload : `{replyTo, fromName, to, subject, html, pdfBase64, pdfFilename}`, protégé par le même
+  header `x-app-secret` que le reste (scan automatisé, pas une vraie auth).
 
-**Gmail uniquement pour l'instant** : `send-invoice` envoie via SMTP (`smtp.gmail.com:465`, TLS
-implicite, `npm:nodemailer`) avec l'email + mot de passe d'application comme identifiants —
-Outlook/Office365 n'accepte le SMTP AUTH qu'en port 587 (STARTTLS), et les Edge Functions Supabase
-bloquent ce port en sortie (25 et 587 interdits, seul 465 fonctionne) ; Microsoft désactive de plus
-en plus l'auth SMTP par défaut sur les nouveaux comptes Outlook.com. Support Outlook = à revoir un
-jour via Microsoft Graph OAuth (`Mail.Send`), un flux distinct à part entière, pas fait.
+**Pourquoi Brevo et pas SendGrid** : SendGrid a été essayé en premier (même compte que BAR OPS,
+domaine authentifié avec succès via leur API `/v3/whitelabel/domains`), mais son crédit d'envoi
+était à zéro (trial expiré, `is_hard_limit:true` sur `/v3/user/credits`) — aucun plan gratuit
+utilisable dans l'immédiat. Brevo a un vrai plan gratuit permanent (300 mails/jour, pas un trial
+qui expire), largement suffisant pour du volume de facturation. Domaine authentifié via l'API Brevo
+(`POST /v3/senders/domains` puis `PUT /v3/senders/domains/{domain}/authenticate` une fois les DNS
+propagés) — 4 enregistrements : `brevo1._domainkey`/`brevo2._domainkey` (CNAME, DKIM),
+`@` (TXT, `brevo-code:...`, preuve de propriété), `_dmarc` (TXT) — ce dernier a remplacé un CNAME
+`_dmarc → dmarc.ionos.fr` posé par défaut par IONOS à l'achat du domaine (un nom ne peut pas avoir
+à la fois un CNAME et un TXT, l'un remplace l'autre ; sans risque ici car le domaine est neuf et
+n'a pas de vraie boîte mail ailleurs). Secret `BREVO_API_KEY` posé via `supabase secrets set`.
 
-Payload client → `send-invoice` : `{email, appPassword, to, subject, html, pdfBase64,
-pdfFilename, fromName}`, protégé par le même header `x-app-secret` que le reste (scan automatisé,
-pas une vraie auth — la vraie protection est que la requête doit porter un mot de passe
-d'application Gmail valide). Le corps de l'email n'est plus la facture en HTML brut : c'est une
-formule de politesse (vouvoiement par défaut, tutoiement activable par un interrupteur sur la fiche
-client — `clients.tutoiement`, formule figée dans le code, pas éditable par l'utilisateur) + la
-facture en **PDF joint** (généré client-side via `html2pdf` → `toPdf().output('datauristring')`,
-voir `pdfBase64FromElement()`/`pdfBase64FromHtml()` dans `facture.html`).
+Le corps de l'email n'est plus la facture en HTML brut : c'est une formule de politesse
+(vouvoiement par défaut, tutoiement activable par un interrupteur sur la fiche client —
+`clients.tutoiement`, formule figée dans le code, pas éditable par l'utilisateur) + la facture en
+**PDF joint** (généré client-side via `html2pdf` → `toPdf().output('datauristring')`, voir
+`pdfBase64FromElement()`/`pdfBase64FromHtml()` dans `facture.html`).
 
-Les Edge Functions `oauth-google-callback`/`oauth-google-poll` et la table `oauth_pending`
-existent encore côté Supabase mais ne sont plus appelées par aucun client (flux OAuth mort, pas
-supprimé — pas de raison de le faire tant que ça ne gêne pas).
+Restes morts, pas supprimés (aucune raison tant que ça ne gêne pas) : les Edge Functions
+`oauth-google-callback`/`oauth-google-poll` + table `oauth_pending` (flux OAuth Gmail) ; les
+colonnes `company_info.smtp_email`/`smtp_app_password` (flux mot de passe d'application) ; le
+compte/domaine SendGrid `ops-suite.fr` authentifié mais inutilisé (Brevo utilise le même domaine,
+authentification indépendante par prestataire).
 
-**Piège vécu en dev** : `saveFrom()`/`saveFromMobile()` (formulaire "Mon entreprise") remplaçaient
-tout l'objet `from` sans repartir de `store('from')` — modifier son nom/adresse effaçait
-silencieusement `smtpEmail`/`smtpAppPassword` (et `bic`) déjà enregistrés. Fix : toujours
-`set('from', {...store('from'), ...champsModifiés})`, jamais un objet neuf en dur.
+**Piège vécu en dev** (toujours valable) : `saveFrom()`/`saveFromMobile()` (formulaire "Mon
+entreprise") remplaçaient tout l'objet `from` sans repartir de `store('from')` — modifier son
+nom/adresse effaçait silencieusement `bic` (et avant ça, `smtpEmail`/`smtpAppPassword`) déjà
+enregistrés. Fix appliqué : toujours `set('from', {...store('from'), ...champsModifiés})`, jamais
+un objet neuf en dur.
 
 ## Login Google + abonnement Stripe (porte d'entrée de l'app)
 Depuis le 2026-08-04 : l'app est gated par une connexion Google (Supabase Auth) + une vérification
@@ -172,7 +183,7 @@ https://github.com/SPECTRE888/Bill-ops-.git (branche main)
 ## Backlog fonctionnel en attente
 - Autonomie mobile complète (usage sans Mac) : se connecter avec un compte Google suffit désormais (plus de code à générer), onglet Clients et Mon entreprise faits côté mobile. Aucun point bloquant connu restant sur cet axe.
 - Facturation groupée (plusieurs prestas d'un même client → une facture) : faite sur Mac (onglet Pointage) et sur mobile (Factures → À facturer, sélection multi-cases + "Facturer la sélection"). Sur les deux, le bouton se désactive si les prestas sélectionnées n'ont pas toutes le même client.
-- PDF (html2pdf.js) en prod, envoyé en pièce jointe (plus en texte brut dans le corps du mail). Envoi de factures désormais par mot de passe d'application Gmail + SMTP (plus d'OAuth Google, plus d'écran "app non vérifiée", auto-service complet, synchronisé entre appareils) — voir Envoi de factures. Outlook non supporté (blocage port SMTP côté Edge Functions Supabase + désactivation croissante de l'auth SMTP par Microsoft), à revoir un jour via Microsoft Graph OAuth si demandé.
+- PDF (html2pdf.js) en prod, envoyé en pièce jointe (plus en texte brut dans le corps du mail). Envoi de factures désormais centralisé via Brevo depuis `mail.ops-suite.fr`, zéro configuration côté utilisateur (plus d'OAuth Google, plus de mot de passe d'application) — voir Envoi de factures. Fonctionne pour tout provider email côté client (Gmail, Outlook, autre) puisque l'envoi ne dépend plus du provider de l'utilisateur.
 - Login/abonnement Stripe toujours en mode **test** — bascule en mode live à faire manuellement (voir section dédiée).
 
 ## Contraintes de style utilisateur

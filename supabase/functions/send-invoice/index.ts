@@ -1,22 +1,21 @@
-// Envoi de factures via SMTP (mot de passe d'application), au nom de l'utilisateur lui-même.
-// Remplace le flux OAuth Gmail précédent (voir git history / CLAUDE.md) : chaque utilisateur
-// génère un mot de passe d'application dans son compte Google (Sécurité → Validation en 2 étapes
-// → Mots de passe des applications) et le colle dans Helm Ops avec son adresse Gmail — plus de
-// Google Cloud Console, plus d'écran "app non vérifiée", auto-service complet.
+// Envoi de factures centralisé via l'API Brevo (ex-Sendinblue), depuis le domaine mutualisé
+// mail.ops-suite.fr (authentifié SPF/DKIM), avec Reply-To réglé sur l'adresse de connexion
+// (Google) de l'utilisateur — remplace le mot de passe d'application Gmail (voir git history /
+// CLAUDE.md) : plus aucune configuration côté client, l'utilisateur n'a qu'à être connecté.
+// SendGrid a été essayé en premier mais le compte (partagé avec BAR OPS) n'avait plus de crédit
+// d'envoi disponible (trial expiré) — Brevo a un vrai plan gratuit permanent (300 mails/jour).
 //
-// Gmail uniquement pour l'instant : smtp.gmail.com accepte le port 465 (TLS implicite), seul port
-// SMTP que les Edge Functions Supabase autorisent en sortie (25 et 587 sont bloqués) — ce qui
-// exclut Outlook/Office365 (SMTP uniquement en 587) tant que ça reste une Edge Function Supabase.
+// Le nom affiché à l'expéditeur ("From" name) reste celui du client (ex. "Jerome Jarrige"), donc
+// le destinataire voit bien le nom de la personne/entreprise qui facture — seule l'adresse
+// technique brute (invisible en usage normal) est celle du domaine mutualisé.
 //
 // Pas d'auth Supabase ici (appelé en fetch() simple depuis facture.html/mobile/index.html) :
 // protégé par un secret partagé APP_RELAY_SECRET (même principe que x-cron-secret sur
-// notify-upcoming-bookings) pour limiter le scan automatisé — pas une vraie auth, le secret est
-// dans du code client public. La vraie protection ici est que chaque requête doit porter un mot
-// de passe d'application Gmail valide appartenant à l'utilisateur.
+// notify-upcoming-bookings) pour limiter le scan automatisé.
 
-import nodemailer from 'npm:nodemailer@6';
-
+const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY')!;
 const APP_RELAY_SECRET = Deno.env.get('APP_RELAY_SECRET');
+const SEND_FROM_EMAIL = 'mail@ops-suite.fr';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -25,7 +24,6 @@ const CORS_HEADERS = {
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const GMAIL_DOMAINS = ['gmail.com', 'googlemail.com'];
 const stripHeaderInjection = (s: string) => s.replace(/[\r\n]+/g, ' ').trim();
 
 Deno.serve(async (req) => {
@@ -43,16 +41,9 @@ Deno.serve(async (req) => {
     return new Response('Invalid JSON', { status: 400, headers: CORS_HEADERS });
   }
 
-  const { email, appPassword, fromName, to, subject, html, pdfBase64, pdfFilename } = body ?? {};
-  if (!email || typeof email !== 'string' || !EMAIL_RE.test(email)) {
-    return new Response('Adresse Gmail expéditrice invalide.', { status: 400, headers: CORS_HEADERS });
-  }
-  const domain = email.split('@')[1]?.toLowerCase() || '';
-  if (!GMAIL_DOMAINS.includes(domain)) {
-    return new Response('Seules les adresses Gmail sont supportées pour le moment.', { status: 400, headers: CORS_HEADERS });
-  }
-  if (!appPassword || typeof appPassword !== 'string') {
-    return new Response("Mot de passe d'application manquant.", { status: 400, headers: CORS_HEADERS });
+  const { replyTo, fromName, to, subject, html, pdfBase64, pdfFilename } = body ?? {};
+  if (!replyTo || typeof replyTo !== 'string' || !EMAIL_RE.test(replyTo)) {
+    return new Response('Adresse de réponse (replyTo) invalide.', { status: 400, headers: CORS_HEADERS });
   }
   if (!to || typeof to !== 'string' || !EMAIL_RE.test(to)) {
     return new Response('Adresse "to" invalide.', { status: 400, headers: CORS_HEADERS });
@@ -61,23 +52,31 @@ Deno.serve(async (req) => {
   const safeFromName = stripHeaderInjection(String(fromName || 'Helm Ops'));
   const safeSubject = stripHeaderInjection(String(subject || 'Facture'));
 
-  const transport = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: { user: email, pass: appPassword },
-  });
+  const payload: any = {
+    sender: { email: SEND_FROM_EMAIL, name: safeFromName },
+    replyTo: { email: replyTo, name: safeFromName },
+    to: [{ email: to }],
+    subject: safeSubject,
+    htmlContent: html || '<p></p>',
+  };
+  if (pdfBase64) {
+    payload.attachment = [{ content: pdfBase64, name: pdfFilename || 'facture.pdf' }];
+  }
 
   try {
-    await transport.sendMail({
-      from: `"${safeFromName.replace(/"/g, "'")}" <${email}>`,
-      to,
-      subject: safeSubject,
-      html: html || '',
-      attachments: pdfBase64
-        ? [{ filename: pdfFilename || 'facture.pdf', content: pdfBase64, encoding: 'base64', contentType: 'application/pdf' }]
-        : [],
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': BREVO_API_KEY,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
+    if (!res.ok) {
+      const errText = await res.text();
+      return new Response(errText, { status: res.status, headers: CORS_HEADERS });
+    }
     return new Response('OK', { status: 200, headers: CORS_HEADERS });
   } catch (e) {
     return new Response(String((e as Error)?.message || e), { status: 502, headers: CORS_HEADERS });
