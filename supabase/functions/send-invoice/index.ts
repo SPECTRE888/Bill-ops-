@@ -1,18 +1,21 @@
-// Envoi de factures via l'API Gmail, au nom de l'utilisateur lui-même (plus de SendGrid, plus de
-// relais technique commun) : chaque utilisateur connecte son propre compte Gmail une fois (bouton
-// "Connecter mon Gmail" dans Mon entreprise / Réglages, voir oauth-google-callback), le
-// refresh_token obtenu est stocké côté client et envoyé à chaque appel ici. Le mail part donc
-// littéralement depuis l'adresse Gmail de l'utilisateur — pas d'usurpation, l'API Gmail n'accepte
-// que l'adresse du compte authentifié dans le "From:".
+// Envoi de factures via SMTP (mot de passe d'application), au nom de l'utilisateur lui-même.
+// Remplace le flux OAuth Gmail précédent (voir git history / CLAUDE.md) : chaque utilisateur
+// génère un mot de passe d'application dans son compte Google (Sécurité → Validation en 2 étapes
+// → Mots de passe des applications) et le colle dans Helm Ops avec son adresse Gmail — plus de
+// Google Cloud Console, plus d'écran "app non vérifiée", auto-service complet.
+//
+// Gmail uniquement pour l'instant : smtp.gmail.com accepte le port 465 (TLS implicite), seul port
+// SMTP que les Edge Functions Supabase autorisent en sortie (25 et 587 sont bloqués) — ce qui
+// exclut Outlook/Office365 (SMTP uniquement en 587) tant que ça reste une Edge Function Supabase.
 //
 // Pas d'auth Supabase ici (appelé en fetch() simple depuis facture.html/mobile/index.html) :
 // protégé par un secret partagé APP_RELAY_SECRET (même principe que x-cron-secret sur
 // notify-upcoming-bookings) pour limiter le scan automatisé — pas une vraie auth, le secret est
-// dans du code client public. La vraie protection ici est que chaque requête doit porter un
-// refresh_token Gmail valide appartenant à l'utilisateur.
+// dans du code client public. La vraie protection ici est que chaque requête doit porter un mot
+// de passe d'application Gmail valide appartenant à l'utilisateur.
 
-const GOOGLE_CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID')!;
-const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET')!;
+import nodemailer from 'npm:nodemailer@6';
+
 const APP_RELAY_SECRET = Deno.env.get('APP_RELAY_SECRET');
 
 const CORS_HEADERS = {
@@ -22,79 +25,8 @@ const CORS_HEADERS = {
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GMAIL_DOMAINS = ['gmail.com', 'googlemail.com'];
 const stripHeaderInjection = (s: string) => s.replace(/[\r\n]+/g, ' ').trim();
-
-function utf8ToBase64(str: string): string {
-  const bytes = new TextEncoder().encode(str);
-  let bin = '';
-  bytes.forEach((b) => (bin += String.fromCharCode(b)));
-  return btoa(bin);
-}
-function toBase64Url(str: string): string {
-  return utf8ToBase64(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-function encodeMimeWord(s: string): string {
-  return `=?UTF-8?B?${utf8ToBase64(s)}?=`;
-}
-
-async function getAccessToken(refreshToken: string): Promise<string> {
-  const res = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: GOOGLE_CLIENT_ID,
-      client_secret: GOOGLE_CLIENT_SECRET,
-      refresh_token: refreshToken,
-      grant_type: 'refresh_token',
-    }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error_description || data.error || 'Échec du rafraîchissement du jeton Gmail.');
-  return data.access_token;
-}
-
-function chunk76(b64: string): string {
-  return b64.replace(/(.{76})/g, '$1\r\n');
-}
-
-function buildRawMime(opts: {
-  fromName: string; fromEmail: string; to: string; subject: string; html: string;
-  pdfBase64?: string; pdfFilename?: string;
-}): string {
-  const headers = [
-    `From: "${opts.fromName.replace(/"/g, "'")}" <${opts.fromEmail}>`,
-    `To: ${opts.to}`,
-    `Subject: ${encodeMimeWord(opts.subject)}`,
-    'MIME-Version: 1.0',
-  ];
-
-  if (!opts.pdfBase64) {
-    return [...headers, 'Content-Type: text/html; charset="UTF-8"', 'Content-Transfer-Encoding: base64', '', utf8ToBase64(opts.html)].join('\r\n');
-  }
-
-  const boundary = `boundary_${crypto.randomUUID().replace(/-/g, '')}`;
-  const filename = (opts.pdfFilename || 'facture.pdf').replace(/"/g, "'");
-  const lines = [
-    ...headers,
-    `Content-Type: multipart/mixed; boundary="${boundary}"`,
-    '',
-    `--${boundary}`,
-    'Content-Type: text/html; charset="UTF-8"',
-    'Content-Transfer-Encoding: base64',
-    '',
-    utf8ToBase64(opts.html),
-    '',
-    `--${boundary}`,
-    `Content-Type: application/pdf; name="${filename}"`,
-    `Content-Disposition: attachment; filename="${filename}"`,
-    'Content-Transfer-Encoding: base64',
-    '',
-    chunk76(opts.pdfBase64),
-    '',
-    `--${boundary}--`,
-  ];
-  return lines.join('\r\n');
-}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
@@ -111,12 +43,16 @@ Deno.serve(async (req) => {
     return new Response('Invalid JSON', { status: 400, headers: CORS_HEADERS });
   }
 
-  const { refreshToken, fromEmail, fromName, to, subject, html, pdfBase64, pdfFilename } = body ?? {};
-  if (!refreshToken || typeof refreshToken !== 'string') {
-    return new Response('Compte Gmail non connecté.', { status: 400, headers: CORS_HEADERS });
-  }
-  if (!fromEmail || typeof fromEmail !== 'string' || !EMAIL_RE.test(fromEmail)) {
+  const { email, appPassword, fromName, to, subject, html, pdfBase64, pdfFilename } = body ?? {};
+  if (!email || typeof email !== 'string' || !EMAIL_RE.test(email)) {
     return new Response('Adresse Gmail expéditrice invalide.', { status: 400, headers: CORS_HEADERS });
+  }
+  const domain = email.split('@')[1]?.toLowerCase() || '';
+  if (!GMAIL_DOMAINS.includes(domain)) {
+    return new Response('Seules les adresses Gmail sont supportées pour le moment.', { status: 400, headers: CORS_HEADERS });
+  }
+  if (!appPassword || typeof appPassword !== 'string') {
+    return new Response("Mot de passe d'application manquant.", { status: 400, headers: CORS_HEADERS });
   }
   if (!to || typeof to !== 'string' || !EMAIL_RE.test(to)) {
     return new Response('Adresse "to" invalide.', { status: 400, headers: CORS_HEADERS });
@@ -125,29 +61,23 @@ Deno.serve(async (req) => {
   const safeFromName = stripHeaderInjection(String(fromName || 'Helm Ops'));
   const safeSubject = stripHeaderInjection(String(subject || 'Facture'));
 
+  const transport = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: { user: email, pass: appPassword },
+  });
+
   try {
-    const accessToken = await getAccessToken(refreshToken);
-    const raw = toBase64Url(buildRawMime({
-      fromName: safeFromName,
-      fromEmail,
+    await transport.sendMail({
+      from: `"${safeFromName.replace(/"/g, "'")}" <${email}>`,
       to,
       subject: safeSubject,
       html: html || '',
-      pdfBase64: typeof pdfBase64 === 'string' && pdfBase64 ? pdfBase64 : undefined,
-      pdfFilename: typeof pdfFilename === 'string' ? pdfFilename : undefined,
-    }));
-    const sendRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ raw }),
+      attachments: pdfBase64
+        ? [{ filename: pdfFilename || 'facture.pdf', content: pdfBase64, encoding: 'base64', contentType: 'application/pdf' }]
+        : [],
     });
-    if (!sendRes.ok) {
-      const errText = await sendRes.text();
-      return new Response(errText, { status: sendRes.status, headers: CORS_HEADERS });
-    }
     return new Response('OK', { status: 200, headers: CORS_HEADERS });
   } catch (e) {
     return new Response(String((e as Error)?.message || e), { status: 502, headers: CORS_HEADERS });
