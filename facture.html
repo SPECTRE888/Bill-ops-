@@ -370,7 +370,6 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div class="info-item"><div class="info-label" data-i18n="lbl_paiement">Mode de règlement</div><div class="info-value" id="viewPay"></div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_rib">RIB / IBAN</div><div class="info-value" id="viewRib"></div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_bic">BIC</div><div class="info-value" id="viewBic"></div></div>
-          <div class="info-item"><div class="info-label" data-i18n="lbl_email_body_default">Formule de politesse</div><div class="info-value" id="viewEmailBody"></div></div>
         </div>
         <div class="row" style="margin-top:10px;align-items:flex-end;">
           <button class="btn-line" id="infoEditBtn" onclick="toggleInfoEdit(true)" data-i18n="btn_edit" style="margin-top:0;">Modifier</button>
@@ -399,8 +398,6 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
             <div style="flex:2;"><label data-i18n="lbl_rib">RIB / IBAN</label><textarea id="fromRib" rows="2" placeholder="IBAN + BIC"></textarea></div>
             <div style="flex:1;"><label data-i18n="lbl_bic">BIC</label><input id="fromBic" placeholder="BIC"></div>
           </div>
-          <label><span data-i18n="lbl_email_body_default">Formule de politesse (email de facture)</span> <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;" data-i18n="hint_email_body_default">(utilisée par défaut à l'envoi, sauf si un client a sa propre formule)</span></label>
-          <textarea id="fromEmailBody" rows="4"></textarea>
           <div class="row" style="margin-top:6px;">
             <button class="btn-gold" onclick="saveFrom()" data-i18n="btn_save_info">Enregistrer mes infos</button>
             <button class="btn-line" onclick="toggleInfoEdit(false)" data-i18n="btn_cancel" style="margin-top:0;">Annuler</button>
@@ -422,6 +419,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <button class="btn-line" style="color:var(--red);" onclick="disconnectGmail()" data-i18n="btn_disconnect_gmail">Déconnecter</button>
         </div>
         <div id="gmailStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+      </div>
+      <div class="card">
+        <div class="ctitle" data-i18n="data_email_body_title">Message de facture</div>
+        <p style="font-size:11px;color:var(--text2);" data-i18n="hint_email_body_default">Utilisée par défaut à l'envoi, sauf si un client a sa propre formule.</p>
+        <textarea id="fromEmailBody" style="height:56px;"></textarea>
+        <button class="btn-gold" onclick="saveEmailBodyDefault()" style="margin-top:10px;" data-i18n="btn_save_message">Enregistrer le message</button>
+        <div id="emailBodyStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
       </div>
       </div>
@@ -747,12 +751,13 @@ compte_status_connected:'Connecté au cloud', compte_status_disconnected:'Non co
 time_just_now:"à l'instant", time_min_ago:'il y a {n} min', time_hour_ago:'il y a {n} h', time_day_ago:'il y a {n} j',
 lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
 data_gmail_title:'Envoi de factures', gmail_intro:'Connecte ton compte Gmail pour envoyer tes factures directement depuis ta propre adresse.',
+data_email_body_title:'Message de facture',
 btn_connect_gmail:'Connecter mon Gmail', gmail_connected_as:'Connecté : {email}', btn_disconnect_gmail:'Déconnecter',
 lbl_tva_regime:'Régime TVA', hint_tva_regime:'(basculement automatique à 32 000 € de CA cumulé)',
 opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'TVA applicable',
 lbl_rcs:'Mention RCS/RM', lbl_paiement:'Mode de règlement', lbl_rib:'RIB / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
-lbl_email_body_default:'Formule de politesse (email de facture)', hint_email_body_default:"(utilisée par défaut à l'envoi, sauf si un client a sa propre formule)",
-btn_save:'Enregistrer', btn_edit:'Modifier', btn_save_info:'Enregistrer mes infos',
+hint_email_body_default:"Utilisée par défaut à l'envoi, sauf si un client a sa propre formule.",
+btn_save:'Enregistrer', btn_edit:'Modifier', btn_save_info:'Enregistrer mes infos', btn_save_message:'Enregistrer le message',
 data_sync_title:'Synchronisation', sync_intro:'Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.',
 btn_gen_sync:'Générer un code de synchro', lbl_paste_sync:'Ou coller un code existant', ph_sync_code:'Code de synchro', btn_connect:'Connecter',
 sync_code_intro:'Code de synchro (à coller sur l\'autre appareil) :', btn_copy_code:'Copier le code', btn_force_sync:'Forcer la synchro', btn_disconnect_device:'Déconnecter cet appareil',
@@ -843,12 +848,13 @@ compte_status_connected:'Connected to cloud', compte_status_disconnected:'Not co
 time_just_now:'just now', time_min_ago:'{n} min ago', time_hour_ago:'{n} h ago', time_day_ago:'{n} d ago',
 lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
 data_gmail_title:'Sending invoices', gmail_intro:'Connect your Gmail account to send invoices directly from your own address.',
+data_email_body_title:'Invoice message',
 btn_connect_gmail:'Connect my Gmail', gmail_connected_as:'Connected: {email}', btn_disconnect_gmail:'Disconnect',
 lbl_tva_regime:'VAT regime', hint_tva_regime:'(automatically switches at €32,000 cumulative revenue)',
 opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applicable',
 lbl_rcs:'Trade register notice', lbl_paiement:'Payment method', lbl_rib:'Bank details / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
-lbl_email_body_default:'Default invoice email message', hint_email_body_default:"(used by default when sending, unless a client has its own message)",
-btn_save:'Save', btn_edit:'Edit', btn_save_info:'Save my info',
+hint_email_body_default:"Used by default when sending, unless a client has its own message.",
+btn_save:'Save', btn_edit:'Edit', btn_save_info:'Save my info', btn_save_message:'Save message',
 data_sync_title:'Sync', sync_intro:'Link this device to another one (Mac / iPhone) to share clients, invoices and schedule.',
 btn_gen_sync:'Generate a sync code', lbl_paste_sync:'Or paste an existing code', ph_sync_code:'Sync code', btn_connect:'Connect',
 sync_code_intro:'Sync code (paste it on the other device):', btn_copy_code:'Copy code', btn_force_sync:'Force sync', btn_disconnect_device:'Disconnect this device',
@@ -939,12 +945,13 @@ compte_status_connected:'Conectado a la nube', compte_status_disconnected:'No co
 time_just_now:'justo ahora', time_min_ago:'hace {n} min', time_hour_ago:'hace {n} h', time_day_ago:'hace {n} d',
 lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
 data_gmail_title:'Envío de facturas', gmail_intro:'Conecta tu cuenta de Gmail para enviar tus facturas directamente desde tu propia dirección.',
+data_email_body_title:'Mensaje de factura',
 btn_connect_gmail:'Conectar mi Gmail', gmail_connected_as:'Conectado: {email}', btn_disconnect_gmail:'Desconectar',
 lbl_tva_regime:'Régimen de IVA', hint_tva_regime:'(cambio automático a 32.000 € de facturación acumulada)',
 opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplicable',
 lbl_rcs:'Mención Registro Mercantil', lbl_paiement:'Forma de pago', lbl_rib:'Datos bancarios / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
-lbl_email_body_default:'Fórmula de cortesía (email de factura)', hint_email_body_default:'(usada por defecto al enviar, salvo que un cliente tenga su propia fórmula)',
-btn_save:'Guardar', btn_edit:'Modificar', btn_save_info:'Guardar mis datos',
+hint_email_body_default:'Usada por defecto al enviar, salvo que un cliente tenga su propia fórmula.',
+btn_save:'Guardar', btn_edit:'Modificar', btn_save_info:'Guardar mis datos', btn_save_message:'Guardar el mensaje',
 data_sync_title:'Sincronización', sync_intro:'Vincula este dispositivo con otro (Mac / iPhone) para compartir clientes, facturas y planificación.',
 btn_gen_sync:'Generar un código de sincronización', lbl_paste_sync:'O pega un código existente', ph_sync_code:'Código de sincronización', btn_connect:'Conectar',
 sync_code_intro:'Código de sincronización (pégalo en el otro dispositivo):', btn_copy_code:'Copiar código', btn_force_sync:'Forzar sincronización', btn_disconnect_device:'Desconectar este dispositivo',
@@ -1396,7 +1403,6 @@ function refreshInfoView(){
   viewPay.textContent = fromPay.value;
   viewRib.textContent = fromRib.value;
   viewBic.textContent = fromBic.value;
-  viewEmailBody.textContent = fromEmailBody.value;
 }
 function renderGmailUI(){
   const g = store('gmailAuth');
@@ -1577,6 +1583,11 @@ function saveFrom(){
   toggleInfoEdit(false);
   setStatusMsg(fromStatus, t('toast_info_saved'));
   setTimeout(()=>fromStatus.textContent='',2000);
+}
+function saveEmailBodyDefault(){
+  set('from', {...store('from'), emailBody:fromEmailBody.value});
+  setStatusMsg(emailBodyStatus, t('toast_info_saved'));
+  setTimeout(()=>emailBodyStatus.textContent='',2000);
 }
 function loadFrom(){
   const f = store('from');
