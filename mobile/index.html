@@ -593,7 +593,7 @@ const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueCloudPus
 // set() écrit local immédiatement puis pousse en tâche de fond vers Supabase.
 const CLOUD_TABLES = { clients:'clients', bookings:'bookings', invoices:'invoices' };
 function toDbRow(k, obj, uid){
-  if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr };
+  if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr, tutoiement:!!obj.tutoiement, siret:obj.siret, billing_addr:obj.billingAddr, default_rate:(obj.defaultRate===undefined?null:obj.defaultRate), notes:obj.notes };
   if(k==='bookings') return { id:obj.id, user_id:uid, client:obj.client, label:obj.label, addr:obj.addr, contact:obj.contact, date:obj.date, time_from:obj.from, time_to:obj.to, hours:obj.hours, rate:obj.rate, status:obj.status, checked_in_at:obj.checkedInAt||null, checked_out_at:obj.checkedOutAt||null, actual_hours:obj.actualHours||null, notified_at:obj.notifiedAt||null };
   // total est stocké localement comme une chaîne formatée ("2652.00 €"), mais la colonne cloud
   // est numeric — on la parse ici et on la reformate au retour (fromDbRow).
@@ -601,7 +601,7 @@ function toDbRow(k, obj, uid){
   if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, reply_to:obj.replyTo };
 }
 function fromDbRow(k, row){
-  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr };
+  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, tutoiement:row.tutoiement, siret:row.siret, billingAddr:row.billing_addr, defaultRate:row.default_rate, notes:row.notes };
   if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
   if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:(typeof row.total==='number'?row.total.toFixed(2):row.total)+' €', status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
   if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, replyTo:row.reply_to };
@@ -1130,14 +1130,16 @@ function saveClientMobile(){
   if(email.trim() && !isValidEmailMobile(email)){ showToast('⚠ Email client invalide : '+email); return; }
   const idx = document.getElementById('cliIdx').value;
   const clients = storeArr('clients');
+  const existing = idx!=='' ? clients[idx] : null;
   const c = {
+    ...(existing||{}),
     name: document.getElementById('cliName').value,
     prefix: document.getElementById('cliPrefix').value.toUpperCase(),
     email: email,
     phone: document.getElementById('cliPhone').value,
     addr: document.getElementById('cliAddr').value
   };
-  if(idx!==''){ c.id = clients[idx]?.id || crypto.randomUUID(); clients[idx]=c; } else { c.id = crypto.randomUUID(); clients.push(c); }
+  if(idx!==''){ c.id = existing?.id || crypto.randomUUID(); clients[idx]=c; } else { c.id = crypto.randomUUID(); clients.push(c); }
   set('clients', clients);
   resetClientFormMobile();
   renderClientListMobile();
@@ -1204,6 +1206,8 @@ function prefillBookingClientMobile(){
   if(!c) return;
   document.getElementById('bkAddr').value = c.addr||'';
   document.getElementById('bkContact').value = c.phone||'';
+  const rateEl = document.getElementById('bkRate');
+  if(!rateEl.value && c.defaultRate) rateEl.value = c.defaultRate;
 }
 function saveBookingForm(){
   const client = document.getElementById('bkClient').value.trim();
@@ -1529,7 +1533,7 @@ function confirmInvoiceExtras(){
     </div>
     <div class="from-to">
       <div><h3>De</h3><div><b>${from.name||''}</b><br>${from.addr||''}<br>${from.contact||''}</div></div>
-      <div style="text-align:right;"><h3>À</h3><div><b>${client.name}</b><br>${client.addr||''}<br>${client.email||''}</div></div>
+      <div style="text-align:right;"><h3>À</h3><div><b>${client.name}</b><br>${client.billingAddr||client.addr||''}<br>${client.email||''}${client.siret?'<br>SIRET : '+client.siret:''}</div></div>
     </div>
     <table>
       <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Unitaire</th><th class="num">Montant</th></tr></thead>

@@ -443,6 +443,15 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
             <span class="switch-track"></span>
           </label>
         </div>
+        <div class="row">
+          <div><label data-i18n="lbl_siret_client">SIRET / TVA client (optionnel)</label><input id="cliSiret"></div>
+          <div><label data-i18n="lbl_tarif_defaut">Tarif horaire par défaut (optionnel)</label><input id="cliDefaultRate" type="number" placeholder="€/h"></div>
+        </div>
+        <p style="font-size:10px;color:var(--text3);margin:-4px 0 8px;" data-i18n="hint_tarif_defaut">Pré-remplit le taux €/h sur les nouvelles prestas et lignes de facture pour ce client.</p>
+        <label data-i18n="lbl_facturation_addr">Adresse de facturation (optionnel)</label><input id="cliBillingAddr">
+        <p style="font-size:10px;color:var(--text3);margin:-4px 0 8px;" data-i18n="hint_facturation_addr">Si différente de l'adresse ci-dessus. Utilisée sur la facture à la place.</p>
+        <label data-i18n="lbl_notes_client">Notes (optionnel)</label><textarea id="cliNotes" rows="2"></textarea>
+        <p style="font-size:10px;color:var(--text3);margin:-4px 0 8px;" data-i18n="hint_notes_client">Usage interne, n'apparaît jamais sur la facture.</p>
         <button class="btn-gold" onclick="saveClient()" data-i18n="btn_save_client">Enregistrer le client</button>
         <button class="btn-line" onclick="resetClientForm()" data-i18n="btn_new_client">Nouveau client</button>
       </div>
@@ -760,6 +769,9 @@ data_backup_title:'Sauvegarde', backup_intro:'Exporte toutes tes données (entre
 btn_export_data:'Exporter mes données', lbl_import_backup:'Importer une sauvegarde',
 clients_add_title:'Ajouter / modifier un client', lbl_nom_societe:'Nom société', lbl_prefixe:'Préfixe facture (2-3 lettres)', lbl_email:'Email', lbl_telephone:'Téléphone',
 toggle_tutoiement:'Tutoiement (email facture)',
+lbl_siret_client:'SIRET / TVA client (optionnel)', lbl_facturation_addr:'Adresse de facturation (optionnel)', hint_facturation_addr:"Si différente de l'adresse ci-dessus. Utilisée sur la facture à la place.",
+lbl_tarif_defaut:'Tarif horaire par défaut (optionnel)', hint_tarif_defaut:'Pré-remplit le taux €/h sur les nouvelles prestas et lignes de facture pour ce client.',
+lbl_notes_client:'Notes (optionnel)', hint_notes_client:"Usage interne, n'apparaît jamais sur la facture.",
 btn_save_client:'Enregistrer le client', btn_new_client:'Nouveau client', clients_list_title:'Clients enregistrés', empty_clients:'Aucun client.', btn_delete:'Supprimer',
 fact_client_title:'Client', ph_client_search:'Tape le nom du client...', fact_invoice_title:'Facture', lbl_num_facture:'N° facture', lbl_date:'Date',
 lbl_date_travaillee:'Date travaillée', hint_date_travaillee:'(pour rattacher le CA au bon mois)', lbl_tva_pct:'TVA (%)',
@@ -855,6 +867,9 @@ data_backup_title:'Backup', backup_intro:'Export all your data (company, clients
 btn_export_data:'Export my data', lbl_import_backup:'Import a backup',
 clients_add_title:'Add / edit a client', lbl_nom_societe:'Company name', lbl_prefixe:'Invoice prefix (2-3 letters)', lbl_email:'Email', lbl_telephone:'Phone',
 toggle_tutoiement:'Informal tone (invoice email)',
+lbl_siret_client:'Client company ID / VAT (optional)', lbl_facturation_addr:'Billing address (optional)', hint_facturation_addr:'If different from the address above. Used on the invoice instead.',
+lbl_tarif_defaut:'Default hourly rate (optional)', hint_tarif_defaut:'Pre-fills the €/h rate on new bookings and invoice lines for this client.',
+lbl_notes_client:'Notes (optional)', hint_notes_client:'Internal use only, never appears on the invoice.',
 btn_save_client:'Save client', btn_new_client:'New client', clients_list_title:'Saved clients', empty_clients:'No clients.', btn_delete:'Delete',
 fact_client_title:'Client', ph_client_search:"Type the client's name...", fact_invoice_title:'Invoice', lbl_num_facture:'Invoice no.', lbl_date:'Date',
 lbl_date_travaillee:'Work date', hint_date_travaillee:'(to attribute revenue to the right month)', lbl_tva_pct:'VAT (%)',
@@ -950,6 +965,9 @@ data_backup_title:'Copia de seguridad', backup_intro:'Exporta todos tus datos (e
 btn_export_data:'Exportar mis datos', lbl_import_backup:'Importar una copia de seguridad',
 clients_add_title:'Añadir / modificar un cliente', lbl_nom_societe:'Nombre de la empresa', lbl_prefixe:'Prefijo de factura (2-3 letras)', lbl_email:'Email', lbl_telephone:'Teléfono',
 toggle_tutoiement:'Tono informal (email de factura)',
+lbl_siret_client:'SIRET / IVA del cliente (opcional)', lbl_facturation_addr:'Dirección de facturación (opcional)', hint_facturation_addr:'Si es diferente de la dirección anterior. Se usa en la factura en su lugar.',
+lbl_tarif_defaut:'Tarifa horaria por defecto (opcional)', hint_tarif_defaut:'Rellena automáticamente la tarifa €/h en nuevas reservas y líneas de factura para este cliente.',
+lbl_notes_client:'Notas (opcional)', hint_notes_client:'Uso interno, nunca aparece en la factura.',
 btn_save_client:'Guardar cliente', btn_new_client:'Nuevo cliente', clients_list_title:'Clientes guardados', empty_clients:'Ningún cliente.', btn_delete:'Eliminar',
 fact_client_title:'Cliente', ph_client_search:'Escribe el nombre del cliente...', fact_invoice_title:'Factura', lbl_num_facture:'N.º factura', lbl_date:'Fecha',
 lbl_date_travaillee:'Fecha de trabajo', hint_date_travaillee:'(para asignar la facturación al mes correcto)', lbl_tva_pct:'IVA (%)',
@@ -1211,7 +1229,7 @@ const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueCloudPus
 // correspondante (debounce, comme l'ancien queueSync() mais table par table).
 const CLOUD_TABLES = { clients:'clients', bookings:'bookings', invoices:'invoices' };
 function toDbRow(k, obj, uid){
-  if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr, tutoiement:!!obj.tutoiement };
+  if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr, tutoiement:!!obj.tutoiement, siret:obj.siret, billing_addr:obj.billingAddr, default_rate:obj.defaultRate||null, notes:obj.notes };
   if(k==='bookings') return { id:obj.id, user_id:uid, client:obj.client, label:obj.label, addr:obj.addr, contact:obj.contact, date:obj.date, time_from:obj.from, time_to:obj.to, hours:obj.hours, rate:obj.rate, status:obj.status, checked_in_at:obj.checkedInAt||null, checked_out_at:obj.checkedOutAt||null, actual_hours:obj.actualHours||null, notified_at:obj.notifiedAt||null };
   // total est stocké localement comme une chaîne formatée ("2652.00 €"), mais la colonne cloud
   // est numeric — on la parse ici (même logique que invoiceAmt()) et on la reformate au retour.
@@ -1219,7 +1237,7 @@ function toDbRow(k, obj, uid){
   if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, bic:obj.bic, reply_to:obj.replyTo };
 }
 function fromDbRow(k, row){
-  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, tutoiement:row.tutoiement };
+  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, tutoiement:row.tutoiement, siret:row.siret, billingAddr:row.billing_addr, defaultRate:row.default_rate, notes:row.notes };
   if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
   if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:(typeof row.total==='number'?row.total.toFixed(2):row.total)+' €', status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
   if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, bic:row.bic, replyTo:row.reply_to };
@@ -1608,6 +1626,7 @@ function suggestPrefix(){
 }
 function resetClientForm(){
   cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliPhone.value=''; cliAddr.value=''; cliTutoiement.checked=false;
+  cliSiret.value=''; cliBillingAddr.value=''; cliDefaultRate.value=''; cliNotes.value='';
 }
 function isValidEmail(email){
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email||'').trim());
@@ -1618,7 +1637,7 @@ function saveClient(){
     return;
   }
   const clients = storeArr('clients');
-  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value, tutoiement:cliTutoiement.checked};
+  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value, tutoiement:cliTutoiement.checked, siret:cliSiret.value, billingAddr:cliBillingAddr.value, defaultRate:parseFloat(cliDefaultRate.value)||null, notes:cliNotes.value};
   if(cliIdx.value!==''){ c.id = clients[cliIdx.value]?.id || crypto.randomUUID(); clients[cliIdx.value]=c; } else { c.id = crypto.randomUUID(); clients.push(c); }
   set('clients', clients);
   resetClientForm(); renderClientList(); refreshClientSelect();
@@ -1626,6 +1645,7 @@ function saveClient(){
 function editClient(i){
   const c = storeArr('clients')[i];
   cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliPhone.value=c.phone||''; cliAddr.value=c.addr; cliTutoiement.checked=!!c.tutoiement;
+  cliSiret.value=c.siret||''; cliBillingAddr.value=c.billingAddr||''; cliDefaultRate.value=c.defaultRate||''; cliNotes.value=c.notes||'';
 }
 function deleteClient(i){
   const clients = storeArr('clients'); clients.splice(i,1); set('clients',clients);
@@ -2178,6 +2198,7 @@ function prefillBookingClient(){
   if(!c) return;
   bkAddr.value = c.addr||'';
   bkContact.value = c.phone||'';
+  if(!bkRate.value && c.defaultRate) bkRate.value = c.defaultRate;
 }
 function viewBooking(id){
   const b = storeArr('bookings').find(x=>x.id===id);
@@ -2422,6 +2443,7 @@ function calcRange(input){
   render();
 }
 function addItem(desc='',qty='',rate='',from='',to='',dates=[]){
+  if(rate===''){ const c = currentClient(); if(c && c.defaultRate) rate = c.defaultRate; }
   const div = document.createElement('div');
   div.className='item-row';
   div.innerHTML = `<div class="row2">
@@ -2519,7 +2541,7 @@ function render(){
   pTagline.style.display = f.tagline ? 'block' : 'none';
   pFrom.innerHTML = `<b>${f.name}</b><br>${f.addr}<br>${f.contact}`;
   const c = currentClient();
-  pTo.innerHTML = c ? `<b>${c.name}</b><br>${c.addr}<br>${c.email}` : '';
+  pTo.innerHTML = c ? `<b>${c.name}</b><br>${c.billingAddr||c.addr}<br>${c.email}${c.siret?'<br>SIRET : '+c.siret:''}` : '';
   pInvNum.textContent = invNum.value||'---';
   refreshEmailDefaults();
   pDate.textContent = formatFrDate(invDate.value);
