@@ -65,7 +65,7 @@ mais n'est plus utilisée par le client (voir tout en haut de ce fichier).
 Accueil : tableau de bord (CA du mois, prestas à venir, factures en attente, heures prévues, prochaine presta, actions rapides), onglet par défaut, sans catégorie (item unique en haut de nav).
 Catégorie Planning : Planning (prestas à venir uniquement) → Calendrier (calendrier CA/jour + prévisionnel du mois + formulaire booking, séparé de Planning).
 Catégorie Facturation : Pointage (prestas à facturer, sélection multi-prestas d'un même client → une seule facture via `invoiceSelectedBookings()`) → Facture (preview visible seulement ici, formulaire tenant sur un écran sans scroll, prestations scrollables en interne) → Historique (recherche + Voir/Modifier/PDF/Renvoyer + stats CA mois/année/total/par client, liste scrollable en interne sans faire défiler la page).
-Catégorie Clients : Mes clients.
+Catégorie Clients : Mes clients (liste repiquée du design BAR OPS — rangée horizontale avatar/infos/actions, recherche en haut — mais sans le badge CA cumulé de BAR OPS, ce total reste réservé à Historique). `clients.createdAt` (mappé sur la colonne `created_at`, déjà existante côté Supabase depuis la migration initiale, jamais écrite par le client — seulement lue en retour) alimente le "depuis DATE" affiché sur chaque carte ; absent tant qu'un client créé avant ce champ n'a pas de valeur.
 Catégorie Paramètres (en bas de nav, après le spacer) : Mon entreprise + sélecteur de thème dark/light/auto.
 
 ## Layout

@@ -139,10 +139,21 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .date-chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface3);border:1px solid var(--border2);border-radius:12px;padding:2px 4px 2px 8px;font-size:11px;color:var(--text);}
 .date-chip button{all:unset;cursor:pointer;font-size:13px;line-height:1;color:var(--text3);padding:0 4px;}
 .date-chip button:hover{color:var(--red);}
-.client-list{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;}
-.client-list .client-card{margin-bottom:0;}
-.client-card{border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;background:var(--surface2);line-height:1.7;}
-.client-card button{margin-top:6px;margin-right:6px;padding:5px 10px;font-size:11px;}
+.client-list{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+/* Repris de BAR OPS (renderClients, app.html) : rangée horizontale avatar/infos/actions au lieu
+   de cartes en grille — sans le badge CA (volontairement, ce total reste dans Historique). */
+.client-card{display:flex;align-items:center;gap:12px;border:1px solid var(--border2);border-radius:var(--radius-lg);padding:10px 14px;min-height:52px;background:var(--surface2);}
+.client-card-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold-bg),rgba(217,166,55,.06));border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--gold);flex-shrink:0;letter-spacing:.04em;}
+.client-card-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;flex-shrink:0;}
+.client-card-infos{display:flex;align-items:center;flex-wrap:nowrap;overflow:hidden;gap:0;flex:1;min-width:0;}
+.client-card-infos>span,.client-card-infos>a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--text3);}
+.client-card-prefix{font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
+.client-card-infos a{text-decoration:none;transition:.15s;}
+.client-card-infos a:hover{color:var(--gold);}
+.client-card-sep{color:var(--border2);margin:0 6px;flex-shrink:0;}
+.client-card-since{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;}
+.client-card-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.client-card-actions button{margin:0;padding:4px 11px;font-size:10px;}
 .cal-day{min-height:66px;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
 .cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
 .cal-day.selected{outline:2px solid var(--gold);}
@@ -157,8 +168,6 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .cal-day-panel .cal-b-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);gap:6px;}
 .cal-day-panel .cal-b-row:last-child{border-bottom:none;}
 .cal-day-panel .cal-b-row button{padding:3px 7px;font-size:10px;margin:0 0 0 3px;}
-.client-card b{color:var(--text);}
-.client-card .tag{color:var(--gold);font-weight:700;}
 .preview-wrap{display:none;background:var(--bg);height:100%;}
 .preview-wrap.active{display:flex;flex-direction:column;}
 .preview-scroll{flex:1;min-height:0;overflow-y:auto;padding:40px;display:flex;justify-content:center;}
@@ -463,9 +472,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <p style="font-size:10px;color:var(--text3);margin:-4px 0 8px;" data-i18n="hint_notes_client">Usage interne, n'apparaît jamais sur la facture.</p>
         <button class="btn-gold" onclick="saveClient()" data-i18n="btn_save_client">Enregistrer le client</button>
         <button class="btn-line" onclick="resetClientForm()" data-i18n="btn_new_client">Nouveau client</button>
+        <button class="btn-line" id="cliDeleteBtn" style="display:none;color:var(--red);" onclick="deleteClient(cliIdx.value)" data-i18n="btn_delete">Supprimer</button>
       </div>
 
-      <h2 data-i18n="clients_list_title">Clients enregistrés</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 0 10px;">
+        <h2 style="margin:0;" data-i18n="clients_list_title">Clients enregistrés</h2>
+        <input id="clientSearchInput" oninput="renderClientList()" placeholder="Chercher..." data-i18n-ph="ph_client_list_search" style="width:auto;min-width:180px;">
+      </div>
       <div class="client-list" id="clientList"></div>
     </div>
 
@@ -789,6 +802,7 @@ lbl_siret_client:'SIRET / TVA client (optionnel)', lbl_facturation_addr:'Adresse
 lbl_tarif_defaut:'Tarif horaire par défaut (optionnel)', hint_tarif_defaut:'Pré-remplit le taux €/h sur les nouvelles prestas et lignes de facture pour ce client.',
 lbl_notes_client:'Notes (optionnel)', hint_notes_client:"Usage interne, n'apparaît jamais sur la facture.",
 btn_save_client:'Enregistrer le client', btn_new_client:'Nouveau client', clients_list_title:'Clients enregistrés', empty_clients:'Aucun client.', btn_delete:'Supprimer',
+ph_client_list_search:'Chercher...', empty_clients_search:'Aucun client ne correspond à la recherche.', btn_new_presta_client:'+ Presta', lbl_client_depuis:'depuis {date}',
 fact_client_title:'Client', ph_client_search:'Tape le nom du client...', fact_invoice_title:'Facture', lbl_num_facture:'N° facture', lbl_date:'Date',
 lbl_date_travaillee:'Date travaillée', hint_date_travaillee:'(pour rattacher le CA au bon mois)', lbl_tva_pct:'TVA (%)',
 fact_frais_title:'Frais déplacement', lbl_km:'Km parcourus', lbl_tarif_km:'Tarif km', lbl_peage:'Péage', lbl_parking:'Parking',
@@ -888,6 +902,7 @@ lbl_siret_client:'Client company ID / VAT (optional)', lbl_facturation_addr:'Bil
 lbl_tarif_defaut:'Default hourly rate (optional)', hint_tarif_defaut:'Pre-fills the €/h rate on new bookings and invoice lines for this client.',
 lbl_notes_client:'Notes (optional)', hint_notes_client:'Internal use only, never appears on the invoice.',
 btn_save_client:'Save client', btn_new_client:'New client', clients_list_title:'Saved clients', empty_clients:'No clients.', btn_delete:'Delete',
+ph_client_list_search:'Search...', empty_clients_search:'No client matches your search.', btn_new_presta_client:'+ Booking', lbl_client_depuis:'since {date}',
 fact_client_title:'Client', ph_client_search:"Type the client's name...", fact_invoice_title:'Invoice', lbl_num_facture:'Invoice no.', lbl_date:'Date',
 lbl_date_travaillee:'Work date', hint_date_travaillee:'(to attribute revenue to the right month)', lbl_tva_pct:'VAT (%)',
 fact_frais_title:'Travel expenses', lbl_km:'Distance (km)', lbl_tarif_km:'Rate per km', lbl_peage:'Toll', lbl_parking:'Parking',
@@ -987,6 +1002,7 @@ lbl_siret_client:'SIRET / IVA del cliente (opcional)', lbl_facturation_addr:'Dir
 lbl_tarif_defaut:'Tarifa horaria por defecto (opcional)', hint_tarif_defaut:'Rellena automáticamente la tarifa €/h en nuevas reservas y líneas de factura para este cliente.',
 lbl_notes_client:'Notas (opcional)', hint_notes_client:'Uso interno, nunca aparece en la factura.',
 btn_save_client:'Guardar cliente', btn_new_client:'Nuevo cliente', clients_list_title:'Clientes guardados', empty_clients:'Ningún cliente.', btn_delete:'Eliminar',
+ph_client_list_search:'Buscar...', empty_clients_search:'Ningún cliente coincide con la búsqueda.', btn_new_presta_client:'+ Servicio', lbl_client_depuis:'desde {date}',
 fact_client_title:'Cliente', ph_client_search:'Escribe el nombre del cliente...', fact_invoice_title:'Factura', lbl_num_facture:'N.º factura', lbl_date:'Fecha',
 lbl_date_travaillee:'Fecha de trabajo', hint_date_travaillee:'(para asignar la facturación al mes correcto)', lbl_tva_pct:'IVA (%)',
 fact_frais_title:'Gastos de desplazamiento', lbl_km:'Kilómetros recorridos', lbl_tarif_km:'Tarifa por km', lbl_peage:'Peaje', lbl_parking:'Aparcamiento',
@@ -1256,7 +1272,7 @@ function toDbRow(k, obj, uid){
   if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, bic:obj.bic, reply_to:obj.replyTo };
 }
 function fromDbRow(k, row){
-  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, tutoiement:row.tutoiement, siret:row.siret, billingAddr:row.billing_addr, defaultRate:row.default_rate, notes:row.notes };
+  if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, tutoiement:row.tutoiement, siret:row.siret, billingAddr:row.billing_addr, defaultRate:row.default_rate, notes:row.notes, createdAt:row.created_at };
   if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
   if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:(typeof row.total==='number'?row.total.toFixed(2):row.total)+' €', status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
   if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, bic:row.bic, replyTo:row.reply_to };
@@ -1646,6 +1662,7 @@ function suggestPrefix(){
 function resetClientForm(){
   cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliPhone.value=''; cliAddr.value=''; cliTutoiement.checked=false;
   cliSiret.value=''; cliBillingAddr.value=''; cliDefaultRate.value=''; cliNotes.value='';
+  cliDeleteBtn.style.display = 'none';
 }
 function isValidEmail(email){
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email||'').trim());
@@ -1656,8 +1673,9 @@ function saveClient(){
     return;
   }
   const clients = storeArr('clients');
-  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value, tutoiement:cliTutoiement.checked, siret:cliSiret.value, billingAddr:cliBillingAddr.value, defaultRate:parseFloat(cliDefaultRate.value)||null, notes:cliNotes.value};
-  if(cliIdx.value!==''){ c.id = clients[cliIdx.value]?.id || crypto.randomUUID(); clients[cliIdx.value]=c; } else { c.id = crypto.randomUUID(); clients.push(c); }
+  const existing = cliIdx.value!=='' ? clients[cliIdx.value] : null;
+  const c = {name:cliName.value, prefix:cliPrefix.value.toUpperCase(), email:cliEmail.value, phone:cliPhone.value, addr:cliAddr.value, tutoiement:cliTutoiement.checked, siret:cliSiret.value, billingAddr:cliBillingAddr.value, defaultRate:parseFloat(cliDefaultRate.value)||null, notes:cliNotes.value, createdAt:existing?.createdAt||new Date().toISOString()};
+  if(cliIdx.value!==''){ c.id = existing?.id || crypto.randomUUID(); clients[cliIdx.value]=c; } else { c.id = crypto.randomUUID(); clients.push(c); }
   set('clients', clients);
   resetClientForm(); renderClientList(); refreshClientSelect();
 }
@@ -1665,20 +1683,53 @@ function editClient(i){
   const c = storeArr('clients')[i];
   cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliPhone.value=c.phone||''; cliAddr.value=c.addr; cliTutoiement.checked=!!c.tutoiement;
   cliSiret.value=c.siret||''; cliBillingAddr.value=c.billingAddr||''; cliDefaultRate.value=c.defaultRate||''; cliNotes.value=c.notes||'';
+  cliDeleteBtn.style.display = 'inline-flex';
+  cliName.scrollIntoView({behavior:'smooth', block:'center'});
 }
 function deleteClient(i){
   const clients = storeArr('clients'); clients.splice(i,1); set('clients',clients);
+  resetClientForm();
   renderClientList(); refreshClientSelect();
 }
 function renderClientList(){
   const clients = storeArr('clients');
-  clientList.innerHTML = clients.map((c,i)=>`
+  const q = (clientSearchInput?.value||'').trim().toLowerCase();
+  const rows = clients.map((c,i)=>({c,i})).filter(({c})=>{
+    if(!q) return true;
+    return [c.name,c.prefix,c.email,c.phone,c.addr].filter(Boolean).join(' ').toLowerCase().includes(q);
+  });
+  const sep = `<span class="client-card-sep">·</span>`;
+  clientList.innerHTML = rows.length ? rows.map(({c,i})=>{
+    const initials = (c.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const infos = [];
+    if(c.prefix) infos.push(`<span class="client-card-prefix">[${c.prefix}]</span>`);
+    if(c.addr) infos.push(`<span>📍 ${c.addr}</span>`);
+    if(c.email) infos.push(`<a href="mailto:${c.email}" onclick="event.stopPropagation()" title="${c.email}">✉ ${c.email}</a>`);
+    if(c.phone) infos.push(`<a href="tel:${c.phone}" onclick="event.stopPropagation()" title="${c.phone}">📞 ${c.phone}</a>`);
+    const createdLabel = c.createdAt ? formatFrDate(c.createdAt.slice(0,10)) : '';
+    return `
     <div class="client-card">
-      <b>${c.name}</b> <span class="tag">[${c.prefix}]</span><br>
-      ${c.email}${c.phone?' · '+c.phone:''}<br>${c.addr}<br>
-      <button class="btn-line" onclick="editClient(${i})">${t('btn_edit')}</button>
-      <button class="btn-line" onclick="deleteClient(${i})">${t('btn_delete')}</button>
-    </div>`).join('') || `<p style="color:var(--text2);font-size:12px;">${t('empty_clients')}</p>`;
+      <div class="client-card-avatar">${initials}</div>
+      <div class="client-card-name">${c.name}</div>
+      ${infos.length ? `<div class="client-card-infos">${sep}${infos.join(sep)}</div>` : `<div style="flex:1;"></div>`}
+      <div class="client-card-actions">
+        ${createdLabel ? `<span class="client-card-since">${t('lbl_client_depuis',{date:createdLabel})}</span>` : ''}
+        <button class="btn-line" onclick="editClient(${i})">${t('btn_edit')}</button>
+        <button class="btn-gold" onclick="clientNewBooking(${i})">${t('btn_new_presta_client')}</button>
+      </div>
+    </div>`;
+  }).join('') : `<p style="color:var(--text2);font-size:12px;">${q?t('empty_clients_search'):t('empty_clients')}</p>`;
+}
+function clientNewBooking(i){
+  const c = storeArr('clients')[i];
+  if(!c) return;
+  showTab('calendrier');
+  cancelEditBooking();
+  bkFormWrap.style.display = 'block';
+  bkClient.value = c.name;
+  prefillBookingClient();
+  bkDate.focus();
+  bkFormWrap.scrollIntoView({behavior:'smooth', block:'center'});
 }
 function refreshClientSelect(){
   const clients = storeArr('clients');
