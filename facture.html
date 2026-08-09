@@ -113,6 +113,9 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
    visuellement autant que le bouton doré à côté. */
 .row .btn-line,.dash-actions .btn-line{margin-top:0;background:var(--surface3);border-color:var(--border2);color:var(--text);}
 .row .btn-line:hover,.dash-actions .btn-line:hover{background:var(--border2);border-color:var(--border2);color:var(--text);}
+input[type=file]{padding:5px;}
+input[type=file]::file-selector-button,input[type=file]::-webkit-file-upload-button{cursor:pointer;border:1px solid var(--border2);border-radius:4px;padding:6px 12px;margin-right:8px;font-size:10px;font-weight:600;font-family:var(--font-body);text-transform:uppercase;letter-spacing:.09em;background:var(--surface3);color:var(--text);transition:.2s;}
+input[type=file]:hover::file-selector-button,input[type=file]:hover::-webkit-file-upload-button{background:var(--border2);}
 .row{display:flex;gap:6px;}
 .row>*{flex:1;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
@@ -413,7 +416,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div class="ctitle" data-i18n="data_gmail_title">Envoi de factures</div>
         <p style="font-size:11px;color:var(--text2);" data-i18n="gmail_intro">Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent par défaut sur ton adresse de connexion, modifiable ici si tu préfères une autre adresse :</p>
         <input id="replyToInput" type="email" placeholder="ton@email.com" disabled>
-        <button class="btn-gold" id="replyToBtn" onclick="toggleReplyToEdit(true)" style="margin-top:10px;" data-i18n="btn_edit">Modifier</button>
+        <button class="btn-line" id="replyToBtn" onclick="toggleReplyToEdit(true)" style="margin-top:10px;" data-i18n="btn_edit">Modifier</button>
         <div id="replyToStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
       </div>
