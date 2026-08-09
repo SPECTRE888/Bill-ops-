@@ -383,15 +383,17 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div class="info-item"><div class="info-label" data-i18n="lbl_rib">RIB / IBAN</div><div class="info-value" id="viewRib"></div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_bic">BIC</div><div class="info-value" id="viewBic"></div></div>
         </div>
-        <div class="row" style="margin-top:auto;padding-top:10px;align-items:flex-end;">
-          <button class="btn-profile" id="infoEditBtn" onclick="toggleInfoEdit(true)" data-i18n="btn_edit" style="margin-top:0;">Modifier</button>
-          <button class="btn-profile" onclick="exportBackup()" data-i18n="btn_export_data" style="margin-top:0;">Exporter mes données</button>
-          <div style="flex:1;">
-            <label style="margin:0 0 5px;" data-i18n="lbl_import_backup">Importer une sauvegarde</label>
-            <input type="file" id="importBackupInput" accept="application/json" onchange="importBackup(this)">
+        <div style="margin-top:auto;display:flex;flex-direction:column;">
+          <div id="backupStatus" style="order:1;font-size:11px;margin:0 0 4px;color:var(--gold);"></div>
+          <div class="row" style="order:2;padding-top:10px;align-items:flex-end;">
+            <button class="btn-profile" id="infoEditBtn" onclick="toggleInfoEdit(true)" data-i18n="btn_edit" style="margin-top:0;">Modifier</button>
+            <button class="btn-profile" onclick="exportBackup()" data-i18n="btn_export_data" style="margin-top:0;">Exporter mes données</button>
+            <div style="flex:1;">
+              <label style="margin:0 0 5px;" data-i18n="lbl_import_backup">Importer une sauvegarde</label>
+              <input type="file" id="importBackupInput" accept="application/json" onchange="importBackup(this)">
+            </div>
           </div>
         </div>
-        <div id="backupStatus" style="font-size:11px;margin-top:4px;color:var(--gold);"></div>
 
         <div id="infoEdit" style="display:none;">
           <label data-i18n="lbl_nom">Nom</label><input id="fromName">
