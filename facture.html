@@ -195,8 +195,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .acc-row button{padding:4px 8px;font-size:10.5px;margin:0;flex-shrink:0;}
 .acc-day-header{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:500;margin:14px 0 6px;}
 .acc-day-header:first-child{margin-top:0;}
-.ptg-row{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:6px;}
-.ptg-row .cal-dot{margin-top:5px;}
+.ptg-row{display:flex;gap:9px;align-items:center;padding:9px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:6px;}
 .ptg-main{flex:1;min-width:0;}
 .ptg-title{font-size:12px;color:var(--text);display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
 .ptg-title .tag{margin-left:auto;font-size:12.5px;color:var(--gold);font-weight:700;}
@@ -616,7 +615,14 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
 
     <div class="tab" id="tab-pointage">
-      <h2 data-i18n="plan_facturer_title">Prestas à facturer</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 0 10px;">
+        <h2 style="margin:0;" data-i18n="plan_facturer_title">Prestas à facturer</h2>
+        <select id="ptgSortSelect" onchange="setPointageSort(this.value)" style="width:auto;min-width:150px;">
+          <option value="date" data-i18n="sort_date">Trier : Date</option>
+          <option value="client" data-i18n="sort_client">Trier : Client</option>
+          <option value="amount" data-i18n="sort_amount">Trier : Montant</option>
+        </select>
+      </div>
       <div id="groupInvoiceBar" style="display:none;margin-bottom:10px;padding:8px 10px;border:1px solid var(--gold-border);background:var(--gold-bg);border-radius:6px;font-size:11.5px;justify-content:space-between;align-items:center;gap:8px;">
         <span id="groupInvoiceInfo"></span>
         <button id="groupInvoiceBtn" class="btn-gold" style="margin:0;padding:5px 10px;font-size:10.5px;flex-shrink:0;" onclick="invoiceSelectedBookings()" data-i18n="btn_group_invoice">Facturer la sélection</button>
@@ -804,6 +810,7 @@ home_sec_facturation:'Facturation', home_factures_attente:'Factures en attente',
 home_next_title:'Prochaine prestation', empty_next:'Aucune prestation programmée.',
 home_actions_title:'Actions rapides', btn_new_booking:'+ Nouvelle prestation', btn_new_invoice:'+ Nouvelle facture', btn_new_client:'+ Ajouter un client',
 plan_venir_title:'Prestas à venir', plan_facturer_title:'Prestas à facturer', empty_venir:'Aucune presta à venir.', empty_facturer:'Aucune presta à facturer.',
+sort_date:'Trier : Date', sort_client:'Trier : Client', sort_amount:'Trier : Montant',
 btn_invoice:'Facturer', btn_delete_short:'Suppr.', sans_date:'sans date', pointe_prefix:'Pointé : ',
 modal_pointage_title:'Modifier le pointage', lbl_arrivee_reelle:"Heure d'arrivée", lbl_depart_reel:'Heure de départ',
 btn_pointage:'Pointage', btn_retirer_pointage:'Retirer le pointage', badge_pointe:'Pointé', badge_prevu:'Prévu',
@@ -902,6 +909,7 @@ home_sec_facturation:'Billing', home_factures_attente:'Pending invoices', home_m
 home_next_title:'Next service', empty_next:'No service scheduled.',
 home_actions_title:'Quick actions', btn_new_booking:'+ New service', btn_new_invoice:'+ New invoice', btn_new_client:'+ Add a client',
 plan_venir_title:'Upcoming services', plan_facturer_title:'Services to invoice', empty_venir:'No upcoming services.', empty_facturer:'No services to invoice.',
+sort_date:'Sort: Date', sort_client:'Sort: Client', sort_amount:'Sort: Amount',
 btn_invoice:'Invoice', btn_delete_short:'Del.', sans_date:'no date', pointe_prefix:'Clocked: ',
 modal_pointage_title:'Edit clocked time', lbl_arrivee_reelle:'Clock-in time', lbl_depart_reel:'Clock-out time',
 btn_pointage:'Clock', btn_retirer_pointage:'Remove clocked time', badge_pointe:'Clocked', badge_prevu:'Scheduled',
@@ -1000,6 +1008,7 @@ home_sec_facturation:'Facturación', home_factures_attente:'Facturas pendientes'
 home_next_title:'Próximo servicio', empty_next:'Ningún servicio programado.',
 home_actions_title:'Acciones rápidas', btn_new_booking:'+ Nuevo servicio', btn_new_invoice:'+ Nueva factura', btn_new_client:'+ Añadir un cliente',
 plan_venir_title:'Servicios próximos', plan_facturer_title:'Servicios a facturar', empty_venir:'Ningún servicio próximo.', empty_facturer:'Ningún servicio a facturar.',
+sort_date:'Ordenar: Fecha', sort_client:'Ordenar: Cliente', sort_amount:'Ordenar: Importe',
 btn_invoice:'Facturar', btn_delete_short:'Elim.', sans_date:'sin fecha', pointe_prefix:'Fichado: ',
 modal_pointage_title:'Modificar el fichaje', lbl_arrivee_reelle:'Hora de entrada', lbl_depart_reel:'Hora de salida',
 btn_pointage:'Fichaje', btn_retirer_pointage:'Quitar el fichaje', badge_pointe:'Fichado', badge_prevu:'Previsto',
@@ -2406,25 +2415,38 @@ function renderCalendarTab(){
     .reduce((s,b)=>s+(b.actualHours ?? b.hours)*b.rate,0);
   bkForecast.textContent = forecast.toFixed(2)+t('cal_forecast_suffix');
 }
+let pointageSortBy = localStorage.getItem('pointageSortBy') || 'date';
+function setPointageSort(val){
+  pointageSortBy = val;
+  localStorage.setItem('pointageSortBy', val);
+  renderPlanning();
+}
 function renderPlanning(){
   renderAccueil();
   const today = todayStr();
   const bookings = storeArr('bookings');
-  const pending = bookings.filter(b=>b.status==='à facturer' && (!b.date || b.date < today || b.checkedOutAt))
-    .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const pending = bookings.filter(b=>b.status==='à facturer' && (!b.date || b.date < today || b.checkedOutAt));
+  if(pointageSortBy==='client'){
+    pending.sort((a,b)=>a.client.localeCompare(b.client) || (b.date||'').localeCompare(a.date||''));
+  } else if(pointageSortBy==='amount'){
+    pending.sort((a,b)=>((b.actualHours??b.hours)*b.rate) - ((a.actualHours??a.hours)*a.rate));
+  } else {
+    pending.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  }
+  if(ptgSortSelect) ptgSortSelect.value = pointageSortBy;
   bkList.innerHTML = pending.length ? pending.map(b=>{
     const h = b.actualHours ?? b.hours;
     const pointed = b.checkedInAt && b.checkedOutAt;
     const timesLabel = pointed ? `${localHM(b.checkedInAt)}–${localHM(b.checkedOutAt)}` : (b.from&&b.to ? `${b.from}–${b.to}` : '');
     return `
     <div class="ptg-row">
-      <input type="checkbox" style="margin-top:5px;flex-shrink:0;" ${groupSelection.has(b.id)?'checked':''} onchange="toggleGroupSelect('${b.id}', this.checked)">
+      <input type="checkbox" style="flex-shrink:0;" ${groupSelection.has(b.id)?'checked':''} onchange="toggleGroupSelect('${b.id}', this.checked)">
       <span class="cal-dot" style="background:${clientColor(b.client)};"></span>
       <div class="ptg-main">
         <div class="ptg-title"><b>${b.client}</b>${b.label?' — '+b.label:''}<span class="tag">${(h*b.rate).toFixed(2)} €</span></div>
         <div class="ptg-sub">
           <span class="ptg-badge ${pointed?'done':'pending'}">${pointed?t('badge_pointe'):t('badge_prevu')}</span>
-          <span>${b.date?formatFrDate(b.date):t('sans_date')}${timesLabel?' · '+timesLabel:''} · ${h}h × ${b.rate}€</span>
+          <span>${b.date?formatFrDate(b.date):t('sans_date')}${timesLabel?' · '+timesLabel:''}</span>
         </div>
       </div>
       <div class="ptg-actions">
