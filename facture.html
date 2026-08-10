@@ -143,9 +143,16 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 /* Repris du style épuré de la rangée Planning (.acc-row), mais en grille à colonnes alignées
    (+ header) — la version inline précédente ("nom · préfixe · adresse · email · tel") juxtaposait
    les infos sans repère visuel, jugée brouillon par l'utilisateur. "Client depuis DATE" retiré de
-   la liste (pas une info à afficher en direct) et déplacé sur la fiche client (titre du formulaire). */
-.client-grid-cols{display:grid;grid-template-columns:14px 1.3fr 60px 1.5fr 1.5fr 1.1fr auto;gap:10px;align-items:center;}
+   la liste (pas une info à afficher en direct) et déplacé sur la fiche client (titre du formulaire,
+   et sur le modal Infos ci-dessous). minmax(0,Xfr) — pas juste Xfr — sur les colonnes souples et
+   colonne Actions en px fixe (pas "auto") : header et chaque ligne sont des grilles CSS
+   indépendantes, donc sans ça la largeur "auto" de chaque colonne dépend du contenu de CETTE
+   ligne (colonne Actions vide dans le header vs 3 boutons dans les lignes) et désaligne tout —
+   bug vécu en prod, header et données décalés horizontalement malgré des grid-template-columns
+   identiques. */
+.client-grid-cols{display:grid;grid-template-columns:14px minmax(0,1.3fr) 60px minmax(0,1.5fr) minmax(0,1.5fr) minmax(0,1.1fr) 240px;gap:10px;align-items:center;}
 .client-header{padding:0 10px 4px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
+.client-header>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .client-row{padding:8px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);}
 .client-row>span,.client-row>a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--text2);}
 .client-row .client-name{font-weight:600;color:var(--text);}
@@ -738,6 +745,19 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <button class="btn-gold" style="width:100%;margin-top:14px;" onclick="closeBookingModal()" data-i18n="btn_close">Fermer</button>
   </div>
 </div>
+<div class="modal-overlay" id="clientInfoModal" style="display:none;" onclick="if(event.target===this) closeClientInfoModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="clientInfoModalTitle"></span>
+      <button type="button" class="modal-close" onclick="closeClientInfoModal()">×</button>
+    </div>
+    <div id="clientInfoModalBody"></div>
+    <div class="row" style="margin-top:14px;">
+      <button class="btn-line" onclick="closeClientInfoModal()" data-i18n="btn_close">Fermer</button>
+      <button class="btn-gold" onclick="editClientFromModal()" data-i18n="btn_edit">Modifier</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="pointageModal" style="display:none;" onclick="if(event.target===this) closePointageModal()">
   <div class="modal-box" style="max-width:360px;">
     <div class="modal-header">
@@ -811,6 +831,7 @@ btn_save_client:'Enregistrer le client', clients_list_title:'Clients enregistré
 ph_client_list_search:'Chercher...', empty_clients_search:'Aucun client ne correspond à la recherche.', btn_new_presta_client:'+ Presta', lbl_client_depuis:'Client depuis le {date}',
 btn_new_client_header:'+ Nouveau client',
 cli_col_client:'Client', cli_col_prefixe:'Préf.', cli_col_adresse:'Adresse', cli_col_email:'Email', cli_col_telephone:'Téléphone',
+btn_info:'Infos', row_client_depuis:'Client depuis',
 fact_client_title:'Client', ph_client_search:'Tape le nom du client...', fact_invoice_title:'Facture', lbl_num_facture:'N° facture', lbl_date:'Date',
 lbl_date_travaillee:'Date travaillée', hint_date_travaillee:'(pour rattacher le CA au bon mois)', lbl_tva_pct:'TVA (%)',
 fact_frais_title:'Frais déplacement', lbl_km:'Km parcourus', lbl_tarif_km:'Tarif km', lbl_peage:'Péage', lbl_parking:'Parking',
@@ -913,6 +934,7 @@ btn_save_client:'Save client', clients_list_title:'Saved clients', empty_clients
 ph_client_list_search:'Search...', empty_clients_search:'No client matches your search.', btn_new_presta_client:'+ Booking', lbl_client_depuis:'Client since {date}',
 btn_new_client_header:'+ New client',
 cli_col_client:'Client', cli_col_prefixe:'Pfx.', cli_col_adresse:'Address', cli_col_email:'Email', cli_col_telephone:'Phone',
+btn_info:'Info', row_client_depuis:'Client since',
 fact_client_title:'Client', ph_client_search:"Type the client's name...", fact_invoice_title:'Invoice', lbl_num_facture:'Invoice no.', lbl_date:'Date',
 lbl_date_travaillee:'Work date', hint_date_travaillee:'(to attribute revenue to the right month)', lbl_tva_pct:'VAT (%)',
 fact_frais_title:'Travel expenses', lbl_km:'Distance (km)', lbl_tarif_km:'Rate per km', lbl_peage:'Toll', lbl_parking:'Parking',
@@ -1015,6 +1037,7 @@ btn_save_client:'Guardar cliente', clients_list_title:'Clientes guardados', empt
 ph_client_list_search:'Buscar...', empty_clients_search:'Ningún cliente coincide con la búsqueda.', btn_new_presta_client:'+ Servicio', lbl_client_depuis:'Cliente desde el {date}',
 btn_new_client_header:'+ Nuevo cliente',
 cli_col_client:'Cliente', cli_col_prefixe:'Pref.', cli_col_adresse:'Dirección', cli_col_email:'Email', cli_col_telephone:'Teléfono',
+btn_info:'Info', row_client_depuis:'Cliente desde',
 fact_client_title:'Cliente', ph_client_search:'Escribe el nombre del cliente...', fact_invoice_title:'Factura', lbl_num_facture:'N.º factura', lbl_date:'Fecha',
 lbl_date_travaillee:'Fecha de trabajo', hint_date_travaillee:'(para asignar la facturación al mes correcto)', lbl_tva_pct:'IVA (%)',
 fact_frais_title:'Gastos de desplazamiento', lbl_km:'Kilómetros recorridos', lbl_tarif_km:'Tarifa por km', lbl_peage:'Peaje', lbl_parking:'Aparcamiento',
@@ -1736,10 +1759,39 @@ function renderClientList(){
       ${c.email?`<a href="mailto:${c.email}" onclick="event.stopPropagation()" title="${c.email}">${c.email}</a>`:'<span></span>'}
       ${c.phone?`<a href="tel:${c.phone}" onclick="event.stopPropagation()" title="${c.phone}">${c.phone}</a>`:'<span></span>'}
       <div class="client-actions">
+        <button class="btn-line" onclick="viewClientInfo(${i})">${t('btn_info')}</button>
         <button class="btn-line" onclick="editClient(${i})">${t('btn_edit')}</button>
         <button class="btn-line" onclick="clientNewBooking(${i})">${t('btn_new_presta_client')}</button>
       </div>
     </div>`).join('') : `<p style="color:var(--text2);font-size:12px;">${q?t('empty_clients_search'):t('empty_clients')}</p>`;
+}
+let clientInfoModalIdx = null;
+function viewClientInfo(i){
+  const c = storeArr('clients')[i];
+  if(!c) return;
+  clientInfoModalIdx = i;
+  clientInfoModalTitle.textContent = c.name;
+  const rows = [
+    [t('cli_col_prefixe'), c.prefix ? `[${c.prefix}]` : ''],
+    [t('lbl_adresse'), c.addr],
+    [t('lbl_email'), c.email],
+    [t('lbl_telephone'), c.phone],
+    [t('lbl_siret_client'), c.siret],
+    [t('lbl_facturation_addr'), c.billingAddr],
+    [t('lbl_tarif_defaut'), c.defaultRate ? `${c.defaultRate} €/h` : ''],
+    [t('lbl_notes_client'), c.notes],
+    [t('row_client_depuis'), c.createdAt ? formatFrDate(c.createdAt.slice(0,10)) : ''],
+  ].filter(([,v])=>v);
+  clientInfoModalBody.innerHTML = rows.map(([k,v])=>`<div class="modal-row"><span class="modal-row-label">${k}</span><span>${v}</span></div>`).join('');
+  clientInfoModal.style.display = 'flex';
+}
+function closeClientInfoModal(){
+  clientInfoModal.style.display = 'none';
+}
+function editClientFromModal(){
+  const i = clientInfoModalIdx;
+  closeClientInfoModal();
+  if(i!=null) editClient(i);
 }
 function clientNewBooking(i){
   const c = storeArr('clients')[i];
