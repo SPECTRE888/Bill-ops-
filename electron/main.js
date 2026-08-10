@@ -31,6 +31,8 @@ function migrateLegacyUserData() {
 }
 
 ipcMain.handle('open-external', (_e, u) => shell.openExternal(u))
+ipcMain.handle('get-version', () => app.getVersion())
+ipcMain.handle('check-for-updates', () => checkAndUpdate())
 
 ipcMain.handle('open-invoice-window', (_e, { html, title }) => {
   const fs = require('fs')
@@ -107,11 +109,11 @@ const { spawn } = require('child_process')
 const GH_OWNER = 'SPECTRE888'
 const GH_REPO  = 'Bill-ops-'
 
-function toast(msg) {
-  const safe = JSON.stringify(String(msg ?? ''))
-  mainWin?.webContents.executeJavaScript(
-    `if(typeof showToast==='function') showToast(${safe}); else console.warn('[updater]', ${safe});`
-  ).catch(() => {})
+// Statut structuré (pas juste un message texte) envoyé au renderer, qui pilote le popup central
+// de mise à jour (#updateModal) + le badge de version dans la sidebar — voir handleUpdateStatus()
+// dans facture.html.
+function sendUpdateStatus(payload) {
+  try { mainWin?.webContents.send('update-status', payload) } catch (e) {}
 }
 
 function get(url) {
@@ -129,7 +131,7 @@ function get(url) {
   })
 }
 
-function download(url, dest) {
+function download(url, dest, onProgress) {
   return new Promise((resolve, reject) => {
     const follow = (u, redirects) => {
       if (redirects > 10) return reject(new Error('Trop de redirections'))
@@ -141,6 +143,14 @@ function download(url, dest) {
         if (res.statusCode !== 200) {
           res.resume()
           return reject(new Error(`HTTP ${res.statusCode} lors du téléchargement`))
+        }
+        const total = Number(res.headers['content-length'] || 0)
+        let received = 0
+        if (onProgress && total) {
+          res.on('data', (chunk) => {
+            received += chunk.length
+            onProgress(Math.round((received / total) * 100))
+          })
         }
         const f = fs.createWriteStream(dest)
         res.pipe(f)
@@ -171,9 +181,12 @@ async function checkAndUpdate() {
     const latest  = release.tag_name.replace(/^v/, '')
     const current = app.getVersion()
 
-    if (!semverGt(latest, current)) return
+    if (!semverGt(latest, current)) {
+      sendUpdateStatus({ state: 'uptodate', version: current })
+      return
+    }
 
-    toast(`Mise à jour v${latest} disponible — téléchargement…`)
+    sendUpdateStatus({ state: 'available', version: latest })
 
     const asset = release.assets.find(a => a.name.match(/arm64-mac\.zip$/) && !a.name.endsWith('.blockmap'))
     if (!asset) throw new Error('Asset ZIP introuvable dans la release')
@@ -181,8 +194,10 @@ async function checkAndUpdate() {
     const tmpDir  = fs.mkdtempSync(path.join(os.tmpdir(), 'helm-ops-upd-'))
     const zipPath = path.join(tmpDir, 'update.zip')
 
-    await download(asset.browser_download_url, zipPath)
-    toast('Installation en cours…')
+    await download(asset.browser_download_url, zipPath, (pct) => {
+      sendUpdateStatus({ state: 'downloading', version: latest, pct })
+    })
+    sendUpdateStatus({ state: 'installing', version: latest })
 
     const appPath    = process.execPath.split('.app/Contents/')[0] + '.app'
     const extractDir = path.join(tmpDir, 'ext')
@@ -214,7 +229,7 @@ async function checkAndUpdate() {
       `echo "Done."`,
     ].join('\n')
 
-    toast('Mise à jour prête — redémarrage dans 3s…')
+    sendUpdateStatus({ state: 'ready', version: latest, seconds: 3 })
     setTimeout(() => {
       spawn('bash', ['-c', script], { detached: true, stdio: 'ignore' }).unref()
       app.quit()
@@ -222,6 +237,7 @@ async function checkAndUpdate() {
 
   } catch (err) {
     console.error('[updater]', err?.message || err)
+    sendUpdateStatus({ state: 'error', message: err?.message || String(err) })
   }
 }
 

@@ -275,6 +275,31 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .modal-row{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
 .modal-row:last-child{border-bottom:none;}
 .modal-row-label{color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;}
+/* Widget de version/mise à jour ancré en bas de .nav-list (margin-top:auto), juste au-dessus du
+   bloc thème/langue — reflète l'état envoyé par le processus principal (update-status IPC). */
+.nav-update{display:flex;align-items:center;gap:8px;padding:9px 12px;margin:auto 4px 2px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);font-size:10.5px;color:var(--text3);cursor:pointer;transition:.2s;}
+.nav-update:hover{border-color:var(--gold-border);color:var(--text2);}
+.nav-update-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:.3s;}
+.nav-update.checking .nav-update-dot,.nav-update.available .nav-update-dot,.nav-update.downloading .nav-update-dot,.nav-update.installing .nav-update-dot{background:var(--gold);animation:nav-update-pulse 1.2s ease-in-out infinite;}
+.nav-update.ready .nav-update-dot{background:var(--green);animation:none;}
+@keyframes nav-update-pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(196,164,107,.45);}50%{opacity:.55;box-shadow:0 0 0 4px rgba(196,164,107,0);}}
+.nav-update-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Popup central de mise à jour — non fermable (le process principal pilote toute la séquence
+   jusqu'au redémarrage), donc pas de .modal-close ici. */
+#updateModal .modal-box{max-width:340px;text-align:center;padding:34px 30px;}
+.upd-ring{width:56px;height:56px;margin:0 auto 18px;border-radius:50%;border:3px solid var(--gold-border);border-top-color:var(--gold);animation:upd-spin .9s linear infinite;}
+.upd-ring.done{animation:none;border-color:var(--green);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--green);}
+@keyframes upd-spin{to{transform:rotate(360deg);}}
+.upd-title{font-family:var(--font-display);font-size:19px;color:var(--gold);letter-spacing:.03em;margin-bottom:4px;}
+.upd-version{font-size:10.5px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px;}
+.upd-bar{height:6px;border-radius:4px;background:var(--surface3);overflow:hidden;margin-bottom:8px;}
+.upd-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold3),var(--gold),var(--gold2));width:0%;transition:width .3s ease;border-radius:4px;}
+.upd-state{font-size:11.5px;color:var(--text2);}
+/* Popup "nouveauté" affiché une fois au redémarrage suivant une mise à jour de version mineure
+   (le X de 1.X.YYY) — comparaison faite côté client via localStorage.lastSeenVersion. */
+#whatsNewModal .modal-box{max-width:360px;text-align:center;padding:34px 30px;}
+.wn-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold);border-radius:20px;padding:4px 14px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px;}
+.wn-text{font-size:12.5px;color:var(--text2);line-height:1.6;margin-bottom:20px;}
 @media print{.nav,.panel,.preview-actionbar{display:none;}.app{display:block;height:auto;overflow:visible;}.preview-wrap{height:auto;}.preview-scroll{padding:0;height:auto;overflow:visible;}#invoice,.invoice-page{box-shadow:none;width:auto;}.invoice-page-num{display:none;}
   :root,[data-theme]{
     --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
@@ -331,6 +356,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
     <div class="nav-section" data-i18n="sec_compte">Compte</div>
     <button id="nav-entreprise" onclick="showTab('entreprise')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span data-i18n="nav_donnees">Profil</span></button>
+    <div class="nav-update" id="navUpdate" onclick="manualCheckForUpdates()" title="Vérifier les mises à jour" data-i18n-title="nav_update_tooltip">
+      <span class="nav-update-dot"></span>
+      <span class="nav-update-text" id="navUpdateText">Helm Ops</span>
+    </div>
     </div>
     <div style="margin-top:auto;border-top:1px solid var(--border);padding:14px 18px;display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -758,6 +787,23 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="updateModal" style="display:none;">
+  <div class="modal-box">
+    <div class="upd-ring" id="updRing"></div>
+    <div class="upd-title" id="updTitle" data-i18n="upd_title">Mise à jour disponible</div>
+    <div class="upd-version" id="updVersion"></div>
+    <div class="upd-bar"><div class="upd-bar-fill" id="updBarFill"></div></div>
+    <div class="upd-state" id="updState"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="whatsNewModal" style="display:none;" onclick="if(event.target===this) closeWhatsNewModal()">
+  <div class="modal-box">
+    <div class="wn-badge" id="wnBadge"></div>
+    <div class="upd-title" data-i18n="wn_title">Nouveautés installées</div>
+    <div class="wn-text" data-i18n="wn_text">Helm Ops vient d'être mis à jour avec des améliorations et correctifs.</div>
+    <button class="btn-gold" style="width:100%;" onclick="closeWhatsNewModal()" data-i18n="wn_btn">Parfait, on y va</button>
+  </div>
+</div>
 <div class="modal-overlay" id="pointageModal" style="display:none;" onclick="if(event.target===this) closePointageModal()">
   <div class="modal-box" style="max-width:360px;">
     <div class="modal-header">
@@ -868,6 +914,9 @@ empty_day:'Aucune prestation ce jour.', btn_add_service_day:'+ Ajouter une prest
 modal_booking_title:'Détail de la prestation', btn_close:'Fermer',
 row_client:'Client', row_prestation:'Prestation', row_date:'Date', row_horaires:'Horaires', row_reel:'Réel (pointé)', row_taux:'Taux', row_total:'Total', row_adresse:'Adresse', row_contact:'Contact',
 non_definie:'non définie',
+nav_update_uptodate:'À jour', nav_update_checking:'Vérification…', nav_update_available:'Mise à jour disponible', nav_update_downloading:'Téléchargement… {pct}%', nav_update_installing:'Installation…', nav_update_ready:'Redémarrage…', nav_update_tooltip:'Vérifier les mises à jour',
+upd_title:'Mise à jour disponible', upd_state_available:'Préparation du téléchargement…', upd_state_downloading:'Téléchargement… {pct}%', upd_state_installing:'Installation en cours…', upd_state_ready:'Prêt — redémarrage dans {seconds}s…',
+wn_title:'Nouveautés installées', wn_text:"Helm Ops vient d'être mis à jour avec des améliorations et des correctifs importants.", wn_btn:'Parfait, on y va', wn_badge_version:'Version {version}',
 toast_client_email_invalid:'⚠ Email client invalide : {email}',
 toast_old_invoice_no_detail:'⚠ Détail non disponible pour cette facture ancienne.',
 toast_invoice_loaded:'✎ Facture {num} chargée pour modification.',
@@ -971,6 +1020,9 @@ empty_day:'No service that day.', btn_add_service_day:'+ Add a service',
 modal_booking_title:'Service detail', btn_close:'Close',
 row_client:'Client', row_prestation:'Service', row_date:'Date', row_horaires:'Hours', row_reel:'Actual (clocked)', row_taux:'Rate', row_total:'Total', row_adresse:'Address', row_contact:'Contact',
 non_definie:'not set',
+nav_update_uptodate:'Up to date', nav_update_checking:'Checking…', nav_update_available:'Update available', nav_update_downloading:'Downloading… {pct}%', nav_update_installing:'Installing…', nav_update_ready:'Restarting…', nav_update_tooltip:'Check for updates',
+upd_title:'Update available', upd_state_available:'Preparing download…', upd_state_downloading:'Downloading… {pct}%', upd_state_installing:'Installing…', upd_state_ready:'Ready — restarting in {seconds}s…',
+wn_title:'Update installed', wn_text:'Helm Ops was just updated with important improvements and fixes.', wn_btn:"Great, let's go", wn_badge_version:'Version {version}',
 toast_client_email_invalid:'⚠ Invalid client email: {email}',
 toast_old_invoice_no_detail:'⚠ Detail unavailable for this older invoice.',
 toast_invoice_loaded:'✎ Invoice {num} loaded for editing.',
@@ -1074,6 +1126,9 @@ empty_day:'Ningún servicio ese día.', btn_add_service_day:'+ Añadir un servic
 modal_booking_title:'Detalle del servicio', btn_close:'Cerrar',
 row_client:'Cliente', row_prestation:'Servicio', row_date:'Fecha', row_horaires:'Horario', row_reel:'Real (fichado)', row_taux:'Tarifa', row_total:'Total', row_adresse:'Dirección', row_contact:'Contacto',
 non_definie:'sin definir',
+nav_update_uptodate:'Actualizado', nav_update_checking:'Comprobando…', nav_update_available:'Actualización disponible', nav_update_downloading:'Descargando… {pct}%', nav_update_installing:'Instalando…', nav_update_ready:'Reiniciando…', nav_update_tooltip:'Buscar actualizaciones',
+upd_title:'Actualización disponible', upd_state_available:'Preparando la descarga…', upd_state_downloading:'Descargando… {pct}%', upd_state_installing:'Instalando…', upd_state_ready:'Listo — reinicio en {seconds}s…',
+wn_title:'Actualización instalada', wn_text:'Helm Ops se acaba de actualizar con mejoras y correcciones importantes.', wn_btn:'Perfecto, vamos', wn_badge_version:'Versión {version}',
 toast_client_email_invalid:'⚠ Email de cliente no válido: {email}',
 toast_old_invoice_no_detail:'⚠ Detalle no disponible para esta factura antigua.',
 toast_invoice_loaded:'✎ Factura {num} cargada para editar.',
@@ -1191,6 +1246,75 @@ function showToast(msg, duration){
   card.innerHTML = `<b>Helm Ops</b>${msg}`;
   stack.appendChild(card);
   setTimeout(()=>{ card.remove(); }, duration || 6000);
+}
+
+// ─── Mise à jour Electron (badge sidebar + popup central) ──────────────────
+// Statut poussé par le process principal (electron/main.js, IPC 'update-status') pendant tout le
+// cycle : available → downloading (avec %) → installing → ready (avant redémarrage auto). Piloté
+// depuis un seul point d'entrée (handleUpdateStatus) qui met à jour le badge nav ET le popup.
+function setNavUpdateState(state, text){
+  if(!navUpdate) return;
+  navUpdate.className = 'nav-update' + (state ? ' '+state : '');
+  navUpdateText.textContent = text;
+}
+function handleUpdateStatus(payload){
+  const { state, version, pct, seconds } = payload || {};
+  if(state==='available'){
+    setNavUpdateState('available', t('nav_update_available'));
+    updVersion.textContent = 'v'+version;
+    updRing.className = 'upd-ring';
+    updBarFill.style.width = '0%';
+    updState.textContent = t('upd_state_available');
+    updateModal.style.display = 'flex';
+  } else if(state==='downloading'){
+    setNavUpdateState('downloading', t('nav_update_downloading',{pct}));
+    updBarFill.style.width = pct+'%';
+    updState.textContent = t('upd_state_downloading',{pct});
+  } else if(state==='installing'){
+    setNavUpdateState('installing', t('nav_update_installing'));
+    updBarFill.style.width = '100%';
+    updState.textContent = t('upd_state_installing');
+  } else if(state==='ready'){
+    setNavUpdateState('ready', t('nav_update_ready'));
+    updRing.className = 'upd-ring done';
+    updRing.textContent = '✓';
+    updState.textContent = t('upd_state_ready',{seconds});
+  } else if(state==='uptodate'){
+    updateModal.style.display = 'none';
+    setNavUpdateState('', 'v'+version);
+  } else if(state==='error'){
+    updateModal.style.display = 'none';
+    setNavUpdateState('', t('nav_update_uptodate'));
+  }
+}
+function manualCheckForUpdates(){
+  if(!window.electronBridge?.checkForUpdates) return;
+  setNavUpdateState('checking', t('nav_update_checking'));
+  window.electronBridge.checkForUpdates();
+}
+async function initUpdateSystem(){
+  if(!window.electronBridge?.getVersion){ if(navUpdate) navUpdate.style.display = 'none'; return; }
+  const version = await window.electronBridge.getVersion();
+  setNavUpdateState('', 'v'+version);
+  window.electronBridge.onUpdateStatus?.(handleUpdateStatus);
+  checkWhatsNew(version);
+}
+// "Nouveauté importante" : comparé au X de 1.X.YYY (pas le YYY, trop fréquent pour mériter un
+// popup dédié) vu au précédent démarrage, stocké dans localStorage (survit à la mise à jour du
+// binaire puisque userData n'est pas touché par le script d'install).
+function checkWhatsNew(version){
+  const prev = localStorage.getItem('lastSeenVersion');
+  localStorage.setItem('lastSeenVersion', version);
+  if(!prev || prev===version) return;
+  const prevMinor = Number(prev.split('.')[1]);
+  const curMinor = Number(version.split('.')[1]);
+  if(!Number.isNaN(prevMinor) && !Number.isNaN(curMinor) && curMinor!==prevMinor){
+    wnBadge.textContent = t('wn_badge_version',{version});
+    whatsNewModal.style.display = 'flex';
+  }
+}
+function closeWhatsNewModal(){
+  whatsNewModal.style.display = 'none';
 }
 function setStatusMsg(el, msg){
   if(!el) return;
@@ -2910,6 +3034,7 @@ applyI18n();
 function bootApp(){
   loadFrom(); renderGmailUI(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
   refreshCompteView();
+  initUpdateSystem();
 }
 setInterval(refreshFromCloudIfIdle, 60000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') refreshFromCloudIfIdle(); });
