@@ -150,7 +150,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
    ligne (colonne Actions vide dans le header vs 3 boutons dans les lignes) et désaligne tout —
    bug vécu en prod, header et données décalés horizontalement malgré des grid-template-columns
    identiques. */
-.client-grid-cols{display:grid;grid-template-columns:14px minmax(0,1.3fr) 60px minmax(0,1.5fr) minmax(0,1.5fr) minmax(0,1.1fr) 240px;gap:10px;align-items:center;}
+.client-grid-cols{display:grid;grid-template-columns:14px minmax(0,1.2fr) 80px minmax(0,2.3fr) minmax(0,1fr) minmax(0,1fr) 240px;gap:10px;align-items:center;}
 .client-header{padding:0 10px 4px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
 .client-header>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .client-row{padding:8px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);}
@@ -830,7 +830,7 @@ lbl_notes_client:'Notes (optionnel)', hint_notes_client:"Usage interne, n'appara
 btn_save_client:'Enregistrer le client', clients_list_title:'Clients enregistrés', empty_clients:'Aucun client.', btn_delete:'Supprimer',
 ph_client_list_search:'Chercher...', empty_clients_search:'Aucun client ne correspond à la recherche.', btn_new_presta_client:'+ Presta', lbl_client_depuis:'Client depuis le {date}',
 btn_new_client_header:'+ Nouveau client',
-cli_col_client:'Client', cli_col_prefixe:'Préf.', cli_col_adresse:'Adresse', cli_col_email:'Email', cli_col_telephone:'Téléphone',
+cli_col_client:'Client', cli_col_prefixe:'Préfixe', cli_col_adresse:'Adresse', cli_col_email:'Email', cli_col_telephone:'Téléphone',
 btn_info:'Infos', row_client_depuis:'Client depuis',
 fact_client_title:'Client', ph_client_search:'Tape le nom du client...', fact_invoice_title:'Facture', lbl_num_facture:'N° facture', lbl_date:'Date',
 lbl_date_travaillee:'Date travaillée', hint_date_travaillee:'(pour rattacher le CA au bon mois)', lbl_tva_pct:'TVA (%)',
@@ -933,7 +933,7 @@ lbl_notes_client:'Notes (optional)', hint_notes_client:'Internal use only, never
 btn_save_client:'Save client', clients_list_title:'Saved clients', empty_clients:'No clients.', btn_delete:'Delete',
 ph_client_list_search:'Search...', empty_clients_search:'No client matches your search.', btn_new_presta_client:'+ Booking', lbl_client_depuis:'Client since {date}',
 btn_new_client_header:'+ New client',
-cli_col_client:'Client', cli_col_prefixe:'Pfx.', cli_col_adresse:'Address', cli_col_email:'Email', cli_col_telephone:'Phone',
+cli_col_client:'Client', cli_col_prefixe:'Prefix', cli_col_adresse:'Address', cli_col_email:'Email', cli_col_telephone:'Phone',
 btn_info:'Info', row_client_depuis:'Client since',
 fact_client_title:'Client', ph_client_search:"Type the client's name...", fact_invoice_title:'Invoice', lbl_num_facture:'Invoice no.', lbl_date:'Date',
 lbl_date_travaillee:'Work date', hint_date_travaillee:'(to attribute revenue to the right month)', lbl_tva_pct:'VAT (%)',
@@ -1036,7 +1036,7 @@ lbl_notes_client:'Notas (opcional)', hint_notes_client:'Uso interno, nunca apare
 btn_save_client:'Guardar cliente', clients_list_title:'Clientes guardados', empty_clients:'Ningún cliente.', btn_delete:'Eliminar',
 ph_client_list_search:'Buscar...', empty_clients_search:'Ningún cliente coincide con la búsqueda.', btn_new_presta_client:'+ Servicio', lbl_client_depuis:'Cliente desde el {date}',
 btn_new_client_header:'+ Nuevo cliente',
-cli_col_client:'Cliente', cli_col_prefixe:'Pref.', cli_col_adresse:'Dirección', cli_col_email:'Email', cli_col_telephone:'Teléfono',
+cli_col_client:'Cliente', cli_col_prefixe:'Prefijo', cli_col_adresse:'Dirección', cli_col_email:'Email', cli_col_telephone:'Teléfono',
 btn_info:'Info', row_client_depuis:'Cliente desde',
 fact_client_title:'Cliente', ph_client_search:'Escribe el nombre del cliente...', fact_invoice_title:'Factura', lbl_num_facture:'N.º factura', lbl_date:'Fecha',
 lbl_date_travaillee:'Fecha de trabajo', hint_date_travaillee:'(para asignar la facturación al mes correcto)', lbl_tva_pct:'IVA (%)',
@@ -1755,7 +1755,7 @@ function renderClientList(){
       <span class="cal-dot" style="background:${clientColor(c.name)};"></span>
       <span class="client-name">${c.name}</span>
       <span>${c.prefix?`[${c.prefix}]`:''}</span>
-      <span title="${c.addr||''}">${c.addr||''}</span>
+      ${c.addr?`<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.addr)}" onclick="event.stopPropagation()" title="${c.addr}">${c.addr}</a>`:'<span></span>'}
       ${c.email?`<a href="mailto:${c.email}" onclick="event.stopPropagation()" title="${c.email}">${c.email}</a>`:'<span></span>'}
       ${c.phone?`<a href="tel:${c.phone}" onclick="event.stopPropagation()" title="${c.phone}">${c.phone}</a>`:'<span></span>'}
       <div class="client-actions">
