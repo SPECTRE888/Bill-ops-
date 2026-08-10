@@ -140,20 +140,11 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .date-chip button{all:unset;cursor:pointer;font-size:13px;line-height:1;color:var(--text3);padding:0 4px;}
 .date-chip button:hover{color:var(--red);}
 .client-list{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
-/* Repris de BAR OPS (renderClients, app.html) : rangée horizontale avatar/infos/actions au lieu
-   de cartes en grille — sans le badge CA (volontairement, ce total reste dans Historique). */
-.client-card{display:flex;align-items:center;gap:12px;border:1px solid var(--border2);border-radius:var(--radius-lg);padding:10px 14px;min-height:52px;background:var(--surface2);}
-.client-card-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold-bg),rgba(217,166,55,.06));border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--gold);flex-shrink:0;letter-spacing:.04em;}
-.client-card-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;flex-shrink:0;}
-.client-card-infos{display:flex;align-items:center;flex-wrap:nowrap;overflow:hidden;gap:0;flex:1;min-width:0;}
-.client-card-infos>span,.client-card-infos>a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--text3);}
-.client-card-prefix{font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
-.client-card-infos a{text-decoration:none;transition:.15s;}
-.client-card-infos a:hover{color:var(--gold);}
-.client-card-sep{color:var(--border2);margin:0 6px;flex-shrink:0;}
-.client-card-since{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;}
-.client-card-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.client-card-actions button{margin:0;padding:4px 11px;font-size:10px;}
+/* Repris du style épuré de la rangée Planning (.acc-row) au lieu de l'avatar rond + bouton doré
+   de la première version — plus sobre/pro, jugée trop "gadget" par l'utilisateur. */
+.client-row .client-info{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.client-row .client-info a{color:inherit;text-decoration:none;transition:.15s;}
+.client-row .client-info a:hover{color:var(--gold);}
 .cal-day{min-height:66px;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
 .cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
 .cal-day.selected{outline:2px solid var(--gold);}
@@ -1716,25 +1707,20 @@ function renderClientList(){
     if(!q) return true;
     return [c.name,c.prefix,c.email,c.phone,c.addr].filter(Boolean).join(' ').toLowerCase().includes(q);
   });
-  const sep = `<span class="client-card-sep">·</span>`;
   clientList.innerHTML = rows.length ? rows.map(({c,i})=>{
-    const initials = (c.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
     const infos = [];
-    if(c.prefix) infos.push(`<span class="client-card-prefix">[${c.prefix}]</span>`);
-    if(c.addr) infos.push(`<span>📍 ${c.addr}</span>`);
+    if(c.prefix) infos.push(`[${c.prefix}]`);
+    if(c.addr) infos.push(`📍 ${c.addr}`);
     if(c.email) infos.push(`<a href="mailto:${c.email}" onclick="event.stopPropagation()" title="${c.email}">✉ ${c.email}</a>`);
     if(c.phone) infos.push(`<a href="tel:${c.phone}" onclick="event.stopPropagation()" title="${c.phone}">📞 ${c.phone}</a>`);
     const createdLabel = c.createdAt ? formatFrDate(c.createdAt.slice(0,10)) : '';
+    if(createdLabel) infos.push(t('lbl_client_depuis',{date:createdLabel}));
     return `
-    <div class="client-card">
-      <div class="client-card-avatar">${initials}</div>
-      <div class="client-card-name">${c.name}</div>
-      ${infos.length ? `<div class="client-card-infos">${sep}${infos.join(sep)}</div>` : `<div style="flex:1;"></div>`}
-      <div class="client-card-actions">
-        ${createdLabel ? `<span class="client-card-since">${t('lbl_client_depuis',{date:createdLabel})}</span>` : ''}
-        <button class="btn-line" onclick="editClient(${i})">${t('btn_edit')}</button>
-        <button class="btn-gold" onclick="clientNewBooking(${i})">${t('btn_new_presta_client')}</button>
-      </div>
+    <div class="acc-row client-row">
+      <span class="cal-dot" style="background:${clientColor(c.name)};"></span>
+      <div class="acc-info client-info"><b>${c.name}</b>${infos.length?' · '+infos.join(' · '):''}</div>
+      <button class="btn-line" onclick="editClient(${i})">${t('btn_edit')}</button>
+      <button class="btn-line" onclick="clientNewBooking(${i})">${t('btn_new_presta_client')}</button>
     </div>`;
   }).join('') : `<p style="color:var(--text2);font-size:12px;">${q?t('empty_clients_search'):t('empty_clients')}</p>`;
 }
