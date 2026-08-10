@@ -275,10 +275,16 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .modal-row{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
 .modal-row:last-child{border-bottom:none;}
 .modal-row-label{color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;}
-/* Widget de version/mise à jour ancré en bas de .nav-list (margin-top:auto), juste au-dessus du
-   bloc thème/langue — reflète l'état envoyé par le processus principal (update-status IPC). */
-.nav-update{display:flex;align-items:center;gap:8px;padding:9px 12px;margin:auto 4px 2px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);font-size:10.5px;color:var(--text3);cursor:pointer;transition:.2s;}
-.nav-update:hover{border-color:var(--gold-border);color:var(--text2);}
+/* Widget de mise à jour ancré en bas de .nav-list (margin-top:auto), juste au-dessus du bloc
+   thème/langue — reflète l'état envoyé par le processus principal (update-status IPC). Invisible
+   au repos (juste un point discret, pas de pastille/texte) : le numéro de version en permanence
+   ici encombrait l'UI pour une info qui n'intéresse que pendant un événement de mise à jour — le
+   texte n'apparaît que pendant checking/available/downloading/installing/ready ; sinon la version
+   se consulte dans Profil (#viewAppVersion). */
+.nav-update{display:flex;align-items:center;gap:8px;padding:8px 10px;margin:auto 4px 2px;border-radius:8px;border:1px solid transparent;background:transparent;font-size:10.5px;color:var(--text3);cursor:pointer;transition:.2s;}
+.nav-update:hover{border-color:var(--border2);background:var(--surface2);}
+.nav-update.checking,.nav-update.available,.nav-update.downloading,.nav-update.installing{border-color:var(--gold-border);background:var(--surface2);}
+.nav-update.ready{border-color:var(--green);background:var(--surface2);}
 .nav-update-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:.3s;}
 .nav-update.checking .nav-update-dot,.nav-update.available .nav-update-dot,.nav-update.downloading .nav-update-dot,.nav-update.installing .nav-update-dot{background:var(--gold);animation:nav-update-pulse 1.2s ease-in-out infinite;}
 .nav-update.ready .nav-update-dot{background:var(--green);animation:none;}
@@ -405,6 +411,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div class="info-grid">
           <div class="info-item"><div class="info-label" data-i18n="lbl_appareil">Appareil</div><div class="info-value" id="viewDeviceLabel" data-i18n="cet_appareil">Cet appareil</div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_derniere_synchro">Dernière synchro</div><div class="info-value" id="viewLastSync">—</div></div>
+          <div class="info-item"><div class="info-label" data-i18n="lbl_version_app">Version</div><div class="info-value" id="viewAppVersion">—</div></div>
         </div>
         <div style="margin-top:auto;display:flex;flex-direction:column;">
           <button class="btn-line" onclick="forceCloudRefresh()" data-i18n="btn_force_sync" style="order:2;margin-top:10px;width:100%;">Forcer la synchro</button>
@@ -853,7 +860,7 @@ nav_accueil:'Tableau de bord', nav_planning:'Planning', nav_pointage:'Pointage',
 sec_planning:'Planning', sec_facturation:'Facturation', sec_clients:'Clients', sec_compte:'Compte',
 theme_dark_title:'Sombre', theme_auto_title:'Auto', theme_light_title:'Clair', legal_link:'Mentions légales',
 data_title:'Profil', data_compte_title:'Compte', data_info_title:'Informations',
-lbl_appareil:'Appareil', cet_appareil:'Cet appareil', lbl_derniere_synchro:'Dernière synchro',
+lbl_appareil:'Appareil', cet_appareil:'Cet appareil', lbl_derniere_synchro:'Dernière synchro', lbl_version_app:'Version',
 compte_status_connected:'Connecté au cloud', compte_status_disconnected:'Non connecté',
 time_just_now:"à l'instant", time_min_ago:'il y a {n} min', time_hour_ago:'il y a {n} h', time_day_ago:'il y a {n} j',
 lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
@@ -914,7 +921,7 @@ empty_day:'Aucune prestation ce jour.', btn_add_service_day:'+ Ajouter une prest
 modal_booking_title:'Détail de la prestation', btn_close:'Fermer',
 row_client:'Client', row_prestation:'Prestation', row_date:'Date', row_horaires:'Horaires', row_reel:'Réel (pointé)', row_taux:'Taux', row_total:'Total', row_adresse:'Adresse', row_contact:'Contact',
 non_definie:'non définie',
-nav_update_uptodate:'À jour', nav_update_checking:'Vérification…', nav_update_available:'Mise à jour disponible', nav_update_downloading:'Téléchargement… {pct}%', nav_update_installing:'Installation…', nav_update_ready:'Redémarrage…', nav_update_tooltip:'Vérifier les mises à jour',
+nav_update_checking:'Vérification…', nav_update_available:'Mise à jour disponible', nav_update_downloading:'Téléchargement… {pct}%', nav_update_installing:'Installation…', nav_update_ready:'Redémarrage…', nav_update_tooltip:'Vérifier les mises à jour',
 upd_title:'Mise à jour disponible', upd_state_available:'Préparation du téléchargement…', upd_state_downloading:'Téléchargement… {pct}%', upd_state_installing:'Installation en cours…', upd_state_ready:'Prêt — redémarrage dans {seconds}s…',
 wn_title:'Nouveautés installées', wn_text:"Helm Ops vient d'être mis à jour avec des améliorations et des correctifs importants.", wn_btn:'Parfait, on y va', wn_badge_version:'Version {version}',
 toast_client_email_invalid:'⚠ Email client invalide : {email}',
@@ -959,7 +966,7 @@ nav_accueil:'Dashboard', nav_planning:'Schedule', nav_pointage:'Time tracking', 
 sec_planning:'Schedule', sec_facturation:'Billing', sec_clients:'Clients', sec_compte:'Account',
 theme_dark_title:'Dark', theme_auto_title:'Auto', theme_light_title:'Light', legal_link:'Legal notice',
 data_title:'Profile', data_compte_title:'Account', data_info_title:'Information',
-lbl_appareil:'Device', cet_appareil:'This device', lbl_derniere_synchro:'Last sync',
+lbl_appareil:'Device', cet_appareil:'This device', lbl_derniere_synchro:'Last sync', lbl_version_app:'Version',
 compte_status_connected:'Connected to cloud', compte_status_disconnected:'Not connected',
 time_just_now:'just now', time_min_ago:'{n} min ago', time_hour_ago:'{n} h ago', time_day_ago:'{n} d ago',
 lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
@@ -1020,7 +1027,7 @@ empty_day:'No service that day.', btn_add_service_day:'+ Add a service',
 modal_booking_title:'Service detail', btn_close:'Close',
 row_client:'Client', row_prestation:'Service', row_date:'Date', row_horaires:'Hours', row_reel:'Actual (clocked)', row_taux:'Rate', row_total:'Total', row_adresse:'Address', row_contact:'Contact',
 non_definie:'not set',
-nav_update_uptodate:'Up to date', nav_update_checking:'Checking…', nav_update_available:'Update available', nav_update_downloading:'Downloading… {pct}%', nav_update_installing:'Installing…', nav_update_ready:'Restarting…', nav_update_tooltip:'Check for updates',
+nav_update_checking:'Checking…', nav_update_available:'Update available', nav_update_downloading:'Downloading… {pct}%', nav_update_installing:'Installing…', nav_update_ready:'Restarting…', nav_update_tooltip:'Check for updates',
 upd_title:'Update available', upd_state_available:'Preparing download…', upd_state_downloading:'Downloading… {pct}%', upd_state_installing:'Installing…', upd_state_ready:'Ready — restarting in {seconds}s…',
 wn_title:'Update installed', wn_text:'Helm Ops was just updated with important improvements and fixes.', wn_btn:"Great, let's go", wn_badge_version:'Version {version}',
 toast_client_email_invalid:'⚠ Invalid client email: {email}',
@@ -1065,7 +1072,7 @@ nav_accueil:'Dashboard', nav_planning:'Planificación', nav_pointage:'Fichaje', 
 sec_planning:'Planificación', sec_facturation:'Facturación', sec_clients:'Clientes', sec_compte:'Cuenta',
 theme_dark_title:'Oscuro', theme_auto_title:'Auto', theme_light_title:'Claro', legal_link:'Aviso legal',
 data_title:'Perfil', data_compte_title:'Cuenta', data_info_title:'Información',
-lbl_appareil:'Dispositivo', cet_appareil:'Este dispositivo', lbl_derniere_synchro:'Última sincronización',
+lbl_appareil:'Dispositivo', cet_appareil:'Este dispositivo', lbl_derniere_synchro:'Última sincronización', lbl_version_app:'Versión',
 compte_status_connected:'Conectado a la nube', compte_status_disconnected:'No conectado',
 time_just_now:'justo ahora', time_min_ago:'hace {n} min', time_hour_ago:'hace {n} h', time_day_ago:'hace {n} d',
 lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
@@ -1126,7 +1133,7 @@ empty_day:'Ningún servicio ese día.', btn_add_service_day:'+ Añadir un servic
 modal_booking_title:'Detalle del servicio', btn_close:'Cerrar',
 row_client:'Cliente', row_prestation:'Servicio', row_date:'Fecha', row_horaires:'Horario', row_reel:'Real (fichado)', row_taux:'Tarifa', row_total:'Total', row_adresse:'Dirección', row_contact:'Contacto',
 non_definie:'sin definir',
-nav_update_uptodate:'Actualizado', nav_update_checking:'Comprobando…', nav_update_available:'Actualización disponible', nav_update_downloading:'Descargando… {pct}%', nav_update_installing:'Instalando…', nav_update_ready:'Reiniciando…', nav_update_tooltip:'Buscar actualizaciones',
+nav_update_checking:'Comprobando…', nav_update_available:'Actualización disponible', nav_update_downloading:'Descargando… {pct}%', nav_update_installing:'Instalando…', nav_update_ready:'Reiniciando…', nav_update_tooltip:'Buscar actualizaciones',
 upd_title:'Actualización disponible', upd_state_available:'Preparando la descarga…', upd_state_downloading:'Descargando… {pct}%', upd_state_installing:'Instalando…', upd_state_ready:'Listo — reinicio en {seconds}s…',
 wn_title:'Actualización instalada', wn_text:'Helm Ops se acaba de actualizar con mejoras y correcciones importantes.', wn_btn:'Perfecto, vamos', wn_badge_version:'Versión {version}',
 toast_client_email_invalid:'⚠ Email de cliente no válido: {email}',
@@ -1281,10 +1288,10 @@ function handleUpdateStatus(payload){
     updState.textContent = t('upd_state_ready',{seconds});
   } else if(state==='uptodate'){
     updateModal.style.display = 'none';
-    setNavUpdateState('', 'v'+version);
+    setNavUpdateState('', '');
   } else if(state==='error'){
     updateModal.style.display = 'none';
-    setNavUpdateState('', t('nav_update_uptodate'));
+    setNavUpdateState('', '');
   }
 }
 function manualCheckForUpdates(){
@@ -1295,7 +1302,9 @@ function manualCheckForUpdates(){
 async function initUpdateSystem(){
   if(!window.electronBridge?.getVersion){ if(navUpdate) navUpdate.style.display = 'none'; return; }
   const version = await window.electronBridge.getVersion();
-  setNavUpdateState('', 'v'+version);
+  setNavUpdateState('', '');
+  const viewAppVersionEl = document.getElementById('viewAppVersion');
+  if(viewAppVersionEl) viewAppVersionEl.textContent = 'v'+version;
   window.electronBridge.onUpdateStatus?.(handleUpdateStatus);
   checkWhatsNew(version);
 }
