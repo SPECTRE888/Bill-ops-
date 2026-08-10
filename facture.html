@@ -140,11 +140,19 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .date-chip button{all:unset;cursor:pointer;font-size:13px;line-height:1;color:var(--text3);padding:0 4px;}
 .date-chip button:hover{color:var(--red);}
 .client-list{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
-/* Repris du style épuré de la rangée Planning (.acc-row) au lieu de l'avatar rond + bouton doré
-   de la première version — plus sobre/pro, jugée trop "gadget" par l'utilisateur. */
-.client-row .client-info{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.client-row .client-info a{color:inherit;text-decoration:none;transition:.15s;}
-.client-row .client-info a:hover{color:var(--gold);}
+/* Repris du style épuré de la rangée Planning (.acc-row), mais en grille à colonnes alignées
+   (+ header) — la version inline précédente ("nom · préfixe · adresse · email · tel") juxtaposait
+   les infos sans repère visuel, jugée brouillon par l'utilisateur. "Client depuis DATE" retiré de
+   la liste (pas une info à afficher en direct) et déplacé sur la fiche client (titre du formulaire). */
+.client-grid-cols{display:grid;grid-template-columns:14px 1.3fr 60px 1.5fr 1.5fr 1.1fr auto;gap:10px;align-items:center;}
+.client-header{padding:0 10px 4px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
+.client-row{padding:8px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);}
+.client-row>span,.client-row>a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--text2);}
+.client-row .client-name{font-weight:600;color:var(--text);}
+.client-row a{text-decoration:none;transition:.15s;}
+.client-row a:hover{color:var(--gold);}
+.client-actions{display:flex;gap:5px;justify-content:flex-end;}
+.client-actions button{margin:0;padding:4px 9px;font-size:10.5px;}
 .cal-day{min-height:66px;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
 .cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
 .cal-day.selected{outline:2px solid var(--gold);}
@@ -442,7 +450,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       </div>
 
       <div id="clientFormWrap" style="display:none;margin-bottom:20px;">
-        <h2 style="margin-top:0;" data-i18n="clients_add_title">Ajouter / modifier un client</h2>
+        <h2 style="margin-top:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+          <span data-i18n="clients_add_title">Ajouter / modifier un client</span>
+          <span id="cliCreatedLabel" style="font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3);"></span>
+        </h2>
         <input type="hidden" id="cliIdx" value="">
         <div class="row">
           <div><label data-i18n="lbl_nom_societe">Nom société</label><input id="cliName" oninput="suggestPrefix()"></div>
@@ -797,8 +808,9 @@ lbl_siret_client:'SIRET / TVA client (optionnel)', lbl_facturation_addr:'Adresse
 lbl_tarif_defaut:'Tarif horaire par défaut (optionnel)', hint_tarif_defaut:'Pré-remplit le taux €/h sur les nouvelles prestas et lignes de facture pour ce client.',
 lbl_notes_client:'Notes (optionnel)', hint_notes_client:"Usage interne, n'apparaît jamais sur la facture.",
 btn_save_client:'Enregistrer le client', clients_list_title:'Clients enregistrés', empty_clients:'Aucun client.', btn_delete:'Supprimer',
-ph_client_list_search:'Chercher...', empty_clients_search:'Aucun client ne correspond à la recherche.', btn_new_presta_client:'+ Presta', lbl_client_depuis:'depuis {date}',
+ph_client_list_search:'Chercher...', empty_clients_search:'Aucun client ne correspond à la recherche.', btn_new_presta_client:'+ Presta', lbl_client_depuis:'Client depuis le {date}',
 btn_new_client_header:'+ Nouveau client',
+cli_col_client:'Client', cli_col_prefixe:'Préf.', cli_col_adresse:'Adresse', cli_col_email:'Email', cli_col_telephone:'Téléphone',
 fact_client_title:'Client', ph_client_search:'Tape le nom du client...', fact_invoice_title:'Facture', lbl_num_facture:'N° facture', lbl_date:'Date',
 lbl_date_travaillee:'Date travaillée', hint_date_travaillee:'(pour rattacher le CA au bon mois)', lbl_tva_pct:'TVA (%)',
 fact_frais_title:'Frais déplacement', lbl_km:'Km parcourus', lbl_tarif_km:'Tarif km', lbl_peage:'Péage', lbl_parking:'Parking',
@@ -898,8 +910,9 @@ lbl_siret_client:'Client company ID / VAT (optional)', lbl_facturation_addr:'Bil
 lbl_tarif_defaut:'Default hourly rate (optional)', hint_tarif_defaut:'Pre-fills the €/h rate on new bookings and invoice lines for this client.',
 lbl_notes_client:'Notes (optional)', hint_notes_client:'Internal use only, never appears on the invoice.',
 btn_save_client:'Save client', clients_list_title:'Saved clients', empty_clients:'No clients.', btn_delete:'Delete',
-ph_client_list_search:'Search...', empty_clients_search:'No client matches your search.', btn_new_presta_client:'+ Booking', lbl_client_depuis:'since {date}',
+ph_client_list_search:'Search...', empty_clients_search:'No client matches your search.', btn_new_presta_client:'+ Booking', lbl_client_depuis:'Client since {date}',
 btn_new_client_header:'+ New client',
+cli_col_client:'Client', cli_col_prefixe:'Pfx.', cli_col_adresse:'Address', cli_col_email:'Email', cli_col_telephone:'Phone',
 fact_client_title:'Client', ph_client_search:"Type the client's name...", fact_invoice_title:'Invoice', lbl_num_facture:'Invoice no.', lbl_date:'Date',
 lbl_date_travaillee:'Work date', hint_date_travaillee:'(to attribute revenue to the right month)', lbl_tva_pct:'VAT (%)',
 fact_frais_title:'Travel expenses', lbl_km:'Distance (km)', lbl_tarif_km:'Rate per km', lbl_peage:'Toll', lbl_parking:'Parking',
@@ -999,8 +1012,9 @@ lbl_siret_client:'SIRET / IVA del cliente (opcional)', lbl_facturation_addr:'Dir
 lbl_tarif_defaut:'Tarifa horaria por defecto (opcional)', hint_tarif_defaut:'Rellena automáticamente la tarifa €/h en nuevas reservas y líneas de factura para este cliente.',
 lbl_notes_client:'Notas (opcional)', hint_notes_client:'Uso interno, nunca aparece en la factura.',
 btn_save_client:'Guardar cliente', clients_list_title:'Clientes guardados', empty_clients:'Ningún cliente.', btn_delete:'Eliminar',
-ph_client_list_search:'Buscar...', empty_clients_search:'Ningún cliente coincide con la búsqueda.', btn_new_presta_client:'+ Servicio', lbl_client_depuis:'desde {date}',
+ph_client_list_search:'Buscar...', empty_clients_search:'Ningún cliente coincide con la búsqueda.', btn_new_presta_client:'+ Servicio', lbl_client_depuis:'Cliente desde el {date}',
 btn_new_client_header:'+ Nuevo cliente',
+cli_col_client:'Cliente', cli_col_prefixe:'Pref.', cli_col_adresse:'Dirección', cli_col_email:'Email', cli_col_telephone:'Teléfono',
 fact_client_title:'Cliente', ph_client_search:'Escribe el nombre del cliente...', fact_invoice_title:'Factura', lbl_num_facture:'N.º factura', lbl_date:'Fecha',
 lbl_date_travaillee:'Fecha de trabajo', hint_date_travaillee:'(para asignar la facturación al mes correcto)', lbl_tva_pct:'IVA (%)',
 fact_frais_title:'Gastos de desplazamiento', lbl_km:'Kilómetros recorridos', lbl_tarif_km:'Tarifa por km', lbl_peage:'Peaje', lbl_parking:'Aparcamiento',
@@ -1661,6 +1675,7 @@ function resetClientForm(){
   cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliPhone.value=''; cliAddr.value=''; cliTutoiement.checked=false;
   cliSiret.value=''; cliBillingAddr.value=''; cliDefaultRate.value=''; cliNotes.value='';
   cliDeleteBtn.style.display = 'none';
+  cliCreatedLabel.textContent = '';
 }
 function openNewClientForm(){
   resetClientForm();
@@ -1691,6 +1706,7 @@ function editClient(i){
   const c = storeArr('clients')[i];
   cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliPhone.value=c.phone||''; cliAddr.value=c.addr; cliTutoiement.checked=!!c.tutoiement;
   cliSiret.value=c.siret||''; cliBillingAddr.value=c.billingAddr||''; cliDefaultRate.value=c.defaultRate||''; cliNotes.value=c.notes||'';
+  cliCreatedLabel.textContent = c.createdAt ? t('lbl_client_depuis',{date:formatFrDate(c.createdAt.slice(0,10))}) : '';
   cliDeleteBtn.style.display = 'inline-flex';
   clientFormWrap.style.display = 'block';
   clientFormWrap.scrollIntoView({behavior:'smooth', block:'start'});
@@ -1707,22 +1723,23 @@ function renderClientList(){
     if(!q) return true;
     return [c.name,c.prefix,c.email,c.phone,c.addr].filter(Boolean).join(' ').toLowerCase().includes(q);
   });
-  clientList.innerHTML = rows.length ? rows.map(({c,i})=>{
-    const infos = [];
-    if(c.prefix) infos.push(`[${c.prefix}]`);
-    if(c.addr) infos.push(`📍 ${c.addr}`);
-    if(c.email) infos.push(`<a href="mailto:${c.email}" onclick="event.stopPropagation()" title="${c.email}">✉ ${c.email}</a>`);
-    if(c.phone) infos.push(`<a href="tel:${c.phone}" onclick="event.stopPropagation()" title="${c.phone}">📞 ${c.phone}</a>`);
-    const createdLabel = c.createdAt ? formatFrDate(c.createdAt.slice(0,10)) : '';
-    if(createdLabel) infos.push(t('lbl_client_depuis',{date:createdLabel}));
-    return `
-    <div class="acc-row client-row">
-      <span class="cal-dot" style="background:${clientColor(c.name)};"></span>
-      <div class="acc-info client-info"><b>${c.name}</b>${infos.length?' · '+infos.join(' · '):''}</div>
-      <button class="btn-line" onclick="editClient(${i})">${t('btn_edit')}</button>
-      <button class="btn-line" onclick="clientNewBooking(${i})">${t('btn_new_presta_client')}</button>
+  const header = `
+    <div class="client-grid-cols client-header">
+      <span></span><span>${t('cli_col_client')}</span><span>${t('cli_col_prefixe')}</span><span>${t('cli_col_adresse')}</span><span>${t('cli_col_email')}</span><span>${t('cli_col_telephone')}</span><span></span>
     </div>`;
-  }).join('') : `<p style="color:var(--text2);font-size:12px;">${q?t('empty_clients_search'):t('empty_clients')}</p>`;
+  clientList.innerHTML = rows.length ? header + rows.map(({c,i})=>`
+    <div class="client-grid-cols client-row">
+      <span class="cal-dot" style="background:${clientColor(c.name)};"></span>
+      <span class="client-name">${c.name}</span>
+      <span>${c.prefix?`[${c.prefix}]`:''}</span>
+      <span title="${c.addr||''}">${c.addr||''}</span>
+      ${c.email?`<a href="mailto:${c.email}" onclick="event.stopPropagation()" title="${c.email}">${c.email}</a>`:'<span></span>'}
+      ${c.phone?`<a href="tel:${c.phone}" onclick="event.stopPropagation()" title="${c.phone}">${c.phone}</a>`:'<span></span>'}
+      <div class="client-actions">
+        <button class="btn-line" onclick="editClient(${i})">${t('btn_edit')}</button>
+        <button class="btn-line" onclick="clientNewBooking(${i})">${t('btn_new_presta_client')}</button>
+      </div>
+    </div>`).join('') : `<p style="color:var(--text2);font-size:12px;">${q?t('empty_clients_search'):t('empty_clients')}</p>`;
 }
 function clientNewBooking(i){
   const c = storeArr('clients')[i];
