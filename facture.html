@@ -263,6 +263,8 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .stat-mini{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;text-align:center;}
 .stat-mini-value{font-family:var(--font-display);font-size:20px;color:var(--gold);font-weight:300;}
 .stat-mini-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-top:4px;}
+.ca-goal-bar{height:8px;border-radius:4px;background:var(--surface3);border:1px solid var(--border2);overflow:hidden;}
+.ca-goal-bar-fill{height:100%;border-radius:4px;transition:width .3s;}
 .hist-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
 .hist-filter{cursor:pointer;padding:5px 12px;border-radius:14px;border:1px solid var(--border2);background:var(--surface2);font-size:11.5px;color:var(--text2);}
 .hist-filter.active{color:var(--gold);border-color:var(--gold-border);background:var(--gold-bg);font-weight:400;}
@@ -633,6 +635,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
     <div class="tab" id="tab-ca">
       <h2 data-i18n="ca_title">Chiffre d'affaires</h2>
+      <div class="row" style="max-width:420px;margin-bottom:14px;">
+        <div style="flex:1;"><label data-i18n="lbl_ca_goal">Objectif mensuel</label><input id="caGoalInput" type="number" min="0" step="50" placeholder="5000" oninput="saveCaSettings()"></div>
+        <div style="flex:1;"><label data-i18n="lbl_charges_rate">Taux de charges (%)</label><input id="chargesRateInput" type="number" min="0" max="100" step="0.1" placeholder="21.1" oninput="saveCaSettings()"></div>
+      </div>
       <div id="caChart"></div>
       <div id="caStats"></div>
       <div id="caList"></div>
@@ -912,7 +918,7 @@ hist_title:'Factures émises', ph_hist_search:"Rechercher (client, n° de factur
 hist_col_num:'N°', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Statut', hist_col_actions:'Actions',
 btn_view:'Voir', btn_resend:'Renvoyer', btn_send_short:'Envoyer', empty_invoices:'Aucune facture émise.',
 status_toutes:'Toutes', status_enregistree:'Enregistrée', status_maj:'Mise à jour', status_envoyee:'Envoyée', status_payee:'Payée',
-ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette année', stat_total:'Total',
+ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette année', stat_total:'Total', stat_charges_mois:'Charges estimées', lbl_ca_goal:'Objectif mensuel', lbl_charges_rate:'Taux de charges (%)', lbl_ca_goal_progress:'Objectif du mois',
 ca_col_client:'Client', ca_col_generated:'CA généré', empty_data:'Aucune donnée.',
 franchise_ok:'(franchise en base active).', franchise_over:'— seuil de franchise dépassé, TVA applicable.',
 franchise_prefix:'CA {year} cumulé : {ca} € / {seuil} €',
@@ -1019,7 +1025,7 @@ hist_title:'Issued invoices', ph_hist_search:'Search (client, invoice no., servi
 hist_col_num:'No.', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Status', hist_col_actions:'Actions',
 btn_view:'View', btn_resend:'Resend', btn_send_short:'Send', empty_invoices:'No invoices issued.',
 status_toutes:'All', status_enregistree:'Saved', status_maj:'Updated', status_envoyee:'Sent', status_payee:'Paid',
-ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', stat_total:'Total',
+ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', stat_total:'Total', stat_charges_mois:'Estimated charges', lbl_ca_goal:'Monthly goal', lbl_charges_rate:'Charges rate (%)', lbl_ca_goal_progress:"This month's goal",
 ca_col_client:'Client', ca_col_generated:'Revenue generated', empty_data:'No data.',
 franchise_ok:'(VAT exemption active).', franchise_over:'— exemption threshold exceeded, VAT applicable.',
 franchise_prefix:'{year} cumulative revenue: €{ca} / €{seuil}',
@@ -1126,7 +1132,7 @@ hist_title:'Facturas emitidas', ph_hist_search:'Buscar (cliente, n.º de factura
 hist_col_num:'N.º', hist_col_client:'Cliente', hist_col_date:'Fecha', hist_col_total:'Total', hist_col_statut:'Estado', hist_col_actions:'Acciones',
 btn_view:'Ver', btn_resend:'Reenviar', btn_send_short:'Enviar', empty_invoices:'Ninguna factura emitida.',
 status_toutes:'Todas', status_enregistree:'Guardada', status_maj:'Actualizada', status_envoyee:'Enviada', status_payee:'Pagada',
-ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', stat_total:'Total',
+ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', stat_total:'Total', stat_charges_mois:'Cargas estimadas', lbl_ca_goal:'Objetivo mensual', lbl_charges_rate:'Tasa de cargas (%)', lbl_ca_goal_progress:'Objetivo del mes',
 ca_col_client:'Cliente', ca_col_generated:'Facturación generada', empty_data:'Sin datos.',
 franchise_ok:'(exención de IVA activa).', franchise_over:'— umbral de exención superado, IVA aplicable.',
 franchise_prefix:'Facturación acumulada {year}: {ca} € / {seuil} €',
@@ -1632,7 +1638,7 @@ function showTab(name){
   if(name==='clients') renderClientList();
   if(name==='facture') refreshClientSelect();
   if(name==='historique') renderHistory();
-  if(name==='ca') renderCA();
+  if(name==='ca'){ loadCaSettings(); renderCA(); }
   if(name==='planning') renderPlanning();
   if(name==='pointage') renderPlanning();
   if(name==='calendrier') renderCalendarTab();
@@ -2297,6 +2303,15 @@ function renderCaChart(invoices, amt){
       <div class="ca-chart-label">${m.label}</div>
     </div>`).join('')}</div>`;
 }
+function saveCaSettings(){
+  set('from', {...store('from'), caGoal: parseFloat(caGoalInput.value)||0, chargesRate: parseFloat(chargesRateInput.value)||0});
+  renderCA();
+}
+function loadCaSettings(){
+  const f = store('from');
+  caGoalInput.value = f.caGoal || '';
+  chargesRateInput.value = f.chargesRate || '';
+}
 function renderCA(){
   const invoices = storeArr('invoices');
   renderCaChart(invoices, invoiceAmt);
@@ -2308,12 +2323,26 @@ function renderCA(){
   const caMonth = invoices.filter(i=>invoiceEventMonth(i)===monthKey).reduce((s,i)=>s+invoiceAmt(i),0);
   const SEUIL_FRANCHISE_TVA = 32000;
   const franchiseDepassee = caYear > SEUIL_FRANCHISE_TVA;
+  const f = store('from');
+  const caGoal = parseFloat(f.caGoal)||0;
+  const chargesRate = parseFloat(f.chargesRate)||0;
+  const goalPct = caGoal>0 ? (caMonth/caGoal)*100 : 0;
+  const chargesMonth = caMonth*chargesRate/100;
   caStats.innerHTML = `
     <div class="stat-row">
       <div class="stat-mini"><div class="stat-mini-value">${caMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_ce_mois')}</div></div>
       <div class="stat-mini"><div class="stat-mini-value">${caYear.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_cette_annee')}</div></div>
       <div class="stat-mini"><div class="stat-mini-value">${totalCA.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_total')}</div></div>
+      ${chargesRate>0 ? `<div class="stat-mini"><div class="stat-mini-value">${chargesMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_charges_mois')}</div></div>` : ''}
     </div>
+    ${caGoal>0 ? `
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;">
+        <span>${t('lbl_ca_goal_progress')}</span>
+        <span>${caMonth.toFixed(2)} € / ${caGoal.toFixed(2)} € · ${Math.round(goalPct)}%</span>
+      </div>
+      <div class="ca-goal-bar"><div class="ca-goal-bar-fill" style="width:${Math.min(100,goalPct)}%;background:${goalPct>=100?'var(--green)':'var(--gold)'};"></div></div>
+    </div>` : ''}
     <div style="font-size:11px;margin-bottom:14px;color:${franchiseDepassee?'var(--red)':'var(--text2)'};">
       ${franchiseDepassee ? '⚠' : ''} ${t('franchise_prefix',{year:yearKey, ca:caYear.toFixed(2), seuil:SEUIL_FRANCHISE_TVA})} ${franchiseDepassee ? t('franchise_over') : t('franchise_ok')}
     </div>`;
@@ -3120,7 +3149,7 @@ async function sendInvoice(){
 
 applyI18n();
 function bootApp(){
-  loadFrom(); renderGmailUI(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
+  loadFrom(); loadCaSettings(); renderGmailUI(); renderClientList(); refreshClientSelect(); render(); renderPlanning(); renderDashboard();
   refreshCompteView();
   initUpdateSystem();
 }
