@@ -119,8 +119,11 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
    visuellement autant que le bouton doré à côté. */
 .row .btn-line,.dash-actions .btn-line{margin-top:0;background:var(--surface3);border-color:var(--border2);color:var(--text);}
 .row .btn-line:hover,.dash-actions .btn-line:hover{background:var(--border2);border-color:var(--border2);color:var(--text);}
-input[type=file]{padding:5px;}
-input[type=file]::file-selector-button,input[type=file]::-webkit-file-upload-button{cursor:pointer;border:1px solid var(--gold-border);border-radius:4px;padding:6px 12px;margin-right:8px;font-size:10px;font-weight:500;font-family:var(--font-body);text-transform:uppercase;letter-spacing:.09em;background:transparent;color:var(--text2);transition:.2s;}
+/* Pas de cadre/fond sur l'input lui-même (sinon ça fait une boîte dans la boîte) : seul le
+   pseudo-bouton ::file-selector-button est stylé, avec le même padding que .btn-profile
+   (Modifier/Exporter à côté) pour une hauteur identique. */
+input[type=file]{padding:0;border:none;background:none;width:auto;font-size:10px;color:var(--text3);}
+input[type=file]::file-selector-button,input[type=file]::-webkit-file-upload-button{cursor:pointer;border:1px solid var(--gold-border);border-radius:4px;padding:8px 16px;margin-right:8px;font-size:10px;font-weight:500;font-family:var(--font-body);text-transform:uppercase;letter-spacing:.09em;background:transparent;color:var(--text2);transition:.2s;}
 input[type=file]:hover::file-selector-button,input[type=file]:hover::-webkit-file-upload-button{border-color:var(--gold);color:var(--gold);background:var(--gold-bg);}
 .row{display:flex;gap:6px;}
 .row>*{flex:1;}
