@@ -492,6 +492,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div id="updateCheckStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
         <p style="font-size:10px;color:var(--text3);margin:10px 0 6px;" data-i18n="hint_force_sync">Recharge tout de suite les données des autres appareils, sans attendre la synchro automatique (jusqu'à 60s).</p>
         <button class="btn-line" onclick="forceCloudRefresh()" data-i18n="btn_force_sync" style="width:100%;">Forcer la synchro</button>
+        <div id="syncStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
       </div>
       </div>
       </div>
@@ -894,7 +895,7 @@ btn_save:'Enregistrer', btn_edit:'Modifier', btn_save_info:'Enregistrer mes info
 data_sync_title:'Synchronisation', sync_intro:'Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.',
 btn_gen_sync:'Générer un code de synchro', lbl_paste_sync:'Ou coller un code existant', ph_sync_code:'Code de synchro', btn_connect:'Connecter',
 sync_code_intro:'Code de synchro (à coller sur l\'autre appareil) :', btn_copy_code:'Copier le code', btn_force_sync:'Forcer la synchro', btn_disconnect_device:'Déconnecter cet appareil',
-hint_force_sync:"Recharge tout de suite les données des autres appareils, sans attendre la synchro automatique (jusqu'à 60s).",
+hint_force_sync:"Recharge tout de suite les données des autres appareils, sans attendre la synchro automatique (jusqu'à 60s).", sync_status_line:'Synchronisé le {date} à {time}',
 data_backup_title:'Sauvegarde', backup_intro:'Exporte toutes tes données (entreprise, clients, factures, planning) dans un fichier, à conserver en lieu sûr ou à réimporter sur un autre appareil.',
 btn_export_data:'Exporter mes données', lbl_import_backup:'Importer une sauvegarde',
 clients_add_title:'Ajouter / modifier un client', lbl_nom_societe:'Nom société', lbl_prefixe:'Préfixe facture (2-3 lettres)', lbl_email:'Email', lbl_telephone:'Téléphone',
@@ -1001,7 +1002,7 @@ btn_save:'Save', btn_edit:'Edit', btn_save_info:'Save my info',
 data_sync_title:'Sync', sync_intro:'Link this device to another one (Mac / iPhone) to share clients, invoices and schedule.',
 btn_gen_sync:'Generate a sync code', lbl_paste_sync:'Or paste an existing code', ph_sync_code:'Sync code', btn_connect:'Connect',
 sync_code_intro:'Sync code (paste it on the other device):', btn_copy_code:'Copy code', btn_force_sync:'Force sync', btn_disconnect_device:'Disconnect this device',
-hint_force_sync:'Reloads data from your other devices right away, instead of waiting for the automatic sync (up to 60s).',
+hint_force_sync:'Reloads data from your other devices right away, instead of waiting for the automatic sync (up to 60s).', sync_status_line:'Synced on {date} at {time}',
 data_backup_title:'Backup', backup_intro:'Export all your data (company, clients, invoices, schedule) to a file, to keep safe or re-import on another device.',
 btn_export_data:'Export my data', lbl_import_backup:'Import a backup',
 clients_add_title:'Add / edit a client', lbl_nom_societe:'Company name', lbl_prefixe:'Invoice prefix (2-3 letters)', lbl_email:'Email', lbl_telephone:'Phone',
@@ -1108,7 +1109,7 @@ btn_save:'Guardar', btn_edit:'Modificar', btn_save_info:'Guardar mis datos',
 data_sync_title:'Sincronización', sync_intro:'Vincula este dispositivo con otro (Mac / iPhone) para compartir clientes, facturas y planificación.',
 btn_gen_sync:'Generar un código de sincronización', lbl_paste_sync:'O pega un código existente', ph_sync_code:'Código de sincronización', btn_connect:'Conectar',
 sync_code_intro:'Código de sincronización (pégalo en el otro dispositivo):', btn_copy_code:'Copiar código', btn_force_sync:'Forzar sincronización', btn_disconnect_device:'Desconectar este dispositivo',
-hint_force_sync:'Recarga de inmediato los datos de tus otros dispositivos, sin esperar la sincronización automática (hasta 60s).',
+hint_force_sync:'Recarga de inmediato los datos de tus otros dispositivos, sin esperar la sincronización automática (hasta 60s).', sync_status_line:'Sincronizado el {date} a las {time}',
 data_backup_title:'Copia de seguridad', backup_intro:'Exporta todos tus datos (empresa, clientes, facturas, planificación) a un archivo, para guardar en un lugar seguro o reimportar en otro dispositivo.',
 btn_export_data:'Exportar mis datos', lbl_import_backup:'Importar una copia de seguridad',
 clients_add_title:'Añadir / modificar un cliente', lbl_nom_societe:'Nombre de la empresa', lbl_prefixe:'Prefijo de factura (2-3 letras)', lbl_email:'Email', lbl_telephone:'Teléfono',
@@ -1404,12 +1405,21 @@ function relativeTime(iso){
   if(hours < 24) return t('time_hour_ago',{n:hours});
   return t('time_day_ago',{n:Math.floor(hours/24)});
 }
+function formatSyncTimestamp(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const date = d.toLocaleDateString(locale(),{day:'2-digit',month:'2-digit',year:'numeric'});
+  const time = d.toTimeString().slice(0,5);
+  return t('sync_status_line',{date,time});
+}
 async function refreshCompteView(){
   const { data:{session} } = await getSb().auth.getSession();
   compteAvatar.textContent = (session?.user?.email||'H').trim().charAt(0).toUpperCase();
   compteStatus.textContent = session ? t('compte_status_connected') : t('compte_status_disconnected');
   const lastSync = localStorage.getItem('lastCloudSyncAt');
   viewLastSync.textContent = lastSync ? relativeTime(lastSync) : '—';
+  const syncStatusEl = document.getElementById('syncStatus');
+  if(syncStatusEl) syncStatusEl.textContent = formatSyncTimestamp(lastSync);
 }
 async function forceCloudRefresh(){
   await hydrateFromCloud();
