@@ -1338,6 +1338,7 @@ async function initUpdateSystem(){
   const viewAppVersionEl = document.getElementById('viewAppVersion');
   if(viewAppVersionEl) viewAppVersionEl.textContent = 'v'+version;
   window.electronBridge.onUpdateStatus?.(handleUpdateStatus);
+  window.electronBridge.checkForUpdates?.();
   checkWhatsNew(version);
 }
 // "Nouveauté importante" : comparé au X de 1.X.YYY (pas le YYY, trop fréquent pour mériter un
