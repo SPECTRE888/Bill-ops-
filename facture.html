@@ -412,11 +412,6 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div class="info-item"><div class="info-label" data-i18n="lbl_derniere_synchro">Dernière synchro</div><div class="info-value" id="viewLastSync">—</div></div>
           <div class="info-item"><div class="info-label" data-i18n="lbl_version_app">Version</div><div class="info-value" id="viewAppVersion">—</div></div>
         </div>
-        <button class="btn-line" id="checkUpdatesBtn" onclick="manualCheckForUpdates()" data-i18n="nav_update_tooltip" style="margin-top:10px;width:100%;">Vérifier les mises à jour</button>
-        <div style="margin-top:auto;display:flex;flex-direction:column;">
-          <button class="btn-line" onclick="forceCloudRefresh()" data-i18n="btn_force_sync" style="order:2;margin-top:10px;width:100%;">Forcer la synchro</button>
-          <p style="order:1;font-size:10px;color:var(--text3);margin:0 0 6px;" data-i18n="hint_force_sync">Recharge tout de suite les données des autres appareils, sans attendre la synchro automatique (jusqu'à 60s).</p>
-        </div>
       </div>
 
       <div class="card">
@@ -443,6 +438,12 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
               <input type="file" id="importBackupInput" accept="application/json" onchange="importBackup(this)">
             </div>
           </div>
+        </div>
+        <div style="height:1px;background:var(--border);margin:10px 0;"></div>
+        <div style="display:flex;flex-direction:column;">
+          <button class="btn-line" id="checkUpdatesBtn" onclick="manualCheckForUpdates()" data-i18n="nav_update_tooltip" style="width:100%;">Vérifier les mises à jour</button>
+          <p style="font-size:10px;color:var(--text3);margin:10px 0 6px;" data-i18n="hint_force_sync">Recharge tout de suite les données des autres appareils, sans attendre la synchro automatique (jusqu'à 60s).</p>
+          <button class="btn-line" onclick="forceCloudRefresh()" data-i18n="btn_force_sync" style="width:100%;">Forcer la synchro</button>
         </div>
 
         <div id="infoEdit" style="display:none;">
