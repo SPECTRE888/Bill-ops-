@@ -244,7 +244,15 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .tab#tab-historique.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 #tab-historique h2:first-child{margin-top:0;}
 #histList{flex:1;min-height:60px;overflow-y:auto;}
-#histList table thead th{position:sticky;top:0;background:var(--surface);z-index:1;}
+/* Padding élargi propre à cette table (pas la règle globale th/td, réutilisée telle quelle par le
+   tableau des prestations de la facture PDF envoyée aux clients — ne pas y toucher ici). Le fond
+   du header sticky doit matcher --bg (fond de page) et pas --surface : les deux sont très proches
+   en dark mais assez différents pour laisser une bande visible derrière le header au scroll. */
+#histList table{width:100%;}
+#histList th,#histList td{padding:10px 16px;}
+#histList td:first-child,#histList th:first-child{padding-left:4px;}
+#histList td:last-child,#histList th:last-child{padding-right:4px;}
+#histList table thead th{position:sticky;top:0;background:var(--bg);z-index:1;}
 .facture-fixed-top h2:first-child{margin-top:0;}
 #tab-facture h2{margin:12px 0 6px;}
 #tab-facture .facture-fixed-top h2:first-child{margin-top:0;}
