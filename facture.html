@@ -78,7 +78,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-fon
 .info-value:empty::before{content:'—';color:var(--text3);}
 #histSearch{max-width:420px;}
 .tab{display:none;} .tab.active{display:block;}
-h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:400;}
+h2{font-family:var(--font-body);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:400;}
 h2:first-child{margin-top:0;}
 label{display:block;font-size:9px;color:var(--text3);margin:10px 0 5px;letter-spacing:.12em;text-transform:uppercase;font-weight:400;}
 .toggle-header{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px;}
@@ -255,13 +255,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px;}
 .dash-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:18px 16px;}
 .dash-card-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
-.dash-card-value{font-family:var(--font-display);font-size:28px;color:var(--gold);font-weight:300;}
+.dash-card-value{font-family:var(--font-body);font-size:28px;color:var(--gold);font-weight:300;}
 .dash-card-hero{padding:24px 20px;text-align:center;margin-bottom:18px;}
 .dash-card-hero .dash-card-label{margin-bottom:16px;font-size:12px;}
 .dash-card-hero .dash-card-value{font-size:56px;line-height:1;margin-bottom:16px;}
 .dash-card-hero-rule{height:1px;background:var(--gold-border);}
 .dash-next-box{background:var(--surface2);border:1px solid var(--gold-border);border-radius:8px;padding:16px 18px;}
-.dash-next-date{font-family:var(--font-display);font-size:18px;color:var(--gold);text-transform:capitalize;}
+.dash-next-date{font-family:var(--font-body);font-size:18px;color:var(--gold);text-transform:capitalize;}
 .dash-next-time{font-size:13px;color:var(--text2);margin-top:2px;}
 .dash-next-client{font-size:14px;font-weight:600;margin-top:8px;}
 .dash-next-lieu{font-size:12px;color:var(--text2);margin-top:2px;}
@@ -269,7 +269,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .dash-actions button{flex:1;min-width:160px;}
 .stat-row{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
 .stat-mini{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;text-align:center;}
-.stat-mini-value{font-family:var(--font-display);font-size:20px;color:var(--gold);font-weight:300;}
+.stat-mini-value{font-family:var(--font-body);font-size:20px;color:var(--gold);font-weight:300;}
 .stat-mini-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-top:4px;}
 .ca-goal-bar{height:8px;border-radius:4px;background:var(--surface3);border:1px solid var(--border2);overflow:hidden;}
 .ca-goal-bar-fill{height:100%;border-radius:4px;transition:width .3s;}
@@ -284,11 +284,11 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .ca-chart-val{font-size:9px;color:var(--text2);margin-bottom:2px;white-space:nowrap;}
 .toast-stack{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
 .toast-card{background:var(--surface);border:1px solid var(--gold-border);border-left:3px solid var(--gold);border-radius:var(--radius-lg);padding:12px 16px;min-width:260px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:12px;color:var(--text);animation:toast-in .2s ease-out;}
-.toast-card b{color:var(--gold);font-family:var(--font-display);font-size:14px;display:block;margin-bottom:2px;}
+.toast-card b{color:var(--gold);font-family:var(--font-body);font-size:14px;display:block;margin-bottom:2px;}
 @keyframes toast-in{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;}
 .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;min-width:300px;max-width:420px;box-shadow:0 12px 32px rgba(0,0,0,.35);}
-.modal-header{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display);font-size:16px;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.modal-header{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-body);font-size:16px;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 .modal-close{all:unset;cursor:pointer;font-size:20px;color:var(--text3);line-height:1;padding:0 4px;}
 .modal-close:hover{color:var(--red);}
 .modal-row{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
@@ -316,7 +316,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .upd-ring{width:56px;height:56px;margin:0 auto 18px;border-radius:50%;border:3px solid var(--gold-border);border-top-color:var(--gold);animation:upd-spin .9s linear infinite;}
 .upd-ring.done{animation:none;border-color:var(--green);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--green);}
 @keyframes upd-spin{to{transform:rotate(360deg);}}
-.upd-title{font-family:var(--font-display);font-size:19px;color:var(--gold);letter-spacing:.03em;margin-bottom:4px;}
+.upd-title{font-family:var(--font-body);font-size:19px;color:var(--gold);letter-spacing:.03em;margin-bottom:4px;}
 .upd-version{font-size:10.5px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px;}
 .upd-bar{height:6px;border-radius:4px;background:var(--surface3);overflow:hidden;margin-bottom:8px;}
 .upd-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold3),var(--gold),var(--gold2));width:0%;transition:width .3s ease;border-radius:4px;}
@@ -340,7 +340,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 <body>
 <div class="modal-overlay" id="loginGate" style="display:none;z-index:20000;">
   <div class="modal-box" style="text-align:center;">
-    <div style="font-family:var(--font-display);font-size:30px;color:var(--gold);letter-spacing:.1em;margin-bottom:16px;">HELM OPS</div>
+    <div style="font-family:var(--font-body);font-size:30px;color:var(--gold);letter-spacing:.1em;margin-bottom:16px;">HELM OPS</div>
     <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">Connecte-toi avec ton compte Google pour accéder à l'application.</p>
     <button class="btn-gold" style="width:100%;" onclick="connectLogin()">Se connecter avec Google</button>
     <div id="loginStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
@@ -349,7 +349,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
 <div class="modal-overlay" id="paywallGate" style="display:none;z-index:20000;">
   <div class="modal-box" style="text-align:center;">
-    <div style="font-family:var(--font-display);font-size:30px;color:var(--gold);letter-spacing:.1em;margin-bottom:16px;">HELM OPS</div>
+    <div style="font-family:var(--font-body);font-size:30px;color:var(--gold);letter-spacing:.1em;margin-bottom:16px;">HELM OPS</div>
     <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">Abonnement Helm Ops — 9,90 €/mois.</p>
     <button class="btn-gold" style="width:100%;" onclick="subscribeNow()">S'abonner</button>
     <button class="btn-line" style="width:100%;margin-top:8px;" onclick="openBillingPortal()">Gérer mon abonnement</button>
@@ -416,7 +416,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <div class="card">
         <div class="ctitle" data-i18n="data_compte_title">Compte</div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:38px;height:38px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:var(--gold);flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.08);" id="compteAvatar">H</div>
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-size:16px;color:var(--gold);flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.08);" id="compteAvatar">H</div>
           <div style="min-width:0;">
             <div style="font-size:12px;color:var(--text);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="accountEmail">—</div>
             <div style="font-size:10px;color:var(--text3);" id="compteStatus"></div>
@@ -726,11 +726,11 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <div class="tab" id="tab-calendrier">
       <h2 data-i18n="cal_title">Calendrier</h2>
       <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);" data-i18n="cal_prev_month">Prévisionnel du mois</div>
-      <div id="bkForecast" style="font-family:var(--font-display);font-size:26px;color:var(--gold);margin-bottom:14px;"></div>
+      <div id="bkForecast" style="font-family:var(--font-body);font-size:26px;color:var(--gold);margin-bottom:14px;"></div>
 
       <div id="bkCalHead" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(-1)">‹</button>
-        <span id="bkCalLabel" style="font-family:var(--font-display);font-size:15px;color:var(--gold);"></span>
+        <span id="bkCalLabel" style="font-family:var(--font-body);font-size:15px;color:var(--gold);"></span>
         <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(1)">›</button>
       </div>
       <div id="bkCal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;"></div>
@@ -863,7 +863,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 <div class="modal-overlay" id="legalModal" style="display:none;background:rgba(0,0,0,.65);" onclick="if(event.target===this) closeLegalModal()">
   <div class="modal-box" style="max-width:560px;width:92%;border-radius:14px;padding:28px;max-height:85vh;overflow-y:auto;position:relative;">
     <button type="button" class="modal-close" onclick="closeLegalModal()" style="position:absolute;top:20px;right:20px;">×</button>
-    <div style="font-family:var(--font-display);font-size:20px;color:var(--gold);margin-bottom:4px;">HELM OPS</div>
+    <div style="font-family:var(--font-body);font-size:20px;color:var(--gold);margin-bottom:4px;">HELM OPS</div>
     <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:20px;" data-i18n="legal_modal_title">Mentions légales</div>
     <div id="legalModalBody" style="font-size:11px;line-height:1.8;color:var(--text2);"></div>
     <button class="btn-gold" style="width:100%;margin-top:20px;" onclick="closeLegalModal()" data-i18n="btn_close">Fermer</button>
