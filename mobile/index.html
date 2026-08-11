@@ -1006,7 +1006,8 @@ function confirmClock(){
     if(new Date(iso) <= new Date(b.checkedInAt)){
       // presta à cheval sur minuit : on reporte le départ au lendemain de la date du booking
       const nextDay = new Date(b.date+'T00:00:00'); nextDay.setDate(nextDay.getDate()+1);
-      iso = new Date(nextDay.toISOString().slice(0,10)+'T'+timeVal+':00').toISOString();
+      const nextDayStr = nextDay.getFullYear()+'-'+String(nextDay.getMonth()+1).padStart(2,'0')+'-'+String(nextDay.getDate()).padStart(2,'0');
+      iso = new Date(nextDayStr+'T'+timeVal+':00').toISOString();
     }
     if(new Date(iso) <= new Date(b.checkedInAt)){ errEl.textContent = '⚠ Le départ doit être après l\'arrivée.'; return; }
     b.checkedOutAt = iso;

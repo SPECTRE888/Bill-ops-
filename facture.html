@@ -2631,7 +2631,8 @@ function savePointageEdit(){
   let outIso = new Date(baseDate+'T'+outVal+':00').toISOString();
   if(new Date(outIso) <= new Date(inIso)){
     const nextDay = new Date(baseDate+'T00:00:00'); nextDay.setDate(nextDay.getDate()+1);
-    outIso = new Date(nextDay.toISOString().slice(0,10)+'T'+outVal+':00').toISOString();
+    const nextDayStr = nextDay.getFullYear()+'-'+String(nextDay.getMonth()+1).padStart(2,'0')+'-'+String(nextDay.getDate()).padStart(2,'0');
+    outIso = new Date(nextDayStr+'T'+outVal+':00').toISOString();
   }
   if(new Date(outIso) <= new Date(inIso)){ pointageModalError.textContent = '⚠ '+t('lbl_depart_reel'); return; }
   b.checkedInAt = inIso;
