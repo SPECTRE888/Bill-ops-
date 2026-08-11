@@ -204,10 +204,19 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .inv-reglement{margin-top:30px;font-size:12.5px;line-height:1.8;color:var(--text2);}
 .inv-reglement h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:0 0 8px;}
 .meta{margin-top:20px;font-size:10.5px;color:var(--text3);line-height:1.6;font-style:italic;}
-.acc-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:5px;font-size:11.5px;}
+/* Même logique que .client-grid-cols (voir commentaire ci-dessus) : header et lignes doivent
+   partager la même grille de colonnes fixes/minmax pour rester alignés. */
+.acc-grid-cols{display:grid;grid-template-columns:14px minmax(0,1.1fr) minmax(0,1.4fr) 90px 90px 230px;gap:10px;align-items:center;}
+.acc-header{padding:0 10px 4px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
+.acc-header>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.acc-row{padding:8px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:5px;font-size:11.5px;}
 .acc-row .cal-dot{flex-shrink:0;}
-.acc-row .acc-info{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.acc-row button{padding:4px 8px;font-size:10.5px;margin:0;flex-shrink:0;}
+.acc-client{font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.acc-presta{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.acc-horaires{color:var(--text2);}
+.acc-montant{color:var(--gold);font-weight:600;text-align:right;}
+.acc-actions{display:flex;gap:5px;justify-content:flex-end;}
+.acc-actions button{margin:0;padding:4px 8px;font-size:10.5px;}
 .acc-day-header{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:500;margin:14px 0 6px;}
 .acc-day-header:first-child{margin-top:0;}
 .ptg-row{display:flex;gap:9px;align-items:center;padding:9px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:6px;}
@@ -552,10 +561,12 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div class="row">
           <div><label data-i18n="lbl_km">Km parcourus</label><input id="km" type="number" value="0" oninput="render()"></div>
           <div><label data-i18n="lbl_tarif_km">Tarif km</label>
-            <select id="kmRate" onchange="render()">
+            <select id="kmRate" onchange="toggleKmRateCustom();render()">
               <option value="0.5">0,50 €/km</option>
               <option value="0.3">0,30 €/km</option>
+              <option value="custom" data-i18n="opt_tarif_km_autre">Autre</option>
             </select>
+            <input id="kmRateCustom" type="number" step="0.01" min="0" value="0" oninput="render()" style="display:none;margin-top:6px;" data-i18n-ph="ph_tarif_km_autre" placeholder="€/km">
           </div>
         </div>
         <div class="row">
@@ -890,7 +901,7 @@ cli_col_client:'Client', cli_col_prefixe:'Préfixe', cli_col_adresse:'Adresse', 
 btn_info:'Infos', row_client_depuis:'Client depuis',
 fact_client_title:'Client', ph_client_search:'Tape le nom du client...', fact_invoice_title:'Facture', lbl_num_facture:'N° facture', lbl_date:'Date',
 lbl_date_travaillee:'Date travaillée', hint_date_travaillee:'(pour rattacher le CA au bon mois)', lbl_tva_pct:'TVA (%)',
-fact_frais_title:'Frais déplacement', lbl_km:'Km parcourus', lbl_tarif_km:'Tarif km', lbl_peage:'Péage', lbl_parking:'Parking',
+fact_frais_title:'Frais déplacement', lbl_km:'Km parcourus', lbl_tarif_km:'Tarif km', opt_tarif_km_autre:'Autre', ph_tarif_km_autre:'€/km', lbl_peage:'Péage', lbl_parking:'Parking',
 toggle_offert:'Offert', toggle_email:'Email', toggle_repas:'Repas', lbl_type:'Type', lbl_valeur:'Valeur',
 lbl_objet:'Objet', ph_objet:'Facture (numéro auto si vide)', lbl_message:'Message', ph_message:'Petit mot avant la facture (optionnel)', lbl_montant_repas:'Montant repas',
 fact_prestations_title:'Prestations', btn_add_line:'+ Ajouter une ligne', btn_duplicate:'Dupliquer',
@@ -997,7 +1008,7 @@ cli_col_client:'Client', cli_col_prefixe:'Prefix', cli_col_adresse:'Address', cl
 btn_info:'Info', row_client_depuis:'Client since',
 fact_client_title:'Client', ph_client_search:"Type the client's name...", fact_invoice_title:'Invoice', lbl_num_facture:'Invoice no.', lbl_date:'Date',
 lbl_date_travaillee:'Work date', hint_date_travaillee:'(to attribute revenue to the right month)', lbl_tva_pct:'VAT (%)',
-fact_frais_title:'Travel expenses', lbl_km:'Distance (km)', lbl_tarif_km:'Rate per km', lbl_peage:'Toll', lbl_parking:'Parking',
+fact_frais_title:'Travel expenses', lbl_km:'Distance (km)', lbl_tarif_km:'Rate per km', opt_tarif_km_autre:'Other', ph_tarif_km_autre:'€/km', lbl_peage:'Toll', lbl_parking:'Parking',
 toggle_offert:'Discount', toggle_email:'Email', toggle_repas:'Meal', lbl_type:'Type', lbl_valeur:'Value',
 lbl_objet:'Subject', ph_objet:'Invoice (auto number if empty)', lbl_message:'Message', ph_message:'A short note before the invoice (optional)', lbl_montant_repas:'Meal amount',
 fact_prestations_title:'Services', btn_add_line:'+ Add a line', btn_duplicate:'Duplicate',
@@ -1104,7 +1115,7 @@ cli_col_client:'Cliente', cli_col_prefixe:'Prefijo', cli_col_adresse:'Dirección
 btn_info:'Info', row_client_depuis:'Cliente desde',
 fact_client_title:'Cliente', ph_client_search:'Escribe el nombre del cliente...', fact_invoice_title:'Factura', lbl_num_facture:'N.º factura', lbl_date:'Fecha',
 lbl_date_travaillee:'Fecha de trabajo', hint_date_travaillee:'(para asignar la facturación al mes correcto)', lbl_tva_pct:'IVA (%)',
-fact_frais_title:'Gastos de desplazamiento', lbl_km:'Kilómetros recorridos', lbl_tarif_km:'Tarifa por km', lbl_peage:'Peaje', lbl_parking:'Aparcamiento',
+fact_frais_title:'Gastos de desplazamiento', lbl_km:'Kilómetros recorridos', lbl_tarif_km:'Tarifa por km', opt_tarif_km_autre:'Otra', ph_tarif_km_autre:'€/km', lbl_peage:'Peaje', lbl_parking:'Aparcamiento',
 toggle_offert:'Descuento', toggle_email:'Email', toggle_repas:'Comida', lbl_type:'Tipo', lbl_valeur:'Valor',
 lbl_objet:'Asunto', ph_objet:'Factura (número automático si está vacío)', lbl_message:'Mensaje', ph_message:'Una nota antes de la factura (opcional)', lbl_montant_repas:'Importe de la comida',
 fact_prestations_title:'Servicios', btn_add_line:'+ Añadir una línea', btn_duplicate:'Duplicar',
@@ -1981,6 +1992,7 @@ function collectInvoiceState(){
     offVal: offVal.value,
     km: km.value,
     kmRate: kmRate.value,
+    kmRateCustom: kmRateCustom.value,
     peage: peage.value,
     parking: parking.value,
     meal: meal.value,
@@ -2010,6 +2022,8 @@ function editInvoice(num){
   offFields.style.display = offEnabled.checked ? 'flex' : 'none';
   km.value = s.km||0;
   kmRate.value = s.kmRate||0.5;
+  kmRateCustom.value = s.kmRateCustom||0;
+  toggleKmRateCustom();
   peage.value = s.peage||0;
   parking.value = s.parking||0;
   meal.value = s.meal||0;
@@ -2038,6 +2052,8 @@ function duplicateInvoice(num){
   offFields.style.display = offEnabled.checked ? 'flex' : 'none';
   km.value = s.km||0;
   kmRate.value = s.kmRate||0.5;
+  kmRateCustom.value = s.kmRateCustom||0;
+  toggleKmRateCustom();
   peage.value = s.peage||0;
   parking.value = s.parking||0;
   meal.value = s.meal||0;
@@ -2066,6 +2082,8 @@ function newInvoiceForm(){
   emailMessage.value = '';
   km.value = 0;
   kmRate.value = 0.5;
+  kmRateCustom.value = 0;
+  toggleKmRateCustom();
   peage.value = 0;
   parking.value = 0;
   meal.value = 0;
@@ -2450,6 +2468,7 @@ function renderCalDayPanel(){
       </span>
       <span>
         <button class="btn-line" onclick="editBooking('${b.id}')">${t('btn_edit')}</button>
+        <button class="btn-line" onclick="duplicateBooking('${b.id}')">${t('btn_duplicate')}</button>
         <button class="btn-line" onclick="deleteBooking('${b.id}')">${t('btn_delete_short')}</button>
       </span>
     </div>`).join('');
@@ -2534,6 +2553,25 @@ function editBooking(id){
   showTab('calendrier');
   bkFormWrap.style.display = 'block';
   bkClient.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function duplicateBooking(id){
+  const b = storeArr('bookings').find(x=>x.id===id);
+  if(!b) return;
+  bkEditId.value = '';
+  bkClient.value = b.client;
+  bkLabel.value = b.label||'';
+  bkAddr.value = b.addr||'';
+  bkContact.value = b.contact||'';
+  bkDate.value = '';
+  bkFrom.value = b.from||'';
+  bkTo.value = b.to||'';
+  bkRate.value = b.rate;
+  bkFormTitle.textContent = t('booking_new_title');
+  bkSubmitBtn.textContent = t('btn_add_planning');
+  showTab('calendrier');
+  bkFormWrap.style.display = 'block';
+  bkDate.focus();
+  bkDate.scrollIntoView({behavior:'smooth', block:'center'});
 }
 function cancelEditBooking(){
   bkEditId.value='';
@@ -2666,7 +2704,10 @@ function renderAccueil(){
     .filter(b=>b.status==='à facturer' && b.date >= today && !b.checkedOutAt)
     .sort((a,b)=>a.date.localeCompare(b.date) || (a.from||'').localeCompare(b.from||''));
   if(!bookings.length){ accList.innerHTML = `<p style="color:var(--text3);font-size:12px;">${t('empty_venir')}</p>`; return; }
-  let html = '';
+  let html = `
+    <div class="acc-grid-cols acc-header">
+      <span></span><span>${t('row_client')}</span><span>${t('row_prestation')}</span><span>${t('row_horaires')}</span><span>${t('row_total')}</span><span></span>
+    </div>`;
   let lastDate = null;
   bookings.forEach(b=>{
     if(b.date !== lastDate){
@@ -2675,12 +2716,17 @@ function renderAccueil(){
       html += `<div class="acc-day-header">${label.charAt(0).toUpperCase()+label.slice(1)}</div>`;
     }
     html += `
-    <div class="acc-row">
+    <div class="acc-grid-cols acc-row">
       <span class="cal-dot" style="background:${clientColor(b.client)};"></span>
-      <div class="acc-info"><b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' · '+b.from+'-'+b.to:''} · <span class="tag">${(b.hours*b.rate).toFixed(2)} €</span></div>
-      <button class="btn-line" onclick="viewBooking('${b.id}')">${t('btn_view')}</button>
-      <button class="btn-line" onclick="editBooking('${b.id}')">${t('btn_edit')}</button>
-      <button class="btn-line" onclick="deleteBooking('${b.id}')">${t('btn_delete_short')}</button>
+      <span class="acc-client" title="${b.client}">${b.client}</span>
+      <span class="acc-presta" title="${b.label||''}">${b.label||''}</span>
+      <span class="acc-horaires">${b.from&&b.to?b.from+'-'+b.to:''}</span>
+      <span class="acc-montant">${(b.hours*b.rate).toFixed(2)} €</span>
+      <div class="acc-actions">
+        <button class="btn-line" onclick="viewBooking('${b.id}')">${t('btn_view')}</button>
+        <button class="btn-line" onclick="editBooking('${b.id}')">${t('btn_edit')}</button>
+        <button class="btn-line" onclick="deleteBooking('${b.id}')">${t('btn_delete_short')}</button>
+      </div>
     </div>`;
   });
   accList.innerHTML = html;
@@ -2835,6 +2881,12 @@ function toggleMeal(){
   render();
 }
 
+function toggleKmRateCustom(){
+  kmRateCustom.style.display = kmRate.value==='custom' ? 'block' : 'none';
+}
+function getKmRateVal(){
+  return kmRate.value==='custom' ? (parseFloat(kmRateCustom.value)||0) : (parseFloat(kmRate.value)||0.5);
+}
 function currentClient(){
   const name = clientSelect.value.trim().toLowerCase();
   if(!name) return null;
@@ -2873,7 +2925,7 @@ function render(){
   });
   const kmVal = parseFloat(km.value)||0;
   if(kmVal>0){
-    const kmRateVal = parseFloat(kmRate.value)||0.5;
+    const kmRateVal = getKmRateVal();
     const kmAmt = kmVal*kmRateVal; sub+=kmAmt;
     pItems.innerHTML += `<tr><td>${t('inv_km')}</td><td class="num">${kmVal} km</td><td class="num">${kmRateVal.toFixed(2)} €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
   }
