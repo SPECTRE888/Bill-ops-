@@ -355,6 +355,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <button id="nav-pointage" onclick="showTab('pointage')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8.5" r="6.5"/><path d="M8 5v3.5l2.5 1.5"/></svg><span data-i18n="nav_pointage">Pointage</span></button>
     <button id="nav-facture" onclick="showTab('facture')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="1" width="10" height="14" rx="1"/><path d="M6 5h4M6 8h4M6 11h2"/></svg><span data-i18n="nav_facture">Facture</span></button>
     <button id="nav-historique" onclick="showTab('historique')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="1,12 5,7 8,9 11,4 15,6"/><path d="M1 15h14"/></svg><span data-i18n="nav_historique">Historique</span></button>
+    <button id="nav-ca" onclick="showTab('ca')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="9" width="3" height="6" rx="0.5"/><rect x="6.5" y="5" width="3" height="10" rx="0.5"/><rect x="11" y="2" width="3" height="13" rx="0.5"/></svg><span data-i18n="nav_ca">Chiffre d'affaires</span></button>
 
     <div class="nav-section" data-i18n="sec_clients">Clients</div>
     <button id="nav-clients" onclick="showTab('clients')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/><circle cx="11" cy="5" r="2.5"/><path d="M11 10c2.8 0 5 2.2 5 5"/></svg><span data-i18n="nav_clients">Mes clients</span></button>
@@ -615,7 +616,9 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <input id="histSearch" placeholder="Rechercher (client, n° de facture, mot-clé d'une prestation)..." oninput="renderHistory()" style="margin-bottom:10px;" data-i18n-ph="ph_hist_search">
       <div id="histFilters" class="hist-filters"></div>
       <div id="histList"></div>
+    </div>
 
+    <div class="tab" id="tab-ca">
       <h2 data-i18n="ca_title">Chiffre d'affaires</h2>
       <div id="caChart"></div>
       <div id="caStats"></div>
@@ -856,7 +859,7 @@ const LOCALE_MAP = {fr:'fr-FR', en:'en-US', es:'es-ES'};
 const WEEKDAY_LETTERS = {fr:['L','M','M','J','V','S','D'], en:['M','T','W','T','F','S','S'], es:['L','M','X','J','V','S','D']};
 const I18N = {
 fr:{
-nav_accueil:'Tableau de bord', nav_planning:'Planning', nav_pointage:'Pointage', nav_calendrier:'Calendrier', nav_facture:'Facture', nav_historique:'Historique', nav_clients:'Mes clients', nav_donnees:'Profil',
+nav_accueil:'Tableau de bord', nav_planning:'Planning', nav_pointage:'Pointage', nav_calendrier:'Calendrier', nav_facture:'Facture', nav_historique:'Historique', nav_ca:"Chiffre d'affaires", nav_clients:'Mes clients', nav_donnees:'Profil',
 sec_planning:'Planning', sec_facturation:'Facturation', sec_clients:'Clients', sec_compte:'Compte',
 theme_dark_title:'Sombre', theme_auto_title:'Auto', theme_light_title:'Clair', legal_link:'Mentions légales',
 data_title:'Profil', data_compte_title:'Compte', data_info_title:'Informations',
@@ -963,7 +966,7 @@ legal_droit_title:'Droit applicable', legal_droit_body:'Les présentes mentions 
 inv_paiement_reception:'Paiement à réception de facture, échéance :', inv_jours:'jours'
 },
 en:{
-nav_accueil:'Dashboard', nav_planning:'Schedule', nav_pointage:'Time tracking', nav_calendrier:'Calendar', nav_facture:'Invoice', nav_historique:'History', nav_clients:'My clients', nav_donnees:'Profile',
+nav_accueil:'Dashboard', nav_planning:'Schedule', nav_pointage:'Time tracking', nav_calendrier:'Calendar', nav_facture:'Invoice', nav_historique:'History', nav_ca:'Revenue', nav_clients:'My clients', nav_donnees:'Profile',
 sec_planning:'Schedule', sec_facturation:'Billing', sec_clients:'Clients', sec_compte:'Account',
 theme_dark_title:'Dark', theme_auto_title:'Auto', theme_light_title:'Light', legal_link:'Legal notice',
 data_title:'Profile', data_compte_title:'Account', data_info_title:'Information',
@@ -1070,7 +1073,7 @@ legal_droit_title:'Governing law', legal_droit_body:'These legal notices are gov
 inv_paiement_reception:'Payment upon receipt of invoice, due within:', inv_jours:'days'
 },
 es:{
-nav_accueil:'Dashboard', nav_planning:'Planificación', nav_pointage:'Fichaje', nav_calendrier:'Calendario', nav_facture:'Factura', nav_historique:'Historial', nav_clients:'Mis clientes', nav_donnees:'Perfil',
+nav_accueil:'Dashboard', nav_planning:'Planificación', nav_pointage:'Fichaje', nav_calendrier:'Calendario', nav_facture:'Factura', nav_historique:'Historial', nav_ca:'Facturación', nav_clients:'Mis clientes', nav_donnees:'Perfil',
 sec_planning:'Planificación', sec_facturation:'Facturación', sec_clients:'Clientes', sec_compte:'Cuenta',
 theme_dark_title:'Oscuro', theme_auto_title:'Auto', theme_light_title:'Claro', legal_link:'Aviso legal',
 data_title:'Perfil', data_compte_title:'Cuenta', data_info_title:'Información',
@@ -1613,7 +1616,8 @@ function showTab(name){
   document.getElementById('nav-'+name).classList.add('active');
   if(name==='clients') renderClientList();
   if(name==='facture') refreshClientSelect();
-  if(name==='historique'){ renderHistory(); renderCA(); }
+  if(name==='historique') renderHistory();
+  if(name==='ca') renderCA();
   if(name==='planning') renderPlanning();
   if(name==='pointage') renderPlanning();
   if(name==='calendrier') renderCalendarTab();
