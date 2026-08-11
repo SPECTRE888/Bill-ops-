@@ -205,19 +205,24 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .inv-reglement h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:0 0 8px;}
 .meta{margin-top:20px;font-size:10.5px;color:var(--text3);line-height:1.6;font-style:italic;}
 /* Même logique que .client-grid-cols (voir commentaire ci-dessus) : header et lignes doivent
-   partager la même grille de colonnes fixes/minmax pour rester alignés. */
-.acc-grid-cols{display:grid;grid-template-columns:14px minmax(0,1.1fr) minmax(0,1.4fr) 90px 90px 230px;gap:10px;align-items:center;}
-.acc-header{padding:0 10px 4px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
+   partager la même grille de colonnes fixes/minmax pour rester alignés. Client + prestation
+   regroupés dans une seule colonne (nom en gras, prestation en sous-ligne grise) plutôt que deux
+   colonnes séparées : avec deux colonnes, la case "Prestation" (large mais souvent courte) laissait
+   un grand vide avant Horaires/Total, jugé "pas clean" par l'utilisateur — un bloc à 2 lignes lit
+   mieux et élimine ce vide. */
+.acc-grid-cols{display:grid;grid-template-columns:14px minmax(0,1fr) 90px 90px 220px;gap:10px;align-items:center;}
+.acc-header{padding:0 10px 6px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
 .acc-header>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.acc-row{padding:8px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:5px;font-size:11.5px;}
+.acc-row{padding:10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:6px;font-size:11.5px;}
 .acc-row .cal-dot{flex-shrink:0;}
+.acc-client-block{min-width:0;}
 .acc-client{font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.acc-presta{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.acc-presta{font-size:10.5px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
 .acc-horaires{color:var(--text2);}
 .acc-montant{color:var(--gold);font-weight:600;text-align:right;}
 .acc-actions{display:flex;gap:5px;justify-content:flex-end;}
 .acc-actions button{margin:0;padding:4px 8px;font-size:10.5px;}
-.acc-day-header{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:500;margin:14px 0 6px;}
+.acc-day-header{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:500;margin:18px 0 8px;}
 .acc-day-header:first-child{margin-top:0;}
 .ptg-row{display:flex;gap:9px;align-items:center;padding:9px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:6px;}
 .ptg-main{flex:1;min-width:0;}
@@ -2750,7 +2755,7 @@ function renderAccueil(){
   if(!bookings.length){ accList.innerHTML = `<p style="color:var(--text3);font-size:12px;">${t('empty_venir')}</p>`; return; }
   let html = `
     <div class="acc-grid-cols acc-header">
-      <span></span><span>${t('row_client')}</span><span>${t('row_prestation')}</span><span>${t('row_horaires')}</span><span>${t('row_total')}</span><span></span>
+      <span></span><span>${t('row_client')}</span><span>${t('row_horaires')}</span><span>${t('row_total')}</span><span></span>
     </div>`;
   let lastDate = null;
   bookings.forEach(b=>{
@@ -2762,8 +2767,10 @@ function renderAccueil(){
     html += `
     <div class="acc-grid-cols acc-row">
       <span class="cal-dot" style="background:${clientColor(b.client)};"></span>
-      <span class="acc-client" title="${b.client}">${b.client}</span>
-      <span class="acc-presta" title="${b.label||''}">${b.label||''}</span>
+      <div class="acc-client-block">
+        <div class="acc-client" title="${b.client}">${b.client}</div>
+        ${b.label ? `<div class="acc-presta" title="${b.label}">${b.label}</div>` : ''}
+      </div>
       <span class="acc-horaires">${b.from&&b.to?b.from+'-'+b.to:''}</span>
       <span class="acc-montant">${(b.hours*b.rate).toFixed(2)} €</span>
       <div class="acc-actions">
