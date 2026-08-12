@@ -817,7 +817,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <button type="button" class="modal-close" onclick="closeBookingModal()">×</button>
     </div>
     <div id="bookingModalBody"></div>
-    <button class="btn-gold" style="width:100%;margin-top:14px;" onclick="closeBookingModal()" data-i18n="btn_close">Fermer</button>
+    <div class="row" style="margin-top:14px;">
+      <button class="btn-line" onclick="closeBookingModal()" data-i18n="btn_close">Fermer</button>
+      <button class="btn-gold" onclick="editBookingFromModal()" data-i18n="btn_edit">Modifier</button>
+    </div>
   </div>
 </div>
 <div class="modal-overlay" id="clientInfoModal" style="display:none;" onclick="if(event.target===this) closeClientInfoModal()">
@@ -2527,7 +2530,7 @@ function renderCalDayPanel(){
         ${(b.addr||b.contact) ? `<br><span style="font-size:11px;color:var(--text2);">${[b.addr,b.contact].filter(Boolean).join(' · ')}</span>` : ''}
       </span>
       <span>
-        <button class="btn-line" onclick="editBooking('${b.id}')">${t('btn_edit')}</button>
+        <button class="btn-line" onclick="viewBooking('${b.id}')">${t('btn_info')}</button>
         <button class="btn-line" onclick="duplicateBooking('${b.id}')">${t('btn_duplicate')}</button>
         <button class="btn-line" onclick="deleteBooking('${b.id}')">${t('btn_delete_short')}</button>
       </span>
@@ -2576,9 +2579,11 @@ function prefillBookingClient(){
   bkContact.value = c.phone||'';
   if(!bkRate.value && c.defaultRate) bkRate.value = c.defaultRate;
 }
+let bookingModalId = null;
 function viewBooking(id){
   const b = storeArr('bookings').find(x=>x.id===id);
   if(!b) return;
+  bookingModalId = id;
   const rows = [
     [t('row_client'), b.client],
     [t('row_prestation'), b.label],
@@ -2595,6 +2600,11 @@ function viewBooking(id){
 }
 function closeBookingModal(){
   bookingModal.style.display = 'none';
+}
+function editBookingFromModal(){
+  const id = bookingModalId;
+  closeBookingModal();
+  if(id!=null) editBooking(id);
 }
 function editBooking(id){
   const b = storeArr('bookings').find(x=>x.id===id);
