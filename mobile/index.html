@@ -994,18 +994,20 @@ function confirmClock(){
   const b = bookings.find(x=>x.id===id);
   const timeVal = document.getElementById('clockTimeInput').value;
   const errEl = document.getElementById('clockModalError');
-  if(!b || !timeVal) return;
+  if(!b) return;
+  if(!timeVal){ errEl.textContent = '⚠ Renseigne une heure.'; return; }
+  const baseDate = b.date || todayStr();
 
   if(mode==='in'){
-    const iso = new Date(b.date+'T'+timeVal+':00').toISOString();
+    const iso = new Date(baseDate+'T'+timeVal+':00').toISOString();
     if(b.checkedOutAt && new Date(iso) >= new Date(b.checkedOutAt)){ errEl.textContent = "⚠ L'arrivée doit être avant le départ."; return; }
     b.checkedInAt = iso;
   } else {
     if(!b.checkedInAt){ errEl.textContent = "⚠ Renseigne d'abord l'heure d'arrivée."; return; }
-    let iso = new Date(b.date+'T'+timeVal+':00').toISOString();
+    let iso = new Date(baseDate+'T'+timeVal+':00').toISOString();
     if(new Date(iso) <= new Date(b.checkedInAt)){
       // presta à cheval sur minuit : on reporte le départ au lendemain de la date du booking
-      const nextDay = new Date(b.date+'T00:00:00'); nextDay.setDate(nextDay.getDate()+1);
+      const nextDay = new Date(baseDate+'T00:00:00'); nextDay.setDate(nextDay.getDate()+1);
       const nextDayStr = nextDay.getFullYear()+'-'+String(nextDay.getMonth()+1).padStart(2,'0')+'-'+String(nextDay.getDate()).padStart(2,'0');
       iso = new Date(nextDayStr+'T'+timeVal+':00').toISOString();
     }
