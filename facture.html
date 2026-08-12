@@ -949,7 +949,7 @@ hist_title:'Factures émises', ph_hist_search:"Rechercher (client, n° de factur
 hist_col_num:'N°', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Statut', hist_col_actions:'Actions',
 btn_view:'Voir', btn_resend:'Renvoyer', btn_send_short:'Envoyer', empty_invoices:'Aucune facture émise.',
 status_toutes:'Toutes', status_enregistree:'Enregistrée', status_maj:'Mise à jour', status_envoyee:'Envoyée', status_payee:'Payée',
-ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette année', stat_total:'Total', stat_charges_mois:'Charges estimées', stat_impot_mois:'Impôt estimé', lbl_ca_goal:'Objectif mensuel (€)', lbl_charges_rate:'Taux de charges (%)', lbl_ca_goal_progress:'Objectif du mois', lbl_ca_goal_year_progress:"Objectif de l'année",
+ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette année', stat_total:'Total', stat_charges_mois:'Charges estimées', stat_impot_mois:'Impôt estimé', lbl_ca_goal:'Objectif mensuel (€)', lbl_charges_rate:'Taux de charges (%)', lbl_ca_goal_progress:'Objectif du mois', lbl_ca_goal_year_progress:"Objectif de l'année", ca_sec_objectifs:'Objectifs', ca_sec_par_client:'CA par client',
 ca_col_client:'Client', ca_col_generated:'CA généré', empty_data:'Aucune donnée.',
 franchise_ok:'(franchise en base active).', franchise_over:'— seuil de franchise dépassé, TVA applicable.',
 franchise_prefix:'CA {year} cumulé : {ca} € / {seuil} €',
@@ -1057,7 +1057,7 @@ hist_title:'Issued invoices', ph_hist_search:'Search (client, invoice no., servi
 hist_col_num:'No.', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Status', hist_col_actions:'Actions',
 btn_view:'View', btn_resend:'Resend', btn_send_short:'Send', empty_invoices:'No invoices issued.',
 status_toutes:'All', status_enregistree:'Saved', status_maj:'Updated', status_envoyee:'Sent', status_payee:'Paid',
-ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', stat_total:'Total', stat_charges_mois:'Estimated charges', stat_impot_mois:'Estimated tax', lbl_ca_goal:'Monthly goal (€)', lbl_charges_rate:'Charges rate (%)', lbl_ca_goal_progress:"This month's goal", lbl_ca_goal_year_progress:"This year's goal",
+ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', stat_total:'Total', stat_charges_mois:'Estimated charges', stat_impot_mois:'Estimated tax', lbl_ca_goal:'Monthly goal (€)', lbl_charges_rate:'Charges rate (%)', lbl_ca_goal_progress:"This month's goal", lbl_ca_goal_year_progress:"This year's goal", ca_sec_objectifs:'Goals', ca_sec_par_client:'Revenue by client',
 ca_col_client:'Client', ca_col_generated:'Revenue generated', empty_data:'No data.',
 franchise_ok:'(VAT exemption active).', franchise_over:'— exemption threshold exceeded, VAT applicable.',
 franchise_prefix:'{year} cumulative revenue: €{ca} / €{seuil}',
@@ -1165,7 +1165,7 @@ hist_title:'Facturas emitidas', ph_hist_search:'Buscar (cliente, n.º de factura
 hist_col_num:'N.º', hist_col_client:'Cliente', hist_col_date:'Fecha', hist_col_total:'Total', hist_col_statut:'Estado', hist_col_actions:'Acciones',
 btn_view:'Ver', btn_resend:'Reenviar', btn_send_short:'Enviar', empty_invoices:'Ninguna factura emitida.',
 status_toutes:'Todas', status_enregistree:'Guardada', status_maj:'Actualizada', status_envoyee:'Enviada', status_payee:'Pagada',
-ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', stat_total:'Total', stat_charges_mois:'Cargas estimadas', stat_impot_mois:'Impuesto estimado', lbl_ca_goal:'Objetivo mensual (€)', lbl_charges_rate:'Tasa de cargas (%)', lbl_ca_goal_progress:'Objetivo del mes', lbl_ca_goal_year_progress:'Objetivo del año',
+ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', stat_total:'Total', stat_charges_mois:'Cargas estimadas', stat_impot_mois:'Impuesto estimado', lbl_ca_goal:'Objetivo mensual (€)', lbl_charges_rate:'Tasa de cargas (%)', lbl_ca_goal_progress:'Objetivo del mes', lbl_ca_goal_year_progress:'Objetivo del año', ca_sec_objectifs:'Objetivos', ca_sec_par_client:'Facturación por cliente',
 ca_col_client:'Cliente', ca_col_generated:'Facturación generada', empty_data:'Sin datos.',
 franchise_ok:'(exención de IVA activa).', franchise_over:'— umbral de exención superado, IVA aplicable.',
 franchise_prefix:'Facturación acumulada {year}: {ca} € / {seuil} €',
@@ -2384,6 +2384,7 @@ function renderCA(){
       ${chargesRate>0 ? `<div class="stat-mini"><div class="stat-mini-value">${chargesMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_charges_mois')}</div></div>` : ''}
       ${taxRate>0 ? `<div class="stat-mini"><div class="stat-mini-value">${taxMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_impot_mois')}</div></div>` : ''}
     </div>
+    ${(caGoal>0||caGoalYear>0) ? `<div class="dash-section-title" style="margin-top:4px;">${t('ca_sec_objectifs')}</div>` : ''}
     ${caGoal>0 ? `
     <div style="margin-bottom:20px;">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
@@ -2406,10 +2407,12 @@ function renderCA(){
   const byClient = {};
   invoices.forEach(i=>{ byClient[i.client] = (byClient[i.client]||0) + invoiceAmt(i); });
   const rows = Object.entries(byClient).sort((a,b)=>b[1]-a[1]);
-  caList.innerHTML = rows.length ? `
+  caList.innerHTML = `
+    <div class="dash-section-title">${t('ca_sec_par_client')}</div>
+    ${rows.length ? `
     <table><thead><tr><th>${t('ca_col_client')}</th><th class="num">${t('ca_col_generated')}</th></tr></thead>
     <tbody>${rows.map(([c,v])=>`<tr><td>${c}</td><td class="num">${v.toFixed(2)} €</td></tr>`).join('')}</tbody></table>
-  ` : `<p style="color:var(--text3);font-size:12px;">${t('empty_data')}</p>`;
+  ` : `<p style="color:var(--text3);font-size:12px;">${t('empty_data')}</p>`}`;
 }
 function renderDashboard(){
   const bookings = storeArr('bookings');
