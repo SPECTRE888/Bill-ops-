@@ -65,7 +65,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-fon
 .panel{background:var(--bg);padding:24px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
 .profile-grid{display:flex;flex-direction:column;gap:12px;}
 .profile-row1{display:grid;grid-template-columns:3fr 7fr;gap:12px;align-items:stretch;}
-.profile-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;}
+.profile-row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:stretch;}
 #tab-entreprise .card{background:var(--surface);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:0;display:flex;flex-direction:column;}
 #tab-entreprise .ctitle{font-size:8px;font-weight:500;text-transform:uppercase;letter-spacing:.2em;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
 #tab-entreprise .ctitle::after{content:'';flex:1;height:1px;background:var(--border);}
@@ -510,6 +510,17 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <button class="btn-line" onclick="forceCloudRefresh()" data-i18n="btn_force_sync" style="width:100%;">Forcer la synchro</button>
         <div id="syncStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
       </div>
+      <div class="card">
+        <div class="ctitle" data-i18n="data_fiscal_title">Fiscalité &amp; objectifs</div>
+        <div class="row">
+          <div style="flex:1;"><label data-i18n="lbl_tax_rate">Taux d'imposition (%)</label><input id="taxRateInput" type="number" min="0" max="100" step="0.1" placeholder="11" oninput="saveCaSettings()"></div>
+          <div style="flex:1;"><label data-i18n="lbl_charges_rate">Taux de charges (%)</label><input id="chargesRateInput" type="number" min="0" max="100" step="0.1" placeholder="21.1" oninput="saveCaSettings()"></div>
+        </div>
+        <div class="row">
+          <div style="flex:1;"><label data-i18n="lbl_ca_goal">Objectif mensuel (€)</label><input id="caGoalInput" type="number" min="0" step="50" placeholder="5000" oninput="saveCaSettings()"></div>
+          <div style="flex:1;"><label data-i18n="lbl_ca_goal_year">Objectif annuel (€)</label><input id="caGoalYearInput" type="number" min="0" step="500" placeholder="50000" oninput="saveCaSettings()"></div>
+        </div>
+      </div>
       </div>
       </div>
     </div>
@@ -652,10 +663,6 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
     <div class="tab" id="tab-ca">
       <h2 data-i18n="ca_title">Chiffre d'affaires</h2>
-      <div class="row" style="max-width:420px;margin-bottom:14px;">
-        <div style="flex:1;"><label data-i18n="lbl_ca_goal">Objectif mensuel</label><input id="caGoalInput" type="number" min="0" step="50" placeholder="5000" oninput="saveCaSettings()"></div>
-        <div style="flex:1;"><label data-i18n="lbl_charges_rate">Taux de charges (%)</label><input id="chargesRateInput" type="number" min="0" max="100" step="0.1" placeholder="21.1" oninput="saveCaSettings()"></div>
-      </div>
       <div id="caChart"></div>
       <div id="caStats"></div>
       <div id="caList"></div>
@@ -907,6 +914,7 @@ time_just_now:"à l'instant", time_min_ago:'il y a {n} min', time_hour_ago:'il y
 lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
 data_gmail_title:'Envoi de factures', gmail_intro:"Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent par défaut sur ton adresse de connexion, modifiable ici si tu préfères une autre adresse :",
 data_updates_title:'Mises à jour & synchro',
+data_fiscal_title:'Fiscalité & objectifs', lbl_tax_rate:"Taux d'imposition (%)", lbl_ca_goal_year:'Objectif annuel (€)',
 lbl_tva_regime:'Régime TVA', hint_tva_regime:'(basculement automatique à 32 000 € de CA cumulé)',
 opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'TVA applicable',
 lbl_rcs:'Mention RCS/RM', lbl_paiement:'Mode de règlement', lbl_rib:'RIB / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
@@ -938,7 +946,7 @@ hist_title:'Factures émises', ph_hist_search:"Rechercher (client, n° de factur
 hist_col_num:'N°', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Statut', hist_col_actions:'Actions',
 btn_view:'Voir', btn_resend:'Renvoyer', btn_send_short:'Envoyer', empty_invoices:'Aucune facture émise.',
 status_toutes:'Toutes', status_enregistree:'Enregistrée', status_maj:'Mise à jour', status_envoyee:'Envoyée', status_payee:'Payée',
-ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette année', stat_total:'Total', stat_charges_mois:'Charges estimées', lbl_ca_goal:'Objectif mensuel', lbl_charges_rate:'Taux de charges (%)', lbl_ca_goal_progress:'Objectif du mois',
+ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette année', stat_total:'Total', stat_charges_mois:'Charges estimées', stat_impot_mois:'Impôt estimé', lbl_ca_goal:'Objectif mensuel (€)', lbl_charges_rate:'Taux de charges (%)', lbl_ca_goal_progress:'Objectif du mois', lbl_ca_goal_year_progress:"Objectif de l'année",
 ca_col_client:'Client', ca_col_generated:'CA généré', empty_data:'Aucune donnée.',
 franchise_ok:'(franchise en base active).', franchise_over:'— seuil de franchise dépassé, TVA applicable.',
 franchise_prefix:'CA {year} cumulé : {ca} € / {seuil} €',
@@ -1014,6 +1022,7 @@ time_just_now:'just now', time_min_ago:'{n} min ago', time_hour_ago:'{n} h ago',
 lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
 data_gmail_title:'Sending invoices', gmail_intro:'Your invoices are sent automatically, nothing to configure. Replies from your clients land in your login address by default — editable here if you prefer another address:',
 data_updates_title:'Updates & sync',
+data_fiscal_title:'Tax & goals', lbl_tax_rate:'Tax rate (%)', lbl_ca_goal_year:'Yearly goal (€)',
 lbl_tva_regime:'VAT regime', hint_tva_regime:'(automatically switches at €32,000 cumulative revenue)',
 opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applicable',
 lbl_rcs:'Trade register notice', lbl_paiement:'Payment method', lbl_rib:'Bank details / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
@@ -1045,7 +1054,7 @@ hist_title:'Issued invoices', ph_hist_search:'Search (client, invoice no., servi
 hist_col_num:'No.', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Status', hist_col_actions:'Actions',
 btn_view:'View', btn_resend:'Resend', btn_send_short:'Send', empty_invoices:'No invoices issued.',
 status_toutes:'All', status_enregistree:'Saved', status_maj:'Updated', status_envoyee:'Sent', status_payee:'Paid',
-ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', stat_total:'Total', stat_charges_mois:'Estimated charges', lbl_ca_goal:'Monthly goal', lbl_charges_rate:'Charges rate (%)', lbl_ca_goal_progress:"This month's goal",
+ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', stat_total:'Total', stat_charges_mois:'Estimated charges', stat_impot_mois:'Estimated tax', lbl_ca_goal:'Monthly goal (€)', lbl_charges_rate:'Charges rate (%)', lbl_ca_goal_progress:"This month's goal", lbl_ca_goal_year_progress:"This year's goal",
 ca_col_client:'Client', ca_col_generated:'Revenue generated', empty_data:'No data.',
 franchise_ok:'(VAT exemption active).', franchise_over:'— exemption threshold exceeded, VAT applicable.',
 franchise_prefix:'{year} cumulative revenue: €{ca} / €{seuil}',
@@ -1121,6 +1130,7 @@ time_just_now:'justo ahora', time_min_ago:'hace {n} min', time_hour_ago:'hace {n
 lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
 data_gmail_title:'Envío de facturas', gmail_intro:'Tus facturas se envían automáticamente, sin nada que configurar. Las respuestas de tus clientes llegan por defecto a tu dirección de conexión, editable aquí si prefieres otra:',
 data_updates_title:'Actualizaciones y sincro',
+data_fiscal_title:'Fiscalidad y objetivos', lbl_tax_rate:'Tasa de impuesto (%)', lbl_ca_goal_year:'Objetivo anual (€)',
 lbl_tva_regime:'Régimen de IVA', hint_tva_regime:'(cambio automático a 32.000 € de facturación acumulada)',
 opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplicable',
 lbl_rcs:'Mención Registro Mercantil', lbl_paiement:'Forma de pago', lbl_rib:'Datos bancarios / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
@@ -1152,7 +1162,7 @@ hist_title:'Facturas emitidas', ph_hist_search:'Buscar (cliente, n.º de factura
 hist_col_num:'N.º', hist_col_client:'Cliente', hist_col_date:'Fecha', hist_col_total:'Total', hist_col_statut:'Estado', hist_col_actions:'Acciones',
 btn_view:'Ver', btn_resend:'Reenviar', btn_send_short:'Enviar', empty_invoices:'Ninguna factura emitida.',
 status_toutes:'Todas', status_enregistree:'Guardada', status_maj:'Actualizada', status_envoyee:'Enviada', status_payee:'Pagada',
-ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', stat_total:'Total', stat_charges_mois:'Cargas estimadas', lbl_ca_goal:'Objetivo mensual', lbl_charges_rate:'Tasa de cargas (%)', lbl_ca_goal_progress:'Objetivo del mes',
+ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', stat_total:'Total', stat_charges_mois:'Cargas estimadas', stat_impot_mois:'Impuesto estimado', lbl_ca_goal:'Objetivo mensual (€)', lbl_charges_rate:'Tasa de cargas (%)', lbl_ca_goal_progress:'Objetivo del mes', lbl_ca_goal_year_progress:'Objetivo del año',
 ca_col_client:'Cliente', ca_col_generated:'Facturación generada', empty_data:'Sin datos.',
 franchise_ok:'(exención de IVA activa).', franchise_over:'— umbral de exención superado, IVA aplicable.',
 franchise_prefix:'Facturación acumulada {year}: {ca} € / {seuil} €',
@@ -2333,13 +2343,15 @@ function renderCaChart(invoices, amt){
     </div>`).join('')}</div>`;
 }
 function saveCaSettings(){
-  set('from', {...store('from'), caGoal: parseFloat(caGoalInput.value)||0, chargesRate: parseFloat(chargesRateInput.value)||0});
+  set('from', {...store('from'), caGoal: parseFloat(caGoalInput.value)||0, caGoalYear: parseFloat(caGoalYearInput.value)||0, chargesRate: parseFloat(chargesRateInput.value)||0, taxRate: parseFloat(taxRateInput.value)||0});
   renderCA();
 }
 function loadCaSettings(){
   const f = store('from');
   caGoalInput.value = f.caGoal || '';
+  caGoalYearInput.value = f.caGoalYear || '';
   chargesRateInput.value = f.chargesRate || '';
+  taxRateInput.value = f.taxRate || '';
 }
 function renderCA(){
   const invoices = storeArr('invoices');
@@ -2354,15 +2366,20 @@ function renderCA(){
   const franchiseDepassee = caYear > SEUIL_FRANCHISE_TVA;
   const f = store('from');
   const caGoal = parseFloat(f.caGoal)||0;
+  const caGoalYear = parseFloat(f.caGoalYear)||0;
   const chargesRate = parseFloat(f.chargesRate)||0;
+  const taxRate = parseFloat(f.taxRate)||0;
   const goalPct = caGoal>0 ? (caMonth/caGoal)*100 : 0;
+  const goalYearPct = caGoalYear>0 ? (caYear/caGoalYear)*100 : 0;
   const chargesMonth = caMonth*chargesRate/100;
+  const taxMonth = caMonth*taxRate/100;
   caStats.innerHTML = `
     <div class="stat-row">
       <div class="stat-mini"><div class="stat-mini-value">${caMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_ce_mois')}</div></div>
       <div class="stat-mini"><div class="stat-mini-value">${caYear.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_cette_annee')}</div></div>
       <div class="stat-mini"><div class="stat-mini-value">${totalCA.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_total')}</div></div>
       ${chargesRate>0 ? `<div class="stat-mini"><div class="stat-mini-value">${chargesMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_charges_mois')}</div></div>` : ''}
+      ${taxRate>0 ? `<div class="stat-mini"><div class="stat-mini-value">${taxMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_impot_mois')}</div></div>` : ''}
     </div>
     ${caGoal>0 ? `
     <div style="margin-bottom:14px;">
@@ -2371,6 +2388,14 @@ function renderCA(){
         <span>${caMonth.toFixed(2)} € / ${caGoal.toFixed(2)} € · ${Math.round(goalPct)}%</span>
       </div>
       <div class="ca-goal-bar"><div class="ca-goal-bar-fill" style="width:${Math.min(100,goalPct)}%;background:${goalPct>=100?'var(--green)':'var(--gold)'};"></div></div>
+    </div>` : ''}
+    ${caGoalYear>0 ? `
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;">
+        <span>${t('lbl_ca_goal_year_progress')}</span>
+        <span>${caYear.toFixed(2)} € / ${caGoalYear.toFixed(2)} € · ${Math.round(goalYearPct)}%</span>
+      </div>
+      <div class="ca-goal-bar"><div class="ca-goal-bar-fill" style="width:${Math.min(100,goalYearPct)}%;background:${goalYearPct>=100?'var(--green)':'var(--gold)'};"></div></div>
     </div>` : ''}
     <div style="font-size:11px;margin-bottom:14px;color:${franchiseDepassee?'var(--red)':'var(--text2)'};">
       ${franchiseDepassee ? '⚠' : ''} ${t('franchise_prefix',{year:yearKey, ca:caYear.toFixed(2), seuil:SEUIL_FRANCHISE_TVA})} ${franchiseDepassee ? t('franchise_over') : t('franchise_ok')}
