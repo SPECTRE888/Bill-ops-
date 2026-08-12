@@ -678,6 +678,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div class="dash-card-label" data-i18n="home_ca_mois">CA du mois (prestas effectuées)</div>
         <div class="dash-card-value" id="dashCA">0 €</div>
         <div class="dash-card-hero-rule"></div>
+        <div id="dashGoalBar" style="margin-top:16px;text-align:left;"></div>
       </div>
 
       <div class="dash-section-title" data-i18n="home_sec_previsionnel">Prévisionnel</div>
@@ -2421,6 +2422,18 @@ function renderDashboard(){
   const caMois = invoices.filter(i=>invoiceEventMonth(i)===monthKey)
     .reduce((s,i)=>s+invoiceAmt(i),0);
   dashCA.textContent = caMois.toFixed(2)+' €';
+  const dashCaGoal = parseFloat(store('from').caGoal)||0;
+  if(dashCaGoal>0){
+    const dashGoalPct = (caMois/dashCaGoal)*100;
+    dashGoalBar.innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span class="ca-goal-label">${t('lbl_ca_goal_progress')}</span>
+        <span class="ca-goal-value">${caMois.toFixed(2)} € / ${dashCaGoal.toFixed(2)} € · ${Math.round(dashGoalPct)}%</span>
+      </div>
+      <div class="ca-goal-bar"><div class="ca-goal-bar-fill" style="width:${Math.min(100,dashGoalPct)}%;background:${dashGoalPct>=100?'var(--green)':'var(--gold)'};"></div></div>`;
+  } else {
+    dashGoalBar.innerHTML = '';
+  }
 
   const upcoming = bookings.filter(b=>b.status==='à facturer' && b.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
   dashUpcoming.textContent = upcoming.length;
