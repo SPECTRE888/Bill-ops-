@@ -54,7 +54,7 @@
 }
 *{box-sizing:border-box;font-family:var(--font-body);-webkit-tap-highlight-color:transparent;}
 body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-font-smoothing:antialiased;}
-h2{font-family:var(--font-display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;font-weight:400;}
+h2{font-family:var(--font-body);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;font-weight:400;}
 label{display:block;font-size:9px;color:var(--text3);margin:10px 0 5px;letter-spacing:.12em;text-transform:uppercase;font-weight:400;}
 input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-weight:300;font-family:var(--font-body);background:var(--surface2);color:var(--text);outline:none;transition:.2s;}
 input[type=checkbox]{width:auto;height:auto;padding:0;border:none;background:none;border-radius:0;accent-color:var(--gold);}
@@ -76,7 +76,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 
 .pair-gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:5000;}
 .pair-box{max-width:360px;width:100%;}
-.pair-title{font-family:var(--font-display);font-size:30px;color:var(--gold);text-align:center;letter-spacing:.1em;margin-bottom:16px;}
+.pair-title{font-family:var(--font-body);font-size:30px;color:var(--gold);text-align:center;letter-spacing:.1em;margin-bottom:16px;}
 
 .mobile-app{min-height:100vh;display:flex;flex-direction:column;}
 .mheader{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;background:var(--surface);border-bottom:1px solid var(--border);}
@@ -107,7 +107,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .mcal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 .mcal-day .mcal-ca{font-size:8px;color:var(--gold);font-weight:700;margin-top:auto;}
 .mcal-day-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12.5px;}
-.mcal-day-header{font-family:var(--font-display);font-size:14px;color:var(--gold);margin-bottom:8px;text-transform:capitalize;}
+.mcal-day-header{font-family:var(--font-body);font-size:14px;color:var(--gold);margin-bottom:8px;text-transform:capitalize;}
 .mcal-b-row{padding:9px 0;border-bottom:1px solid var(--border);}
 .mcal-b-row.invoiced{opacity:.55;}
 .mcal-b-row:last-child{border-bottom:none;}
@@ -116,11 +116,11 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 
 .toast-stack{position:fixed;top:20px;right:20px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
 .toast-card{background:var(--surface);border:1px solid var(--gold-border);border-left:3px solid var(--gold);border-radius:var(--radius-lg);padding:12px 16px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:12px;color:var(--text);}
-.toast-card b{color:var(--gold);font-family:var(--font-display);font-size:14px;display:block;margin-bottom:2px;}
+.toast-card b{color:var(--gold);font-family:var(--font-body);font-size:14px;display:block;margin-bottom:2px;}
 
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;}
 .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:360px;box-shadow:0 12px 32px rgba(0,0,0,.35);}
-.modal-header{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display);font-size:16px;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.modal-header{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-body);font-size:16px;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 .modal-close{all:unset;cursor:pointer;font-size:20px;color:var(--text3);line-height:1;padding:0 4px;}
 .modal-close:hover{color:var(--red);}
 .modal-box-lg{max-width:420px;max-height:85vh;overflow-y:auto;}
@@ -134,7 +134,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .switch-track::before{content:'';position:absolute;height:12px;width:12px;left:3px;top:3px;background:var(--text3);border-radius:50%;transition:.2s;}
 .switch input:checked + .switch-track{background:var(--gold-bg);border-color:var(--gold-border);}
 .switch input:checked + .switch-track::before{transform:translateX(14px);background:var(--gold);}
-.extras-total{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-family:var(--font-display);font-size:18px;color:var(--gold);font-weight:300;}
+.extras-total{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-family:var(--font-body);font-size:18px;color:var(--gold);font-weight:300;}
 
 .invoice-preview-overlay{position:fixed;inset:0;background:var(--bg);z-index:10001;overflow-y:auto;display:none;}
 .invoice-preview-bar{position:sticky;top:0;z-index:1;display:flex;justify-content:flex-end;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;background:var(--surface);border-bottom:1px solid var(--border);}
@@ -211,10 +211,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     <section id="tab-planning" style="display:none;">
       <h2>Planning</h2>
       <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);">Prévisionnel du mois</div>
-      <div id="mCalForecast" style="font-family:var(--font-display);font-size:24px;color:var(--gold);margin-bottom:12px;"></div>
+      <div id="mCalForecast" style="font-family:var(--font-body);font-size:24px;color:var(--gold);margin-bottom:12px;"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <button class="btn-line" style="margin:0;padding:5px 12px;" onclick="calShiftMobile(-1)">‹</button>
-        <span id="mCalLabel" style="font-family:var(--font-display);font-size:15px;color:var(--gold);text-transform:capitalize;"></span>
+        <span id="mCalLabel" style="font-family:var(--font-body);font-size:15px;color:var(--gold);text-transform:capitalize;"></span>
         <button class="btn-line" style="margin:0;padding:5px 12px;" onclick="calShiftMobile(1)">›</button>
       </div>
       <div id="mCal" class="mcal-grid"></div>
