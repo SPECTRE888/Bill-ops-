@@ -153,7 +153,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
    ligne (colonne Actions vide dans le header vs 3 boutons dans les lignes) et désaligne tout —
    bug vécu en prod, header et données décalés horizontalement malgré des grid-template-columns
    identiques. */
-.client-grid-cols{display:grid;grid-template-columns:14px minmax(0,1.2fr) 80px minmax(0,2.3fr) minmax(0,1fr) minmax(0,1fr) 240px;gap:10px;align-items:center;}
+.client-grid-cols{display:grid;grid-template-columns:minmax(0,1.2fr) 80px minmax(0,2.3fr) minmax(0,1fr) minmax(0,1fr) 240px;gap:10px;align-items:center;}
 .client-header{padding:0 10px 4px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
 .client-header>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .client-row{padding:8px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);}
@@ -1967,11 +1967,10 @@ function renderClientList(){
   });
   const header = `
     <div class="client-grid-cols client-header">
-      <span></span><span>${t('cli_col_client')}</span><span>${t('cli_col_prefixe')}</span><span>${t('cli_col_adresse')}</span><span>${t('cli_col_email')}</span><span>${t('cli_col_telephone')}</span><span></span>
+      <span>${t('cli_col_client')}</span><span>${t('cli_col_prefixe')}</span><span>${t('cli_col_adresse')}</span><span>${t('cli_col_email')}</span><span>${t('cli_col_telephone')}</span><span></span>
     </div>`;
   clientList.innerHTML = rows.length ? header + rows.map(({c,i})=>`
     <div class="client-grid-cols client-row">
-      <span class="cal-dot" style="background:${clientColor(c.name)};"></span>
       <span class="client-name">${c.name}</span>
       <span>${c.prefix?`[${c.prefix}]`:''}</span>
       ${c.addr?`<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.addr)}" onclick="event.stopPropagation()" title="${c.addr}">${c.addr}</a>`:'<span></span>'}
