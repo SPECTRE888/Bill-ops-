@@ -970,7 +970,7 @@ ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette a
 ca_col_client:'Client', ca_col_generated:'CA généré', empty_data:'Aucune donnée.',
 franchise_ok:'(franchise en base active).', franchise_over:'— seuil de franchise dépassé, TVA applicable.',
 franchise_prefix:'CA {year} cumulé : {ca} € / {seuil} €',
-home_title:"Vue d'ensemble", home_sec_mois:'Ce mois-ci (réalisé)', home_ca_mois:'CA du mois (prestas effectuées)',
+home_title:"Vue d'ensemble", home_sec_mois:'Ce mois-ci (réalisé)', home_ca_mois:'CA du mois (prestas encaissées)',
 home_sec_apercu:'Prévisionnel & facturation', home_prestas_venir:'Prestations à venir', home_ca_prevu:'CA prévu ce mois', home_heures_prevues:'Heures prévues ce mois',
 home_factures_attente:'Factures en attente', home_montant_encaisser:'Montant à encaisser',
 home_next_title:'Prochaine prestation', empty_next:'Aucune prestation programmée.',
@@ -1078,7 +1078,7 @@ ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', sta
 ca_col_client:'Client', ca_col_generated:'Revenue generated', empty_data:'No data.',
 franchise_ok:'(VAT exemption active).', franchise_over:'— exemption threshold exceeded, VAT applicable.',
 franchise_prefix:'{year} cumulative revenue: €{ca} / €{seuil}',
-home_title:'Overview', home_sec_mois:'This month (completed)', home_ca_mois:'Monthly revenue (services completed)',
+home_title:'Overview', home_sec_mois:'This month (completed)', home_ca_mois:'Monthly revenue (invoices collected)',
 home_sec_apercu:'Forecast & billing', home_prestas_venir:'Upcoming services', home_ca_prevu:'Forecast revenue this month', home_heures_prevues:'Forecast hours this month',
 home_factures_attente:'Pending invoices', home_montant_encaisser:'Amount to collect',
 home_next_title:'Next service', empty_next:'No service scheduled.',
@@ -1186,7 +1186,7 @@ ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', 
 ca_col_client:'Cliente', ca_col_generated:'Facturación generada', empty_data:'Sin datos.',
 franchise_ok:'(exención de IVA activa).', franchise_over:'— umbral de exención superado, IVA aplicable.',
 franchise_prefix:'Facturación acumulada {year}: {ca} € / {seuil} €',
-home_title:'Resumen', home_sec_mois:'Este mes (realizado)', home_ca_mois:'Facturación del mes (servicios realizados)',
+home_title:'Resumen', home_sec_mois:'Este mes (realizado)', home_ca_mois:'Facturación del mes (facturas cobradas)',
 home_sec_apercu:'Previsión y facturación', home_prestas_venir:'Servicios próximos', home_ca_prevu:'Facturación prevista este mes', home_heures_prevues:'Horas previstas este mes',
 home_factures_attente:'Facturas pendientes', home_montant_encaisser:'Importe a cobrar',
 home_next_title:'Próximo servicio', empty_next:'Ningún servicio programado.',
@@ -2475,7 +2475,7 @@ function renderDashboard(){
   const now = new Date();
   const monthKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 
-  const caMois = invoices.filter(i=>invoiceEventMonth(i)===monthKey)
+  const caMois = invoices.filter(i=>i.status==='Payée' && invoiceEventMonth(i)===monthKey)
     .reduce((s,i)=>s+invoiceAmt(i),0);
   dashCA.textContent = caMois.toFixed(2)+' €';
   const dashCaGoal = parseFloat(store('from').caGoal)||0;
