@@ -501,16 +501,20 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div class="ctitle" data-i18n="data_gmail_title">Envoi de factures</div>
         <p style="font-size:11px;color:var(--text2);" data-i18n="gmail_intro">Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent par défaut sur ton adresse de connexion, modifiable ici si tu préfères une autre adresse :</p>
         <input id="replyToInput" type="email" placeholder="ton@email.com" disabled>
-        <button class="btn-line" id="replyToBtn" onclick="toggleReplyToEdit(true)" style="margin-top:10px;" data-i18n="btn_edit">Modifier</button>
-        <div id="replyToStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+        <div style="margin-top:auto;">
+          <button class="btn-line" id="replyToBtn" onclick="toggleReplyToEdit(true)" style="margin-top:10px;" data-i18n="btn_edit">Modifier</button>
+          <div id="replyToStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+        </div>
       </div>
       <div class="card">
         <div class="ctitle" data-i18n="data_updates_title">Mises à jour &amp; synchro</div>
         <button class="btn-line" id="checkUpdatesBtn" onclick="manualCheckForUpdates()" data-i18n="nav_update_tooltip" style="width:100%;">Vérifier les mises à jour</button>
         <div id="updateCheckStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
         <p style="font-size:10px;color:var(--text3);margin:10px 0 6px;" data-i18n="hint_force_sync">Recharge tout de suite les données des autres appareils, sans attendre la synchro automatique (jusqu'à 60s).</p>
-        <button class="btn-line" onclick="forceCloudRefresh()" data-i18n="btn_force_sync" style="width:100%;">Forcer la synchro</button>
-        <div id="syncStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
+        <div style="margin-top:auto;">
+          <button class="btn-line" onclick="forceCloudRefresh()" data-i18n="btn_force_sync" style="width:100%;">Forcer la synchro</button>
+          <div id="syncStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
+        </div>
       </div>
       <div class="card">
         <div class="ctitle" data-i18n="data_fiscal_title">Fiscalité &amp; objectifs</div>
@@ -522,8 +526,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div style="flex:1;"><label data-i18n="lbl_ca_goal">Objectif mensuel (€)</label><input id="caGoalInput" type="number" min="0" step="50" placeholder="5000" disabled></div>
           <div style="flex:1;"><label data-i18n="lbl_ca_goal_year">Objectif annuel (€)</label><input id="caGoalYearInput" type="number" min="0" step="500" placeholder="50000" disabled></div>
         </div>
-        <button class="btn-line" id="fiscalEditBtn" onclick="toggleFiscalEdit(true)" style="margin-top:10px;" data-i18n="btn_edit">Modifier</button>
-        <div id="fiscalStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+        <div style="margin-top:auto;">
+          <button class="btn-line" id="fiscalEditBtn" onclick="toggleFiscalEdit(true)" style="margin-top:10px;" data-i18n="btn_edit">Modifier</button>
+          <div id="fiscalStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
+        </div>
       </div>
       </div>
       </div>
