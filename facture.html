@@ -2500,9 +2500,9 @@ function renderDashboard(){
   dashUnpaidAmt.textContent = aEncaisser.toFixed(2)+' €';
 
   const bookingsMois = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey));
-  const heuresMois = bookingsMois.reduce((s,b)=>s+b.hours,0);
+  const heuresMois = bookingsMois.reduce((s,b)=>s+(b.actualHours ?? b.hours),0);
   dashHours.textContent = heuresMois.toFixed(1)+' h';
-  const forecastMois = bookingsMois.reduce((s,b)=>s+b.hours*b.rate,0);
+  const forecastMois = bookingsMois.reduce((s,b)=>s+(b.actualHours ?? b.hours)*b.rate,0);
   dashForecastAmt.textContent = forecastMois.toFixed(2)+' €';
 
   const next = upcoming[0];
