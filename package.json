@@ -1,6 +1,6 @@
 {
   "name": "helm-ops",
-  "version": "1.1.137",
+  "version": "1.1.138",
   "description": "Helm Ops — gestion complète d'activité (clients, planning, facturation)",
   "author": "Jérôme Jarrige <Jarrige.jerome@hotmail.fr>",
   "license": "UNLICENSED",
@@ -40,15 +40,30 @@
       "entitlements": "electron/entitlements.mac.plist",
       "entitlementsInherit": "electron/entitlements.mac.plist",
       "target": [
-        { "target": "dmg", "arch": ["arm64"] },
-        { "target": "zip", "arch": ["arm64"] }
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        }
       ],
       "category": "public.app-category.business"
     },
     "win": {
       "icon": "electron/assets/icon.ico",
       "target": [
-        { "target": "nsis", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     },
     "dmg": {
