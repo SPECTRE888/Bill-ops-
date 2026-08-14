@@ -259,22 +259,26 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 #tab-facture label{margin:5px 0 2px;font-size:11px;}
 #tab-facture input,#tab-facture select,#tab-facture textarea{padding:6px 8px;font-size:12.5px;}
 #tab-facture .row{gap:6px;}
-.dash-section-title{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:0 0 8px;font-weight:500;}
-.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px;}
-.dash-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:18px 16px;}
-.dash-card-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
-.dash-card-value{font-family:var(--font-body);font-size:28px;color:var(--gold);font-weight:300;}
-.dash-card-hero{padding:24px 20px;text-align:center;margin-bottom:18px;}
-.dash-card-hero .dash-card-label{margin-bottom:16px;font-size:12px;}
-.dash-card-hero .dash-card-value{font-size:56px;line-height:1;margin-bottom:16px;}
+.dash-section-title{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:0 0 6px;font-weight:500;}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px;}
+.dash-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:12px 14px;}
+.dash-card-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
+.dash-card-value{font-family:var(--font-body);font-size:21px;color:var(--gold);font-weight:300;}
+.dash-card-hero{padding:14px 20px;text-align:center;margin-bottom:12px;}
+.dash-card-hero .dash-card-label{margin-bottom:8px;font-size:11px;}
+.dash-card-hero .dash-card-value{font-size:36px;line-height:1;margin-bottom:8px;}
 .dash-card-hero-rule{height:1px;background:var(--gold-border);}
-.dash-next-box{background:var(--surface2);border:1px solid var(--gold-border);border-radius:8px;padding:16px 18px;}
-.dash-next-date{font-family:var(--font-body);font-size:18px;color:var(--gold);text-transform:capitalize;}
-.dash-next-time{font-size:13px;color:var(--text2);margin-top:2px;}
-.dash-next-client{font-size:14px;font-weight:600;margin-top:8px;}
-.dash-next-lieu{font-size:12px;color:var(--text2);margin-top:2px;}
+.dash-next-box{background:var(--surface2);border:1px solid var(--gold-border);border-radius:8px;padding:10px 14px;}
+.dash-next-date{font-family:var(--font-body);font-size:15px;color:var(--gold);text-transform:capitalize;}
+.dash-next-time{font-size:12px;color:var(--text2);margin-top:2px;}
+.dash-next-client{font-size:13px;font-weight:600;margin-top:5px;}
+.dash-next-lieu{font-size:11.5px;color:var(--text2);margin-top:2px;}
 .dash-actions{display:flex;gap:10px;flex-wrap:wrap;}
 .dash-actions button{flex:1;min-width:160px;}
+.dash-bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+.dash-actions-col{display:flex;flex-direction:column;gap:6px;}
+.dash-actions-col button{width:100%;margin-top:0;}
+#tab-accueil h2{margin:0 0 10px;font-size:14px;}
 .stat-row{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
 .stat-mini{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;text-align:center;}
 .stat-mini-value{font-family:var(--font-body);font-size:20px;color:var(--gold);font-weight:300;}
@@ -686,10 +690,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div class="dash-card-label" data-i18n="home_ca_mois">CA du mois (prestas effectuées)</div>
         <div class="dash-card-value" id="dashCA">0 €</div>
         <div class="dash-card-hero-rule"></div>
-        <div id="dashGoalBar" style="margin-top:16px;text-align:left;"></div>
+        <div id="dashGoalBar" style="margin-top:10px;text-align:left;"></div>
       </div>
 
-      <div class="dash-section-title" data-i18n="home_sec_previsionnel">Prévisionnel</div>
+      <div class="dash-section-title" data-i18n="home_sec_apercu">Prévisionnel &amp; facturation</div>
       <div class="dash-grid">
         <div class="dash-card">
           <div class="dash-card-label" data-i18n="home_prestas_venir">Prestations à venir</div>
@@ -703,10 +707,6 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div class="dash-card-label" data-i18n="home_heures_prevues">Heures prévues ce mois</div>
           <div class="dash-card-value" id="dashHours">0 h</div>
         </div>
-      </div>
-
-      <div class="dash-section-title" data-i18n="home_sec_facturation">Facturation</div>
-      <div class="dash-grid">
         <div class="dash-card">
           <div class="dash-card-label" data-i18n="home_factures_attente">Factures en attente</div>
           <div class="dash-card-value" id="dashPending">0</div>
@@ -717,14 +717,19 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         </div>
       </div>
 
-      <h2 data-i18n="home_next_title">Prochaine prestation</h2>
-      <div class="dash-next-box" id="dashNext"></div>
-
-      <h2 data-i18n="home_actions_title">Actions rapides</h2>
-      <div class="dash-actions">
-        <button class="btn-gold" onclick="dashNewBooking()" data-i18n="btn_new_booking">+ Nouvelle prestation</button>
-        <button class="btn-gold" onclick="dashNewInvoice()" data-i18n="btn_new_invoice">+ Nouvelle facture</button>
-        <button class="btn-line" onclick="dashNewClient()" data-i18n="btn_new_client">+ Ajouter un client</button>
+      <div class="dash-bottom-row">
+        <div>
+          <div class="dash-section-title" data-i18n="home_next_title">Prochaine prestation</div>
+          <div class="dash-next-box" id="dashNext"></div>
+        </div>
+        <div>
+          <div class="dash-section-title" data-i18n="home_actions_title">Actions rapides</div>
+          <div class="dash-actions dash-actions-col">
+            <button class="btn-gold" onclick="dashNewBooking()" data-i18n="btn_new_booking">+ Nouvelle prestation</button>
+            <button class="btn-gold" onclick="dashNewInvoice()" data-i18n="btn_new_invoice">+ Nouvelle facture</button>
+            <button class="btn-line" onclick="dashNewClient()" data-i18n="btn_new_client">+ Ajouter un client</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -966,8 +971,8 @@ ca_col_client:'Client', ca_col_generated:'CA généré', empty_data:'Aucune donn
 franchise_ok:'(franchise en base active).', franchise_over:'— seuil de franchise dépassé, TVA applicable.',
 franchise_prefix:'CA {year} cumulé : {ca} € / {seuil} €',
 home_title:"Vue d'ensemble", home_sec_mois:'Ce mois-ci (réalisé)', home_ca_mois:'CA du mois (prestas effectuées)',
-home_sec_previsionnel:'Prévisionnel', home_prestas_venir:'Prestations à venir', home_ca_prevu:'CA prévu ce mois', home_heures_prevues:'Heures prévues ce mois',
-home_sec_facturation:'Facturation', home_factures_attente:'Factures en attente', home_montant_encaisser:'Montant à encaisser',
+home_sec_apercu:'Prévisionnel & facturation', home_prestas_venir:'Prestations à venir', home_ca_prevu:'CA prévu ce mois', home_heures_prevues:'Heures prévues ce mois',
+home_factures_attente:'Factures en attente', home_montant_encaisser:'Montant à encaisser',
 home_next_title:'Prochaine prestation', empty_next:'Aucune prestation programmée.',
 home_actions_title:'Actions rapides', btn_new_booking:'+ Nouvelle prestation', btn_new_invoice:'+ Nouvelle facture', btn_new_client:'+ Ajouter un client',
 plan_venir_title:'Prestas à venir', plan_facturer_title:'Prestas à facturer', empty_venir:'Aucune presta à venir.', empty_facturer:'Aucune presta à facturer.',
@@ -1074,8 +1079,8 @@ ca_col_client:'Client', ca_col_generated:'Revenue generated', empty_data:'No dat
 franchise_ok:'(VAT exemption active).', franchise_over:'— exemption threshold exceeded, VAT applicable.',
 franchise_prefix:'{year} cumulative revenue: €{ca} / €{seuil}',
 home_title:'Overview', home_sec_mois:'This month (completed)', home_ca_mois:'Monthly revenue (services completed)',
-home_sec_previsionnel:'Forecast', home_prestas_venir:'Upcoming services', home_ca_prevu:'Forecast revenue this month', home_heures_prevues:'Forecast hours this month',
-home_sec_facturation:'Billing', home_factures_attente:'Pending invoices', home_montant_encaisser:'Amount to collect',
+home_sec_apercu:'Forecast & billing', home_prestas_venir:'Upcoming services', home_ca_prevu:'Forecast revenue this month', home_heures_prevues:'Forecast hours this month',
+home_factures_attente:'Pending invoices', home_montant_encaisser:'Amount to collect',
 home_next_title:'Next service', empty_next:'No service scheduled.',
 home_actions_title:'Quick actions', btn_new_booking:'+ New service', btn_new_invoice:'+ New invoice', btn_new_client:'+ Add a client',
 plan_venir_title:'Upcoming services', plan_facturer_title:'Services to invoice', empty_venir:'No upcoming services.', empty_facturer:'No services to invoice.',
@@ -1182,8 +1187,8 @@ ca_col_client:'Cliente', ca_col_generated:'Facturación generada', empty_data:'S
 franchise_ok:'(exención de IVA activa).', franchise_over:'— umbral de exención superado, IVA aplicable.',
 franchise_prefix:'Facturación acumulada {year}: {ca} € / {seuil} €',
 home_title:'Resumen', home_sec_mois:'Este mes (realizado)', home_ca_mois:'Facturación del mes (servicios realizados)',
-home_sec_previsionnel:'Previsión', home_prestas_venir:'Servicios próximos', home_ca_prevu:'Facturación prevista este mes', home_heures_prevues:'Horas previstas este mes',
-home_sec_facturation:'Facturación', home_factures_attente:'Facturas pendientes', home_montant_encaisser:'Importe a cobrar',
+home_sec_apercu:'Previsión y facturación', home_prestas_venir:'Servicios próximos', home_ca_prevu:'Facturación prevista este mes', home_heures_prevues:'Horas previstas este mes',
+home_factures_attente:'Facturas pendientes', home_montant_encaisser:'Importe a cobrar',
 home_next_title:'Próximo servicio', empty_next:'Ningún servicio programado.',
 home_actions_title:'Acciones rápidas', btn_new_booking:'+ Nuevo servicio', btn_new_invoice:'+ Nueva factura', btn_new_client:'+ Añadir un cliente',
 plan_venir_title:'Servicios próximos', plan_facturer_title:'Servicios a facturar', empty_venir:'Ningún servicio próximo.', empty_facturer:'Ningún servicio a facturar.',
