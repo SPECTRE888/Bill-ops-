@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld('electronBridge', {
   openInvoiceWindow: (html, title) => ipcRenderer.invoke('open-invoice-window', { html, title }),
   getVersion: () => ipcRenderer.invoke('get-version'),
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  downloadUpdate: () => ipcRenderer.invoke('download-update'),
   onUpdateStatus: (cb) => ipcRenderer.on('update-status', (_e, payload) => cb(payload)),
 });

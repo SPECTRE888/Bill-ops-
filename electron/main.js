@@ -32,7 +32,8 @@ function migrateLegacyUserData() {
 
 ipcMain.handle('open-external', (_e, u) => shell.openExternal(u))
 ipcMain.handle('get-version', () => app.getVersion())
-ipcMain.handle('check-for-updates', () => checkAndUpdate())
+ipcMain.handle('check-for-updates', () => checkForUpdates())
+ipcMain.handle('download-update', () => downloadAndInstallUpdate())
 
 ipcMain.handle('open-invoice-window', (_e, { html, title }) => {
   const fs = require('fs')
@@ -172,7 +173,12 @@ function semverGt(a, b) {
   return false
 }
 
-async function checkAndUpdate() {
+// Résultat du dernier check positif, gardé en mémoire pour que downloadAndInstallUpdate() (déclenché
+// par le clic utilisateur sur le badge sidebar, pas automatiquement) sache quoi télécharger sans
+// re-fetcher l'API GitHub.
+let pendingRelease = null
+
+async function checkForUpdates() {
   try {
     const raw     = await get(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/releases/latest`)
     const release = JSON.parse(raw)
@@ -182,15 +188,26 @@ async function checkAndUpdate() {
     const current = app.getVersion()
 
     if (!semverGt(latest, current)) {
+      pendingRelease = null
       sendUpdateStatus({ state: 'uptodate', version: current })
       return
     }
 
-    sendUpdateStatus({ state: 'available', version: latest })
-
     const asset = release.assets.find(a => a.name.match(/arm64-mac\.zip$/) && !a.name.endsWith('.blockmap'))
     if (!asset) throw new Error('Asset ZIP introuvable dans la release')
 
+    pendingRelease = { version: latest, asset }
+    sendUpdateStatus({ state: 'available', version: latest })
+  } catch (err) {
+    console.error('[updater]', err?.message || err)
+    sendUpdateStatus({ state: 'error', message: err?.message || String(err) })
+  }
+}
+
+async function downloadAndInstallUpdate() {
+  if (!pendingRelease) return
+  const { version: latest, asset } = pendingRelease
+  try {
     const tmpDir  = fs.mkdtempSync(path.join(os.tmpdir(), 'helm-ops-upd-'))
     const zipPath = path.join(tmpDir, 'update.zip')
 
@@ -246,7 +263,7 @@ async function checkAndUpdate() {
 // sinon, si le boot (login + hydrateFromCloud) dépasse le délai fixe, le statut 'available'
 // part avant que quiconque écoute côté renderer et le badge sidebar ne s'affiche jamais.
 function setupUpdater() {
-  setInterval(checkAndUpdate, 30 * 60 * 1000)
+  setInterval(checkForUpdates, 30 * 60 * 1000)
 }
 
 // ─── Boot ───────────────────────────────────────────────────────────────

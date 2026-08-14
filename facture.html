@@ -312,7 +312,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
    n'apparaît (.show) que pendant un
    événement réel (available/downloading/installing/ready), en évidence (fond + bordure dorés,
    dot pulsant) pour ne pas la manquer — important tant que l'app est en dev et met à jour souvent. */
-.nav-update{display:none;align-items:center;gap:8px;padding:10px 12px;margin:auto 4px 2px;border-radius:8px;border:1px solid var(--gold-border);background:var(--gold-bg);font-size:10.5px;color:var(--gold);font-weight:500;cursor:default;animation:nav-update-in .25s ease-out;}
+.nav-update{display:none;align-items:center;gap:8px;padding:10px 12px;margin:auto 4px 2px;border-radius:8px;border:1px solid var(--gold-border);background:var(--gold-bg);font-size:10.5px;color:var(--gold);font-weight:500;cursor:pointer;animation:nav-update-in .25s ease-out;}
 .nav-update.show{display:flex;}
 .nav-update.ready{border-color:var(--green);background:var(--green-bg);color:var(--green);}
 @keyframes nav-update-in{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
@@ -393,7 +393,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
     <div class="nav-section" data-i18n="sec_compte">Compte</div>
     <button id="nav-entreprise" onclick="showTab('entreprise')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span data-i18n="nav_donnees">Profil</span></button>
-    <div class="nav-update" id="navUpdate">
+    <div class="nav-update" id="navUpdate" onclick="openUpdateModal()">
       <span class="nav-update-dot"></span>
       <span class="nav-update-text" id="navUpdateText">Helm Ops</span>
     </div>
@@ -847,13 +847,17 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
   </div>
 </div>
-<div class="modal-overlay" id="updateModal" style="display:none;">
+<div class="modal-overlay" id="updateModal" style="display:none;" onclick="if(event.target===this) dismissUpdateModal()">
   <div class="modal-box">
     <div class="upd-ring" id="updRing"></div>
     <div class="upd-title" id="updTitle" data-i18n="upd_title">Mise à jour disponible</div>
     <div class="upd-version" id="updVersion"></div>
     <div class="upd-bar"><div class="upd-bar-fill" id="updBarFill"></div></div>
     <div class="upd-state" id="updState"></div>
+    <div class="row" id="updActions" style="display:none;margin-top:16px;">
+      <button class="btn-gold" style="flex:1;" onclick="startUpdateDownload()" data-i18n="btn_install_update">Installer maintenant</button>
+      <button class="btn-line" style="flex:1;margin-top:0;" onclick="dismissUpdateModal()" data-i18n="btn_update_later">Plus tard</button>
+    </div>
   </div>
 </div>
 <div class="modal-overlay" id="whatsNewModal" style="display:none;" onclick="if(event.target===this) closeWhatsNewModal()">
@@ -977,7 +981,7 @@ modal_booking_title:'Détail de la prestation', btn_close:'Fermer',
 row_client:'Client', row_prestation:'Prestation', row_date:'Date', row_horaires:'Horaires', row_reel:'Réel (pointé)', row_taux:'Taux', row_total:'Total', row_adresse:'Adresse', row_contact:'Contact',
 non_definie:'non définie',
 nav_update_checking:'Vérification…', nav_update_available:'Mise à jour disponible', nav_update_downloading:'Téléchargement… {pct}%', nav_update_installing:'Installation…', nav_update_ready:'Redémarrage…', nav_update_tooltip:'Vérifier les mises à jour', nav_update_uptodate:'Helm Ops est à jour · v{version}',
-upd_title:'Mise à jour disponible', upd_state_available:'Préparation du téléchargement…', upd_state_downloading:'Téléchargement… {pct}%', upd_state_installing:'Installation en cours…', upd_state_ready:'Prêt — redémarrage dans {seconds}s…',
+upd_title:'Mise à jour disponible', upd_state_choice:'Une nouvelle version est prête à installer.', upd_state_available:'Préparation du téléchargement…', upd_state_downloading:'Téléchargement… {pct}%', upd_state_installing:'Installation en cours…', upd_state_ready:'Prêt — redémarrage dans {seconds}s…', btn_install_update:'Installer maintenant', btn_update_later:'Plus tard',
 wn_title:'Nouveautés installées', wn_text:"Helm Ops vient d'être mis à jour avec des améliorations et des correctifs importants.", wn_btn:'Parfait, on y va', wn_badge_version:'Version {version}',
 toast_client_email_invalid:'⚠ Email client invalide : {email}',
 toast_old_invoice_no_detail:'⚠ Détail non disponible pour cette facture ancienne.',
@@ -1085,7 +1089,7 @@ modal_booking_title:'Service detail', btn_close:'Close',
 row_client:'Client', row_prestation:'Service', row_date:'Date', row_horaires:'Hours', row_reel:'Actual (clocked)', row_taux:'Rate', row_total:'Total', row_adresse:'Address', row_contact:'Contact',
 non_definie:'not set',
 nav_update_checking:'Checking…', nav_update_available:'Update available', nav_update_downloading:'Downloading… {pct}%', nav_update_installing:'Installing…', nav_update_ready:'Restarting…', nav_update_tooltip:'Check for updates', nav_update_uptodate:'Helm Ops is up to date · v{version}',
-upd_title:'Update available', upd_state_available:'Preparing download…', upd_state_downloading:'Downloading… {pct}%', upd_state_installing:'Installing…', upd_state_ready:'Ready — restarting in {seconds}s…',
+upd_title:'Update available', upd_state_choice:'A new version is ready to install.', upd_state_available:'Preparing download…', upd_state_downloading:'Downloading… {pct}%', upd_state_installing:'Installing…', upd_state_ready:'Ready — restarting in {seconds}s…', btn_install_update:'Install now', btn_update_later:'Later',
 wn_title:'Update installed', wn_text:'Helm Ops was just updated with important improvements and fixes.', wn_btn:"Great, let's go", wn_badge_version:'Version {version}',
 toast_client_email_invalid:'⚠ Invalid client email: {email}',
 toast_old_invoice_no_detail:'⚠ Detail unavailable for this older invoice.',
@@ -1193,7 +1197,7 @@ modal_booking_title:'Detalle del servicio', btn_close:'Cerrar',
 row_client:'Cliente', row_prestation:'Servicio', row_date:'Fecha', row_horaires:'Horario', row_reel:'Real (fichado)', row_taux:'Tarifa', row_total:'Total', row_adresse:'Dirección', row_contact:'Contacto',
 non_definie:'sin definir',
 nav_update_checking:'Comprobando…', nav_update_available:'Actualización disponible', nav_update_downloading:'Descargando… {pct}%', nav_update_installing:'Instalando…', nav_update_ready:'Reiniciando…', nav_update_tooltip:'Buscar actualizaciones', nav_update_uptodate:'Helm Ops está actualizado · v{version}',
-upd_title:'Actualización disponible', upd_state_available:'Preparando la descarga…', upd_state_downloading:'Descargando… {pct}%', upd_state_installing:'Instalando…', upd_state_ready:'Listo — reinicio en {seconds}s…',
+upd_title:'Actualización disponible', upd_state_choice:'Una nueva versión está lista para instalar.', upd_state_available:'Preparando la descarga…', upd_state_downloading:'Descargando… {pct}%', upd_state_installing:'Instalando…', upd_state_ready:'Listo — reinicio en {seconds}s…', btn_install_update:'Instalar ahora', btn_update_later:'Más tarde',
 wn_title:'Actualización instalada', wn_text:'Helm Ops se acaba de actualizar con mejoras y correcciones importantes.', wn_btn:'Perfecto, vamos', wn_badge_version:'Versión {version}',
 toast_client_email_invalid:'⚠ Email de cliente no válido: {email}',
 toast_old_invoice_no_detail:'⚠ Detalle no disponible para esta factura antigua.',
@@ -1314,16 +1318,22 @@ function showToast(msg, duration){
   setTimeout(()=>{ card.remove(); }, duration || 6000);
 }
 
-// ─── Mise à jour Electron (badge sidebar + popup central) ──────────────────
+// ─── Mise à jour Electron (badge sidebar + popup à la demande) ─────────────
 // Statut poussé par le process principal (electron/main.js, IPC 'update-status') pendant tout le
-// cycle : available → downloading (avec %) → installing → ready (avant redémarrage auto). Piloté
-// depuis un seul point d'entrée (handleUpdateStatus) qui met à jour le badge nav ET le popup.
+// cycle : available → (clic utilisateur) → downloading (avec %) → installing → ready (avant
+// redémarrage auto). Le check (initUpdateSystem() au boot + toutes les 30 min) ne fait que
+// détecter et allumer le badge nav — il ne télécharge/installe jamais tout seul : c'est le clic
+// sur le badge (openUpdateModal → startUpdateDownload) qui déclenche le téléchargement, pour que
+// l'utilisateur choisisse "installer maintenant" ou "plus tard" au lieu de se faire interrompre
+// par un popup central surgissant sans qu'il ait rien demandé.
 // Bannière visible uniquement pour un événement réel (dispo/téléchargement/installation/prêt) —
 // 'checking' et 'uptodate' ne l'affichent pas (sinon elle flasherait à chaque poll silencieux
 // toutes les 30 min sans rien à annoncer).
 const NAV_UPDATE_VISIBLE_STATES = ['available','downloading','installing','ready'];
+let currentUpdateState = '', pendingUpdateVersion = '';
 function setNavUpdateState(state, text){
   if(!navUpdate) return;
+  currentUpdateState = state;
   const visible = NAV_UPDATE_VISIBLE_STATES.includes(state);
   navUpdate.className = 'nav-update' + (visible ? ' show '+state : '');
   navUpdateText.textContent = text;
@@ -1332,17 +1342,34 @@ function resetCheckUpdatesBtn(){
   const btn = document.getElementById('checkUpdatesBtn');
   if(btn){ btn.disabled = false; btn.textContent = t('nav_update_tooltip'); }
 }
+function openUpdateModal(){
+  if(!NAV_UPDATE_VISIBLE_STATES.includes(currentUpdateState)) return;
+  if(currentUpdateState==='available'){
+    updVersion.textContent = 'v'+pendingUpdateVersion;
+    updRing.className = 'upd-ring';
+    updBarFill.style.width = '0%';
+    updState.textContent = t('upd_state_choice');
+    updActions.style.display = 'flex';
+  } else {
+    updActions.style.display = 'none';
+  }
+  updateModal.style.display = 'flex';
+}
+function startUpdateDownload(){
+  updActions.style.display = 'none';
+  updState.textContent = t('upd_state_available');
+  window.electronBridge.downloadUpdate?.();
+}
+function dismissUpdateModal(){
+  updateModal.style.display = 'none';
+}
 function handleUpdateStatus(payload){
   const { state, version, pct, seconds } = payload || {};
   const statusEl = document.getElementById('updateCheckStatus');
   if(state==='available'){
+    pendingUpdateVersion = version;
     setNavUpdateState('available', t('nav_update_available'));
     if(statusEl) statusEl.textContent = '';
-    updVersion.textContent = 'v'+version;
-    updRing.className = 'upd-ring';
-    updBarFill.style.width = '0%';
-    updState.textContent = t('upd_state_available');
-    updateModal.style.display = 'flex';
   } else if(state==='downloading'){
     setNavUpdateState('downloading', t('nav_update_downloading',{pct}));
     updBarFill.style.width = pct+'%';
@@ -1356,8 +1383,8 @@ function handleUpdateStatus(payload){
     updRing.className = 'upd-ring done';
     updRing.textContent = '✓';
     updState.textContent = t('upd_state_ready',{seconds});
+    updateModal.style.display = 'flex';
   } else if(state==='uptodate'){
-    updateModal.style.display = 'none';
     setNavUpdateState('', '');
     resetCheckUpdatesBtn();
     if(statusEl) statusEl.textContent = t('nav_update_uptodate',{version});
