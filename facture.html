@@ -1003,6 +1003,7 @@ toast_invoice_not_found:'⚠ Facture introuvable.',
 toast_sendgrid_missing:"⚠ Client introuvable pour cette facture.",
 toast_invoice_resent:'✔ Facture renvoyée à {email}.', toast_resend_failed:'✕ Échec du renvoi.', toast_error_generic:'✕ Erreur : {msg}',
 confirm_delete_invoice:'Supprimer définitivement la facture {num} ?', toast_invoice_deleted:'✔ Facture {num} supprimée.',
+confirm_delete_client:'Supprimer définitivement le client {name} ?',
 toast_status_updated:'✔ Statut de la facture {num} : {status}.', toast_booking_updated:'✔ Booking modifié.', toast_preview_updated:'✔ Aperçu mis à jour.',
 toast_select_client_save:"⚠ Sélectionne un client avant d'enregistrer.",
 toast_select_client_send:"⚠ Sélectionne un client avant d'envoyer.", toast_sending:'Envoi en cours…',
@@ -1111,6 +1112,7 @@ toast_invoice_not_found:'⚠ Invoice not found.',
 toast_sendgrid_missing:'⚠ Client not found for this invoice.',
 toast_invoice_resent:'✔ Invoice resent to {email}.', toast_resend_failed:'✕ Resend failed.', toast_error_generic:'✕ Error: {msg}',
 confirm_delete_invoice:'Permanently delete invoice {num}?', toast_invoice_deleted:'✔ Invoice {num} deleted.',
+confirm_delete_client:'Permanently delete client {name}?',
 toast_status_updated:'✔ Invoice {num} status: {status}.', toast_booking_updated:'✔ Booking updated.', toast_preview_updated:'✔ Preview updated.',
 toast_select_client_save:'⚠ Select a client before saving.',
 toast_select_client_send:'⚠ Select a client before sending.', toast_sending:'Sending…',
@@ -1219,6 +1221,7 @@ toast_invoice_not_found:'⚠ Factura no encontrada.',
 toast_sendgrid_missing:'⚠ Cliente no encontrado para esta factura.',
 toast_invoice_resent:'✔ Factura reenviada a {email}.', toast_resend_failed:'✕ Error al reenviar.', toast_error_generic:'✕ Error: {msg}',
 confirm_delete_invoice:'¿Eliminar definitivamente la factura {num}?', toast_invoice_deleted:'✔ Factura {num} eliminada.',
+confirm_delete_client:'¿Eliminar definitivamente el cliente {name}?',
 toast_status_updated:'✔ Estado de la factura {num}: {status}.', toast_booking_updated:'✔ Reserva modificada.', toast_preview_updated:'✔ Vista previa actualizada.',
 toast_select_client_save:'⚠ Selecciona un cliente antes de guardar.',
 toast_select_client_send:'⚠ Selecciona un cliente antes de enviar.', toast_sending:'Enviando…',
@@ -1998,6 +2001,12 @@ function deleteClient(i){
   closeClientForm();
   renderClientList(); refreshClientSelect();
 }
+async function deleteClientFromList(i){
+  const c = storeArr('clients')[i];
+  if(!c) return;
+  if(!await confirmDialog(t('confirm_delete_client',{name:c.name}))) return;
+  deleteClient(i);
+}
 function renderClientList(){
   const clients = storeArr('clients');
   const q = (clientSearchInput?.value||'').trim().toLowerCase();
@@ -2018,7 +2027,8 @@ function renderClientList(){
       ${c.phone?`<a href="tel:${c.phone}" onclick="event.stopPropagation()" title="${c.phone}">${c.phone}</a>`:'<span></span>'}
       <div class="client-actions">
         <button class="btn-line" onclick="viewClientInfo(${i})">${t('btn_info')}</button>
-        <button class="btn-line" onclick="clientNewBooking(${i})">${t('btn_new_presta_client')}</button>
+        <button class="btn-gold" onclick="clientNewBooking(${i})">${t('btn_new_presta_client')}</button>
+        <button class="btn-line" style="color:var(--red);" onclick="deleteClientFromList(${i})">${t('btn_delete')}</button>
       </div>
     </div>`).join('') : `<p style="color:var(--text2);font-size:12px;">${q?t('empty_clients_search'):t('empty_clients')}</p>`;
 }
