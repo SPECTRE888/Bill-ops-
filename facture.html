@@ -180,7 +180,8 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .cal-day-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:14px;font-size:12px;max-height:180px;overflow-y:auto;}
 .cal-day-panel .cal-b-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);gap:6px;}
 .cal-day-panel .cal-b-row:last-child{border-bottom:none;}
-.cal-day-panel .cal-b-row button{padding:3px 7px;font-size:10px;margin:0 0 0 3px;}
+.cal-day-panel .cal-b-row button{padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;margin:0 0 0 3px;}
+#histList td:last-child button{margin:0 2px 0 0;padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;}
 .preview-wrap{display:none;background:var(--bg);height:100%;}
 .preview-wrap.active{display:flex;flex-direction:column;}
 .preview-scroll{flex:1;min-height:0;overflow-y:auto;padding:40px;display:flex;justify-content:center;}
@@ -228,7 +229,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .acc-horaires{color:var(--text2);}
 .acc-montant{color:var(--gold);font-weight:600;text-align:right;}
 .acc-actions{display:flex;gap:5px;justify-content:flex-end;}
-.acc-actions button{margin:0;padding:4px 8px;font-size:10.5px;}
+.acc-actions button{margin:0;padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;}
 .acc-day-header{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:500;margin:18px 0 8px;}
 .acc-day-header:first-child{margin-top:0;}
 .ptg-row{display:flex;gap:9px;align-items:center;padding:9px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);margin-bottom:6px;}
@@ -240,7 +241,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .ptg-badge.done{background:var(--green-bg);color:var(--green);border:1px solid var(--green);}
 .ptg-badge.pending{background:var(--surface);color:var(--text3);border:1px solid var(--border2);}
 .ptg-actions{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;margin-top:1px;}
-.ptg-actions button{margin:0;padding:4px 9px;font-size:10.5px;}
+.ptg-actions button{margin:0;padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;}
 #accList{margin-bottom:4px;}
 .tab#tab-facture.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 .facture-scroll{flex:1;min-height:0;overflow-y:auto;}
@@ -2354,12 +2355,12 @@ function renderHistory(){
         </select>
       </td>
       <td>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="viewInvoice('${i.num}')">${t('btn_view')}</button>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="editInvoice('${i.num}')">${t('btn_edit')}</button>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="duplicateInvoice('${i.num}')">${t('btn_duplicate')}</button>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="downloadInvoicePdf('${i.num}')">PDF</button>
-        <button class="btn-line" style="padding:4px 8px;font-size:11px;margin:0 2px 0 0;" onclick="resendInvoice('${i.num}')">${(i.status==='Envoyée'||i.status==='Payée')?t('btn_resend'):t('btn_send_short')}</button>
-        <button class="btn-line btn-danger" style="padding:4px 8px;font-size:11px;margin:0;" onclick="deleteInvoice('${i.num}')">${t('btn_delete')}</button>
+        <button class="btn-line" onclick="viewInvoice('${i.num}')">${t('btn_view')}</button>
+        <button class="btn-line" onclick="editInvoice('${i.num}')">${t('btn_edit')}</button>
+        <button class="btn-line" onclick="duplicateInvoice('${i.num}')">${t('btn_duplicate')}</button>
+        <button class="btn-line" onclick="downloadInvoicePdf('${i.num}')">PDF</button>
+        <button class="btn-line" onclick="resendInvoice('${i.num}')">${(i.status==='Envoyée'||i.status==='Payée')?t('btn_resend'):t('btn_send_short')}</button>
+        <button class="btn-line btn-danger" style="margin:0;" onclick="deleteInvoice('${i.num}')">${t('btn_delete')}</button>
       </td>
     </tr>`).join('')}</tbody></table>
   ` : `<p style="color:var(--text3);font-size:12px;">${t('empty_invoices')}</p>`;
