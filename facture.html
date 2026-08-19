@@ -185,7 +185,14 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .cal-day-panel .cal-b-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);gap:6px;}
 .cal-day-panel .cal-b-row:last-child{border-bottom:none;}
 .cal-day-panel .cal-b-row button{padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;margin:0 0 0 3px;}
-#histList td:last-child button{margin:0 2px 0 0;padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;}
+/* La colonne Actions se cale sur la ligne la plus large (Renvoyer, 8 lettres) — les lignes avec
+   Envoyer (7 lettres, factures pas encore envoyées) laissaient un blanc à droite qui décalait
+   Supprimer vers la gauche par rapport aux autres lignes. En flex + marge auto sur le dernier
+   bouton, Supprimer reste toujours collé au bord droit de la colonne, quelle que soit la largeur
+   des boutons qui le précèdent. */
+#histList td:last-child{display:flex;align-items:center;}
+#histList td:last-child button{margin:0 2px 0 0;padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;flex-shrink:0;}
+#histList td:last-child button:last-child{margin:0 0 0 auto;}
 .preview-wrap{display:none;background:var(--bg);height:100%;}
 .preview-wrap.active{display:flex;flex-direction:column;}
 .preview-scroll{flex:1;min-height:0;overflow-y:auto;padding:40px;display:flex;justify-content:center;}
