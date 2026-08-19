@@ -1585,6 +1585,7 @@ function queueCloudPush(k){
 }
 async function pushCloudKey(k){
   if(cloudPushBusy[k]){ cloudPushTimers[k] = setTimeout(()=>pushCloudKey(k), 1200); return; }
+  cloudPushTimers[k] = null;
   const { data:{session} } = await getSb().auth.getSession();
   if(!session) return;
   cloudPushBusy[k] = true;
