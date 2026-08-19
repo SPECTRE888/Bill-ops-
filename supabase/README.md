@@ -1,6 +1,6 @@
 # Edge Functions Supabase — état déployé
 
-Neuf fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill-ops) :
+Dix fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill-ops) :
 
 - **`send-invoice`** — envoi via l'API Gmail au nom de l'utilisateur lui-même (plus de SendGrid ni
   de relais SMTP centralisé, abandonnés ; remplace aussi `send-invoice-server.js`, jamais hébergé,
@@ -32,6 +32,13 @@ Neuf fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill
 - **`stripe-webhook`** — POST, signature Stripe (`STRIPE_WEBHOOK_SECRET`, body brut). Synchronise
   `subscriptions` sur `customer.subscription.created/updated/deleted` et `invoice.payment_failed`.
   Même compte Stripe que BAR OPS, produit/prix et endpoint webhook dédiés à Helm.
+- **`delete-account`** — POST, bearer token. Supprime définitivement le compte de l'utilisateur
+  connecté : annule son abonnement Stripe actif s'il existe (best-effort), puis
+  `auth.admin.deleteUser` — toutes les tables applicatives (`clients`, `bookings`, `invoices`,
+  `company_info`, `push_subscriptions`, `profiles`, `subscriptions`) référencent `auth.users(id)`
+  en `ON DELETE CASCADE`, donc supprimer l'utilisateur Auth suffit à tout effacer côté serveur.
+  Appelée depuis le bouton "Supprimer" de la carte Informations (`facture.html`, onglet Profil —
+  pas encore répliqué sur mobile).
 - **`auth-relay-deposit`**/**`auth-relay-poll`** — handoff des tokens de session Supabase Auth pour
   le login Google côté Electron desktop (pas d'origine https locale pour un `redirectTo` direct) :
   `mobile/oauth-relay.html` dépose les tokens via `auth-relay-deposit`, l'app les récupère par
@@ -145,6 +152,7 @@ npx supabase functions deploy stripe-webhook --no-verify-jwt
 npx supabase functions deploy auth-relay-deposit --no-verify-jwt
 npx supabase functions deploy auth-relay-poll --no-verify-jwt
 npx supabase functions deploy notify-upcoming-bookings --no-verify-jwt
+npx supabase functions deploy delete-account --no-verify-jwt
 ```
 
 Nécessite d'être connecté (`npx supabase login`, une seule fois par machine — ouvre le navigateur).

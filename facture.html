@@ -115,6 +115,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
    synchro) reste en .btn-line neutre, comme sur BAR OPS. */
 .btn-profile{background:transparent;border:1px solid var(--gold-border);color:var(--text2);font-weight:500;}
 .btn-profile:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-bg);}
+/* Repris tel quel de BAR OPS (.btn-profile.btn-danger, app.html) : contour rouge transparent au
+   repos (pas le fond rouge plein de .btn-danger seul) pour le bouton Supprimer de la même rangée. */
+.btn-profile.btn-danger{border-color:var(--red);color:var(--red);background:transparent;}
+.btn-profile.btn-danger:hover{border-color:var(--red);color:var(--red);background:var(--red-bg);}
 /* Rangées d'actions groupées (.row, .dash-actions) mêlant .btn-gold (action principale, plein)
    et .btn-line (action secondaire, contour) : le margin-top:6px de .btn-line — pensé pour un
    bouton isolé sous un label/champ — grignote sa hauteur dans une rangée flex par rapport à ses
@@ -471,11 +475,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div id="backupStatus" style="order:1;font-size:11px;margin:0 0 4px;color:var(--gold);"></div>
           <div class="row" style="order:2;padding-top:10px;align-items:flex-end;">
             <button class="btn-profile" id="infoEditBtn" onclick="toggleInfoEdit(true)" data-i18n="btn_edit" style="margin-top:0;">Modifier</button>
+            <button class="btn-profile" onclick="confirmResetHelmData()" data-i18n="prof_btn_reset" style="margin-top:0;">Réinitialiser</button>
+            <button class="btn-profile btn-danger" onclick="confirmDeleteHelmAccount()" data-i18n="btn_delete" style="margin-top:0;">Supprimer</button>
             <button class="btn-profile" onclick="exportBackup()" data-i18n="btn_export_data" style="margin-top:0;">Exporter mes données</button>
-            <div style="flex:1;">
-              <label style="margin:0 0 5px;" data-i18n="lbl_import_backup">Importer une sauvegarde</label>
-              <input type="file" id="importBackupInput" accept="application/json" onchange="importBackup(this)">
-            </div>
+          </div>
+          <div style="padding-top:8px;">
+            <label style="margin:0 0 5px;" data-i18n="lbl_import_backup">Importer une sauvegarde</label>
+            <input type="file" id="importBackupInput" accept="application/json" onchange="importBackup(this)">
           </div>
         </div>
         <div id="infoEdit" style="display:none;">
@@ -949,6 +955,8 @@ sync_code_intro:'Code de synchro (à coller sur l\'autre appareil) :', btn_copy_
 hint_force_sync:"Recharge tout de suite les données des autres appareils, sans attendre la synchro automatique (jusqu'à 60s).", sync_status_line:'Synchronisé le {date} à {time}',
 data_backup_title:'Sauvegarde', backup_intro:'Exporte toutes tes données (entreprise, clients, factures, planning) dans un fichier, à conserver en lieu sûr ou à réimporter sur un autre appareil.',
 btn_export_data:'Exporter mes données', lbl_import_backup:'Importer une sauvegarde',
+prof_btn_reset:'Réinitialiser', confirm_reset_data:'Réinitialiser toutes tes données (clients, prestations, factures) ? Ton profil entreprise et ton compte sont conservés. Cette action est irréversible.', toast_reset_done:'✔ Données réinitialisées',
+confirm_delete_account:'Supprimer définitivement ton compte Helm Ops ? Toutes tes données seront effacées et ton abonnement annulé. Cette action est irréversible.', toast_account_deleted:'Compte supprimé', toast_delete_account_error:'✕ Échec de la suppression du compte',
 clients_add_title:'Ajouter / modifier un client', lbl_nom_societe:'Nom société', lbl_prefixe:'Préfixe facture (2-3 lettres)', lbl_email:'Email', lbl_telephone:'Téléphone',
 toggle_tutoiement:'Tutoiement (email facture)',
 lbl_siret_client:'SIRET / TVA client (optionnel)', lbl_facturation_addr:'Adresse de facturation (optionnel)', hint_facturation_addr:"Si différente de l'adresse ci-dessus. Utilisée sur la facture à la place.",
@@ -1058,6 +1066,8 @@ sync_code_intro:'Sync code (paste it on the other device):', btn_copy_code:'Copy
 hint_force_sync:'Reloads data from your other devices right away, instead of waiting for the automatic sync (up to 60s).', sync_status_line:'Synced on {date} at {time}',
 data_backup_title:'Backup', backup_intro:'Export all your data (company, clients, invoices, schedule) to a file, to keep safe or re-import on another device.',
 btn_export_data:'Export my data', lbl_import_backup:'Import a backup',
+prof_btn_reset:'Reset', confirm_reset_data:'Reset all your data (clients, bookings, invoices)? Your company profile and account are kept. This action is irreversible.', toast_reset_done:'✔ Data reset',
+confirm_delete_account:'Permanently delete your Helm Ops account? All your data will be erased and your subscription cancelled. This action is irreversible.', toast_account_deleted:'Account deleted', toast_delete_account_error:'✕ Account deletion failed',
 clients_add_title:'Add / edit a client', lbl_nom_societe:'Company name', lbl_prefixe:'Invoice prefix (2-3 letters)', lbl_email:'Email', lbl_telephone:'Phone',
 toggle_tutoiement:'Informal tone (invoice email)',
 lbl_siret_client:'Client company ID / VAT (optional)', lbl_facturation_addr:'Billing address (optional)', hint_facturation_addr:'If different from the address above. Used on the invoice instead.',
@@ -1167,6 +1177,8 @@ sync_code_intro:'Código de sincronización (pégalo en el otro dispositivo):', 
 hint_force_sync:'Recarga de inmediato los datos de tus otros dispositivos, sin esperar la sincronización automática (hasta 60s).', sync_status_line:'Sincronizado el {date} a las {time}',
 data_backup_title:'Copia de seguridad', backup_intro:'Exporta todos tus datos (empresa, clientes, facturas, planificación) a un archivo, para guardar en un lugar seguro o reimportar en otro dispositivo.',
 btn_export_data:'Exportar mis datos', lbl_import_backup:'Importar una copia de seguridad',
+prof_btn_reset:'Restablecer', confirm_reset_data:'¿Restablecer todos tus datos (clientes, prestaciones, facturas)? Tu perfil de empresa y tu cuenta se conservan. Esta acción es irreversible.', toast_reset_done:'✔ Datos restablecidos',
+confirm_delete_account:'¿Eliminar definitivamente tu cuenta Helm Ops? Todos tus datos se borrarán y tu suscripción se cancelará. Esta acción es irreversible.', toast_account_deleted:'Cuenta eliminada', toast_delete_account_error:'✕ Error al eliminar la cuenta',
 clients_add_title:'Añadir / modificar un cliente', lbl_nom_societe:'Nombre de la empresa', lbl_prefixe:'Prefijo de factura (2-3 letras)', lbl_email:'Email', lbl_telephone:'Teléfono',
 toggle_tutoiement:'Tono informal (email de factura)',
 lbl_siret_client:'SIRET / IVA del cliente (opcional)', lbl_facturation_addr:'Dirección de facturación (opcional)', hint_facturation_addr:'Si es diferente de la dirección anterior. Se usa en la factura en su lugar.',
@@ -1532,6 +1544,54 @@ function importBackup(input){
   input.value = '';
 }
 
+// Vide clients/bookings/invoices en local ET dans le cloud (from/company_info conservé — c'est
+// une remise à zéro des données métier, pas un "supprimer mon compte"). Les flags
+// cloudMigrated_<clé> ne sont pas touchés : le cloud vidé reste une source de vérité légitime
+// pour hydrateFromCloud, pas un état "pas encore migré" à re-remplir depuis un cache local qui,
+// de toute façon, est vidé juste après.
+async function confirmResetHelmData(){
+  if(!await confirmDialog(t('confirm_reset_data'), t('prof_btn_reset'))) return;
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return;
+  const uid = session.user.id;
+  try{
+    const results = await Promise.all([
+      getSb().from('clients').delete().eq('user_id', uid),
+      getSb().from('bookings').delete().eq('user_id', uid),
+      getSb().from('invoices').delete().eq('user_id', uid),
+    ]);
+    const err = results.find(r=>r.error);
+    if(err) throw err.error;
+  }catch(e){ showToast('✕ '+e.message); return; }
+  localStorage.setItem('clients', '[]');
+  localStorage.setItem('bookings', '[]');
+  localStorage.setItem('invoices', '[]');
+  showToast(t('toast_reset_done'));
+  setTimeout(()=>location.reload(), 800);
+}
+// Supprime le compte Auth via l'Edge Function delete-account (service role, seule façon de
+// supprimer un utilisateur Supabase Auth — pas d'API self-delete côté client). Toutes les tables
+// applicatives référencent auth.users(id) en ON DELETE CASCADE (voir supabase/migrations/), donc
+// la suppression de l'utilisateur suffit à tout effacer côté serveur ; pas besoin de vider chaque
+// table depuis le client avant.
+async function confirmDeleteHelmAccount(){
+  if(!await confirmDialog(t('confirm_delete_account'), t('btn_delete'))) return;
+  const { data:{session} } = await getSb().auth.getSession();
+  if(!session) return;
+  try{
+    const res = await fetch(DELETE_ACCOUNT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json', Authorization:'Bearer '+session.access_token},
+    });
+    const data = await res.json();
+    if(!res.ok || !data.success) throw new Error(data.error||res.statusText);
+  }catch(e){ showToast(t('toast_delete_account_error')+' — '+e.message); return; }
+  showToast(t('toast_account_deleted'));
+  await getSb().auth.signOut();
+  Object.keys(localStorage).forEach(k=>localStorage.removeItem(k));
+  setTimeout(()=>location.reload(), 800);
+}
+
 function setTheme(mode){
   localStorage.setItem('inv_theme',mode);
   applyTheme();
@@ -1784,6 +1844,7 @@ function saveReplyTo(){
 const CHECK_ACCESS_URL = SUPABASE_URL + '/functions/v1/check-access';
 const STRIPE_CHECKOUT_URL = SUPABASE_URL + '/functions/v1/stripe-checkout';
 const AUTH_RELAY_POLL_URL = SUPABASE_URL + '/functions/v1/auth-relay-poll';
+const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/delete-account';
 const AUTH_RELAY_URL = 'https://spectre888.github.io/Bill-ops-/oauth-relay.html';
 
 function showAuthGate(which){
