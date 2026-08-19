@@ -254,7 +254,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <h2>Factures</h2>
       <div class="toggle-row" style="margin:0 0 14px;flex-wrap:wrap;">
         <button id="factViewAfacturer" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('afacturer')">À facturer</button>
-        <button id="factViewCreees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('creees')">Créées</button>
+        <button id="factViewCreees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('creees')">À envoyer</button>
         <button id="factViewEnvoyees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('envoyees')">Envoyées</button>
         <button id="factViewPayees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('payees')">Payées</button>
       </div>
@@ -538,6 +538,15 @@ async function openBillingPortal(){
   }catch(e){ showToast('⚠ Erreur réseau'); }
 }
 
+// Fusion des statuts Enregistrée/Mise à jour en "À envoyer" (voir facture.html) : normalise une
+// seule fois les factures créées avant ce changement, sinon leur statut stocké reste
+// Enregistrée/Mise à jour, qu'aucun filtre/<option> ne reconnaît plus côté client.
+function migrateInvoiceStatuses(){
+  const invoices = storeArr('invoices');
+  let changed = false;
+  invoices.forEach(i=>{ if(i.status==='Enregistrée'||i.status==='Mise à jour'){ i.status='À envoyer'; changed = true; } });
+  if(changed) set('invoices', invoices);
+}
 async function bootApp(){
   await handleLoginRedirect();
   const access = await checkAccess();
@@ -552,6 +561,7 @@ async function bootApp(){
   showAuthGate(null);
   renderAccountCard(access);
   await hydrateFromCloud();
+  migrateInvoiceStatuses();
   applyTheme();
   document.getElementById('appShell').style.display = 'flex';
   renderActiveTab();
@@ -1263,8 +1273,7 @@ function invoiceCardHtml(i){
     <span style="color:var(--text2);font-size:12px;">${i.date||''}</span><br>
     <span style="font-weight:600;">${i.total}</span>
     <select onchange="updateInvoiceStatusMobile('${i.num}', this.value)" style="width:auto;display:inline-block;margin-left:8px;padding:3px 8px;font-size:11px;font-weight:600;color:${color};">
-      <option value="Enregistrée"${i.status==='Enregistrée'?' selected':''}>Enregistrée</option>
-      <option value="Mise à jour"${i.status==='Mise à jour'?' selected':''}>Mise à jour</option>
+      <option value="À envoyer"${i.status==='À envoyer'?' selected':''}>À envoyer</option>
       <option value="Envoyée"${i.status==='Envoyée'?' selected':''}>Envoyée</option>
       <option value="Payée"${i.status==='Payée'?' selected':''}>Payée</option>
     </select>
@@ -1295,9 +1304,9 @@ function renderFacturesTab(){
     return;
   }
   document.getElementById('groupInvoiceBarMobile').style.display = 'none';
-  const statuses = {creees:['Enregistrée','Mise à jour'], envoyees:['Envoyée'], payees:['Payée']}[facturesView];
+  const statuses = {creees:['À envoyer'], envoyees:['Envoyée'], payees:['Payée']}[facturesView];
   const invoices = storeArr('invoices').filter(i=>statuses.includes(i.status)).slice().reverse();
-  const empty = {creees:'Aucune facture créée.', envoyees:'Aucune facture envoyée.', payees:'Aucune facture payée.'}[facturesView];
+  const empty = {creees:'Aucune facture à envoyer.', envoyees:'Aucune facture envoyée.', payees:'Aucune facture payée.'}[facturesView];
   el.innerHTML = invoices.length ? invoices.map(invoiceCardHtml).join('') : `<p style="color:var(--text3);font-size:13px;">${empty}</p>`;
 }
 async function deleteInvoiceMobile(num){
@@ -1570,7 +1579,7 @@ function confirmInvoiceExtras(){
     date: invDate,
     workDate: months.length===1 ? months[0]+'-01' : (firstBk.date||''),
     total: total.toFixed(2)+' €',
-    status: 'Enregistrée',
+    status: 'À envoyer',
     bookingId: list.length===1 ? firstBk.id : null,
     bookingIds: list.map(b=>b.id),
     state: {

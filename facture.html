@@ -980,7 +980,8 @@ btn_generate_preview:"Générer l'aperçu", btn_export_pdf:'Exporter en PDF', bt
 hist_title:'Factures émises', ph_hist_search:"Rechercher (client, n° de facture, mot-clé d'une prestation)...",
 hist_col_num:'N°', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Statut', hist_col_actions:'Actions',
 btn_view:'Voir', btn_resend:'Renvoyer', btn_send_short:'Envoyer', empty_invoices:'Aucune facture émise.',
-status_toutes:'Toutes', status_enregistree:'Enregistrée', status_maj:'Mise à jour', status_envoyee:'Envoyée', status_payee:'Payée',
+status_toutes:'Toutes', status_a_envoyer:'À envoyer', status_envoyee:'Envoyée', status_payee:'Payée',
+status_pill_envoyees:'Envoyées', status_pill_payees:'Payées',
 ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette année', stat_total:'Total', stat_charges_mois:'Charges estimées', stat_impot_mois:'Impôt estimé', lbl_ca_goal:'Objectif mensuel (€)', lbl_charges_rate:'Taux de charges (%)', lbl_ca_goal_progress:'Objectif du mois', lbl_ca_goal_year_progress:"Objectif de l'année", ca_sec_objectifs:'Objectifs', ca_sec_par_client:'CA par client',
 ca_col_client:'Client', ca_col_generated:'CA généré', empty_data:'Aucune donnée.',
 franchise_ok:'(franchise en base active).', franchise_over:'— seuil de franchise dépassé, TVA applicable.',
@@ -1091,7 +1092,8 @@ btn_generate_preview:'Generate preview', btn_export_pdf:'Export as PDF', btn_sen
 hist_title:'Issued invoices', ph_hist_search:'Search (client, invoice no., service keyword)...',
 hist_col_num:'No.', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Status', hist_col_actions:'Actions',
 btn_view:'View', btn_resend:'Resend', btn_send_short:'Send', empty_invoices:'No invoices issued.',
-status_toutes:'All', status_enregistree:'Saved', status_maj:'Updated', status_envoyee:'Sent', status_payee:'Paid',
+status_toutes:'All', status_a_envoyer:'To send', status_envoyee:'Sent', status_payee:'Paid',
+status_pill_envoyees:'Sent', status_pill_payees:'Paid',
 ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', stat_total:'Total', stat_charges_mois:'Estimated charges', stat_impot_mois:'Estimated tax', lbl_ca_goal:'Monthly goal (€)', lbl_charges_rate:'Charges rate (%)', lbl_ca_goal_progress:"This month's goal", lbl_ca_goal_year_progress:"This year's goal", ca_sec_objectifs:'Goals', ca_sec_par_client:'Revenue by client',
 ca_col_client:'Client', ca_col_generated:'Revenue generated', empty_data:'No data.',
 franchise_ok:'(VAT exemption active).', franchise_over:'— exemption threshold exceeded, VAT applicable.',
@@ -1202,7 +1204,8 @@ btn_generate_preview:'Generar vista previa', btn_export_pdf:'Exportar en PDF', b
 hist_title:'Facturas emitidas', ph_hist_search:'Buscar (cliente, n.º de factura, palabra clave de un servicio)...',
 hist_col_num:'N.º', hist_col_client:'Cliente', hist_col_date:'Fecha', hist_col_total:'Total', hist_col_statut:'Estado', hist_col_actions:'Acciones',
 btn_view:'Ver', btn_resend:'Reenviar', btn_send_short:'Enviar', empty_invoices:'Ninguna factura emitida.',
-status_toutes:'Todas', status_enregistree:'Guardada', status_maj:'Actualizada', status_envoyee:'Enviada', status_payee:'Pagada',
+status_toutes:'Todas', status_a_envoyer:'Por enviar', status_envoyee:'Enviada', status_payee:'Pagada',
+status_pill_envoyees:'Enviadas', status_pill_payees:'Pagadas',
 ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', stat_total:'Total', stat_charges_mois:'Cargas estimadas', stat_impot_mois:'Impuesto estimado', lbl_ca_goal:'Objetivo mensual (€)', lbl_charges_rate:'Tasa de cargas (%)', lbl_ca_goal_progress:'Objetivo del mes', lbl_ca_goal_year_progress:'Objetivo del año', ca_sec_objectifs:'Objetivos', ca_sec_par_client:'Facturación por cliente',
 ca_col_client:'Cliente', ca_col_generated:'Facturación generada', empty_data:'Sin datos.',
 franchise_ok:'(exención de IVA activa).', franchise_over:'— umbral de exención superado, IVA aplicable.',
@@ -1301,7 +1304,7 @@ function setLang(l){
 function sidebarDisconnect(){
   logoutAccount();
 }
-const STATUS_KEYS = {'Enregistrée':'status_enregistree','Mise à jour':'status_maj','Envoyée':'status_envoyee','Payée':'status_payee','Toutes':'status_toutes'};
+const STATUS_KEYS = {'À envoyer':'status_a_envoyer','Envoyée':'status_envoyee','Payée':'status_payee','Toutes':'status_toutes'};
 function statusLabel(s){ return STATUS_KEYS[s] ? t(STATUS_KEYS[s]) : s; }
 function refreshAllViews(){
   refreshInfoView(); refreshCompteView(); renderGmailUI();
@@ -1919,6 +1922,16 @@ async function openBillingPortal(){
   }catch(e){ showToast('⚠ Erreur réseau'); }
 }
 
+// Fusion des statuts Enregistrée/Mise à jour (voir STATUS_KEYS) : normalise les factures créées
+// avant ce changement, une seule fois, pour qu'elles remontent bien dans le filtre "À envoyer"
+// au lieu de disparaître silencieusement (leur statut stocké resterait sinon Enregistrée/Mise à
+// jour, qu'aucun filtre ni <option> ne reconnaît plus).
+function migrateInvoiceStatuses(){
+  const invoices = storeArr('invoices');
+  let changed = false;
+  invoices.forEach(i=>{ if(i.status==='Enregistrée'||i.status==='Mise à jour'){ i.status='À envoyer'; changed = true; } });
+  if(changed) set('invoices', invoices);
+}
 async function bootAuth(){
   const access = await checkAccess();
   if(!access.loggedIn){ showAuthGate('login'); return; }
@@ -1926,6 +1939,7 @@ async function bootAuth(){
   showAuthGate(null);
   renderAccountCard(access);
   await hydrateFromCloud();
+  migrateInvoiceStatuses();
   bootApp();
 }
 let sessionEmail = null;
@@ -2369,11 +2383,15 @@ function setHistFilter(status){
   histStatusFilter = status;
   renderHistory();
 }
+// Trois statuts réels seulement (Enregistrée/Mise à jour fusionnés en "À envoyer" — deux états
+// techniques de sauvegarde qui ne disaient rien du cycle de vie réel de la facture) : les
+// pastilles au pluriel reprennent le vocabulaire de mobile/index.html (switchFacturesView).
+const HIST_FILTER_LABELS = { 'Toutes':'status_toutes', 'À envoyer':'status_a_envoyer', 'Envoyée':'status_pill_envoyees', 'Payée':'status_pill_payees' };
 function renderHistFilters(allInvoices){
-  const statuses = ['Toutes','Enregistrée','Mise à jour','Envoyée','Payée'];
-  histFilters.innerHTML = statuses.map(s=>{
-    const count = s==='Toutes' ? allInvoices.length : allInvoices.filter(i=>i.status===s).length;
-    return `<span class="hist-filter${histStatusFilter===s?' active':''}" onclick="setHistFilter('${s}')">${statusLabel(s)} (${count})</span>`;
+  const filters = ['Toutes','À envoyer','Envoyée','Payée'];
+  histFilters.innerHTML = filters.map(f=>{
+    const count = f==='Toutes' ? allInvoices.length : allInvoices.filter(i=>i.status===f).length;
+    return `<span class="hist-filter${histStatusFilter===f?' active':''}" onclick="setHistFilter('${f}')">${t(HIST_FILTER_LABELS[f])} (${count})</span>`;
   }).join('');
 }
 function renderHistory(){
@@ -2392,8 +2410,7 @@ function renderHistory(){
       <td>${i.num}</td><td>${i.client}</td><td>${i.date||''}</td><td class="num">${i.total}</td>
       <td>
         <select onchange="updateInvoiceStatus('${i.num}', this.value)" style="width:auto;padding:3px 6px;font-size:11px;font-weight:600;color:${(i.status==='Envoyée'||i.status==='Payée')?'var(--green)':'var(--gold)'};">
-          <option value="Enregistrée"${i.status==='Enregistrée'?' selected':''}>${t('status_enregistree')}</option>
-          <option value="Mise à jour"${i.status==='Mise à jour'?' selected':''}>${t('status_maj')}</option>
+          <option value="À envoyer"${i.status==='À envoyer'?' selected':''}>${t('status_a_envoyer')}</option>
           <option value="Envoyée"${i.status==='Envoyée'?' selected':''}>${t('status_envoyee')}</option>
           <option value="Payée"${i.status==='Payée'?' selected':''}>${t('status_payee')}</option>
         </select>
@@ -3298,8 +3315,7 @@ function saveInvoice(){
   render();
   const c = currentClient();
   if(!c || !invNum.value){ showToast(t('toast_select_client_save')); return; }
-  const existing = storeArr('invoices').some(i=>i.num===invNum.value);
-  saveToHistory(existing ? 'Mise à jour' : 'Enregistrée');
+  saveToHistory('À envoyer');
 }
 
 async function sendInvoice(){
