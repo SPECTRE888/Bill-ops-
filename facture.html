@@ -186,11 +186,12 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .cal-day-panel .cal-b-row:last-child{border-bottom:none;}
 .cal-day-panel .cal-b-row button{padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;margin:0 0 0 3px;}
 /* min-width fixe sur chaque bouton : Envoyer/Renvoyer (largeurs différentes) ne décalent plus les
-   boutons suivants, la grille reste alignée colonne par colonne d'une ligne à l'autre. La marge
-   auto sur le dernier bouton (Supprimer) le garde en plus collé au bord droit de la colonne. */
-#histList td:last-child{display:flex;align-items:center;}
-#histList td:last-child button{margin:0 2px 0 0;padding:0 11px;min-width:78px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;flex-shrink:0;text-align:center;}
-#histList td:last-child button:last-child{margin:0 0 0 auto;}
+   boutons suivants, la grille reste alignée colonne par colonne d'une ligne à l'autre.
+   justify-content:flex-end colle tout le groupe au bord droit de la colonne (aligné sous l'en-tête
+   Actions, lui-même aligné à droite) — un margin-auto sur le dernier bouton avait déjà été essayé
+   mais un style inline margin:0 sur le bouton Supprimer l'écrasait silencieusement. */
+#histList td:last-child{display:flex;align-items:center;justify-content:flex-end;gap:6px;}
+#histList td:last-child button{margin:0;padding:0 11px;min-width:78px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;flex-shrink:0;text-align:center;}
 .hist-th-actions{text-align:right;}
 .preview-wrap{display:none;background:var(--bg);height:100%;}
 .preview-wrap.active{display:flex;flex-direction:column;}
@@ -2424,7 +2425,7 @@ function renderHistory(){
         <button class="btn-line" onclick="duplicateInvoice('${i.num}')">${t('btn_duplicate')}</button>
         <button class="btn-line" onclick="downloadInvoicePdf('${i.num}')">PDF</button>
         <button class="btn-line" onclick="resendInvoice('${i.num}')">${(i.status==='Envoyée'||i.status==='Payée')?t('btn_resend'):t('btn_send_short')}</button>
-        <button class="btn-line btn-danger" style="margin:0;" onclick="deleteInvoice('${i.num}')">${t('btn_delete')}</button>
+        <button class="btn-line btn-danger" onclick="deleteInvoice('${i.num}')">${t('btn_delete')}</button>
       </td>
     </tr>`).join('')}</tbody></table>
   ` : `<p style="color:var(--text3);font-size:12px;">${t('empty_invoices')}</p>`;
