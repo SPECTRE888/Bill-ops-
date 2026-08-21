@@ -1931,9 +1931,12 @@ async function subscribeNow(){
 
 function pollCheckAccessAfterCheckout(statusEl){
   let attempts = 0;
+  // 40×3s = 2min : le webhook Stripe met généralement quelques secondes mais peut dépasser les
+  // 30s d'une ancienne version de ce polling (vécu en test) — le lien "Rafraîchir" relance juste
+  // checkAccess() sans rouvrir un nouveau Stripe Checkout, contrairement à recliquer "S'abonner".
   const timer = setInterval(async ()=>{
     attempts++;
-    if(attempts > 15){ clearInterval(timer); setStatusMsg(statusEl, 'Paiement en cours de validation — clique sur "S\'abonner" à nouveau si besoin dans quelques instants.'); return; }
+    if(attempts > 40){ clearInterval(timer); statusEl.innerHTML = 'Paiement en cours de validation — <a href="#" onclick="pollCheckAccessAfterCheckout(document.getElementById(\'paywallStatus\'));return false;" style="color:var(--gold);text-decoration:underline;">Rafraîchir</a>'; return; }
     const access = await checkAccess();
     if(access.allowed){ clearInterval(timer); bootAuth(); }
   }, 2000);
