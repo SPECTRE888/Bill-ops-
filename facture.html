@@ -383,6 +383,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <button class="btn-gold" style="width:100%;" onclick="subscribeNow()">S'abonner</button>
     <button class="btn-line" style="width:100%;margin-top:8px;" onclick="openBillingPortal()">Gérer mon abonnement</button>
     <div id="paywallStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
+    <button onclick="logoutAccount()" style="font-size:10px;font-weight:400;color:var(--text3);background:none;border:none;padding:0;margin-top:14px;cursor:pointer;letter-spacing:.05em;font-family:var(--font-body);text-decoration:underline;">Se connecter avec un autre compte</button>
   </div>
 </div>
 
@@ -430,7 +431,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <button onclick="setLang('es')" id="lang-es" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-radius:0 3px 3px 0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">ES</button>
         </div>
       </div>
-      <button onclick="sidebarDisconnect()" style="font-size:10px;font-weight:400;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:3px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;font-family:var(--font-body);padding:6px;width:100%;" data-i18n="btn_sidebar_disconnect">Déconnexion</button>
+      <button id="sidebarDisconnectBtn" onclick="sidebarDisconnect()" style="font-size:10px;font-weight:400;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:3px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;font-family:var(--font-body);padding:6px;width:100%;" data-i18n="btn_sidebar_disconnect">Déconnexion</button>
       <button onclick="openLegalModal()" style="font-size:9px;font-weight:400;color:var(--text3);background:none;border:none;border-radius:0;padding:0;text-align:center;cursor:pointer;letter-spacing:.08em;font-family:var(--font-body);width:100%;margin-top:auto;">© HELM OPS</button>
     </div>
   </div>
@@ -1835,6 +1836,10 @@ const AUTH_RELAY_URL = 'https://spectre888.github.io/Bill-ops-/oauth-relay.html'
 function showAuthGate(which){
   document.getElementById('loginGate').style.display = which==='login' ? 'flex' : 'none';
   document.getElementById('paywallGate').style.display = which==='paywall' ? 'flex' : 'none';
+  // Le bouton Déconnexion n'a pas de sens tant qu'on n'est pas connecté (login) ni tant que
+  // l'accès est bloqué avant confirmation d'abonnement (paywall) — il resterait visible sous
+  // l'overlay semi-transparent et donnerait l'impression d'être encore actif.
+  document.getElementById('sidebarDisconnectBtn').style.display = which ? 'none' : '';
 }
 
 function connectLogin(){
