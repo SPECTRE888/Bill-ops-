@@ -48,13 +48,13 @@ Dix fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill-
   dédiée au seul flux Gmail-send).
 
   `oauth-relay` a remplacé `mobile/oauth-relay.html` (hébergée sur GitHub Pages) le 2026-08-21 :
-  une fois `app.ops-suite.fr` en place comme domaine perso pour la PWA mobile (voir plus bas),
-  ouvrir cette page de relais sur ce même domaine tombait dans le `"scope": "./"` du
-  `manifest.json` de la PWA — un onglet Safari affichant "Connexion en cours…" basculait alors
-  tout seul vers le `start_url` de la PWA (`index.html`) quelques secondes après, sans qu'aucun
-  code de la page de relais ne redirige quoi que ce soit (comportement du navigateur/OS pour une
-  PWA installée, pas un bug JS). La servir depuis `*.supabase.co` (hors du scope de la PWA)
-  élimine le problème sans restructurer `mobile/`.
+  à ce moment-là, la PWA mobile venait d'être bougée sur un domaine perso GitHub Pages
+  (`app.ops-suite.fr`) — ouvrir la page de relais sur ce même domaine tombait dans le
+  `"scope": "./"` du `manifest.json` de la PWA, un onglet Safari affichant "Connexion en cours…"
+  basculait alors tout seul vers le `start_url` de la PWA (`index.html`) quelques secondes après,
+  sans qu'aucun code de la page de relais ne redirige quoi que ce soit (comportement du
+  navigateur/OS pour une PWA installée, pas un bug JS). La servir depuis `*.supabase.co` (hors de
+  tout scope PWA) élimine le problème, indépendamment d'où vit la PWA elle-même.
 
 Les dix sont déployées avec `--no-verify-jwt` (appelées directement en `fetch()` depuis
 `facture.html`/`mobile/index.html`, ou par `pg_cron` — pas par un client Supabase authentifié).
@@ -126,23 +126,22 @@ vérifié côté BAR OPS que leur webhook fait de même avec les events Helm.
 
 Côté Supabase Dashboard (`chlmqnrvnrgeaihryreb`), déjà configuré : Authentication → Providers →
 Google (Client ID/Secret = `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`) ; Authentication → URL
-Configuration → `https://app.ops-suite.fr/**` (login PWA mobile) et
-`https://chlmqnrvnrgeaihryreb.supabase.co/functions/v1/oauth-relay**` (relais desktop, voir plus
-haut pourquoi ce n'est plus sur app.ops-suite.fr) dans les redirect URLs autorisées (le wildcard
-`**` est nécessaire — le `redirectTo` du flux desktop porte un `?state=...` dynamique qui ne
-matche pas une entrée sans wildcard, Supabase retombe alors silencieusement sur le Site URL par
-défaut du projet). Et côté Google Cloud Console :
+Configuration → `https://helm-ops-ivory.vercel.app/**` (login PWA mobile) et
+`https://chlmqnrvnrgeaihryreb.supabase.co/functions/v1/oauth-relay**` (relais desktop) dans les
+redirect URLs autorisées (le wildcard `**` est nécessaire — le `redirectTo` du flux desktop porte
+un `?state=...` dynamique qui ne matche pas une entrée sans wildcard, Supabase retombe alors
+silencieusement sur le Site URL par défaut du projet). Et côté Google Cloud Console :
 `https://chlmqnrvnrgeaihryreb.supabase.co/auth/v1/callback` ajouté comme second "Authorized
 redirect URI" sur le client OAuth déjà utilisé pour Gmail-send.
 
-`app.ops-suite.fr` est un domaine perso GitHub Pages (fichier `mobile/CNAME`) qui remplace depuis
-le 2026-08-21 le `spectre888.github.io/Bill-ops-/` par défaut pour la PWA mobile — celui-ci
-exposait le pseudo GitHub personnel dans l'URL vue par l'utilisateur à chaque usage de la PWA.
-Étapes manuelles faites côté hébergeur (IONOS, déjà propriétaire du domaine `ops-suite.fr` pour
-Brevo) : enregistrement DNS CNAME `app` → `spectre888.github.io.` ; côté GitHub : Settings → Pages
-→ Custom domain + "Enforce HTTPS" (le fichier CNAME ne suffit pas à lui seul avec un déploiement
-par workflow Actions comme celui de ce repo — contrairement à l'ancien déploiement par branche,
-il faut aussi enregistrer le domaine via `gh api -X PUT repos/.../pages -f cname=...`).
+`mobile/` est hébergée sur Vercel (`helm-ops-ivory.vercel.app`, projet `helm-ops`, déploiement
+continu branché sur `main` via `vercel git connect`, Root Directory réglé sur `mobile` côté
+Vercel) — même pattern que BAR OPS (`bar-ops-v2.vercel.app`). Avant le 2026-08-21 : GitHub Pages,
+d'abord en `spectre888.github.io/Bill-ops-/` (exposait le pseudo GitHub personnel dans l'URL),
+puis brièvement en domaine perso `app.ops-suite.fr` — abandonné aussi car `ops-suite.fr` est
+réservé au mailing (`mail.ops-suite.fr`) et à une future plateforme multi-produits, pas à l'URL
+d'un produit Helm spécifique (décision utilisateur explicite). GitHub Pages désactivé pour ce
+repo (`gh api -X DELETE repos/.../pages`), `.github/workflows/pages.yml` supprimé.
 
 `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` viennent d'un identifiant OAuth "Web application" créé
 dans Google Cloud Console (API activée : Gmail API), avec comme URI de redirection autorisée
