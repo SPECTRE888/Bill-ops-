@@ -317,6 +317,32 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 @keyframes toast-in{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;}
 .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;min-width:300px;max-width:420px;box-shadow:0 12px 32px rgba(0,0,0,.35);}
+/* Repris tel quel de BAR OPS (auth.html) : écran de connexion/abonnement toujours en thème sombre
+   fixe, indépendant du thème dark/light/auto de l'app (comme sur BAR OPS), fond opaque plutôt que
+   le voile translucide de .modal-overlay — pour ne plus laisser deviner la sidebar par transparence. */
+#loginGate,#paywallGate{
+  background:radial-gradient(1100px 620px at 50% -12%,rgba(217,166,55,.16),transparent 60%),radial-gradient(900px 700px at 105% 105%,rgba(217,166,55,.06),transparent 55%),#030303;
+  isolation:isolate;
+}
+#loginGate::before,#paywallGate::before{
+  content:'';position:fixed;inset:0;z-index:-1;opacity:.05;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+#loginGate .modal-box,#paywallGate .modal-box{
+  background:linear-gradient(165deg,#141310,#0b0a09 65%);
+  border:1px solid rgba(217,166,55,.14);border-radius:20px;
+  padding:72px 56px 56px;max-width:500px;width:100%;text-align:center;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.75),0 1px 0 rgba(255,255,255,.03) inset;
+  color:#ede8e0;
+}
+.auth-title{font-family:var(--font-body);font-size:58px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;line-height:1;color:#d9a637;}
+.auth-sub{color:#a89f92;font-size:12px;margin-bottom:52px;letter-spacing:.22em;text-transform:uppercase;font-family:var(--font-body);font-weight:500;}
+.auth-btn-fill{width:100%;padding:17px 18px;border:1px solid #d9a637;background:#d9a637;color:#080808;border-radius:5px;cursor:pointer;font-family:var(--font-body);font-size:12px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;transition:.2s;}
+.auth-btn-fill:hover{background:#eabc5c;border-color:#eabc5c;}
+.auth-btn-line{width:100%;padding:17px 18px;border:1px solid #2a2a2a;background:none;color:#a89f92;border-radius:5px;cursor:pointer;font-family:var(--font-body);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;transition:.2s;margin-top:12px;}
+.auth-btn-line:hover{border-color:#d9a637;color:#d9a637;}
+.auth-switch{font-size:12px;color:#a89f92;margin-top:22px;letter-spacing:.05em;background:none;border:none;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-family:var(--font-body);}
+.auth-switch:hover{color:#d9a637;}
 .modal-header{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-body);font-size:16px;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 .modal-close{all:unset;cursor:pointer;font-size:20px;color:var(--text3);line-height:1;padding:0 4px;}
 .modal-close:hover{color:var(--red);}
@@ -368,22 +394,22 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 </head>
 <body>
 <div class="modal-overlay" id="loginGate" style="display:none;z-index:20000;">
-  <div class="modal-box" style="text-align:center;">
-    <div style="font-family:var(--font-body);font-size:30px;color:var(--gold);letter-spacing:.1em;margin-bottom:16px;">HELM OPS</div>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">Connecte-toi avec ton compte Google pour accéder à l'application.</p>
-    <button class="btn-gold" style="width:100%;" onclick="connectLogin()">Se connecter avec Google</button>
-    <div id="loginStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
+  <div class="modal-box">
+    <div class="auth-title">Helm Ops</div>
+    <div class="auth-sub">Connectez-vous</div>
+    <button class="auth-btn-fill" onclick="connectLogin()">Se connecter avec Google</button>
+    <div id="loginStatus" style="font-size:11px;margin-top:14px;color:#d9a637;"></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="paywallGate" style="display:none;z-index:20000;">
-  <div class="modal-box" style="text-align:center;">
-    <div style="font-family:var(--font-body);font-size:30px;color:var(--gold);letter-spacing:.1em;margin-bottom:16px;">HELM OPS</div>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">Abonnement Helm Ops — 9,90 €/mois.</p>
-    <button class="btn-gold" style="width:100%;" onclick="subscribeNow()">S'abonner</button>
-    <button class="btn-line" style="width:100%;margin-top:8px;" onclick="openBillingPortal()">Gérer mon abonnement</button>
-    <div id="paywallStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
-    <button onclick="logoutAccount()" style="font-size:10px;font-weight:400;color:var(--text3);background:none;border:none;padding:0;margin-top:14px;cursor:pointer;letter-spacing:.05em;font-family:var(--font-body);text-decoration:underline;">Se connecter avec un autre compte</button>
+  <div class="modal-box">
+    <div class="auth-title">Helm Ops</div>
+    <div class="auth-sub">Abonnement — 9,90 €/mois</div>
+    <button class="auth-btn-fill" onclick="subscribeNow()">S'abonner</button>
+    <button class="auth-btn-line" onclick="openBillingPortal()">Gérer mon abonnement</button>
+    <div id="paywallStatus" style="font-size:11px;margin-top:14px;color:#d9a637;"></div>
+    <button class="auth-switch" onclick="logoutAccount()" style="margin-top:22px;">Se connecter avec un autre compte</button>
   </div>
 </div>
 
