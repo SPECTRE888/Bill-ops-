@@ -185,14 +185,13 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .cal-day-panel .cal-b-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);gap:6px;}
 .cal-day-panel .cal-b-row:last-child{border-bottom:none;}
 .cal-day-panel .cal-b-row button{padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;margin:0 0 0 3px;}
-/* La colonne Actions se cale sur la ligne la plus large (Renvoyer, 8 lettres) — les lignes avec
-   Envoyer (7 lettres, factures pas encore envoyées) laissaient un blanc à droite qui décalait
-   Supprimer vers la gauche par rapport aux autres lignes. En flex + marge auto sur le dernier
-   bouton, Supprimer reste toujours collé au bord droit de la colonne, quelle que soit la largeur
-   des boutons qui le précèdent. */
+/* min-width fixe sur chaque bouton : Envoyer/Renvoyer (largeurs différentes) ne décalent plus les
+   boutons suivants, la grille reste alignée colonne par colonne d'une ligne à l'autre. La marge
+   auto sur le dernier bouton (Supprimer) le garde en plus collé au bord droit de la colonne. */
 #histList td:last-child{display:flex;align-items:center;}
-#histList td:last-child button{margin:0 2px 0 0;padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;flex-shrink:0;}
+#histList td:last-child button{margin:0 2px 0 0;padding:0 11px;min-width:78px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;flex-shrink:0;text-align:center;}
 #histList td:last-child button:last-child{margin:0 0 0 auto;}
+.hist-th-actions{text-align:right;}
 .preview-wrap{display:none;background:var(--bg);height:100%;}
 .preview-wrap.active{display:flex;flex-direction:column;}
 .preview-scroll{flex:1;min-height:0;overflow-y:auto;padding:40px;display:flex;justify-content:center;}
@@ -981,7 +980,7 @@ hist_title:'Factures émises', ph_hist_search:"Rechercher (client, n° de factur
 hist_col_num:'N°', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Statut', hist_col_actions:'Actions',
 btn_view:'Voir', btn_resend:'Renvoyer', btn_send_short:'Envoyer', empty_invoices:'Aucune facture émise.',
 status_toutes:'Toutes', status_a_envoyer:'À envoyer', status_envoyee:'Envoyée', status_payee:'Payée',
-status_pill_envoyees:'Envoyées', status_pill_payees:'Payées',
+status_pill_envoyees:'Envoyées', status_pill_payees:'Payées', status_pill_a_traiter:'À traiter',
 ca_title:"Chiffre d'affaires", stat_ce_mois:'Ce mois', stat_cette_annee:'Cette année', stat_total:'Total', stat_charges_mois:'Charges estimées', stat_impot_mois:'Impôt estimé', lbl_ca_goal:'Objectif mensuel (€)', lbl_charges_rate:'Taux de charges (%)', lbl_ca_goal_progress:'Objectif du mois', lbl_ca_goal_year_progress:"Objectif de l'année", ca_sec_objectifs:'Objectifs', ca_sec_par_client:'CA par client',
 ca_col_client:'Client', ca_col_generated:'CA généré', empty_data:'Aucune donnée.',
 franchise_ok:'(franchise en base active).', franchise_over:'— seuil de franchise dépassé, TVA applicable.',
@@ -1093,7 +1092,7 @@ hist_title:'Issued invoices', ph_hist_search:'Search (client, invoice no., servi
 hist_col_num:'No.', hist_col_client:'Client', hist_col_date:'Date', hist_col_total:'Total', hist_col_statut:'Status', hist_col_actions:'Actions',
 btn_view:'View', btn_resend:'Resend', btn_send_short:'Send', empty_invoices:'No invoices issued.',
 status_toutes:'All', status_a_envoyer:'To send', status_envoyee:'Sent', status_payee:'Paid',
-status_pill_envoyees:'Sent', status_pill_payees:'Paid',
+status_pill_envoyees:'Sent', status_pill_payees:'Paid', status_pill_a_traiter:'To process',
 ca_title:'Revenue', stat_ce_mois:'This month', stat_cette_annee:'This year', stat_total:'Total', stat_charges_mois:'Estimated charges', stat_impot_mois:'Estimated tax', lbl_ca_goal:'Monthly goal (€)', lbl_charges_rate:'Charges rate (%)', lbl_ca_goal_progress:"This month's goal", lbl_ca_goal_year_progress:"This year's goal", ca_sec_objectifs:'Goals', ca_sec_par_client:'Revenue by client',
 ca_col_client:'Client', ca_col_generated:'Revenue generated', empty_data:'No data.',
 franchise_ok:'(VAT exemption active).', franchise_over:'— exemption threshold exceeded, VAT applicable.',
@@ -1205,7 +1204,7 @@ hist_title:'Facturas emitidas', ph_hist_search:'Buscar (cliente, n.º de factura
 hist_col_num:'N.º', hist_col_client:'Cliente', hist_col_date:'Fecha', hist_col_total:'Total', hist_col_statut:'Estado', hist_col_actions:'Acciones',
 btn_view:'Ver', btn_resend:'Reenviar', btn_send_short:'Enviar', empty_invoices:'Ninguna factura emitida.',
 status_toutes:'Todas', status_a_envoyer:'Por enviar', status_envoyee:'Enviada', status_payee:'Pagada',
-status_pill_envoyees:'Enviadas', status_pill_payees:'Pagadas',
+status_pill_envoyees:'Enviadas', status_pill_payees:'Pagadas', status_pill_a_traiter:'Por tratar',
 ca_title:'Facturación', stat_ce_mois:'Este mes', stat_cette_annee:'Este año', stat_total:'Total', stat_charges_mois:'Cargas estimadas', stat_impot_mois:'Impuesto estimado', lbl_ca_goal:'Objetivo mensual (€)', lbl_charges_rate:'Tasa de cargas (%)', lbl_ca_goal_progress:'Objetivo del mes', lbl_ca_goal_year_progress:'Objetivo del año', ca_sec_objectifs:'Objetivos', ca_sec_par_client:'Facturación por cliente',
 ca_col_client:'Cliente', ca_col_generated:'Facturación generada', empty_data:'Sin datos.',
 franchise_ok:'(exención de IVA activa).', franchise_over:'— umbral de exención superado, IVA aplicable.',
@@ -2378,7 +2377,9 @@ async function resendInvoice(num){
     }
   }catch(e){ showToast(t('toast_error_generic',{msg:e.message})); }
 }
-let histStatusFilter = 'Toutes';
+// Défaut sur "À traiter" plutôt que "Toutes" : une fois payée, une facture est réglée, on n'a
+// plus besoin de la voir — l'écran doit s'ouvrir sur ce qui reste à faire (à envoyer/envoyée).
+let histStatusFilter = 'À traiter';
 function setHistFilter(status){
   histStatusFilter = status;
   renderHistory();
@@ -2386,11 +2387,12 @@ function setHistFilter(status){
 // Trois statuts réels seulement (Enregistrée/Mise à jour fusionnés en "À envoyer" — deux états
 // techniques de sauvegarde qui ne disaient rien du cycle de vie réel de la facture) : les
 // pastilles au pluriel reprennent le vocabulaire de mobile/index.html (switchFacturesView).
-const HIST_FILTER_LABELS = { 'Toutes':'status_toutes', 'À envoyer':'status_a_envoyer', 'Envoyée':'status_pill_envoyees', 'Payée':'status_pill_payees' };
+// "À traiter" est un filtre virtuel (pas un statut stocké) = tout sauf Payée.
+const HIST_FILTER_LABELS = { 'À traiter':'status_pill_a_traiter', 'Toutes':'status_toutes', 'À envoyer':'status_a_envoyer', 'Envoyée':'status_pill_envoyees', 'Payée':'status_pill_payees' };
 function renderHistFilters(allInvoices){
-  const filters = ['Toutes','À envoyer','Envoyée','Payée'];
+  const filters = ['À traiter','Toutes','À envoyer','Envoyée','Payée'];
   histFilters.innerHTML = filters.map(f=>{
-    const count = f==='Toutes' ? allInvoices.length : allInvoices.filter(i=>i.status===f).length;
+    const count = f==='Toutes' ? allInvoices.length : f==='À traiter' ? allInvoices.filter(i=>i.status!=='Payée').length : allInvoices.filter(i=>i.status===f).length;
     return `<span class="hist-filter${histStatusFilter===f?' active':''}" onclick="setHistFilter('${f}')">${t(HIST_FILTER_LABELS[f])} (${count})</span>`;
   }).join('');
 }
@@ -2403,9 +2405,10 @@ function renderHistory(){
     const items = (i.state?.items||[]).map(it=>it.desc||'').join(' ');
     return [i.num, i.client, items].join(' ').toLowerCase().includes(q);
   });
-  if(histStatusFilter!=='Toutes') invoices = invoices.filter(i=>i.status===histStatusFilter);
+  if(histStatusFilter==='À traiter') invoices = invoices.filter(i=>i.status!=='Payée');
+  else if(histStatusFilter!=='Toutes') invoices = invoices.filter(i=>i.status===histStatusFilter);
   histList.innerHTML = invoices.length ? `
-    <table><thead><tr><th>${t('hist_col_num')}</th><th>${t('hist_col_client')}</th><th>${t('hist_col_date')}</th><th>${t('hist_col_total')}</th><th>${t('hist_col_statut')}</th><th>${t('hist_col_actions')}</th></tr></thead>
+    <table><thead><tr><th>${t('hist_col_num')}</th><th>${t('hist_col_client')}</th><th>${t('hist_col_date')}</th><th class="num">${t('hist_col_total')}</th><th>${t('hist_col_statut')}</th><th class="hist-th-actions">${t('hist_col_actions')}</th></tr></thead>
     <tbody>${invoices.map(i=>`<tr>
       <td>${i.num}</td><td>${i.client}</td><td>${i.date||''}</td><td class="num">${i.total}</td>
       <td>
