@@ -116,12 +116,21 @@ vérifié côté BAR OPS que leur webhook fait de même avec les events Helm.
 
 Côté Supabase Dashboard (`chlmqnrvnrgeaihryreb`), déjà configuré : Authentication → Providers →
 Google (Client ID/Secret = `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`) ; Authentication → URL
-Configuration → `https://spectre888.github.io/Bill-ops-/**` et
-`https://spectre888.github.io/Bill-ops-/oauth-relay.html**` dans les redirect URLs autorisées (le
-wildcard `**` est nécessaire — le `redirectTo` du flux desktop porte un `?state=...` dynamique qui
-ne matche pas une entrée sans wildcard, Supabase retombe alors silencieusement sur le Site URL par
-défaut du projet). Et côté Google Cloud Console : `https://chlmqnrvnrgeaihryreb.supabase.co/auth/v1/callback`
-ajouté comme second "Authorized redirect URI" sur le client OAuth déjà utilisé pour Gmail-send.
+Configuration → `https://app.ops-suite.fr/**` et `https://app.ops-suite.fr/oauth-relay.html**` dans
+les redirect URLs autorisées (le wildcard `**` est nécessaire — le `redirectTo` du flux desktop
+porte un `?state=...` dynamique qui ne matche pas une entrée sans wildcard, Supabase retombe alors
+silencieusement sur le Site URL par défaut du projet). Et côté Google Cloud Console :
+`https://chlmqnrvnrgeaihryreb.supabase.co/auth/v1/callback` ajouté comme second "Authorized
+redirect URI" sur le client OAuth déjà utilisé pour Gmail-send.
+
+`app.ops-suite.fr` est un domaine perso GitHub Pages (fichier `mobile/CNAME`) qui remplace depuis
+le 2026-08-21 le `spectre888.github.io/Bill-ops-/` par défaut — celui-ci exposait le pseudo GitHub
+personnel dans l'URL vue par l'utilisateur à chaque connexion desktop (page de relais) et à chaque
+usage de la PWA mobile. Étapes manuelles nécessaires côté hébergeur (IONOS, déjà propriétaire du
+domaine `ops-suite.fr` pour Brevo) : enregistrement DNS CNAME `app` → `spectre888.github.io.` ;
+côté GitHub : Settings → Pages → Custom domain (se remplit normalement seul depuis le fichier
+CNAME, vérifier "Enforce HTTPS" une fois le certificat provisionné, peut prendre jusqu'à 24h après
+la propagation DNS).
 
 `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` viennent d'un identifiant OAuth "Web application" créé
 dans Google Cloud Console (API activée : Gmail API), avec comme URI de redirection autorisée

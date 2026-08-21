@@ -9,7 +9,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')!;
 const STRIPE_PRICE_ID_MONTHLY = Deno.env.get('STRIPE_PRICE_ID_MONTHLY')!;
-const APP_URL = 'https://spectre888.github.io/Bill-ops-/';
+const APP_URL = 'https://app.ops-suite.fr/';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
