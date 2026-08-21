@@ -2,7 +2,7 @@
 
 Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) garde son nom technique historique, décorrélé de la marque affichée. La table `billops_sync` (ancien mécanisme de sync par code, voir Historique en bas de section Stockage cloud) n'est plus utilisée par le client mais n'a pas été supprimée côté Supabase.
 
-Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, `oauth-google-callback`/`oauth-google-poll` mortes depuis l'abandon de l'OAuth Gmail (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`oauth-relay`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement (`oauth-relay` sert la page de relais du login Google desktop, volontairement hors de GitHub Pages — voir Login + abonnement ci-dessous), `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
+Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `oauth-relay-page/index.html` (page statique de relais pour le login Google côté Electron, déployée sur Vercel — projet séparé `helm-relay`, voir Login + abonnement ci-dessous), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, `oauth-google-callback`/`oauth-google-poll` mortes depuis l'abandon de l'OAuth Gmail (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
 
 ## Stack
 HTML/CSS/JS vanilla. `localStorage` sert de **cache local** (from, clients, invoices, bookings, inv_theme, inv_lang, gmailAuth, pushSubscriptions) — la source de vérité pour les données métier (clients/bookings/invoices/from) est Supabase, scindée par utilisateur (voir Stockage cloud ci-dessous).
@@ -175,15 +175,20 @@ de celui qui l'a initié).
   (`signInWithOAuth({redirectTo: <page elle-même>})`), tokens repris dans `location.hash` au
   chargement.
 - **Desktop Electron** (`file://`, pas d'origine https locale) : `connectLogin()` ouvre le flow
-  avec `redirectTo` pointant vers l'Edge Function `oauth-relay?state=...` (`skipBrowserRedirect:true`),
+  avec `redirectTo` pointant vers `https://helm-relay.vercel.app/?state=...` (`skipBrowserRedirect:true`),
   Electron force l'URL vers le navigateur système (`shell.openExternal`, `window.open()` renvoie
   `null` — ne pas s'y fier, cf. `connectGmail()`), la page de relais dépose les tokens via
   `auth-relay-deposit` et l'app les récupère par polling (`auth-relay-poll`, table `login_relay`,
   usage unique) — même principe que `oauth-google-callback`/`oauth-google-poll` pour Gmail-send.
-  Servie depuis une Edge Function (`*.supabase.co`) plutôt que `mobile/oauth-relay.html` sur GitHub
-  Pages : demande explicite de ne plus voir le pseudo GitHub personnel dans l'URL au moment de la
-  connexion desktop — la PWA mobile elle-même reste sur GitHub Pages, seule cette page de quelques
-  secondes ("Connexion en cours…") a changé d'hébergement.
+  `oauth-relay-page/index.html`, déployée sur Vercel (projet `helm-relay`, séparé du projet de la
+  PWA) plutôt que `mobile/oauth-relay.html` sur GitHub Pages : demande explicite de ne plus voir le
+  pseudo GitHub personnel dans l'URL au moment de la connexion desktop — la PWA mobile elle-même
+  reste sur GitHub Pages, seule cette page de quelques secondes ("Connexion en cours…") a changé
+  d'hébergement. Une Edge Function Supabase a d'abord été essayée pour ça (même contenu, servi
+  depuis `*.supabase.co`) mais la plateforme force un `Content-Type: text/plain` + un
+  `Content-Security-Policy: default-src 'none'; sandbox` sur toute réponse HTTP d'une Edge
+  Function — le script de la page ne s'exécutait jamais, le navigateur affichait le HTML brut en
+  texte. Les Edge Functions Supabase ne peuvent donc pas servir une page interactive comme celle-ci.
 
 Tables Supabase : `profiles` (id/email, remplie par un trigger `handle_new_user` sur `auth.users`,
 lecture seule côté client), `subscriptions` (`user_id, status, plan, period, expires_at,

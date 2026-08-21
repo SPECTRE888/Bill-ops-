@@ -1847,14 +1847,17 @@ function saveReplyTo(){
 
 // --- Login Google + abonnement Stripe (porte d'entrée, indépendante du code de synchro).
 // Electron n'a pas d'origine https locale pour recevoir un redirectTo direct : le flow OAuth
-// ouvre le navigateur système vers une page de relais (Edge Function oauth-relay — pas sur GitHub
-// Pages, pour ne pas exposer le pseudo GitHub personnel dans l'URL vue à la connexion), qui dépose
-// les tokens via auth-relay-deposit ; on les récupère ici par polling (auth-relay-poll). ---
+// ouvre le navigateur système vers une page de relais hébergée sur Vercel (projet séparé
+// `helm-relay`, dossier `oauth-relay-page/` — pas sur GitHub Pages, pour ne pas exposer le pseudo
+// GitHub personnel dans l'URL vue à la connexion ; pas non plus une Edge Function Supabase, qui
+// force un Content-Type text/plain + CSP sandbox sur toute réponse HTTP, empêchant le script de
+// la page de s'exécuter), qui dépose les tokens via auth-relay-deposit ; on les récupère ici par
+// polling (auth-relay-poll). ---
 const CHECK_ACCESS_URL = SUPABASE_URL + '/functions/v1/check-access';
 const STRIPE_CHECKOUT_URL = SUPABASE_URL + '/functions/v1/stripe-checkout';
 const AUTH_RELAY_POLL_URL = SUPABASE_URL + '/functions/v1/auth-relay-poll';
 const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/delete-account';
-const AUTH_RELAY_URL = SUPABASE_URL + '/functions/v1/oauth-relay';
+const AUTH_RELAY_URL = 'https://helm-relay.vercel.app/';
 
 function showAuthGate(which){
   document.getElementById('loginGate').style.display = which==='login' ? 'flex' : 'none';

@@ -39,19 +39,16 @@ Dix fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill-
   en `ON DELETE CASCADE`, donc supprimer l'utilisateur Auth suffit à tout effacer côté serveur.
   Appelée depuis le bouton "Supprimer" de la carte Informations (`facture.html`, onglet Profil —
   pas encore répliqué sur mobile).
-- **`oauth-relay`** — sert la page HTML de relais du login Google desktop ("Connexion en cours…").
-  Volontairement hors de GitHub Pages : sur `spectre888.github.io/Bill-ops-/`, cette URL exposait
-  le pseudo GitHub personnel de l'utilisateur au moment précis de la connexion — demande explicite
-  de le faire disparaître. La PWA mobile elle-même (`mobile/index.html`) reste sur GitHub Pages,
-  seule cette page transitoire a changé d'hébergement.
 - **`auth-relay-deposit`**/**`auth-relay-poll`** — handoff des tokens de session Supabase Auth pour
   le login Google côté Electron desktop (pas d'origine https locale pour un `redirectTo` direct) :
-  `oauth-relay` dépose les tokens via `auth-relay-deposit`, l'app les récupère par polling sur
-  `auth-relay-poll` (table `login_relay`, usage unique) — même principe que
-  `oauth-google-callback`/`oauth-google-poll` ci-dessus, table séparée (`oauth_pending` reste
+  la page de relais (`oauth-relay-page/index.html`, déployée sur Vercel — `helm-relay.vercel.app`,
+  projet séparé de la PWA — voir `CLAUDE.md` section Login + abonnement pour pourquoi pas GitHub
+  Pages ni une Edge Function Supabase) dépose les tokens via `auth-relay-deposit`, l'app les
+  récupère par polling sur `auth-relay-poll` (table `login_relay`, usage unique) — même principe
+  que `oauth-google-callback`/`oauth-google-poll` ci-dessus, table séparée (`oauth_pending` reste
   dédiée au seul flux Gmail-send).
 
-Les dix sont déployées avec `--no-verify-jwt` (appelées directement en `fetch()` depuis
+Les neuf sont déployées avec `--no-verify-jwt` (appelées directement en `fetch()` depuis
 `facture.html`/`mobile/index.html`, ou par `pg_cron` — pas par un client Supabase authentifié).
 `notify-upcoming-bookings` vérifie un header `x-cron-secret` ; `send-invoice`, `oauth-google-poll`
 et `auth-relay-deposit`/`auth-relay-poll` vérifient un header `x-app-secret` (constante
@@ -122,10 +119,10 @@ vérifié côté BAR OPS que leur webhook fait de même avec les events Helm.
 Côté Supabase Dashboard (`chlmqnrvnrgeaihryreb`), déjà configuré : Authentication → Providers →
 Google (Client ID/Secret = `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`) ; Authentication → URL
 Configuration → `https://spectre888.github.io/Bill-ops-/**` (PWA mobile) et
-`https://chlmqnrvnrgeaihryreb.supabase.co/functions/v1/oauth-relay**` (relais desktop) dans les
-redirect URLs autorisées (le wildcard `**` est nécessaire — le `redirectTo` du flux desktop porte
-un `?state=...` dynamique qui ne matche pas une entrée sans wildcard, Supabase retombe alors
-silencieusement sur le Site URL par défaut du projet). Et côté Google Cloud Console :
+`https://helm-relay.vercel.app/**` (relais desktop) dans les redirect URLs autorisées (le wildcard
+`**` est nécessaire — le `redirectTo` du flux desktop porte un `?state=...` dynamique qui ne
+matche pas une entrée sans wildcard, Supabase retombe alors silencieusement sur le Site URL par
+défaut du projet). Et côté Google Cloud Console :
 `https://chlmqnrvnrgeaihryreb.supabase.co/auth/v1/callback` ajouté comme second "Authorized
 redirect URI" sur le client OAuth déjà utilisé pour Gmail-send.
 
@@ -155,7 +152,6 @@ npx supabase functions deploy oauth-google-poll --no-verify-jwt
 npx supabase functions deploy check-access --no-verify-jwt
 npx supabase functions deploy stripe-checkout --no-verify-jwt
 npx supabase functions deploy stripe-webhook --no-verify-jwt
-npx supabase functions deploy oauth-relay --no-verify-jwt
 npx supabase functions deploy auth-relay-deposit --no-verify-jwt
 npx supabase functions deploy auth-relay-poll --no-verify-jwt
 npx supabase functions deploy notify-upcoming-bookings --no-verify-jwt
