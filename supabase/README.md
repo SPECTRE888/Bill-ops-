@@ -39,24 +39,14 @@ Dix fonctions déployées et actives sur le projet `chlmqnrvnrgeaihryreb` (Bill-
   en `ON DELETE CASCADE`, donc supprimer l'utilisateur Auth suffit à tout effacer côté serveur.
   Appelée depuis le bouton "Supprimer" de la carte Informations (`facture.html`, onglet Profil —
   pas encore répliqué sur mobile).
-- **`oauth-relay`** — sert la page HTML de relais du login Google desktop (voir juste en dessous).
 - **`auth-relay-deposit`**/**`auth-relay-poll`** — handoff des tokens de session Supabase Auth pour
   le login Google côté Electron desktop (pas d'origine https locale pour un `redirectTo` direct) :
-  `oauth-relay` dépose les tokens via `auth-relay-deposit`, l'app les récupère par polling sur
-  `auth-relay-poll` (table `login_relay`, usage unique) — même principe que
+  `mobile/oauth-relay.html` dépose les tokens via `auth-relay-deposit`, l'app les récupère par
+  polling sur `auth-relay-poll` (table `login_relay`, usage unique) — même principe que
   `oauth-google-callback`/`oauth-google-poll` ci-dessus, table séparée (`oauth_pending` reste
   dédiée au seul flux Gmail-send).
 
-  `oauth-relay` a remplacé `mobile/oauth-relay.html` (hébergée sur GitHub Pages) le 2026-08-21 :
-  à ce moment-là, la PWA mobile venait d'être bougée sur un domaine perso GitHub Pages
-  (`app.ops-suite.fr`) — ouvrir la page de relais sur ce même domaine tombait dans le
-  `"scope": "./"` du `manifest.json` de la PWA, un onglet Safari affichant "Connexion en cours…"
-  basculait alors tout seul vers le `start_url` de la PWA (`index.html`) quelques secondes après,
-  sans qu'aucun code de la page de relais ne redirige quoi que ce soit (comportement du
-  navigateur/OS pour une PWA installée, pas un bug JS). La servir depuis `*.supabase.co` (hors de
-  tout scope PWA) élimine le problème, indépendamment d'où vit la PWA elle-même.
-
-Les dix sont déployées avec `--no-verify-jwt` (appelées directement en `fetch()` depuis
+Les neuf sont déployées avec `--no-verify-jwt` (appelées directement en `fetch()` depuis
 `facture.html`/`mobile/index.html`, ou par `pg_cron` — pas par un client Supabase authentifié).
 `notify-upcoming-bookings` vérifie un header `x-cron-secret` ; `send-invoice`, `oauth-google-poll`
 et `auth-relay-deposit`/`auth-relay-poll` vérifient un header `x-app-secret` (constante
@@ -126,22 +116,12 @@ vérifié côté BAR OPS que leur webhook fait de même avec les events Helm.
 
 Côté Supabase Dashboard (`chlmqnrvnrgeaihryreb`), déjà configuré : Authentication → Providers →
 Google (Client ID/Secret = `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`) ; Authentication → URL
-Configuration → `https://helm-ops-ivory.vercel.app/**` (login PWA mobile) et
-`https://chlmqnrvnrgeaihryreb.supabase.co/functions/v1/oauth-relay**` (relais desktop) dans les
-redirect URLs autorisées (le wildcard `**` est nécessaire — le `redirectTo` du flux desktop porte
-un `?state=...` dynamique qui ne matche pas une entrée sans wildcard, Supabase retombe alors
-silencieusement sur le Site URL par défaut du projet). Et côté Google Cloud Console :
-`https://chlmqnrvnrgeaihryreb.supabase.co/auth/v1/callback` ajouté comme second "Authorized
-redirect URI" sur le client OAuth déjà utilisé pour Gmail-send.
-
-`mobile/` est hébergée sur Vercel (`helm-ops-ivory.vercel.app`, projet `helm-ops`, déploiement
-continu branché sur `main` via `vercel git connect`, Root Directory réglé sur `mobile` côté
-Vercel) — même pattern que BAR OPS (`bar-ops-v2.vercel.app`). Avant le 2026-08-21 : GitHub Pages,
-d'abord en `spectre888.github.io/Bill-ops-/` (exposait le pseudo GitHub personnel dans l'URL),
-puis brièvement en domaine perso `app.ops-suite.fr` — abandonné aussi car `ops-suite.fr` est
-réservé au mailing (`mail.ops-suite.fr`) et à une future plateforme multi-produits, pas à l'URL
-d'un produit Helm spécifique (décision utilisateur explicite). GitHub Pages désactivé pour ce
-repo (`gh api -X DELETE repos/.../pages`), `.github/workflows/pages.yml` supprimé.
+Configuration → `https://spectre888.github.io/Bill-ops-/**` et
+`https://spectre888.github.io/Bill-ops-/oauth-relay.html**` dans les redirect URLs autorisées (le
+wildcard `**` est nécessaire — le `redirectTo` du flux desktop porte un `?state=...` dynamique qui
+ne matche pas une entrée sans wildcard, Supabase retombe alors silencieusement sur le Site URL par
+défaut du projet). Et côté Google Cloud Console : `https://chlmqnrvnrgeaihryreb.supabase.co/auth/v1/callback`
+ajouté comme second "Authorized redirect URI" sur le client OAuth déjà utilisé pour Gmail-send.
 
 `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` viennent d'un identifiant OAuth "Web application" créé
 dans Google Cloud Console (API activée : Gmail API), avec comme URI de redirection autorisée
@@ -169,7 +149,6 @@ npx supabase functions deploy oauth-google-poll --no-verify-jwt
 npx supabase functions deploy check-access --no-verify-jwt
 npx supabase functions deploy stripe-checkout --no-verify-jwt
 npx supabase functions deploy stripe-webhook --no-verify-jwt
-npx supabase functions deploy oauth-relay --no-verify-jwt
 npx supabase functions deploy auth-relay-deposit --no-verify-jwt
 npx supabase functions deploy auth-relay-poll --no-verify-jwt
 npx supabase functions deploy notify-upcoming-bookings --no-verify-jwt

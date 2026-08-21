@@ -2,7 +2,7 @@
 
 Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) garde son nom technique historique, décorrélé de la marque affichée. La table `billops_sync` (ancien mécanisme de sync par code, voir Historique en bas de section Stockage cloud) n'est plus utilisée par le client mais n'a pas été supprimée côté Supabase.
 
-Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur Vercel — `helm-ops-ivory.vercel.app`, même pattern que BAR OPS, voir Login + abonnement ci-dessous pour l'historique GitHub Pages abandonné), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, `oauth-google-callback`/`oauth-google-poll` mortes depuis l'abandon de l'OAuth Gmail (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`oauth-relay`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement (`oauth-relay` sert la page de relais du login Google desktop — plus sur GitHub Pages depuis le 2026-08-21, voir Login + abonnement ci-dessous), `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
+Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `mobile/oauth-relay.html` (page statique de relais pour le login Google côté Electron, voir Login + abonnement ci-dessous), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, `oauth-google-callback`/`oauth-google-poll` mortes depuis l'abandon de l'OAuth Gmail (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
 
 ## Stack
 HTML/CSS/JS vanilla. `localStorage` sert de **cache local** (from, clients, invoices, bookings, inv_theme, inv_lang, gmailAuth, pushSubscriptions) — la source de vérité pour les données métier (clients/bookings/invoices/from) est Supabase, scindée par utilisateur (voir Stockage cloud ci-dessous).
@@ -75,7 +75,23 @@ Catégorie Paramètres (en bas de nav, après le spacer) : Mon entreprise + sél
 ## App mobile (PWA)
 `mobile/index.html` — compagnon iPhone installable via Safari (Ajouter à l'écran d'accueil), pas d'app native/App Store. Objectif : utilisable en autonomie complète par quelqu'un sans Mac (se connecter avec un compte Google suffit, voir Stockage cloud plus haut). Quatre onglets : Pointage (pointer arrivée/départ, transformer une presta pointée en facture avec extras km/péage/parking/offert/repas), Planning (consultation + ajout/modif/suppression de prestas, comme sur le Mac), Factures (lecture, aperçu en overlay in-app, téléchargement PDF, envoi par email — automatique, aucune config requise, voir Envoi de factures ci-dessous), Clients (CRUD clients, même modèle de données que `facture.html` — `name/prefix/email/phone/addr/tutoiement/siret/billingAddr/defaultRate/notes`, `prefix` utilisé pour la numérotation des factures ; `siret`/`billingAddr`/`defaultRate`/`notes` non éditables depuis l'UI mobile — pas de champs dédiés dans le formulaire client mobile, volontairement pour ne pas alourdir un écran déjà dense — mais préservés lors d'une modif faite sur mobile, `siret`/`billingAddr` réinjectés dans la facture générée si présents). Réglages (accès via l'icône engrenage, pas dans la barre du bas) contient aussi Mon entreprise (formulaire repliable, même modèle `from` que `facture.html`), volontairement pas un onglet séparé pour ne pas alourdir la nav.
 Champs additionnels sur les objets `bookings` (optionnels, rétrocompatibles) : `checkedInAt`, `checkedOutAt` (timestamps ISO), `actualHours` (arrondi au quart d'heure), `notifiedAt` (posé par la Edge Function de notification, voir plus bas). `facture.html:invoiceBooking` utilise les heures réelles pour la ligne de facture quand elles existent, sinon retombe sur `hours`/`from`/`to` statiques.
-Déploiement : Vercel (projet `helm-ops`, Root Directory réglé sur `mobile`), branché en continu sur `main` via l'intégration GitHub — même pattern que BAR OPS (`bar-ops-v2.vercel.app`). Avant le 2026-08-21 : GitHub Pages (`.github/workflows/pages.yml`, supprimé), d'abord en `spectre888.github.io/Bill-ops-/` (exposait le pseudo GitHub personnel dans l'URL à chaque usage), puis brièvement en domaine perso `app.ops-suite.fr` — abandonné aussi car `ops-suite.fr` est réservé au mailing et à une future plateforme multi-produits, pas à l'URL d'un produit Helm spécifique (décision utilisateur explicite, voir Login + abonnement plus bas).
+Déploiement : `.github/workflows/pages.yml` publie le dossier `mobile/` sur GitHub Pages à chaque push touchant `mobile/**` (Pages doit être activé une fois dans Settings → Pages → Source: GitHub Actions).
+
+**Tentative de migration abandonnée (2026-08-21)** : l'URL `spectre888.github.io/Bill-ops-/` expose
+le pseudo GitHub personnel de l'utilisateur (vu à chaque connexion desktop et à chaque usage de la
+PWA) — demande initiale : la faire disparaître. Essayé dans l'ordre, tout annulé après un après-midi
+de régressions en cascade, retour à l'état ci-dessus : (1) domaine perso `app.ops-suite.fr` en
+CNAME GitHub Pages — abandonné, l'utilisateur réserve `ops-suite.fr` au mailing et à une future
+plateforme multi-produits, pas à l'URL d'un produit Helm spécifique ; (2) migration complète vers
+Vercel (`helm-ops-ivory.vercel.app`, même pattern que BAR OPS) — a working, mais le login desktop
+restait cassé (redirection vers la PWA au lieu de l'app Electron) pour une cause jamais identifiée
+avec certitude malgré plusieurs correctifs (sélecteur de compte Google, page de relais déplacée sur
+une Edge Function Supabase hors du scope PWA, redirect URLs Supabase revues) ; l'utilisateur a
+demandé l'annulation complète plutôt que de continuer à déboguer en production. Si le sujet est
+repris un jour : tester d'abord en local/isolé avant de toucher le login réel, et se méfier du fait
+que `mobile/manifest.json` déclare `"scope": "./"` — n'importe quelle page servie sous le même
+domaine que la PWA (y compris une page de relais) peut se faire capturer par une PWA installée
+(Add to Dock/Home Screen), silencieusement, sans qu'aucun code ne redirige quoi que ce soit.
 
 ## Notifications push ("la presta commence bientôt")
 Web Push standard (VAPID), supporté par Safari iOS 16.4+ pour les PWA installées sur l'écran d'accueil. Bouton "Activer les notifications" dans le header mobile → abonnement stocké localement (`pushSubscriptions`) et poussé dans la table cloud `push_subscriptions` (clé = `endpoint`, scindée par `user_id`, RLS select/insert/delete). Une Edge Function Supabase (`supabase/functions/notify-upcoming-bookings`), déclenchée toutes les ~3 min par pg_cron, lit directement la table `bookings` (statut à facturer, non pointé, non notifié) et filtre celles dont l'heure de début tombe dans une fenêtre ~10-20 min à venir (viser un rappel ~15 min avant, tolérant un tick pg_cron manqué), envoie une notification à chaque abonnement `push_subscriptions` de l'utilisateur concerné (sans contenu chiffré, texte fixe géré par `mobile/sw.js`), puis pose `notified_at` sur les bookings correspondants pour ne pas re-notifier. Les abonnements qui répondent 404/410 (révoqués côté navigateur) sont supprimés automatiquement de `push_subscriptions`. Avant le 2026-08-05, cette fonction lisait/écrivait tout depuis le blob unique `billops_sync` (voir Stockage cloud plus haut) — migrée en même temps que le reste pour ne pas silencieusement arrêter de fonctionner une fois le code de synchro retiré côté client.
@@ -156,22 +172,15 @@ pas de session Supabase → écran de connexion (`#loginGate`) ; session mais `c
 Flux OAuth : flow implicite Supabase (`flowType:'implicit'` sur `getSb()`, tokens dans le fragment
 d'URL, pas de PKCE — nécessaire car le flux desktop termine dans un contexte navigateur différent
 de celui qui l'a initié).
-- **Mobile** (déjà en https réel via Vercel) : redirection directe
+- **Mobile** (déjà en https réel via GitHub Pages) : redirection directe
   (`signInWithOAuth({redirectTo: <page elle-même>})`), tokens repris dans `location.hash` au
   chargement.
 - **Desktop Electron** (`file://`, pas d'origine https locale) : `connectLogin()` ouvre le flow
-  avec `redirectTo` pointant vers l'Edge Function `oauth-relay?state=...` (`skipBrowserRedirect:true`),
+  avec `redirectTo` pointant vers `mobile/oauth-relay.html?state=...` (`skipBrowserRedirect:true`),
   Electron force l'URL vers le navigateur système (`shell.openExternal`, `window.open()` renvoie
   `null` — ne pas s'y fier, cf. `connectGmail()`), la page de relais dépose les tokens via
   `auth-relay-deposit` et l'app les récupère par polling (`auth-relay-poll`, table `login_relay`,
   usage unique) — même principe que `oauth-google-callback`/`oauth-google-poll` pour Gmail-send.
-  La page de relais était sur GitHub Pages (`mobile/oauth-relay.html`) jusqu'au 2026-08-21 : une
-  fois la PWA mobile passée sur le domaine perso `app.ops-suite.fr`, ouvrir cette page sur ce même
-  domaine tombait dans le `scope` du `manifest.json` de la PWA — un onglet Safari basculait tout
-  seul vers `index.html` (start_url de la PWA installée) quelques secondes après avoir affiché
-  "Connexion en cours…", sans aucun redirect côté code (comportement navigateur/OS pour une PWA
-  installée, pas un bug JS). Servie depuis `*.supabase.co` (Edge Function) à la place, hors du
-  scope de la PWA — élimine le problème sans restructurer `mobile/`.
 
 Tables Supabase : `profiles` (id/email, remplie par un trigger `handle_new_user` sur `auth.users`,
 lecture seule côté client), `subscriptions` (`user_id, status, plan, period, expires_at,
