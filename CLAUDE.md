@@ -2,7 +2,7 @@
 
 Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) garde son nom technique historique, décorrélé de la marque affichée. La table `billops_sync` (ancien mécanisme de sync par code, voir Historique en bas de section Stockage cloud) n'est plus utilisée par le client mais n'a pas été supprimée côté Supabase.
 
-Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `mobile/oauth-relay.html` (page statique de relais pour le login Google côté Electron, voir Login + abonnement ci-dessous), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, `oauth-google-callback`/`oauth-google-poll` mortes depuis l'abandon de l'OAuth Gmail (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
+Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages sous le domaine perso `app.ops-suite.fr`), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, `oauth-google-callback`/`oauth-google-poll` mortes depuis l'abandon de l'OAuth Gmail (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`oauth-relay`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement (`oauth-relay` sert la page de relais du login Google desktop — plus sur GitHub Pages depuis le 2026-08-21, voir Login + abonnement ci-dessous), `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
 
 ## Stack
 HTML/CSS/JS vanilla. `localStorage` sert de **cache local** (from, clients, invoices, bookings, inv_theme, inv_lang, gmailAuth, pushSubscriptions) — la source de vérité pour les données métier (clients/bookings/invoices/from) est Supabase, scindée par utilisateur (voir Stockage cloud ci-dessous).
@@ -160,11 +160,18 @@ de celui qui l'a initié).
   (`signInWithOAuth({redirectTo: <page elle-même>})`), tokens repris dans `location.hash` au
   chargement.
 - **Desktop Electron** (`file://`, pas d'origine https locale) : `connectLogin()` ouvre le flow
-  avec `redirectTo` pointant vers `mobile/oauth-relay.html?state=...` (`skipBrowserRedirect:true`),
+  avec `redirectTo` pointant vers l'Edge Function `oauth-relay?state=...` (`skipBrowserRedirect:true`),
   Electron force l'URL vers le navigateur système (`shell.openExternal`, `window.open()` renvoie
   `null` — ne pas s'y fier, cf. `connectGmail()`), la page de relais dépose les tokens via
   `auth-relay-deposit` et l'app les récupère par polling (`auth-relay-poll`, table `login_relay`,
   usage unique) — même principe que `oauth-google-callback`/`oauth-google-poll` pour Gmail-send.
+  La page de relais était sur GitHub Pages (`mobile/oauth-relay.html`) jusqu'au 2026-08-21 : une
+  fois la PWA mobile passée sur le domaine perso `app.ops-suite.fr`, ouvrir cette page sur ce même
+  domaine tombait dans le `scope` du `manifest.json` de la PWA — un onglet Safari basculait tout
+  seul vers `index.html` (start_url de la PWA installée) quelques secondes après avoir affiché
+  "Connexion en cours…", sans aucun redirect côté code (comportement navigateur/OS pour une PWA
+  installée, pas un bug JS). Servie depuis `*.supabase.co` (Edge Function) à la place, hors du
+  scope de la PWA — élimine le problème sans restructurer `mobile/`.
 
 Tables Supabase : `profiles` (id/email, remplie par un trigger `handle_new_user` sur `auth.users`,
 lecture seule côté client), `subscriptions` (`user_id, status, plan, period, expires_at,

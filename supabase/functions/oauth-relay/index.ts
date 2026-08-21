@@ -1,4 +1,15 @@
-<!DOCTYPE html>
+// Page de relais OAuth pour le login desktop Electron, servie ici (Supabase Edge Function) plutôt
+// que sur app.ops-suite.fr (GitHub Pages) — reprise du 2026-08-21 : app.ops-suite.fr héberge aussi
+// la PWA mobile (mobile/index.html), dont le manifest.json déclare `"scope": "./"` (racine du
+// domaine). Un onglet Safari ouvrant /oauth-relay.html sur ce même domaine tombe dans le scope de
+// la PWA installée (Add to Dock) et se fait rediriger vers son start_url (index.html) au lieu de
+// rester sur la page de relais — observé en test réel : "Connexion en cours…" bascule seul vers
+// la PWA quelques secondes après. Servir cette page depuis un domaine entièrement différent
+// (*.supabase.co, hors du scope PWA) élimine le problème sans toucher à la structure de mobile/.
+// Même logique que mobile/oauth-relay.html (dépose les tokens via auth-relay-deposit, l'app
+// Electron les récupère par polling via auth-relay-poll) — seul l'hébergement change.
+
+const HTML = `<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
@@ -54,3 +65,9 @@ p{font-family:'Jost',sans-serif;font-size:13px;font-weight:500;color:var(--text2
 </script>
 </body>
 </html>
+`;
+
+Deno.serve((req) => {
+  if (req.method !== 'GET') return new Response('Method not allowed', { status: 405 });
+  return new Response(HTML, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+});

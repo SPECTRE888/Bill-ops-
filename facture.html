@@ -1847,14 +1847,14 @@ function saveReplyTo(){
 
 // --- Login Google + abonnement Stripe (porte d'entrée, indépendante du code de synchro).
 // Electron n'a pas d'origine https locale pour recevoir un redirectTo direct : le flow OAuth
-// ouvre le navigateur système vers une page de relais hébergée sur GitHub Pages
-// (mobile/oauth-relay.html), qui dépose les tokens via auth-relay-deposit ; on les récupère ici
+// ouvre le navigateur système vers une page de relais (Edge Function oauth-relay, voir plus bas
+// pourquoi pas GitHub Pages), qui dépose les tokens via auth-relay-deposit ; on les récupère ici
 // par polling (auth-relay-poll). ---
 const CHECK_ACCESS_URL = SUPABASE_URL + '/functions/v1/check-access';
 const STRIPE_CHECKOUT_URL = SUPABASE_URL + '/functions/v1/stripe-checkout';
 const AUTH_RELAY_POLL_URL = SUPABASE_URL + '/functions/v1/auth-relay-poll';
 const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/delete-account';
-const AUTH_RELAY_URL = 'https://app.ops-suite.fr/oauth-relay.html';
+const AUTH_RELAY_URL = SUPABASE_URL + '/functions/v1/oauth-relay';
 
 function showAuthGate(which){
   document.getElementById('loginGate').style.display = which==='login' ? 'flex' : 'none';
