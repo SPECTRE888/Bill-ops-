@@ -481,7 +481,7 @@ async function handleLoginRedirect(){
 function connectLoginMobile(){
   const statusEl = document.getElementById('loginStatus');
   setStatusMsg(statusEl, '⏳ Redirection vers Google...');
-  getSb().auth.signInWithOAuth({provider:'google', options:{redirectTo: location.origin+location.pathname}});
+  getSb().auth.signInWithOAuth({provider:'google', options:{redirectTo: location.origin+location.pathname, queryParams:{prompt:'select_account'}}});
 }
 
 async function logoutAccount(){

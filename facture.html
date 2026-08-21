@@ -1874,7 +1874,7 @@ function connectLogin(){
   setStatusMsg(statusEl, '⏳ Connexion en cours...');
   getSb().auth.signInWithOAuth({
     provider:'google',
-    options:{ redirectTo: AUTH_RELAY_URL + '?state=' + encodeURIComponent(state), skipBrowserRedirect:true }
+    options:{ redirectTo: AUTH_RELAY_URL + '?state=' + encodeURIComponent(state), skipBrowserRedirect:true, queryParams:{prompt:'select_account'} }
   }).then(({data, error})=>{
     if(error || !data?.url){ setStatusMsg(statusEl, '✕ '+(error?.message||'Erreur de connexion.')); return; }
     const popup = window.open(data.url, 'googleLogin', 'width=480,height=640');
