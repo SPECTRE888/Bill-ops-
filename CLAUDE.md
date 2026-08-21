@@ -2,7 +2,7 @@
 
 Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) garde son nom technique historique, décorrélé de la marque affichée. La table `billops_sync` (ancien mécanisme de sync par code, voir Historique en bas de section Stockage cloud) n'est plus utilisée par le client mais n'a pas été supprimée côté Supabase.
 
-Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `mobile/oauth-relay.html` (page statique de relais pour le login Google côté Electron, voir Login + abonnement ci-dessous), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, `oauth-google-callback`/`oauth-google-poll` mortes depuis l'abandon de l'OAuth Gmail (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
+Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, `oauth-google-callback`/`oauth-google-poll` mortes depuis l'abandon de l'OAuth Gmail (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`oauth-relay`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement (`oauth-relay` sert la page de relais du login Google desktop, volontairement hors de GitHub Pages — voir Login + abonnement ci-dessous), `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
 
 ## Stack
 HTML/CSS/JS vanilla. `localStorage` sert de **cache local** (from, clients, invoices, bookings, inv_theme, inv_lang, gmailAuth, pushSubscriptions) — la source de vérité pour les données métier (clients/bookings/invoices/from) est Supabase, scindée par utilisateur (voir Stockage cloud ci-dessous).
@@ -77,21 +77,20 @@ Catégorie Paramètres (en bas de nav, après le spacer) : Mon entreprise + sél
 Champs additionnels sur les objets `bookings` (optionnels, rétrocompatibles) : `checkedInAt`, `checkedOutAt` (timestamps ISO), `actualHours` (arrondi au quart d'heure), `notifiedAt` (posé par la Edge Function de notification, voir plus bas). `facture.html:invoiceBooking` utilise les heures réelles pour la ligne de facture quand elles existent, sinon retombe sur `hours`/`from`/`to` statiques.
 Déploiement : `.github/workflows/pages.yml` publie le dossier `mobile/` sur GitHub Pages à chaque push touchant `mobile/**` (Pages doit être activé une fois dans Settings → Pages → Source: GitHub Actions).
 
-**Tentative de migration abandonnée (2026-08-21)** : l'URL `spectre888.github.io/Bill-ops-/` expose
-le pseudo GitHub personnel de l'utilisateur (vu à chaque connexion desktop et à chaque usage de la
-PWA) — demande initiale : la faire disparaître. Essayé dans l'ordre, tout annulé après un après-midi
-de régressions en cascade, retour à l'état ci-dessus : (1) domaine perso `app.ops-suite.fr` en
-CNAME GitHub Pages — abandonné, l'utilisateur réserve `ops-suite.fr` au mailing et à une future
-plateforme multi-produits, pas à l'URL d'un produit Helm spécifique ; (2) migration complète vers
-Vercel (`helm-ops-ivory.vercel.app`, même pattern que BAR OPS) — a working, mais le login desktop
-restait cassé (redirection vers la PWA au lieu de l'app Electron) pour une cause jamais identifiée
-avec certitude malgré plusieurs correctifs (sélecteur de compte Google, page de relais déplacée sur
-une Edge Function Supabase hors du scope PWA, redirect URLs Supabase revues) ; l'utilisateur a
-demandé l'annulation complète plutôt que de continuer à déboguer en production. Si le sujet est
-repris un jour : tester d'abord en local/isolé avant de toucher le login réel, et se méfier du fait
-que `mobile/manifest.json` déclare `"scope": "./"` — n'importe quelle page servie sous le même
-domaine que la PWA (y compris une page de relais) peut se faire capturer par une PWA installée
-(Add to Dock/Home Screen), silencieusement, sans qu'aucun code ne redirige quoi que ce soit.
+**Historique (2026-08-21)** : la PWA mobile est restée sur GitHub Pages tout du long (voir
+Déploiement ci-dessus) — seule la page de relais du login desktop a bougé, voir section Login +
+abonnement plus bas pour le détail. Deux essais intermédiaires ont été tentés puis abandonnés avant
+cette solution : un domaine perso `app.ops-suite.fr` en CNAME GitHub Pages pour la PWA (abandonné,
+l'utilisateur réserve `ops-suite.fr` au mailing et à une future plateforme multi-produits, pas à
+l'URL d'un produit Helm spécifique), puis une migration complète de la PWA vers Vercel
+(`helm-ops-ivory.vercel.app`, même pattern que BAR OPS — fonctionnelle mais abandonnée pour la même
+raison de nommage, sans lien avec un bug). Un après-midi entier a été perdu à déboguer un login
+desktop apparemment cassé après ces essais (redirection vers la PWA au lieu de l'app Electron) :
+la cause réelle n'était ni le domaine ni la page de relais mais l'app Electron installée restée
+bloquée sur une ancienne version (l'auto-updater ne s'était jamais déclenché) — tous les tests
+portaient sur du code obsolète. Retenir pour la prochaine fois : vérifier la version réellement
+installée (`defaults read "/Applications/Helm Ops.app/Contents/Info.plist"
+CFBundleShortVersionString`) avant de chercher un bug de comportement après un changement de build.
 
 ## Notifications push ("la presta commence bientôt")
 Web Push standard (VAPID), supporté par Safari iOS 16.4+ pour les PWA installées sur l'écran d'accueil. Bouton "Activer les notifications" dans le header mobile → abonnement stocké localement (`pushSubscriptions`) et poussé dans la table cloud `push_subscriptions` (clé = `endpoint`, scindée par `user_id`, RLS select/insert/delete). Une Edge Function Supabase (`supabase/functions/notify-upcoming-bookings`), déclenchée toutes les ~3 min par pg_cron, lit directement la table `bookings` (statut à facturer, non pointé, non notifié) et filtre celles dont l'heure de début tombe dans une fenêtre ~10-20 min à venir (viser un rappel ~15 min avant, tolérant un tick pg_cron manqué), envoie une notification à chaque abonnement `push_subscriptions` de l'utilisateur concerné (sans contenu chiffré, texte fixe géré par `mobile/sw.js`), puis pose `notified_at` sur les bookings correspondants pour ne pas re-notifier. Les abonnements qui répondent 404/410 (révoqués côté navigateur) sont supprimés automatiquement de `push_subscriptions`. Avant le 2026-08-05, cette fonction lisait/écrivait tout depuis le blob unique `billops_sync` (voir Stockage cloud plus haut) — migrée en même temps que le reste pour ne pas silencieusement arrêter de fonctionner une fois le code de synchro retiré côté client.
@@ -176,11 +175,15 @@ de celui qui l'a initié).
   (`signInWithOAuth({redirectTo: <page elle-même>})`), tokens repris dans `location.hash` au
   chargement.
 - **Desktop Electron** (`file://`, pas d'origine https locale) : `connectLogin()` ouvre le flow
-  avec `redirectTo` pointant vers `mobile/oauth-relay.html?state=...` (`skipBrowserRedirect:true`),
+  avec `redirectTo` pointant vers l'Edge Function `oauth-relay?state=...` (`skipBrowserRedirect:true`),
   Electron force l'URL vers le navigateur système (`shell.openExternal`, `window.open()` renvoie
   `null` — ne pas s'y fier, cf. `connectGmail()`), la page de relais dépose les tokens via
   `auth-relay-deposit` et l'app les récupère par polling (`auth-relay-poll`, table `login_relay`,
   usage unique) — même principe que `oauth-google-callback`/`oauth-google-poll` pour Gmail-send.
+  Servie depuis une Edge Function (`*.supabase.co`) plutôt que `mobile/oauth-relay.html` sur GitHub
+  Pages : demande explicite de ne plus voir le pseudo GitHub personnel dans l'URL au moment de la
+  connexion desktop — la PWA mobile elle-même reste sur GitHub Pages, seule cette page de quelques
+  secondes ("Connexion en cours…") a changé d'hébergement.
 
 Tables Supabase : `profiles` (id/email, remplie par un trigger `handle_new_user` sur `auth.users`,
 lecture seule côté client), `subscriptions` (`user_id, status, plan, period, expires_at,

@@ -1,4 +1,12 @@
-<!DOCTYPE html>
+// Page de relais OAuth pour le login desktop Electron, servie ici (Supabase Edge Function) plutôt
+// que sur GitHub Pages — seul ce petit écran transitoire ("Connexion en cours…") change de place,
+// la PWA mobile (mobile/index.html) reste sur spectre888.github.io/Bill-ops-/ comme avant, aucune
+// autre URL ne change. Demande initiale : ne plus voir le pseudo GitHub personnel dans l'URL au
+// moment précis de la connexion desktop. Même logique que l'ancien mobile/oauth-relay.html (dépose
+// les tokens via auth-relay-deposit, l'app Electron les récupère par polling via auth-relay-poll)
+// — seul l'hébergement de cette page change.
+
+const HTML = `<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
@@ -54,3 +62,9 @@ p{font-family:'Jost',sans-serif;font-size:13px;font-weight:500;color:var(--text2
 </script>
 </body>
 </html>
+`;
+
+Deno.serve((req) => {
+  if (req.method !== 'GET') return new Response('Method not allowed', { status: 405 });
+  return new Response(HTML, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+});
