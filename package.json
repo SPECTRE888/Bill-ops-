@@ -1,6 +1,6 @@
 {
   "name": "helm-ops",
-  "version": "1.1.164",
+  "version": "1.1.165",
   "description": "Helm Ops — gestion complète d'activité (clients, planning, facturation)",
   "author": "Jérôme Jarrige <Jarrige.jerome@hotmail.fr>",
   "license": "UNLICENSED",

@@ -153,19 +153,37 @@ nom/adresse effaçait silencieusement `bic` (et avant ça, `smtpEmail`/`smtpAppP
 enregistrés. Fix appliqué : toujours `set('from', {...store('from'), ...champsModifiés})`, jamais
 un objet neuf en dur.
 
-## Login Google + abonnement Stripe (porte d'entrée de l'app)
-Depuis le 2026-08-04 : l'app est gated par une connexion Google (Supabase Auth) + une vérification
+## Login Google + email/mot de passe + abonnement Stripe (porte d'entrée de l'app)
+Depuis le 2026-08-04 : l'app est gated par une connexion (Supabase Auth) + une vérification
 d'abonnement Stripe, indépendante du système "connecter mon Gmail" (envoi de factures, régression
 de sync connue plus haut) — deux mécanismes distincts qui ne se recoupent pas. Ce même login
-Google est aussi ce qui fait maintenant office de liaison entre appareils pour les données (voir
+est aussi ce qui fait maintenant office de liaison entre appareils pour les données (voir
 Stockage cloud), le code de synchro ayant été retiré. Même compte Stripe que BAR OPS (décision
 explicite, "ça facilite les paiements"), produit/prix et webhook dédiés à Helm dans ce même compte.
 Prix actuel : 9,90 €/mois (placeholder, modifiable dans Stripe).
 
+Deux méthodes de connexion sur `#loginGate` depuis le 2026-08-22 (email/mot de passe ajouté en
+plus de Google — tout le monde n'a pas de compte Google) : formulaire email + mot de passe
+(`authEmailSubmit()`, bascule connexion/inscription via `toggleAuthMode()`) et bouton Google
+(`connectLogin()`/`connectLoginMobile()`, inchangé). Mot de passe oublié
+(`authForgotPassword()` → `resetPasswordForEmail()`) affiche un 3e écran (`#resetPasswordGate`,
+`submitNewPassword()` → `updateUser({password})`) au retour du lien reçu par email — détecté via
+`type=recovery` dans le hash de redirection, `handleLoginRedirect()` retourne ce booléen et le
+boot route vers l'écran de reset au lieu du boot normal. Sur desktop, les liens email
+(confirmation d'inscription, reset) utilisent le même `redirectTo` que l'OAuth Google
+(`http://127.0.0.1:59877/callback`, voir Flux OAuth ci-dessous) — déjà whitelisté côté Supabase,
+donc aucune config supplémentaire ; implique que l'app doit être ouverte (serveur loopback actif)
+au moment où l'utilisateur clique le lien reçu par email, même limite déjà acceptée pour l'OAuth.
+Sur mobile (déjà en https réel), `redirectTo` pointe simplement vers la page elle-même. Pas de
+vérification d'email forcée côté client : `signUp()` peut renvoyer une session immédiate (si la
+confirmation est désactivée côté Supabase Auth) ou `data.session===null` (si activée), les deux
+cas sont gérés sans dépendre du réglage exact du dashboard.
+
 Ordre des portes au boot (`bootAuth()` dans `facture.html`, `bootApp()` dans `mobile/index.html`) :
-pas de session Supabase → écran de connexion (`#loginGate`) ; session mais `check-access` refuse
-→ écran d'abonnement (`#paywallGate`, prix + bouton "S'abonner" + "Gérer mon abonnement") ; sinon
-→ `hydrateFromCloud()` puis boot normal de l'app. Annulation d'abonnement : accès conservé jusqu'à
+pas de session Supabase → écran de connexion (`#loginGate`) ; lien de reset cliqué → écran
+nouveau mot de passe (`#resetPasswordGate`) ; session mais `check-access` refuse → écran
+d'abonnement (`#paywallGate`, prix + bouton "S'abonner" + "Gérer mon abonnement") ; sinon →
+`hydrateFromCloud()` puis boot normal de l'app. Annulation d'abonnement : accès conservé jusqu'à
 `expires_at` (fin de période déjà payée), pas de coupure immédiate.
 
 Flux OAuth : flow implicite Supabase (`flowType:'implicit'` sur `getSb()`, tokens dans le fragment

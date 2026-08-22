@@ -77,6 +77,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .pair-gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:5000;}
 .pair-box{max-width:360px;width:100%;}
 .pair-title{font-family:var(--font-body);font-size:30px;color:var(--gold);text-align:center;letter-spacing:.1em;margin-bottom:16px;}
+.auth-switch-mobile{font-size:11px;color:var(--text2);background:none;border:none;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-family:var(--font-body);padding:0;}
+.auth-switch-mobile:hover{color:var(--gold);}
+.auth-divider-mobile{display:flex;align-items:center;gap:10px;margin:18px 0 4px;color:var(--text3);font-size:10px;letter-spacing:.12em;text-transform:uppercase;}
+.auth-divider-mobile::before,.auth-divider-mobile::after{content:'';flex:1;height:1px;background:var(--border);}
 
 .mobile-app{min-height:100vh;display:flex;flex-direction:column;}
 .mheader{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;background:var(--surface);border-bottom:1px solid var(--border);}
@@ -174,8 +178,16 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 <div id="loginGate" class="pair-gate" style="display:none;">
   <div class="pair-box">
     <div class="pair-title">HELM OPS</div>
-    <p style="color:var(--text2);font-size:13px;text-align:center;">Connecte-toi avec ton compte Google pour accéder à l'application.</p>
-    <button class="btn-gold action-btn" onclick="connectLoginMobile()">Se connecter avec Google</button>
+    <p style="color:var(--text2);font-size:13px;text-align:center;margin-bottom:16px;">Connecte-toi pour accéder à l'application.</p>
+    <input type="email" id="authEmail" placeholder="Email" autocomplete="email" style="margin-bottom:10px;"/>
+    <input type="password" id="authPassword" placeholder="Mot de passe" autocomplete="current-password" style="margin-bottom:10px;"/>
+    <button class="btn-gold action-btn" onclick="authEmailSubmit()" id="authEmailBtn">Se connecter</button>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;">
+      <button class="auth-switch-mobile" onclick="toggleAuthMode()" id="authModeToggle">Créer un compte</button>
+      <button class="auth-switch-mobile" onclick="authForgotPassword()">Mot de passe oublié ?</button>
+    </div>
+    <div class="auth-divider-mobile">ou</div>
+    <button class="btn-line action-btn" onclick="connectLoginMobile()">Se connecter avec Google</button>
     <div id="loginStatus" style="font-size:12px;margin-top:8px;text-align:center;color:var(--gold);"></div>
   </div>
 </div>
@@ -187,6 +199,17 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     <button class="btn-gold action-btn" onclick="subscribeNow()">S'abonner</button>
     <button class="btn-line action-btn" onclick="openBillingPortal()">Gérer mon abonnement</button>
     <div id="paywallStatus" style="font-size:12px;margin-top:8px;text-align:center;color:var(--gold);"></div>
+  </div>
+</div>
+
+<div id="resetPasswordGate" class="pair-gate" style="display:none;">
+  <div class="pair-box">
+    <div class="pair-title">HELM OPS</div>
+    <p style="color:var(--text2);font-size:13px;text-align:center;margin-bottom:16px;">Choisis un nouveau mot de passe.</p>
+    <input type="password" id="resetPassword1" placeholder="Nouveau mot de passe" autocomplete="new-password" style="margin-bottom:10px;"/>
+    <input type="password" id="resetPassword2" placeholder="Confirmer le mot de passe" autocomplete="new-password" style="margin-bottom:10px;"/>
+    <button class="btn-gold action-btn" onclick="submitNewPassword()">Enregistrer</button>
+    <div id="resetStatus" style="font-size:12px;margin-top:8px;text-align:center;color:var(--gold);"></div>
   </div>
 </div>
 
@@ -464,24 +487,83 @@ const STRIPE_CHECKOUT_URL = SUPABASE_URL + '/functions/v1/stripe-checkout';
 function showAuthGate(which){
   document.getElementById('loginGate').style.display = which==='login' ? 'flex' : 'none';
   document.getElementById('paywallGate').style.display = which==='paywall' ? 'flex' : 'none';
+  document.getElementById('resetPasswordGate').style.display = which==='reset' ? 'flex' : 'none';
   if(which) document.getElementById('appShell').style.display = 'none';
 }
 
 async function handleLoginRedirect(){
-  if(!location.hash.includes('access_token=')) return;
+  if(!location.hash.includes('access_token=')) return false;
   const hash = new URLSearchParams(location.hash.slice(1));
   const accessToken = hash.get('access_token');
   const refreshToken = hash.get('refresh_token');
+  const isRecovery = hash.get('type') === 'recovery';
   history.replaceState(null, '', location.pathname);
   if(accessToken && refreshToken){
     await getSb().auth.setSession({access_token:accessToken, refresh_token:refreshToken});
   }
+  return isRecovery;
 }
 
 function connectLoginMobile(){
   const statusEl = document.getElementById('loginStatus');
   setStatusMsg(statusEl, '⏳ Redirection vers Google...');
   getSb().auth.signInWithOAuth({provider:'google', options:{redirectTo: location.origin+location.pathname, queryParams:{prompt:'select_account'}}});
+}
+
+// --- Login email + mot de passe, alternative à Google (tout le monde n'a pas de compte Google) ---
+let authMode = 'signin';
+function toggleAuthMode(){
+  authMode = authMode==='signin' ? 'signup' : 'signin';
+  document.getElementById('authEmailBtn').textContent = authMode==='signin' ? 'Se connecter' : 'Créer un compte';
+  document.getElementById('authModeToggle').textContent = authMode==='signin' ? 'Créer un compte' : '← Se connecter';
+  document.getElementById('loginStatus').textContent = '';
+}
+function authErrorMsg(error){
+  const m = error?.message || '';
+  if(m.includes('Invalid login credentials')) return 'Email ou mot de passe incorrect.';
+  if(m.includes('already registered') || m.includes('already exists')) return 'Un compte existe déjà avec cet email — connecte-toi plutôt.';
+  if(m.includes('Password should be at least')) return 'Mot de passe trop court (6 caractères minimum).';
+  return m || 'Erreur de connexion.';
+}
+async function authEmailSubmit(){
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const statusEl = document.getElementById('loginStatus');
+  if(!email || !isValidEmail(email)){ setStatusMsg(statusEl, '✕ Email invalide.'); return; }
+  if(!password || password.length<6){ setStatusMsg(statusEl, '✕ Mot de passe trop court (6 caractères minimum).'); return; }
+  if(authMode==='signin'){
+    setStatusMsg(statusEl, '⏳ Connexion en cours...');
+    const {error} = await getSb().auth.signInWithPassword({email, password});
+    if(error){ setStatusMsg(statusEl, '✕ '+authErrorMsg(error)); return; }
+    setStatusMsg(statusEl, '');
+    bootApp();
+  } else {
+    setStatusMsg(statusEl, '⏳ Création du compte...');
+    const {data, error} = await getSb().auth.signUp({email, password, options:{emailRedirectTo: location.origin+location.pathname}});
+    if(error){ setStatusMsg(statusEl, '✕ '+authErrorMsg(error)); return; }
+    if(data.session){ setStatusMsg(statusEl, ''); bootApp(); }
+    else setStatusMsg(statusEl, '✓ Compte créé — vérifie tes emails pour confirmer ton adresse, puis connecte-toi.');
+  }
+}
+async function authForgotPassword(){
+  const email = document.getElementById('authEmail').value.trim();
+  const statusEl = document.getElementById('loginStatus');
+  if(!email || !isValidEmail(email)){ setStatusMsg(statusEl, '✕ Renseigne ton email ci-dessus d\'abord.'); return; }
+  setStatusMsg(statusEl, '⏳ Envoi en cours...');
+  const {error} = await getSb().auth.resetPasswordForEmail(email, {redirectTo: location.origin+location.pathname});
+  if(error){ setStatusMsg(statusEl, '✕ '+authErrorMsg(error)); return; }
+  setStatusMsg(statusEl, '✓ Email envoyé — suis le lien pour choisir un nouveau mot de passe.');
+}
+async function submitNewPassword(){
+  const p1 = document.getElementById('resetPassword1').value;
+  const p2 = document.getElementById('resetPassword2').value;
+  const statusEl = document.getElementById('resetStatus');
+  if(!p1 || p1.length<6){ setStatusMsg(statusEl, '✕ Mot de passe trop court (6 caractères minimum).'); return; }
+  if(p1!==p2){ setStatusMsg(statusEl, '✕ Les mots de passe ne correspondent pas.'); return; }
+  setStatusMsg(statusEl, '⏳ Enregistrement...');
+  const {error} = await getSb().auth.updateUser({password:p1});
+  if(error){ setStatusMsg(statusEl, '✕ '+authErrorMsg(error)); return; }
+  bootApp();
 }
 
 async function logoutAccount(){
@@ -548,7 +630,8 @@ function migrateInvoiceStatuses(){
   if(changed) set('invoices', invoices);
 }
 async function bootApp(){
-  await handleLoginRedirect();
+  const isRecovery = await handleLoginRedirect();
+  if(isRecovery){ showAuthGate('reset'); return; }
   const access = await checkAccess();
   if(!access.loggedIn){
     showAuthGate('login');
