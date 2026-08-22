@@ -9,6 +9,11 @@ const path = require('path')
 const APP_FILE  = path.join(__dirname, '..', 'facture.html')
 const AUTH_PORT = 59877
 
+// Désactive Chromium Autofill (adresse/carte/mot de passe) : pas de cas d'usage pour une app
+// desktop de gestion, et son overlay de prévisualisation de suggestion repeignait le champ email
+// du formulaire de login en clair au-dessus du fond sombre voulu, illisible.
+app.commandLine.appendSwitch('disable-features', 'Autofill,AutofillServerCommunication')
+
 let mainWin    = null
 let authServer = null
 
