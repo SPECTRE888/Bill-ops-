@@ -1847,17 +1847,25 @@ function saveReplyTo(){
 
 // --- Login Google + abonnement Stripe (porte d'entrée, indépendante du code de synchro).
 // Electron n'a pas d'origine https locale pour recevoir un redirectTo direct : le flow OAuth
-// ouvre le navigateur système vers une page de relais hébergée sur Vercel (projet séparé
-// `helm-relay`, dossier `oauth-relay-page/` — pas sur GitHub Pages, pour ne pas exposer le pseudo
-// GitHub personnel dans l'URL vue à la connexion ; pas non plus une Edge Function Supabase, qui
-// force un Content-Type text/plain + CSP sandbox sur toute réponse HTTP, empêchant le script de
-// la page de s'exécuter), qui dépose les tokens via auth-relay-deposit ; on les récupère ici par
-// polling (auth-relay-poll). ---
+// ouvre le navigateur système vers un petit serveur local (electron/main.js:startAuthServer,
+// port 59877) que Supabase redirige directement une fois l'auth Google faite — ce serveur
+// recharge la fenêtre principale avec les tokens dans le hash (voir handleLoginRedirect ci-
+// dessous). Remplace l'ancien flow (page de relais Vercel + polling auth-relay-poll) : plus
+// rapide, sans dépendance d'hébergement externe. ---
 const CHECK_ACCESS_URL = SUPABASE_URL + '/functions/v1/check-access';
 const STRIPE_CHECKOUT_URL = SUPABASE_URL + '/functions/v1/stripe-checkout';
-const AUTH_RELAY_POLL_URL = SUPABASE_URL + '/functions/v1/auth-relay-poll';
 const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/delete-account';
-const AUTH_RELAY_URL = 'https://helm-relay.vercel.app/';
+
+async function handleLoginRedirect(){
+  if(!location.hash.includes('access_token=')) return;
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const accessToken = hash.get('access_token');
+  const refreshToken = hash.get('refresh_token');
+  history.replaceState(null, '', location.pathname);
+  if(accessToken && refreshToken){
+    await getSb().auth.setSession({access_token:accessToken, refresh_token:refreshToken});
+  }
+}
 
 function showAuthGate(which){
   document.getElementById('loginGate').style.display = which==='login' ? 'flex' : 'none';
@@ -1868,35 +1876,17 @@ function showAuthGate(which){
   document.getElementById('sidebarDisconnectBtn').style.display = which ? 'none' : '';
 }
 
-function connectLogin(){
-  const state = crypto.getRandomValues(new Uint32Array(4)).join('-');
+async function connectLogin(){
   const statusEl = document.getElementById('loginStatus');
   setStatusMsg(statusEl, '⏳ Connexion en cours...');
-  getSb().auth.signInWithOAuth({
+  if(window.electronBridge?.restartAuthServer) await window.electronBridge.restartAuthServer();
+  const { data, error } = await getSb().auth.signInWithOAuth({
     provider:'google',
-    options:{ redirectTo: AUTH_RELAY_URL + '?state=' + encodeURIComponent(state), skipBrowserRedirect:true, queryParams:{prompt:'select_account'} }
-  }).then(({data, error})=>{
-    if(error || !data?.url){ setStatusMsg(statusEl, '✕ '+(error?.message||'Erreur de connexion.')); return; }
-    const popup = window.open(data.url, 'googleLogin', 'width=480,height=640');
-    // popup peut être null en Electron même si l'URL s'est bien ouverte dans le navigateur
-    // système, donc on poll dans tous les cas.
-    let attempts = 0;
-    const timer = setInterval(async ()=>{
-      attempts++;
-      if(popup && popup.closed && attempts > 1){ clearInterval(timer); setStatusMsg(statusEl, ''); return; }
-      if(attempts > 80){ clearInterval(timer); setStatusMsg(statusEl, '✕ Délai dépassé, réessaie.'); return; }
-      try{
-        const res = await fetch(AUTH_RELAY_POLL_URL + '?state=' + encodeURIComponent(state), { headers:{'x-app-secret':APP_RELAY_SECRET} });
-        const relayData = await res.json();
-        if(relayData.accessToken){
-          clearInterval(timer);
-          if(popup && !popup.closed) popup.close();
-          await getSb().auth.setSession({access_token: relayData.accessToken, refresh_token: relayData.refreshToken});
-          bootAuth();
-        }
-      }catch(e){ /* on retente au prochain tick */ }
-    }, 1500);
+    options:{ redirectTo:'http://127.0.0.1:59877/callback', skipBrowserRedirect:true, queryParams:{prompt:'select_account'} }
   });
+  if(error || !data?.url){ setStatusMsg(statusEl, '✕ '+(error?.message||'Erreur de connexion.')); return; }
+  if(window.electronBridge?.openExternal) window.electronBridge.openExternal(data.url);
+  else window.open(data.url, 'googleLogin');
 }
 
 async function logoutAccount(){
@@ -3398,7 +3388,7 @@ function bootApp(){
 }
 setInterval(refreshFromCloudIfIdle, 60000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') refreshFromCloudIfIdle(); });
-bootAuth();
+handleLoginRedirect().then(bootAuth);
 </script>
 </body>
 </html>

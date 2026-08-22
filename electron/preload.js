@@ -5,6 +5,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronBridge', {
   openExternal: (u) => ipcRenderer.invoke('open-external', u),
+  restartAuthServer: () => ipcRenderer.invoke('restart-auth-server'),
   openInvoiceWindow: (html, title) => ipcRenderer.invoke('open-invoice-window', { html, title }),
   getVersion: () => ipcRenderer.invoke('get-version'),
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
