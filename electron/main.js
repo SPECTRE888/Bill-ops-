@@ -93,7 +93,10 @@ function startAuthServer() {
         setTimeout(() => {
           mainWin.show()
           mainWin.focus()
-          mainWin.loadURL(`file://${APP_FILE.replace(/\\/g, '/')}${hash}`)
+          // ?auth=<ts> force un vrai rechargement : un changement de #hash seul sur l'URL déjà
+          // chargée est traité comme une navigation same-document (ancre) par Electron, le script
+          // ne se ré-exécute pas et les tokens ne sont jamais lus par handleLoginRedirect().
+          mainWin.loadURL(`file://${APP_FILE.replace(/\\/g, '/')}?auth=${Date.now()}${hash}`)
         }, 400)
       }
       return
