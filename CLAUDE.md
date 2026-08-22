@@ -213,6 +213,22 @@ mode Stripe **test** — bascule en **live** à faire manuellement (nouveau prod
 mode Live, nouvelles valeurs de secrets) avant un usage réel multi-utilisateurs. Voir
 `supabase/README.md` pour le détail des secrets/tables.
 
+## Onboarding première connexion (desktop uniquement)
+Depuis le 2026-08-22 : repéré dans BAR OPS (même principe, wizard modal 4 étapes au lieu de 6 —
+adapté aux 3 piliers réels de Helm Ops au lieu des 5 de BAR OPS). Se déclenche dans `bootAuth()`
+juste après `bootApp()` (`obInit()`, `facture.html`), uniquement si l'espace de travail est
+vide : aucun client, aucune presta, et `store('from').name` absent — sinon le flag local
+`helmops_onboarding_done` est posé sans jamais afficher le modal (couvre le cas d'un utilisateur
+qui avait déjà des données avant l'ajout de cette fonctionnalité). Étapes : (1) prénom (juste
+pour usage local, pas persisté en base) + nom de structure → écrit dans `from.name` ; (2) premier
+client (nom/email/téléphone) → poussé dans `clients` ; (3) première presta (client pré-rempli
+depuis l'étape 2, date, horaires, tarif) → poussée dans `bookings`, `hours` calculé comme dans
+`addBooking()` ; (4) écran récap final. Chaque étape sauvegarde uniquement si son champ principal
+est rempli — sinon "Continuer"/"Passer" avance sans rien créer (seule l'étape 1 bloque avec une
+validation si le prénom est vide). Pas de pendant équivalent sur mobile (PWA) ni dans le
+système i18n (texte en dur en français, comme `loginGate`/`paywallGate` — ces écrans pré-app ne
+sont jamais passés par `t()`).
+
 ## Repo cible
 https://github.com/SPECTRE888/Bill-ops-.git (branche main)
 

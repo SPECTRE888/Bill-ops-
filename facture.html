@@ -410,6 +410,157 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
   </div>
 </div>
 
+<!-- Onboarding première connexion — ne s'affiche que si l'espace de travail est vide (voir obInit()) -->
+<div id="onboarding-overlay" style="display:none">
+  <div id="onboarding-modal">
+    <div id="ob-progress-track"><div id="ob-progress-bar"></div></div>
+    <div id="ob-steps-indicator">
+      <div class="ob-step-dot active" data-step="1"></div><div class="ob-step-line"></div>
+      <div class="ob-step-dot" data-step="2"></div><div class="ob-step-line"></div>
+      <div class="ob-step-dot" data-step="3"></div><div class="ob-step-line"></div>
+      <div class="ob-step-dot" data-step="4"></div>
+    </div>
+
+    <div class="ob-step" id="ob-step-1">
+      <div class="ob-icon">*</div>
+      <h2 class="ob-title">Bienvenue dans Helm Ops</h2>
+      <p class="ob-subtitle">Votre outil de gestion d'activité — clients, planning, facturation.<br>En 3 étapes, on configure l'essentiel.</p>
+      <div class="ob-field">
+        <label class="ob-label">Votre prénom</label>
+        <input type="text" id="ob-firstname" class="ob-input" placeholder="Ex : Jérôme" autocomplete="off"/>
+      </div>
+      <div class="ob-field">
+        <label class="ob-label">Nom de votre structure</label>
+        <input type="text" id="ob-company" class="ob-input" placeholder="Ex : Intelligence Spotlighted" autocomplete="off"/>
+      </div>
+      <p class="ob-hint">Utilisé sur vos factures — modifiable à tout moment dans Mon entreprise</p>
+    </div>
+
+    <div class="ob-step" id="ob-step-2" style="display:none">
+      <div class="ob-icon">#</div>
+      <h2 class="ob-title">Ajoutez votre 1er client</h2>
+      <p class="ob-subtitle">Ça prend 30 secondes — et vous verrez immédiatement la valeur.</p>
+      <div class="ob-field">
+        <label class="ob-label">Nom du client</label>
+        <input type="text" id="ob-client-name" class="ob-input" placeholder="Ex : Marguerite Events" autocomplete="off"/>
+      </div>
+      <div class="ob-row2">
+        <div class="ob-field">
+          <label class="ob-label">Email (optionnel)</label>
+          <input type="email" id="ob-client-email" class="ob-input" placeholder="contact@..." autocomplete="off"/>
+        </div>
+        <div class="ob-field">
+          <label class="ob-label">Téléphone (optionnel)</label>
+          <input type="text" id="ob-client-phone" class="ob-input" placeholder="06 XX XX XX XX" autocomplete="off"/>
+        </div>
+      </div>
+      <p class="ob-hint">Vous pourrez en ajouter autant que vous voulez dans Mes clients</p>
+    </div>
+
+    <div class="ob-step" id="ob-step-3" style="display:none">
+      <div class="ob-icon">+</div>
+      <h2 class="ob-title">Votre prochaine presta</h2>
+      <p class="ob-subtitle">Créez votre première prestation en quelques secondes.</p>
+      <div class="ob-field">
+        <label class="ob-label">Client</label>
+        <input type="text" id="ob-booking-client" class="ob-input" placeholder="Nom du client" autocomplete="off"/>
+      </div>
+      <div class="ob-field">
+        <label class="ob-label">Date</label>
+        <input type="date" id="ob-booking-date" class="ob-input"/>
+      </div>
+      <div class="ob-row2">
+        <div class="ob-field">
+          <label class="ob-label">Heure de début</label>
+          <input type="time" id="ob-booking-from" class="ob-input"/>
+        </div>
+        <div class="ob-field">
+          <label class="ob-label">Heure de fin</label>
+          <input type="time" id="ob-booking-to" class="ob-input"/>
+        </div>
+      </div>
+      <div class="ob-field">
+        <label class="ob-label">Tarif horaire (€/h)</label>
+        <input type="number" id="ob-booking-rate" class="ob-input" placeholder="Ex : 35" step="0.5" min="0"/>
+      </div>
+      <p class="ob-hint">Vous pouvez passer cette étape et créer vos prestas depuis le Planning</p>
+    </div>
+
+    <div class="ob-step" id="ob-step-4" style="display:none">
+      <div class="ob-icon">v</div>
+      <h2 class="ob-title">Prêt à décoller !</h2>
+      <p class="ob-subtitle">Vous avez configuré les 3 piliers de Helm Ops.</p>
+      <div class="ob-checklist">
+        <div class="ob-check-item">
+          <span class="ob-check-icon">*</span>
+          <div><div class="ob-check-title">Mon entreprise</div><div class="ob-check-desc">Nom et infos de facturation</div></div>
+        </div>
+        <div class="ob-check-item">
+          <span class="ob-check-icon">#</span>
+          <div><div class="ob-check-title">Mes clients</div><div class="ob-check-desc">Vos clients et leurs coordonnées</div></div>
+        </div>
+        <div class="ob-check-item">
+          <span class="ob-check-icon">+</span>
+          <div><div class="ob-check-title">Planning</div><div class="ob-check-desc">Vos prestations à venir</div></div>
+        </div>
+      </div>
+      <p style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);font-size:11px;color:var(--text2);text-align:center">
+        Vous pouvez maintenant pointer vos prestas, générer vos factures<br>et suivre votre chiffre d'affaires !
+      </p>
+    </div>
+
+    <div id="ob-footer">
+      <button id="ob-btn-skip" onclick="obSkip()">Passer</button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button id="ob-btn-back" onclick="obBack()" style="display:none">← Retour</button>
+        <button id="ob-btn-next" onclick="obNext()">Continuer →</button>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+#onboarding-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:21000;display:flex;align-items:center;justify-content:center;animation:obFadeIn .3s ease;}
+@keyframes obFadeIn{from{opacity:0}to{opacity:1}}
+#onboarding-modal{background:var(--surface);border:1px solid var(--gold-border);border-radius:12px;width:100%;max-width:480px;padding:36px 32px 28px;position:relative;box-shadow:0 32px 80px rgba(0,0,0,0.5);animation:obSlideIn .35s cubic-bezier(0.16,1,0.3,1);max-height:90vh;overflow-y:auto;}
+@keyframes obSlideIn{from{opacity:0;transform:translateY(24px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+#ob-progress-track{height:1px;background:var(--border);border-radius:1px;margin-bottom:24px;overflow:hidden;}
+#ob-progress-bar{height:100%;background:var(--gold);border-radius:1px;width:25%;transition:width .4s cubic-bezier(0.16,1,0.3,1);}
+#ob-steps-indicator{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:28px;}
+.ob-step-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);transition:all .3s;flex-shrink:0;}
+.ob-step-dot.active{background:var(--gold);border-color:var(--gold);box-shadow:0 0 8px rgba(217,166,55,0.4);}
+.ob-step-dot.done{background:var(--green);border-color:var(--green);}
+.ob-step-line{flex:1;max-width:60px;height:1px;background:var(--border);transition:background .3s;}
+.ob-step-line.done{background:var(--green);}
+.ob-icon{font-size:28px;color:var(--gold);margin-bottom:12px;display:block;animation:obIconPop .4s cubic-bezier(0.16,1,0.3,1);}
+@keyframes obIconPop{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+.ob-title{font-family:var(--font-body);font-size:26px;font-weight:300;color:var(--text);letter-spacing:.04em;margin-bottom:8px;}
+.ob-subtitle{font-size:13px;color:var(--text2);font-weight:300;line-height:1.6;margin-bottom:24px;letter-spacing:.02em;}
+.ob-field{margin-bottom:14px;}
+.ob-label{display:block;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.14em;font-weight:400;margin-bottom:6px;}
+.ob-input{width:100%;padding:10px 13px;font-size:13px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-family:var(--font-body);font-weight:300;outline:none;transition:border-color .2s,background .2s;letter-spacing:.02em;box-sizing:border-box;}
+.ob-input:focus{border-color:var(--gold);background:var(--surface3);}
+.ob-input::placeholder{color:var(--text3);}
+.ob-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ob-hint{font-size:11px;color:var(--text3);margin-top:8px;font-weight:300;letter-spacing:.02em;}
+.ob-checklist{display:flex;flex-direction:column;gap:12px;margin-top:4px;}
+.ob-check-item{display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;animation:obCheckIn .4s cubic-bezier(0.16,1,0.3,1) both;}
+.ob-check-item:nth-child(1){animation-delay:.05s}.ob-check-item:nth-child(2){animation-delay:.12s}.ob-check-item:nth-child(3){animation-delay:.19s}
+@keyframes obCheckIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.ob-check-icon{font-size:14px;color:var(--gold);flex-shrink:0;margin-top:1px;}
+.ob-check-title{font-size:12px;font-weight:500;color:var(--text);letter-spacing:.04em;margin-bottom:3px;}
+.ob-check-desc{font-size:11px;color:var(--text2);font-weight:300;letter-spacing:.02em;}
+#ob-footer{display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:20px;border-top:1px solid var(--border);}
+#ob-btn-skip{font-size:10px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:var(--font-body);letter-spacing:.1em;text-transform:uppercase;padding:6px 0;transition:color .2s;}
+#ob-btn-skip:hover{color:var(--text2);}
+#ob-btn-back{font-size:10px;color:var(--text2);background:none;border:1px solid var(--border2);border-radius:4px;cursor:pointer;font-family:var(--font-body);letter-spacing:.08em;text-transform:uppercase;padding:9px 16px;transition:all .2s;}
+#ob-btn-back:hover{border-color:var(--text3);color:var(--text);}
+#ob-btn-next{font-size:11px;font-weight:600;color:#080808;background:var(--gold);border:1px solid var(--gold);border-radius:4px;cursor:pointer;font-family:var(--font-body);letter-spacing:.1em;text-transform:uppercase;padding:10px 22px;transition:all .25s;}
+#ob-btn-next:hover{background:var(--gold2);border-color:var(--gold2);box-shadow:0 4px 16px rgba(217,166,55,.3);}
+#ob-btn-next.ob-finish{background:var(--green);border-color:var(--green);color:#080808;}
+#ob-btn-next.ob-finish:hover{background:#7abc94;border-color:#7abc94;}
+[data-theme="light"] .ob-input{color-scheme:light;}
+</style>
+
 <div class="app no-preview" id="appRoot">
   <div class="nav">
     <div class="nav-logo">
@@ -1965,7 +2116,108 @@ async function bootAuth(){
   await hydrateFromCloud();
   migrateInvoiceStatuses();
   bootApp();
+  obInit();
 }
+
+// --- Onboarding première connexion : ne s'affiche que si l'espace de travail est vide
+// (aucun client, aucune presta, aucune structure renseignée), pour guider la première saisie
+// au lieu de lâcher l'utilisateur sur un tableau de bord à zéro. Flag local (pas synchronisé
+// cloud, juste un rappel UI) doublé d'une vérif sur les données réelles : si l'utilisateur a
+// déjà des données (ex. migrées depuis un autre appareil), l'onboarding ne se déclenche pas
+// même si le flag n'a jamais été posé sur cet appareil. ---
+const OB_KEY = 'helmops_onboarding_done';
+let obCurrentStep = 1;
+const OB_TOTAL = 4;
+
+function obInit(){
+  if(localStorage.getItem(OB_KEY)==='1') return;
+  const hasData = storeArr('clients').length>0 || storeArr('bookings').length>0 || !!store('from').name;
+  if(hasData){ localStorage.setItem(OB_KEY,'1'); return; }
+  obShow();
+}
+function obShow(){
+  document.getElementById('onboarding-overlay').style.display = 'flex';
+  obRender(1);
+  setTimeout(()=>document.getElementById('ob-firstname')?.focus(), 400);
+}
+function obRender(step){
+  obCurrentStep = step;
+  document.getElementById('ob-progress-bar').style.width = (step/OB_TOTAL*100)+'%';
+  document.querySelectorAll('.ob-step-dot').forEach((dot,i)=>{
+    dot.classList.remove('active','done');
+    if(i+1===step) dot.classList.add('active');
+    if(i+1<step) dot.classList.add('done');
+  });
+  document.querySelectorAll('.ob-step-line').forEach((line,i)=>line.classList.toggle('done', i+1<step));
+  for(let i=1;i<=OB_TOTAL;i++){
+    const el = document.getElementById('ob-step-'+i);
+    if(el) el.style.display = i===step ? 'block' : 'none';
+  }
+  document.getElementById('ob-btn-back').style.display = step>1 ? 'inline-flex' : 'none';
+  document.getElementById('ob-btn-skip').style.display = step<OB_TOTAL ? 'block' : 'none';
+  const btnNext = document.getElementById('ob-btn-next');
+  if(step===OB_TOTAL){ btnNext.textContent = 'Terminer'; btnNext.classList.add('ob-finish'); }
+  else { btnNext.textContent = 'Continuer →'; btnNext.classList.remove('ob-finish'); }
+  if(step===3){
+    const clientName = document.getElementById('ob-client-name').value.trim();
+    if(clientName) document.getElementById('ob-booking-client').value = clientName;
+  }
+}
+function obShake(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.borderColor = 'var(--red)';
+  setTimeout(()=>{ el.style.borderColor = ''; }, 1200);
+}
+function obNext(){
+  if(obCurrentStep===1){
+    const firstname = document.getElementById('ob-firstname').value.trim();
+    if(!firstname){ document.getElementById('ob-firstname').focus(); obShake('ob-firstname'); return; }
+    localStorage.setItem('helmops_user_firstname', firstname);
+    const company = document.getElementById('ob-company').value.trim();
+    if(company){ set('from', {...store('from'), name:company}); loadFrom(); }
+  }
+  if(obCurrentStep===2){
+    const name = document.getElementById('ob-client-name').value.trim();
+    if(name){
+      const clients = storeArr('clients');
+      clients.push({id:crypto.randomUUID(), name, prefix:'', email:document.getElementById('ob-client-email').value.trim(), phone:document.getElementById('ob-client-phone').value.trim(), addr:'', tutoiement:false, siret:'', billingAddr:'', defaultRate:null, notes:'', createdAt:new Date().toISOString()});
+      set('clients', clients);
+      renderClientList(); refreshClientSelect();
+    }
+  }
+  if(obCurrentStep===3){
+    const client = document.getElementById('ob-booking-client').value.trim();
+    const date = document.getElementById('ob-booking-date').value;
+    if(client && date){
+      const from = document.getElementById('ob-booking-from').value;
+      const to = document.getElementById('ob-booking-to').value;
+      let hours = 0;
+      if(from && to){
+        const [h1,m1]=from.split(':').map(Number), [h2,m2]=to.split(':').map(Number);
+        let mins=(h2*60+m2)-(h1*60+m1); if(mins<0) mins+=24*60;
+        hours = mins/60;
+      }
+      const bookings = storeArr('bookings');
+      bookings.push({id:crypto.randomUUID(), client, label:'', addr:'', contact:'', date, from, to, hours, rate:parseFloat(document.getElementById('ob-booking-rate').value)||0, status:'à facturer'});
+      set('bookings', bookings);
+      renderPlanning(); renderCalendarTab();
+    }
+  }
+  if(obCurrentStep===OB_TOTAL){ obFinish(); return; }
+  obRender(obCurrentStep+1);
+}
+function obBack(){ if(obCurrentStep>1) obRender(obCurrentStep-1); }
+function obSkip(){ obFinish(); }
+function obFinish(){
+  localStorage.setItem(OB_KEY,'1');
+  const overlay = document.getElementById('onboarding-overlay');
+  overlay.style.transition = 'opacity .3s ease';
+  overlay.style.opacity = '0';
+  setTimeout(()=>{ overlay.style.display='none'; overlay.style.opacity=''; }, 300);
+  renderDashboard();
+}
+document.getElementById('onboarding-modal')?.addEventListener('keydown', e=>{ if(e.key==='Enter') obNext(); });
 let sessionEmail = null;
 function renderAccountCard(access){
   sessionEmail = access.session?.user?.email || null;
