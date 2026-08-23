@@ -297,6 +297,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
         <p style="color:var(--text2);font-size:12px;margin:0 0 10px;" id="accountRenewal"></p>
         <div class="row" style="flex-wrap:wrap;">
           <button class="btn-line" onclick="openBillingPortal()">Gérer mon abonnement</button>
+          <button class="btn-line" onclick="openChangePasswordModal()">Changer le mot de passe</button>
           <button class="btn-line" style="color:var(--red);" onclick="logoutAccount()">Se déconnecter</button>
         </div>
       </div>
@@ -421,6 +422,19 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <button class="btn-line" onclick="confirmModalResolve(false)">Annuler</button>
       <button class="btn-gold" id="confirmModalOkBtn" onclick="confirmModalResolve(true)">Confirmer</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="changePasswordModal" style="display:none;z-index:10001;" onclick="if(event.target===this) closeChangePasswordModal()">
+  <div class="modal-box">
+    <p style="font-weight:600;margin:0 0 10px;">Changer le mot de passe</p>
+    <input type="password" id="cpwNew" placeholder="Nouveau mot de passe" autocomplete="new-password" style="margin-bottom:10px;"/>
+    <input type="password" id="cpwConfirm" placeholder="Confirmer le mot de passe" autocomplete="new-password" style="margin-bottom:10px;"/>
+    <div class="row">
+      <button class="btn-line" onclick="closeChangePasswordModal()">Annuler</button>
+      <button class="btn-gold" onclick="submitChangePassword()">Enregistrer</button>
+    </div>
+    <div id="cpwStatus" style="font-size:12px;margin-top:8px;color:var(--gold);"></div>
   </div>
 </div>
 
@@ -620,6 +634,28 @@ async function openBillingPortal(){
     if(data.url) location.href = data.url;
     else showToast('⚠ '+(data.error||'Erreur'));
   }catch(e){ showToast('⚠ Erreur réseau'); }
+}
+
+function openChangePasswordModal(){
+  document.getElementById('cpwNew').value = '';
+  document.getElementById('cpwConfirm').value = '';
+  document.getElementById('cpwStatus').textContent = '';
+  document.getElementById('changePasswordModal').style.display = 'flex';
+}
+function closeChangePasswordModal(){
+  document.getElementById('changePasswordModal').style.display = 'none';
+}
+async function submitChangePassword(){
+  const p1 = document.getElementById('cpwNew').value;
+  const p2 = document.getElementById('cpwConfirm').value;
+  const statusEl = document.getElementById('cpwStatus');
+  if(!p1 || p1.length<6){ setStatusMsg(statusEl, '✕ Mot de passe trop court (6 caractères minimum).'); return; }
+  if(p1!==p2){ setStatusMsg(statusEl, '✕ Les mots de passe ne correspondent pas.'); return; }
+  setStatusMsg(statusEl, '⏳…');
+  const {error} = await getSb().auth.updateUser({password:p1});
+  if(error){ setStatusMsg(statusEl, '✕ '+error.message); return; }
+  showToast('✔ Mot de passe modifié.');
+  closeChangePasswordModal();
 }
 
 // Fusion des statuts Enregistrée/Mise à jour en "À envoyer" (voir facture.html) : normalise une

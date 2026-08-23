@@ -662,6 +662,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div class="info-item"><div class="info-label">Renouvellement</div><div class="info-value" id="accountRenewal">—</div></div>
         </div>
         <button class="btn-line" onclick="openBillingPortal()" style="margin-top:10px;width:100%;">Gérer mon abonnement</button>
+        <button class="btn-line" onclick="openChangePasswordModal()" style="margin-top:6px;width:100%;" data-i18n="btn_change_password">Changer le mot de passe</button>
         <div style="height:1px;background:var(--border);margin:10px 0;"></div>
         <div class="info-grid">
           <div class="info-item"><div class="info-label" data-i18n="lbl_appareil">Appareil</div><div class="info-value" id="viewDeviceLabel" data-i18n="cet_appareil">Cet appareil</div></div>
@@ -1064,6 +1065,21 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="changePasswordModal" style="display:none;" onclick="if(event.target===this) closeChangePasswordModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span data-i18n="cpw_title">Changer le mot de passe</span>
+      <button class="modal-close" onclick="closeChangePasswordModal()">×</button>
+    </div>
+    <label data-i18n="cpw_new">Nouveau mot de passe</label><input type="password" id="cpwNew" autocomplete="new-password">
+    <label data-i18n="cpw_confirm">Confirmer le mot de passe</label><input type="password" id="cpwConfirm" autocomplete="new-password">
+    <div class="row" style="margin-top:14px;">
+      <button class="btn-line" onclick="closeChangePasswordModal()" data-i18n="btn_cancel">Annuler</button>
+      <button class="btn-gold" onclick="submitChangePassword()" data-i18n="btn_save">Enregistrer</button>
+    </div>
+    <div id="cpwStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
+  </div>
+</div>
 <div class="modal-overlay" id="clientInfoModal" style="display:none;" onclick="if(event.target===this) closeClientInfoModal()">
   <div class="modal-box">
     <div class="modal-header">
@@ -1157,6 +1173,8 @@ lbl_tva_regime:'Régime TVA', hint_tva_regime:'(basculement automatique à 32 00
 opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'TVA applicable',
 lbl_rcs:'Mention RCS/RM', lbl_paiement:'Mode de règlement', lbl_rib:'RIB / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
 btn_save:'Enregistrer', btn_edit:'Modifier', btn_save_info:'Enregistrer mes infos',
+cpw_title:'Changer le mot de passe', cpw_new:'Nouveau mot de passe', cpw_confirm:'Confirmer le mot de passe', btn_change_password:'Changer le mot de passe',
+toast_cpw_too_short:'✕ Mot de passe trop court (6 caractères minimum).', toast_cpw_mismatch:'✕ Les mots de passe ne correspondent pas.', toast_cpw_done:'✔ Mot de passe modifié.',
 data_sync_title:'Synchronisation', sync_intro:'Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.',
 btn_gen_sync:'Générer un code de synchro', lbl_paste_sync:'Ou coller un code existant', ph_sync_code:'Code de synchro', btn_connect:'Connecter',
 sync_code_intro:'Code de synchro (à coller sur l\'autre appareil) :', btn_copy_code:'Copier le code', btn_force_sync:'Forcer la synchro', btn_disconnect_device:'Déconnecter cet appareil',
@@ -1271,6 +1289,8 @@ lbl_tva_regime:'VAT regime', hint_tva_regime:'(automatically switches at €32,0
 opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applicable',
 lbl_rcs:'Trade register notice', lbl_paiement:'Payment method', lbl_rib:'Bank details / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
 btn_save:'Save', btn_edit:'Edit', btn_save_info:'Save my info',
+cpw_title:'Change password', cpw_new:'New password', cpw_confirm:'Confirm password', btn_change_password:'Change password',
+toast_cpw_too_short:'✕ Password too short (6 characters minimum).', toast_cpw_mismatch:'✕ Passwords do not match.', toast_cpw_done:'✔ Password changed.',
 data_sync_title:'Sync', sync_intro:'Link this device to another one (Mac / iPhone) to share clients, invoices and schedule.',
 btn_gen_sync:'Generate a sync code', lbl_paste_sync:'Or paste an existing code', ph_sync_code:'Sync code', btn_connect:'Connect',
 sync_code_intro:'Sync code (paste it on the other device):', btn_copy_code:'Copy code', btn_force_sync:'Force sync', btn_disconnect_device:'Disconnect this device',
@@ -1385,6 +1405,8 @@ lbl_tva_regime:'Régimen de IVA', hint_tva_regime:'(cambio automático a 32.000 
 opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplicable',
 lbl_rcs:'Mención Registro Mercantil', lbl_paiement:'Forma de pago', lbl_rib:'Datos bancarios / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
 btn_save:'Guardar', btn_edit:'Modificar', btn_save_info:'Guardar mis datos',
+cpw_title:'Cambiar la contraseña', cpw_new:'Nueva contraseña', cpw_confirm:'Confirmar contraseña', btn_change_password:'Cambiar la contraseña',
+toast_cpw_too_short:'✕ Contraseña demasiado corta (mínimo 6 caracteres).', toast_cpw_mismatch:'✕ Las contraseñas no coinciden.', toast_cpw_done:'✔ Contraseña modificada.',
 data_sync_title:'Sincronización', sync_intro:'Vincula este dispositivo con otro (Mac / iPhone) para compartir clientes, facturas y planificación.',
 btn_gen_sync:'Generar un código de sincronización', lbl_paste_sync:'O pega un código existente', ph_sync_code:'Código de sincronización', btn_connect:'Conectar',
 sync_code_intro:'Código de sincronización (pégalo en el otro dispositivo):', btn_copy_code:'Copiar código', btn_force_sync:'Forzar sincronización', btn_disconnect_device:'Desconectar este dispositivo',
@@ -2203,6 +2225,28 @@ async function openBillingPortal(){
     if(data.url) window.open(data.url, 'stripePortal');
     else showToast('⚠ '+(data.error||'Erreur'));
   }catch(e){ showToast('⚠ Erreur réseau'); }
+}
+
+function openChangePasswordModal(){
+  document.getElementById('cpwNew').value = '';
+  document.getElementById('cpwConfirm').value = '';
+  document.getElementById('cpwStatus').textContent = '';
+  document.getElementById('changePasswordModal').style.display = 'flex';
+}
+function closeChangePasswordModal(){
+  document.getElementById('changePasswordModal').style.display = 'none';
+}
+async function submitChangePassword(){
+  const p1 = document.getElementById('cpwNew').value;
+  const p2 = document.getElementById('cpwConfirm').value;
+  const statusEl = document.getElementById('cpwStatus');
+  if(!p1 || p1.length<6){ setStatusMsg(statusEl, t('toast_cpw_too_short')); return; }
+  if(p1!==p2){ setStatusMsg(statusEl, t('toast_cpw_mismatch')); return; }
+  setStatusMsg(statusEl, '⏳…');
+  const {error} = await getSb().auth.updateUser({password:p1});
+  if(error){ setStatusMsg(statusEl, '✕ '+error.message); return; }
+  showToast(t('toast_cpw_done'));
+  closeChangePasswordModal();
 }
 
 // Fusion des statuts Enregistrée/Mise à jour (voir STATUS_KEYS) : normalise les factures créées
