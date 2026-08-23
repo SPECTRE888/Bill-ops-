@@ -591,7 +591,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 [data-theme="light"] .ob-input{color-scheme:light;}
 </style>
 
-<div class="app no-preview" id="appRoot">
+<div class="app no-preview" id="appRoot" style="display:none;">
   <div class="nav">
     <div class="nav-logo">
       <div class="brand">HELM OPS</div>
@@ -2207,6 +2207,7 @@ async function bootAuth(){
   if(!access.loggedIn){ showAuthGate('login'); return; }
   if(!access.allowed){ showAuthGate('paywall'); return; }
   showAuthGate(null);
+  document.getElementById('appRoot').style.display = '';
   renderAccountCard(access);
   await hydrateFromCloud();
   migrateInvoiceStatuses();
