@@ -570,6 +570,7 @@ async function submitNewPassword(){
 async function logoutAccount(){
   if(!await confirmDialog('Se déconnecter de Helm Ops ?')) return;
   await getSb().auth.signOut();
+  Object.keys(localStorage).forEach(k=>localStorage.removeItem(k));
   location.reload();
 }
 
@@ -807,7 +808,9 @@ async function hydrateFromCloud(isRetry){
   localStorage.setItem('clients', nextClients);
   localStorage.setItem('bookings', nextBookings);
   localStorage.setItem('invoices', nextInvoices);
-  if(companyRes.data) localStorage.setItem('from', JSON.stringify(fromDbRow('from', companyRes.data)));
+  // Toujours réécrit (voir facture.html) : sinon un compte sans company_info hérite du 'from'
+  // resté en cache local d'un compte précédemment connecté sur le même appareil.
+  localStorage.setItem('from', companyRes.data ? JSON.stringify(fromDbRow('from', companyRes.data)) : '{}');
   localStorage.setItem('lastCloudSyncAt', new Date().toISOString());
   return changed;
 }
@@ -1310,6 +1313,7 @@ function prefillBookingClientMobile(){
 function saveBookingForm(){
   const client = document.getElementById('bkClient').value.trim();
   if(!client){ showToast('⚠ Renseigne un client.'); return; }
+  if(!document.getElementById('bkDate').value){ showToast('⚠ Renseigne une date valide.'); return; }
   const from = document.getElementById('bkFrom').value;
   const to = document.getElementById('bkTo').value;
   let hours = 0;

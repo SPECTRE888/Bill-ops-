@@ -1216,6 +1216,7 @@ nav_update_checking:'Vérification…', nav_update_available:'Mise à jour dispo
 upd_title:'Mise à jour disponible', upd_state_choice:'Une nouvelle version est prête à installer.', upd_state_available:'Préparation du téléchargement…', upd_state_downloading:'Téléchargement… {pct}%', upd_state_installing:'Installation en cours…', upd_state_ready:'Prêt — redémarrage dans {seconds}s…', btn_install_update:'Installer maintenant', btn_update_later:'Plus tard',
 wn_title:'Nouveautés installées', wn_text:"Helm Ops vient d'être mis à jour avec des améliorations et des correctifs importants.", wn_btn:'Parfait, on y va', wn_badge_version:'Version {version}',
 toast_client_email_invalid:'⚠ Email client invalide : {email}',
+toast_booking_client_required:'⚠ Renseigne un client.', toast_booking_date_required:'⚠ Renseigne une date valide.',
 toast_old_invoice_no_detail:'⚠ Détail non disponible pour cette facture ancienne.',
 toast_invoice_loaded:'✎ Facture {num} chargée pour modification.',
 toast_invoice_duplicated:'✔ Nouvelle facture {num} créée à partir de {from}.',
@@ -1224,6 +1225,7 @@ toast_invoice_not_found:'⚠ Facture introuvable.',
 toast_sendgrid_missing:"⚠ Client introuvable pour cette facture.",
 toast_invoice_resent:'✔ Facture renvoyée à {email}.', toast_resend_failed:'✕ Échec du renvoi.', toast_error_generic:'✕ Erreur : {msg}',
 confirm_delete_invoice:'Supprimer définitivement la facture {num} ?', toast_invoice_deleted:'✔ Facture {num} supprimée.',
+confirm_delete_booking:'Supprimer définitivement cette prestation ?', toast_booking_deleted:'✔ Prestation supprimée.',
 confirm_delete_client:'Supprimer définitivement le client {name} ?',
 toast_status_updated:'✔ Statut de la facture {num} : {status}.', toast_booking_updated:'✔ Booking modifié.', toast_preview_updated:'✔ Aperçu mis à jour.',
 toast_select_client_save:"⚠ Sélectionne un client avant d'enregistrer.",
@@ -1328,6 +1330,7 @@ nav_update_checking:'Checking…', nav_update_available:'Update available', nav_
 upd_title:'Update available', upd_state_choice:'A new version is ready to install.', upd_state_available:'Preparing download…', upd_state_downloading:'Downloading… {pct}%', upd_state_installing:'Installing…', upd_state_ready:'Ready — restarting in {seconds}s…', btn_install_update:'Install now', btn_update_later:'Later',
 wn_title:'Update installed', wn_text:'Helm Ops was just updated with important improvements and fixes.', wn_btn:"Great, let's go", wn_badge_version:'Version {version}',
 toast_client_email_invalid:'⚠ Invalid client email: {email}',
+toast_booking_client_required:'⚠ Enter a client.', toast_booking_date_required:'⚠ Enter a valid date.',
 toast_old_invoice_no_detail:'⚠ Detail unavailable for this older invoice.',
 toast_invoice_loaded:'✎ Invoice {num} loaded for editing.',
 toast_invoice_duplicated:'✔ New invoice {num} created from {from}.',
@@ -1336,6 +1339,7 @@ toast_invoice_not_found:'⚠ Invoice not found.',
 toast_sendgrid_missing:'⚠ Client not found for this invoice.',
 toast_invoice_resent:'✔ Invoice resent to {email}.', toast_resend_failed:'✕ Resend failed.', toast_error_generic:'✕ Error: {msg}',
 confirm_delete_invoice:'Permanently delete invoice {num}?', toast_invoice_deleted:'✔ Invoice {num} deleted.',
+confirm_delete_booking:'Permanently delete this booking?', toast_booking_deleted:'✔ Booking deleted.',
 confirm_delete_client:'Permanently delete client {name}?',
 toast_status_updated:'✔ Invoice {num} status: {status}.', toast_booking_updated:'✔ Booking updated.', toast_preview_updated:'✔ Preview updated.',
 toast_select_client_save:'⚠ Select a client before saving.',
@@ -1440,6 +1444,7 @@ nav_update_checking:'Comprobando…', nav_update_available:'Actualización dispo
 upd_title:'Actualización disponible', upd_state_choice:'Una nueva versión está lista para instalar.', upd_state_available:'Preparando la descarga…', upd_state_downloading:'Descargando… {pct}%', upd_state_installing:'Instalando…', upd_state_ready:'Listo — reinicio en {seconds}s…', btn_install_update:'Instalar ahora', btn_update_later:'Más tarde',
 wn_title:'Actualización instalada', wn_text:'Helm Ops se acaba de actualizar con mejoras y correcciones importantes.', wn_btn:'Perfecto, vamos', wn_badge_version:'Versión {version}',
 toast_client_email_invalid:'⚠ Email de cliente no válido: {email}',
+toast_booking_client_required:'⚠ Indica un cliente.', toast_booking_date_required:'⚠ Indica una fecha válida.',
 toast_old_invoice_no_detail:'⚠ Detalle no disponible para esta factura antigua.',
 toast_invoice_loaded:'✎ Factura {num} cargada para editar.',
 toast_invoice_duplicated:'✔ Nueva factura {num} creada a partir de {from}.',
@@ -1448,6 +1453,7 @@ toast_invoice_not_found:'⚠ Factura no encontrada.',
 toast_sendgrid_missing:'⚠ Cliente no encontrado para esta factura.',
 toast_invoice_resent:'✔ Factura reenviada a {email}.', toast_resend_failed:'✕ Error al reenviar.', toast_error_generic:'✕ Error: {msg}',
 confirm_delete_invoice:'¿Eliminar definitivamente la factura {num}?', toast_invoice_deleted:'✔ Factura {num} eliminada.',
+confirm_delete_booking:'¿Eliminar definitivamente esta prestación?', toast_booking_deleted:'✔ Prestación eliminada.',
 confirm_delete_client:'¿Eliminar definitivamente el cliente {name}?',
 toast_status_updated:'✔ Estado de la factura {num}: {status}.', toast_booking_updated:'✔ Reserva modificada.', toast_preview_updated:'✔ Vista previa actualizada.',
 toast_select_client_save:'⚠ Selecciona un cliente antes de guardar.',
@@ -1940,7 +1946,10 @@ async function hydrateFromCloud(isRetry){
   localStorage.setItem('clients', nextClients);
   localStorage.setItem('bookings', nextBookings);
   localStorage.setItem('invoices', nextInvoices);
-  if(companyRes.data) localStorage.setItem('from', JSON.stringify(fromDbRow('from', companyRes.data)));
+  // Toujours réécrit (jamais conditionné à companyRes.data) : sinon un compte sans company_info
+  // hérite silencieusement du 'from' resté en cache local d'un compte précédemment connecté sur
+  // le même appareil (nom, IBAN, SIRET d'un autre utilisateur affichés/utilisés sur ses factures).
+  localStorage.setItem('from', companyRes.data ? JSON.stringify(fromDbRow('from', companyRes.data)) : '{}');
   localStorage.setItem('lastCloudSyncAt', new Date().toISOString());
   return changed;
 }
@@ -2138,6 +2147,10 @@ async function submitNewPassword(){
 async function logoutAccount(){
   if(!await confirmDialog('Se déconnecter de Helm Ops ?')) return;
   await getSb().auth.signOut();
+  // Vide le cache local métier (clients/bookings/invoices/from) — sinon il reste visible/utilisé
+  // le temps du prochain hydrateFromCloud() si un autre compte se connecte ensuite sur cet
+  // appareil (même logique que confirmDeleteHelmAccount()).
+  Object.keys(localStorage).forEach(k=>localStorage.removeItem(k));
   location.reload();
 }
 
@@ -2212,7 +2225,7 @@ async function bootAuth(){
   await hydrateFromCloud();
   migrateInvoiceStatuses();
   bootApp();
-  obInit();
+  obInit(access.session.user.id);
 }
 
 // --- Onboarding première connexion : ne s'affiche que si l'espace de travail est vide
@@ -2221,14 +2234,17 @@ async function bootAuth(){
 // cloud, juste un rappel UI) doublé d'une vérif sur les données réelles : si l'utilisateur a
 // déjà des données (ex. migrées depuis un autre appareil), l'onboarding ne se déclenche pas
 // même si le flag n'a jamais été posé sur cet appareil. ---
-const OB_KEY = 'helmops_onboarding_done';
+// Scopé par user_id (pas juste 'helmops_onboarding_done') : plusieurs comptes utilisés sur le
+// même appareil/install (ex. tests) ne doivent pas se voler mutuellement le flag "déjà onboardé".
+let obKey = 'helmops_onboarding_done';
 let obCurrentStep = 1;
 const OB_TOTAL = 4;
 
-function obInit(){
-  if(localStorage.getItem(OB_KEY)==='1') return;
+function obInit(uid){
+  obKey = 'helmops_onboarding_done_'+uid;
+  if(localStorage.getItem(obKey)==='1') return;
   const hasData = storeArr('clients').length>0 || storeArr('bookings').length>0 || !!store('from').name;
-  if(hasData){ localStorage.setItem(OB_KEY,'1'); return; }
+  if(hasData){ localStorage.setItem(obKey,'1'); return; }
   obShow();
 }
 function obShow(){
@@ -2306,7 +2322,7 @@ function obNext(){
 function obBack(){ if(obCurrentStep>1) obRender(obCurrentStep-1); }
 function obSkip(){ obFinish(); }
 function obFinish(){
-  localStorage.setItem(OB_KEY,'1');
+  localStorage.setItem(obKey,'1');
   const overlay = document.getElementById('onboarding-overlay');
   overlay.style.transition = 'opacity .3s ease';
   overlay.style.opacity = '0';
@@ -3097,6 +3113,8 @@ function addBookingForDay(day){
 }
 
 function addBooking(){
+  if(!bkClient.value.trim()){ showToast(t('toast_booking_client_required')); bkClient.focus(); return; }
+  if(!bkDate.value){ showToast(t('toast_booking_date_required')); bkDate.focus(); return; }
   let hours = 0;
   if(bkFrom.value && bkTo.value){
     const [h1,m1]=bkFrom.value.split(':').map(Number);
@@ -3257,10 +3275,12 @@ function invoiceSelectedBookings(){
   showTab('facture');
   showToast(t('toast_group_invoice_created',{n:selected.length}));
 }
-function deleteBooking(id){
+async function deleteBooking(id){
+  if(!await confirmDialog(t('confirm_delete_booking'))) return;
   set('bookings', storeArr('bookings').filter(x=>x.id!==id));
   renderPlanning();
   renderCalendarTab();
+  showToast(t('toast_booking_deleted'));
 }
 let pointageEditId = null;
 function openPointageModal(id){
