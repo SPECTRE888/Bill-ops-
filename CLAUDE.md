@@ -1,8 +1,10 @@
 # Helm Ops — Gestion complète d'activité (clients, planning, facturation)
 
-Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) garde son nom technique historique, décorrélé de la marque affichée. La table `billops_sync` (ancien mécanisme de sync par code, voir Historique en bas de section Stockage cloud) n'est plus utilisée par le client mais n'a pas été supprimée côté Supabase.
+Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) garde son nom technique historique, décorrélé de la marque affichée.
 
-Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `oauth-relay-page/index.html` (ancienne page statique de relais pour le login Google côté Electron, déployée sur Vercel — projet séparé `helm-relay`, morte depuis le passage au serveur loopback local, voir Login + abonnement ci-dessous), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, `oauth-google-callback`/`oauth-google-poll` mortes depuis l'abandon de l'OAuth Gmail (voir Envoi de factures), `check-access`/`stripe-checkout`/`stripe-webhook`/`auth-relay-deposit`/`auth-relay-poll` login + abonnement, `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
+**Audit de sécurité du 2026-08-23** : une table `billops_sync` (ancien mécanisme de sync par code) avait une policy RLS grande ouverte (`anon read/write`, `qual:true`) — accès lecture/écriture sans authentification, exploitable avec la seule clé publique de l'app, contenait encore de vraies données. Table supprimée. Le flow OAuth desktop via relais Vercel (`helm-relay.vercel.app` + `auth-relay-deposit`/`auth-relay-poll` + table `login_relay`), documenté comme "mort côté app" depuis le passage au serveur loopback local le 2026-08-22, s'est révélé **toujours actif côté infra** (URL toujours whitelistée dans `uri_allow_list` Supabase Auth, secret partagé public) — exploitable à distance par phishing sans accès à la machine de la victime. Projet Vercel supprimé, Edge Functions `auth-relay-deposit`/`auth-relay-poll`/`oauth-google-callback`/`oauth-google-poll` supprimées, tables `login_relay`/`oauth_pending` supprimées, `oauth-relay-page/` retiré du repo, `uri_allow_list` nettoyée, `APP_RELAY_SECRET` tourné. Leçon retenue : "mort côté client" ne veut pas dire "mort côté infra" — un flow remplacé doit être désactivé à la source (whitelist, secrets, déploiement), pas seulement laissé sans appelant côté app.
+
+Fichiers : `facture.html` (app desktop complète, single-file, packagée en app Mac via Electron), `mobile/index.html` (PWA compagnon iPhone, single-file, déployée sur GitHub Pages), `supabase/functions/` (Edge Functions : `send-invoice` envoi centralisé via l'API Brevo depuis `mail.ops-suite.fr`, protégé par un vrai token de session Supabase depuis le 2026-08-23 (en plus du secret partagé) ; `check-access`/`stripe-checkout`/`stripe-webhook` login + abonnement ; `delete-account` suppression de compte ; `notify-upcoming-bookings` rappels push). `send-invoice-server.js` (ancienne version Express, référence obsolète pré-SMTP, pas utilisée en prod).
 
 ## Stack
 HTML/CSS/JS vanilla. `localStorage` sert de **cache local** (from, clients, invoices, bookings, inv_theme, inv_lang, gmailAuth, pushSubscriptions) — la source de vérité pour les données métier (clients/bookings/invoices/from) est Supabase, scindée par utilisateur (voir Stockage cloud ci-dessous).
@@ -58,8 +60,8 @@ proprement si ça gêne (ex. ajouter `gmail_refresh_token`/`gmail_email` à `com
 Historique : avant ce système, `facture.html`/`mobile/index.html` partageaient leurs données via
 un blob JSON unique dans la table `billops_sync`, clé par un "code de synchro" aléatoire collé
 manuellement sur chaque appareil (whole-blob last-write-wins, sans notion de compte). Abandonné
-au profit du stockage par compte ci-dessus ; la table `billops_sync` existe encore côté Supabase
-mais n'est plus utilisée par le client (voir tout en haut de ce fichier).
+au profit du stockage par compte ci-dessus ; table supprimée le 2026-08-23 (RLS grande ouverte
+trouvée lors d'un audit de sécurité — voir tout en haut de ce fichier).
 
 ## Onglets (nav gauche, groupés par catégorie)
 Accueil : tableau de bord (CA du mois, prestas à venir, factures en attente, heures prévues, prochaine presta, actions rapides), onglet par défaut, sans catégorie (item unique en haut de nav).
@@ -141,11 +143,13 @@ Le corps de l'email n'est plus la facture en HTML brut : c'est une formule de po
 **PDF joint** (généré client-side via `html2pdf` → `toPdf().output('datauristring')`, voir
 `pdfBase64FromElement()`/`pdfBase64FromHtml()` dans `facture.html`).
 
-Restes morts, pas supprimés (aucune raison tant que ça ne gêne pas) : les Edge Functions
-`oauth-google-callback`/`oauth-google-poll` + table `oauth_pending` (flux OAuth Gmail) ; les
-colonnes `company_info.smtp_email`/`smtp_app_password` (flux mot de passe d'application) ; le
-compte/domaine SendGrid `ops-suite.fr` authentifié mais inutilisé (Brevo utilise le même domaine,
-authentification indépendante par prestataire).
+Restes morts : les Edge Functions `oauth-google-callback`/`oauth-google-poll` + table
+`oauth_pending` (flux OAuth Gmail) ont été supprimées le 2026-08-23 (audit de sécurité — un flow
+remplacé mais laissé déployé s'est révélé exploitable, voir tout en haut de ce fichier). Restent en
+l'état, sans risque identifié : les colonnes `company_info.smtp_email`/`smtp_app_password` (flux
+mot de passe d'application, jamais lues en écriture externe) ; le compte/domaine SendGrid
+`ops-suite.fr` authentifié mais inutilisé (Brevo utilise le même domaine, authentification
+indépendante par prestataire).
 
 **Piège vécu en dev** (toujours valable) : `saveFrom()`/`saveFromMobile()` (formulaire "Mon
 entreprise") remplaçaient tout l'objet `from` sans repartir de `store('from')` — modifier son
@@ -209,19 +213,31 @@ de celui qui l'a initié).
   s'ouvre toujours (Google refuse l'OAuth en webview embarquée, quel que soit le user-agent), mais
   plus de dépendance d'hébergement externe ni d'aller-retour réseau pour récupérer les tokens —
   motif du changement : repéré dans BAR OPS, qui utilise ce même pattern (serveur loopback local
-  au lieu d'un relais hébergé).
-  **Restes morts, pas supprimés** : `oauth-relay-page/index.html` (projet Vercel `helm-relay`),
-  Edge Functions `auth-relay-deposit`/`auth-relay-poll`, table `login_relay` — la page de relais
-  avait elle-même remplacé une Edge Function Supabase essayée en premier, abandonnée car la
-  plateforme force un `Content-Type: text/plain` + `Content-Security-Policy: default-src 'none';
-  sandbox` sur toute réponse HTTP d'une Edge Function, empêchant le script de la page de s'exécuter
-  (les Edge Functions Supabase ne peuvent donc pas servir une page interactive).
+  au lieu d'un relais hébergé). Depuis le 2026-08-23, ce serveur loopback exige aussi un nonce
+  anti-CSRF à usage unique (`electron/main.js:expectedAuthNonce`/`nonceValid()`, généré côté
+  renderer par `authRedirectTo()` avant chaque tentative — OAuth ou lien email — et transmis au
+  process principal par IPC `set-auth-nonce`) : sans lui, une page web ouverte dans le navigateur
+  habituel pendant que l'app tourne pouvait forcer une connexion sur un compte contrôlé par un
+  attaquant (`/callback`+`/token` acceptaient tout hash sans vérifier la provenance), permettant
+  l'exfiltration des données locales déjà en cache vers le cloud de l'attaquant via
+  `hydrateFromCloud()`/`migrateLocalToCloud()`.
+  **Supprimés le 2026-08-23** (audit de sécurité) : `oauth-relay-page/index.html` + projet Vercel
+  `helm-relay`, Edge Functions `auth-relay-deposit`/`auth-relay-poll`, table `login_relay`. Ce
+  flow, documenté "mort côté app" depuis le 2026-08-22, s'est révélé toujours exploitable côté
+  infra : l'URL Vercel était restée dans `uri_allow_list` (Supabase Auth), et son `state` de
+  requête n'était jamais vérifié comme provenant d'une vraie tentative — un attaquant pouvait
+  construire un lien `/auth/v1/authorize?redirect_to=https://helm-relay.vercel.app/?state=<son
+  state>`, l'envoyer par phishing, et une fois la victime authentifiée via un vrai écran Google
+  légitime, récupérer ses tokens de session via `auth-relay-poll` (secret partagé public,
+  embarqué en clair dans le JS de la page). Exploitable à distance, sans dépendre de l'app en
+  cours d'exécution sur la machine de la victime — contrairement au CSRF loopback ci-dessus.
 
 Tables Supabase : `profiles` (id/email, remplie par un trigger `handle_new_user` sur `auth.users`,
 lecture seule côté client), `subscriptions` (`user_id, status, plan, period, expires_at,
 stripe_customer_id, stripe_subscription_id` — écrite uniquement par les Edge Functions via
-service role, `check-access` fait foi). `login_relay` existe encore côté Supabase mais n'est plus
-utilisée par le client (voir flow desktop ci-dessus).
+service role, `check-access` fait foi ; RLS : SELECT own uniquement, aucune policy
+INSERT/UPDATE/DELETE pour `anon`/`authenticated` — impossible de s'auto-attribuer un accès via
+l'API REST directe). `login_relay` supprimée le 2026-08-23 (voir flow desktop ci-dessus).
 
 Fonctionnel de bout en bout depuis le 2026-08-05 (vérifié en usage réel : login, abonnement test
 Stripe, accès débloqué). Étapes manuelles faites : produit/prix + webhook Stripe dédiés à Helm,

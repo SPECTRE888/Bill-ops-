@@ -484,7 +484,7 @@ function todayStr(){
 const SUPABASE_URL = 'https://chlmqnrvnrgeaihryreb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobG1xbnJ2bnJnZWFpaHJ5cmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNTQ1MjMsImV4cCI6MjA5ODczMDUyM30.ErgkAYc0mVv6iyEeIDtJ8kKaX6ExyNi4ribi_rvqX6s';
 const SEND_INVOICE_URL = SUPABASE_URL + '/functions/v1/send-invoice';
-const APP_RELAY_SECRET = '364ae57df352752832e9c6cb52ad7b040740ad481628839b';
+const APP_RELAY_SECRET = 'fff2e258076a39a82dce6641d9ac066761220cb51bfd57b7922d160184431a01';
 const VAPID_PUBLIC_KEY = 'BNAR3mX4w7cbnSefEGzsl0dBxIIEBr7ZuzPbXQf6UQCAntPLdFohiSp4dXeop7pwVFsMYL9PMwxJ4rc2_rZ8zaY';
 let sb = null;
 function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {auth:{flowType:'implicit'}}); return sb; }
@@ -719,6 +719,10 @@ const store = k => JSON.parse(localStorage.getItem(k) || '{}');
 const storeArr = k => JSON.parse(localStorage.getItem(k) || '[]');
 const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueCloudPush(k); };
 
+// Échappement HTML — voir facture.html pour le détail (même risque : nom/adresse client non
+// échappé dans innerHTML, exécutable dans la même origine que le token de session Supabase).
+const esc = v => String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
 // --- Stockage cloud (remplace localStorage comme source de vérité) ---
 // Voir facture.html pour le détail : store()/storeArr() restent une lecture locale synchrone,
 // set() écrit local immédiatement puis pousse en tâche de fond vers Supabase.
@@ -898,7 +902,7 @@ function pointedBookingCardHtml(b){
   return `<div class="mcard" style="display:flex;gap:10px;align-items:flex-start;">
     <input type="checkbox" style="width:auto;margin-top:3px;flex-shrink:0;" ${groupSelectionMobile.has(b.id)?'checked':''} onchange="toggleGroupSelectMobile('${b.id}', this.checked)">
     <div style="flex:1;min-width:0;">
-      <b>${b.client}</b>${b.label?' — '+b.label:''}<br>
+      <b>${esc(b.client)}</b>${b.label?' — '+esc(b.label):''}<br>
       <span style="color:var(--text2);font-size:12px;">${formatFrDate(b.date)} · ${localHM(b.checkedInAt)} – ${localHM(b.checkedOutAt)} · ${b.actualHours}h réel</span><br>
       ${details?`<div style="margin:6px 0;font-size:11.5px;color:var(--text2);">${details}</div>`:''}
       <button class="btn-gold action-btn" onclick="openInvoiceExtras('${b.id}')">Transformer en facture</button>
@@ -1048,11 +1052,11 @@ async function testLocalNotification(){
 function linkifyPhones(text){
   if(!text) return '';
   const re = /(\+33[\s.-]?[1-9](?:[\s.-]?\d{2}){4})|(0[1-9](?:[\s.-]?\d{2}){4})/g;
-  return text.replace(re, m => `<a href="tel:${m.replace(/[\s.-]/g,'')}" style="color:var(--gold);">${m}</a>`);
+  return esc(text).replace(re, m => `<a href="tel:${m.replace(/[\s.-]/g,'')}" style="color:var(--gold);">${m}</a>`);
 }
 function mapsLink(addr){
   if(!addr) return '';
-  return `<a href="https://maps.apple.com/?q=${encodeURIComponent(addr)}" style="color:var(--text2);text-decoration:underline;">${addr}</a>`;
+  return `<a href="https://maps.apple.com/?q=${encodeURIComponent(addr)}" style="color:var(--text2);text-decoration:underline;">${esc(addr)}</a>`;
 }
 let pointageView = 'topoint';
 function switchPointageView(v){
@@ -1076,7 +1080,7 @@ function renderPointage(){
   el.innerHTML = active.length ? active.map(b=>{
     const overdue = b.date < today;
     const dayLabel = overdue ? formatFrDate(b.date) : "Aujourd'hui";
-    const info = `<b>${b.client}</b>${b.label?' — '+b.label:''}<br><span style="color:var(--text2);font-size:12px;">${dayLabel}${b.from&&b.to?' · '+b.from+'-'+b.to:''}</span>`;
+    const info = `<b>${esc(b.client)}</b>${b.label?' — '+esc(b.label):''}<br><span style="color:var(--text2);font-size:12px;">${dayLabel}${b.from&&b.to?' · '+esc(b.from)+'-'+esc(b.to):''}</span>`;
     const alertLine = overdue ? `<div style="margin-top:4px;font-size:11.5px;color:var(--red);font-weight:600;">⚠ Pointage en retard</div>` : '';
     const details = [
       b.addr ? `<div style="margin-top:6px;font-size:11.5px;color:var(--text2);">📍 ${mapsLink(b.addr)}</div>` : '',
@@ -1231,7 +1235,7 @@ function renderMobileCalDayPanel(){
       b.contact ? `☎ ${linkifyPhones(b.contact)}` : ''
     ].filter(Boolean).join('<br>') : '';
     return `<div class="mcal-b-row${invoiced?' invoiced':''}" style="border-left:3px solid ${invoiced?'var(--border2)':clientColor(b.client)};padding-left:8px;">
-      <b>${b.client}</b>${b.label?' — '+b.label:''}${b.from&&b.to?' · '+b.from+'-'+b.to:''} — <span style="color:${invoiced?'var(--text2)':'var(--gold)'};font-weight:600;">${((b.actualHours ?? b.hours)*b.rate).toFixed(2)} €</span>
+      <b>${esc(b.client)}</b>${b.label?' — '+esc(b.label):''}${b.from&&b.to?' · '+esc(b.from)+'-'+esc(b.to):''} — <span style="color:${invoiced?'var(--text2)':'var(--gold)'};font-weight:600;">${((b.actualHours ?? b.hours)*b.rate).toFixed(2)} €</span>
       ${details?`<div style="margin-top:5px;font-size:11.5px;color:var(--text2);">${details}</div>`:''}
       <div class="mcal-b-actions">
         ${actionHtml}
@@ -1254,7 +1258,7 @@ function addBookingForMobileDay(day){
 }
 
 function populateClientNames(){
-  document.getElementById('clientNames').innerHTML = storeArr('clients').map(c=>`<option value="${c.name}">`).join('');
+  document.getElementById('clientNames').innerHTML = storeArr('clients').map(c=>`<option value="${esc(c.name)}">`).join('');
 }
 function isValidEmailMobile(email){
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email||'').trim());
@@ -1305,8 +1309,8 @@ function renderClientListMobile(){
   const clients = storeArr('clients');
   document.getElementById('clientListMobile').innerHTML = clients.map((c,i)=>`
     <div class="mcard">
-      <b>${c.name}</b>${c.prefix?' <span style="color:var(--gold);font-size:11px;">['+c.prefix+']</span>':''}<br>
-      ${c.email||''}${c.phone?' · '+c.phone:''}${c.addr?'<br>'+c.addr:''}
+      <b>${esc(c.name)}</b>${c.prefix?' <span style="color:var(--gold);font-size:11px;">['+esc(c.prefix)+']</span>':''}<br>
+      ${esc(c.email||'')}${c.phone?' · '+esc(c.phone):''}${c.addr?'<br>'+esc(c.addr):''}
       <div style="margin-top:8px;display:flex;gap:8px;">
         <button class="btn-line" onclick="editClientMobile(${i})">Modifier</button>
         <button class="btn-line" style="color:var(--red);" onclick="deleteClientMobile(${i})">Supprimer</button>
@@ -1393,9 +1397,9 @@ async function deleteBookingMobile(id){
 function invoiceCardHtml(i){
   const color = (i.status==='Envoyée'||i.status==='Payée') ? 'var(--green)' : 'var(--gold)';
   return `<div class="mcard">
-    <b>${i.num}</b> — ${i.client}<br>
-    <span style="color:var(--text2);font-size:12px;">${i.date||''}</span><br>
-    <span style="font-weight:600;">${i.total}</span>
+    <b>${esc(i.num)}</b> — ${esc(i.client)}<br>
+    <span style="color:var(--text2);font-size:12px;">${esc(i.date||'')}</span><br>
+    <span style="font-weight:600;">${esc(i.total)}</span>
     <select onchange="updateInvoiceStatusMobile('${i.num}', this.value)" style="width:auto;display:inline-block;margin-left:8px;padding:3px 8px;font-size:11px;font-weight:600;color:${color};">
       <option value="À envoyer"${i.status==='À envoyer'?' selected':''}>À envoyer</option>
       <option value="Envoyée"${i.status==='Envoyée'?' selected':''}>Envoyée</option>
@@ -1651,7 +1655,7 @@ function confirmInvoiceExtras(){
     : (from.tva || 'TVA non applicable, art. 293 B du CGI');
 
   let rows = rowsData.map(rd=>{
-    const descCell = [rd.b.date?`<b>${formatFrDate(rd.b.date)}</b>`:'', (rd.from&&rd.to)?`${rd.from} – ${rd.to}`:'', rd.b.label||'Prestation'].filter(Boolean).join(' · ');
+    const descCell = [rd.b.date?`<b>${formatFrDate(rd.b.date)}</b>`:'', (rd.from&&rd.to)?`${esc(rd.from)} – ${esc(rd.to)}`:'', esc(rd.b.label||'Prestation')].filter(Boolean).join(' · ');
     return `<tr><td>${descCell}</td><td class="num">${rd.qty||''}</td><td class="num">${rd.rate?rd.rate.toFixed(2)+' €':'-'}</td><td class="num">${rd.amt.toFixed(2)} €</td></tr>`;
   }).join('');
   if(km>0) rows += `<tr><td>Frais kilométriques</td><td class="num">${km} km</td><td class="num">${kmRate.toFixed(2)} €</td><td class="num">${kmAmt.toFixed(2)} €</td></tr>`;
@@ -1661,17 +1665,17 @@ function confirmInvoiceExtras(){
 
   const html = `<div id="invoice">
     <div class="inv-brand">
-      <div class="inv-brandname">${from.name||'Votre entreprise'}</div>
-      <div class="inv-tagline" style="${from.tagline?'':'display:none;'}">${from.tagline||''}</div>
+      <div class="inv-brandname">${esc(from.name||'Votre entreprise')}</div>
+      <div class="inv-tagline" style="${from.tagline?'':'display:none;'}">${esc(from.tagline||'')}</div>
     </div>
     <div class="inv-title-rule"><span>Facture</span></div>
     <div class="inv-meta-row">
-      <div><div class="inv-label">N° de facture</div><div class="inv-value">${num}</div></div>
+      <div><div class="inv-label">N° de facture</div><div class="inv-value">${esc(num)}</div></div>
       <div style="text-align:right;"><div class="inv-label">Date</div><div class="inv-value">${formatFrDate(invDate)}</div></div>
     </div>
     <div class="from-to">
-      <div><h3>De</h3><div><b>${from.name||''}</b><br>${from.addr||''}<br>${from.contact||''}</div></div>
-      <div style="text-align:right;"><h3>À</h3><div><b>${client.name}</b><br>${client.billingAddr||client.addr||''}<br>${client.email||''}${client.siret?'<br>SIRET : '+client.siret:''}</div></div>
+      <div><h3>De</h3><div><b>${esc(from.name||'')}</b><br>${esc(from.addr||'')}<br>${esc(from.contact||'')}</div></div>
+      <div style="text-align:right;"><h3>À</h3><div><b>${esc(client.name)}</b><br>${esc(client.billingAddr||client.addr||'')}<br>${esc(client.email||'')}${client.siret?'<br>SIRET : '+esc(client.siret):''}</div></div>
     </div>
     <table>
       <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Unitaire</th><th class="num">Montant</th></tr></thead>
@@ -1686,12 +1690,12 @@ function confirmInvoiceExtras(){
     <div class="inv-reglement">
       <h3>Règlement</h3>
       <div>
-        Titulaire : ${from.name||''}<br>
-        ${from.rib ? from.rib.replace(/\n/g,'<br>')+'<br>' : ''}
-        <b>${from.pay||'Virement bancaire'} — Paiement à réception de facture, échéance : 30 jours.</b>
+        Titulaire : ${esc(from.name||'')}<br>
+        ${from.rib ? esc(from.rib).replace(/\n/g,'<br>')+'<br>' : ''}
+        <b>${esc(from.pay||'Virement bancaire')} — Paiement à réception de facture, échéance : 30 jours.</b>
       </div>
     </div>
-    <div class="meta">SIRET : ${from.siret||''} — ${from.rcs||''}. ${tvaMention}.<br>
+    <div class="meta">SIRET : ${esc(from.siret||'')} — ${esc(from.rcs||'')}. ${esc(tvaMention)}.<br>
       En cas de retard de paiement : pénalité de 3× le taux d'intérêt légal + indemnité forfaitaire de recouvrement de 40 €.</div>
   </div>`;
 
