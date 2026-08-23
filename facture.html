@@ -1174,7 +1174,7 @@ opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'T
 lbl_rcs:'Mention RCS/RM', lbl_paiement:'Mode de règlement', lbl_rib:'RIB / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
 btn_save:'Enregistrer', btn_edit:'Modifier', btn_save_info:'Enregistrer mes infos',
 cpw_title:'Changer le mot de passe', cpw_new:'Nouveau mot de passe', cpw_confirm:'Confirmer le mot de passe', btn_change_password:'Changer le mot de passe',
-toast_cpw_too_short:'✕ Mot de passe trop court (6 caractères minimum).', toast_cpw_mismatch:'✕ Les mots de passe ne correspondent pas.', toast_cpw_done:'✔ Mot de passe modifié.',
+toast_cpw_too_short:'✕ Mot de passe trop court (10 caractères minimum).', toast_cpw_mismatch:'✕ Les mots de passe ne correspondent pas.', toast_cpw_done:'✔ Mot de passe modifié.',
 data_sync_title:'Synchronisation', sync_intro:'Relie cet appareil à un autre (Mac / iPhone) pour partager clients, factures et planning.',
 btn_gen_sync:'Générer un code de synchro', lbl_paste_sync:'Ou coller un code existant', ph_sync_code:'Code de synchro', btn_connect:'Connecter',
 sync_code_intro:'Code de synchro (à coller sur l\'autre appareil) :', btn_copy_code:'Copier le code', btn_force_sync:'Forcer la synchro', btn_disconnect_device:'Déconnecter cet appareil',
@@ -1290,7 +1290,7 @@ opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applica
 lbl_rcs:'Trade register notice', lbl_paiement:'Payment method', lbl_rib:'Bank details / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
 btn_save:'Save', btn_edit:'Edit', btn_save_info:'Save my info',
 cpw_title:'Change password', cpw_new:'New password', cpw_confirm:'Confirm password', btn_change_password:'Change password',
-toast_cpw_too_short:'✕ Password too short (6 characters minimum).', toast_cpw_mismatch:'✕ Passwords do not match.', toast_cpw_done:'✔ Password changed.',
+toast_cpw_too_short:'✕ Password too short (10 characters minimum).', toast_cpw_mismatch:'✕ Passwords do not match.', toast_cpw_done:'✔ Password changed.',
 data_sync_title:'Sync', sync_intro:'Link this device to another one (Mac / iPhone) to share clients, invoices and schedule.',
 btn_gen_sync:'Generate a sync code', lbl_paste_sync:'Or paste an existing code', ph_sync_code:'Sync code', btn_connect:'Connect',
 sync_code_intro:'Sync code (paste it on the other device):', btn_copy_code:'Copy code', btn_force_sync:'Force sync', btn_disconnect_device:'Disconnect this device',
@@ -1406,7 +1406,7 @@ opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplica
 lbl_rcs:'Mención Registro Mercantil', lbl_paiement:'Forma de pago', lbl_rib:'Datos bancarios / IBAN', lbl_bic:'BIC', ph_rib:'IBAN + BIC',
 btn_save:'Guardar', btn_edit:'Modificar', btn_save_info:'Guardar mis datos',
 cpw_title:'Cambiar la contraseña', cpw_new:'Nueva contraseña', cpw_confirm:'Confirmar contraseña', btn_change_password:'Cambiar la contraseña',
-toast_cpw_too_short:'✕ Contraseña demasiado corta (mínimo 6 caracteres).', toast_cpw_mismatch:'✕ Las contraseñas no coinciden.', toast_cpw_done:'✔ Contraseña modificada.',
+toast_cpw_too_short:'✕ Contraseña demasiado corta (mínimo 10 caracteres).', toast_cpw_mismatch:'✕ Las contraseñas no coinciden.', toast_cpw_done:'✔ Contraseña modificada.',
 data_sync_title:'Sincronización', sync_intro:'Vincula este dispositivo con otro (Mac / iPhone) para compartir clientes, facturas y planificación.',
 btn_gen_sync:'Generar un código de sincronización', lbl_paste_sync:'O pega un código existente', ph_sync_code:'Código de sincronización', btn_connect:'Conectar',
 sync_code_intro:'Código de sincronización (pégalo en el otro dispositivo):', btn_copy_code:'Copiar código', btn_force_sync:'Forzar sincronización', btn_disconnect_device:'Desconectar este dispositivo',
@@ -2097,7 +2097,7 @@ async function connectLogin(){
   if(window.electronBridge?.restartAuthServer) await window.electronBridge.restartAuthServer();
   const { data, error } = await getSb().auth.signInWithOAuth({
     provider:'google',
-    options:{ redirectTo:'http://127.0.0.1:59877/callback', skipBrowserRedirect:true, queryParams:{prompt:'select_account'} }
+    options:{ redirectTo:await authRedirectTo(), skipBrowserRedirect:true, queryParams:{prompt:'select_account'} }
   });
   if(error || !data?.url){ setStatusMsg(statusEl, '✕ '+(error?.message||'Erreur de connexion.')); return; }
   if(window.electronBridge?.openExternal) window.electronBridge.openExternal(data.url);
@@ -2115,14 +2115,21 @@ function toggleAuthMode(){
   document.getElementById('authModeToggle').textContent = authMode==='signin' ? 'Créer un compte' : '← Se connecter';
   document.getElementById('loginStatus').textContent = '';
 }
-function authRedirectTo(){
-  return window.electronBridge ? 'http://127.0.0.1:59877/callback' : location.origin + location.pathname;
+// Nonce anti-CSRF (voir electron/main.js) : sans lui, n'importe quelle page web ouverte dans le
+// navigateur habituel pendant que l'app tourne pourrait poster un hash de tokens arbitraire sur le
+// serveur loopback et forcer une connexion sur un compte que l'attaquant contrôle. Généré côté
+// renderer juste avant chaque tentative (OAuth ou lien email), transmis au process principal.
+async function authRedirectTo(){
+  if(!window.electronBridge) return location.origin + location.pathname;
+  const nonce = crypto.randomUUID();
+  await window.electronBridge.setAuthNonce(nonce);
+  return 'http://127.0.0.1:59877/callback?n='+nonce;
 }
 function authErrorMsg(error){
   const m = error?.message || '';
   if(m.includes('Invalid login credentials')) return 'Email ou mot de passe incorrect.';
   if(m.includes('already registered') || m.includes('already exists')) return 'Un compte existe déjà avec cet email — connecte-toi plutôt.';
-  if(m.includes('Password should be at least')) return 'Mot de passe trop court (6 caractères minimum).';
+  if(m.includes('Password should be at least')) return 'Mot de passe trop court (10 caractères minimum).';
   return m || 'Erreur de connexion.';
 }
 async function authEmailSubmit(){
@@ -2130,7 +2137,7 @@ async function authEmailSubmit(){
   const password = document.getElementById('authPassword').value;
   const statusEl = document.getElementById('loginStatus');
   if(!email || !isValidEmail(email)){ setStatusMsg(statusEl, '✕ Email invalide.'); return; }
-  if(!password || password.length<6){ setStatusMsg(statusEl, '✕ Mot de passe trop court (6 caractères minimum).'); return; }
+  if(!password || password.length<10){ setStatusMsg(statusEl, '✕ Mot de passe trop court (10 caractères minimum).'); return; }
   if(authMode==='signin'){
     setStatusMsg(statusEl, '⏳ Connexion en cours...');
     const {error} = await getSb().auth.signInWithPassword({email, password});
@@ -2139,7 +2146,7 @@ async function authEmailSubmit(){
     bootAuth();
   } else {
     setStatusMsg(statusEl, '⏳ Création du compte...');
-    const {data, error} = await getSb().auth.signUp({email, password, options:{emailRedirectTo:authRedirectTo()}});
+    const {data, error} = await getSb().auth.signUp({email, password, options:{emailRedirectTo:await authRedirectTo()}});
     if(error){ setStatusMsg(statusEl, '✕ '+authErrorMsg(error)); return; }
     if(data.session){ setStatusMsg(statusEl, ''); bootAuth(); }
     else setStatusMsg(statusEl, '✓ Compte créé — vérifie tes emails pour confirmer ton adresse, puis connecte-toi.');
@@ -2150,7 +2157,7 @@ async function authForgotPassword(){
   const statusEl = document.getElementById('loginStatus');
   if(!email || !isValidEmail(email)){ setStatusMsg(statusEl, '✕ Renseigne ton email ci-dessus d\'abord.'); return; }
   setStatusMsg(statusEl, '⏳ Envoi en cours...');
-  const {error} = await getSb().auth.resetPasswordForEmail(email, {redirectTo:authRedirectTo()});
+  const {error} = await getSb().auth.resetPasswordForEmail(email, {redirectTo:await authRedirectTo()});
   if(error){ setStatusMsg(statusEl, '✕ '+authErrorMsg(error)); return; }
   setStatusMsg(statusEl, '✓ Email envoyé — suis le lien pour choisir un nouveau mot de passe.');
 }
@@ -2158,7 +2165,7 @@ async function submitNewPassword(){
   const p1 = document.getElementById('resetPassword1').value;
   const p2 = document.getElementById('resetPassword2').value;
   const statusEl = document.getElementById('resetStatus');
-  if(!p1 || p1.length<6){ setStatusMsg(statusEl, '✕ Mot de passe trop court (6 caractères minimum).'); return; }
+  if(!p1 || p1.length<10){ setStatusMsg(statusEl, '✕ Mot de passe trop court (10 caractères minimum).'); return; }
   if(p1!==p2){ setStatusMsg(statusEl, '✕ Les mots de passe ne correspondent pas.'); return; }
   setStatusMsg(statusEl, '⏳ Enregistrement...');
   const {error} = await getSb().auth.updateUser({password:p1});
@@ -2240,7 +2247,7 @@ async function submitChangePassword(){
   const p1 = document.getElementById('cpwNew').value;
   const p2 = document.getElementById('cpwConfirm').value;
   const statusEl = document.getElementById('cpwStatus');
-  if(!p1 || p1.length<6){ setStatusMsg(statusEl, t('toast_cpw_too_short')); return; }
+  if(!p1 || p1.length<10){ setStatusMsg(statusEl, t('toast_cpw_too_short')); return; }
   if(p1!==p2){ setStatusMsg(statusEl, t('toast_cpw_mismatch')); return; }
   setStatusMsg(statusEl, '⏳…');
   const {error} = await getSb().auth.updateUser({password:p1});
@@ -2797,8 +2804,9 @@ async function resendInvoice(num){
   if(!isValidEmail(c.email)){ showToast(t('toast_client_email_invalid',{email:c.email})); return; }
   try{
     const pdfBase64 = await pdfBase64FromHtml(inv.html);
+    const { data:{session} } = await getSb().auth.getSession();
     const res = await fetch(SEND_INVOICE_URL, {
-      method:'POST', headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
+      method:'POST', headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET, 'Authorization':'Bearer '+session?.access_token},
       body: JSON.stringify({replyTo: resolveReplyTo(), to: c.email, subject:t('inv_facture_label')+' '+inv.num, html: emailBodyHtml(resolveEmailBody(c, inv.num)), pdfBase64, pdfFilename: inv.num+'.pdf', fromName: f.name})
     });
     showToast(res.ok ? t('toast_invoice_resent',{email:c.email}) : t('toast_resend_failed'));
@@ -3769,9 +3777,10 @@ async function sendInvoice(){
   const msg = emailMessage.value.trim() || resolveEmailBody(c, num);
   try{
     const pdfBase64 = await pdfBase64FromElement(document.getElementById('invoice'));
+    const { data:{session} } = await getSb().auth.getSession();
     const res = await fetch(SEND_INVOICE_URL, {
       method:'POST',
-      headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
+      headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET, 'Authorization':'Bearer '+session?.access_token},
       body: JSON.stringify({
         replyTo: resolveReplyTo(),
         to: c.email,

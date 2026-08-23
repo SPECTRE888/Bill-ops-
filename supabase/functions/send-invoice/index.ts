@@ -9,10 +9,18 @@
 // le destinataire voit bien le nom de la personne/entreprise qui facture — seule l'adresse
 // technique brute (invisible en usage normal) est celle du domaine mutualisé.
 //
-// Pas d'auth Supabase ici (appelé en fetch() simple depuis facture.html/mobile/index.html) :
-// protégé par un secret partagé APP_RELAY_SECRET (même principe que x-cron-secret sur
-// notify-upcoming-bookings) pour limiter le scan automatisé.
+// x-app-secret seul ne protégeait rien : c'est une constante publique, lisible en clair dans
+// facture.html/mobile/index.html (donc dans le code source de la PWA publiée sur GitHub Pages).
+// N'importe qui pouvait extraire ce secret et utiliser cette fonction comme relais email ouvert
+// (spam/phishing depuis mail.ops-suite.fr, domaine authentifié SPF/DKIM/DMARC — donc les emails
+// passent les filtres anti-spam ; ou épuisement du quota Brevo partagé 300/jour). Fix : exiger en
+// plus un vrai token de session Supabase (même principe que check-access), pour que seul un
+// compte réellement inscrit puisse appeler cette fonction.
 
+import { createClient } from 'npm:@supabase/supabase-js@2';
+
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY')!;
 const APP_RELAY_SECRET = Deno.env.get('APP_RELAY_SECRET');
 const SEND_FROM_EMAIL = 'mail@ops-suite.fr';
@@ -20,7 +28,7 @@ const SEND_FROM_EMAIL = 'mail@ops-suite.fr';
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, x-app-secret',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-app-secret',
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,9 +38,18 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405, headers: CORS_HEADERS });
 
-  if (APP_RELAY_SECRET && req.headers.get('x-app-secret') !== APP_RELAY_SECRET) {
+  // Fail-closed : si APP_RELAY_SECRET n'est pas configuré côté env, on refuse plutôt que de
+  // laisser passer silencieusement (l'ancien `if (APP_RELAY_SECRET && ...)` fail-ouvrait).
+  if (!APP_RELAY_SECRET || req.headers.get('x-app-secret') !== APP_RELAY_SECRET) {
     return new Response('Unauthorized', { status: 401, headers: CORS_HEADERS });
   }
+
+  const authHeader = req.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  if (!token) return new Response('Unauthorized', { status: 401, headers: CORS_HEADERS });
+  const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+  const { data: userData, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !userData?.user) return new Response('Unauthorized', { status: 401, headers: CORS_HEADERS });
 
   let body: any;
   try {

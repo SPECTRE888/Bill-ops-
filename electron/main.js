@@ -17,6 +17,33 @@ app.commandLine.appendSwitch('disable-features', 'Autofill,AutofillServerCommuni
 let mainWin    = null
 let authServer = null
 
+// ─── Anti-CSRF sur le serveur loopback ──────────────────────────────────────
+// Le serveur /callback+/token écoute en continu (pas juste pendant une tentative de login) sur
+// 127.0.0.1 — une requête GET simple (non préflightée par CORS) depuis n'importe quelle page web
+// ouverte dans le navigateur habituel de l'utilisateur peut donc y poster un hash de tokens
+// arbitraire, même sans rapport avec une vraie tentative de connexion de cette app. Comme ce hash
+// finit directement dans getSb().auth.setSession() côté renderer, un attaquant qui a un compte
+// Supabase à lui (inscription gratuite) peut forcer l'app de la victime à se connecter sur SON
+// compte — et hydrateFromCloud()/migrateLocalToCloud() pousseraient alors les données locales déjà
+// en cache de la victime vers le cloud de l'attaquant. Fix : un nonce aléatoire à usage unique,
+// généré côté renderer juste avant chaque tentative (OAuth Google, email de confirmation, email de
+// reset), connu uniquement du process principal — /callback et /token n'acceptent que le hash qui
+// arrive accompagné du nonce en cours.
+let expectedAuthNonce = null
+let authNonceExpiresAt = 0
+ipcMain.handle('set-auth-nonce', (_e, nonce) => {
+  expectedAuthNonce = nonce
+  // Aligné sur mailer_otp_exp (1h, réglage Supabase Auth) : les liens de confirmation/reset
+  // envoyés par email expirent déjà côté Supabase à cette échéance, inutile que le nonce soit
+  // plus restrictif que ça pour ces flux (OAuth Google se conclut de toute façon en quelques
+  // secondes, largement dans la fenêtre).
+  authNonceExpiresAt = Date.now() + 60 * 60 * 1000
+  return true
+})
+function nonceValid(n) {
+  return !!n && n === expectedAuthNonce && Date.now() < authNonceExpiresAt
+}
+
 // ─── Migration userData depuis l'ancien nom "bill-ops" (renommage → Helm Ops) ──
 // Sans ça, macOS traite l'app comme nouvelle après le renommage de productName/appId
 // et le thème + le code de synchro locaux semblent perdus au premier lancement.
@@ -60,6 +87,8 @@ function startAuthServer() {
     const parsed = url.parse(req.url, true)
 
     if (parsed.pathname === '/callback') {
+      const n = parsed.query.n || ''
+      if (!nonceValid(n)) { res.writeHead(403); res.end('Forbidden'); return }
       res.writeHead(200, { 'Content-Type': 'text/html' })
       res.end(`<!DOCTYPE html><html><head><meta charset="utf-8">
         <title>Helm Ops — Connexion réussie</title>
@@ -83,7 +112,7 @@ function startAuthServer() {
         </div>
         <script>
           const hash = window.location.hash || ''
-          fetch('/token?' + new URLSearchParams({ hash })).catch(()=>{})
+          fetch('/token?' + new URLSearchParams({ hash, n: ${JSON.stringify(n)} })).catch(()=>{})
           function closeTab(){ window.open('about:blank','_self'); window.close(); }
           document.getElementById('btn').addEventListener('click', closeTab)
           setTimeout(closeTab, 1000)
@@ -92,6 +121,9 @@ function startAuthServer() {
     }
 
     if (parsed.pathname === '/token') {
+      const n = parsed.query.n || ''
+      if (!nonceValid(n)) { res.writeHead(403); res.end('Forbidden'); return }
+      expectedAuthNonce = null // usage unique : invalidé dès consommation, même en cas de succès
       const hash = parsed.query.hash || ''
       res.writeHead(200); res.end('ok')
       if (mainWin) {

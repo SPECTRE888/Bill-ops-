@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
   if (req.method !== 'GET') return new Response('Method not allowed', { status: 405, headers: CORS_HEADERS });
 
-  if (APP_RELAY_SECRET && req.headers.get('x-app-secret') !== APP_RELAY_SECRET) {
+  if (!APP_RELAY_SECRET || req.headers.get('x-app-secret') !== APP_RELAY_SECRET) {
     return new Response('Unauthorized', { status: 401, headers: CORS_HEADERS });
   }
 

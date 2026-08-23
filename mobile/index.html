@@ -537,7 +537,7 @@ function authErrorMsg(error){
   const m = error?.message || '';
   if(m.includes('Invalid login credentials')) return 'Email ou mot de passe incorrect.';
   if(m.includes('already registered') || m.includes('already exists')) return 'Un compte existe déjà avec cet email — connecte-toi plutôt.';
-  if(m.includes('Password should be at least')) return 'Mot de passe trop court (6 caractères minimum).';
+  if(m.includes('Password should be at least')) return 'Mot de passe trop court (10 caractères minimum).';
   return m || 'Erreur de connexion.';
 }
 async function authEmailSubmit(){
@@ -545,7 +545,7 @@ async function authEmailSubmit(){
   const password = document.getElementById('authPassword').value;
   const statusEl = document.getElementById('loginStatus');
   if(!email || !isValidEmail(email)){ setStatusMsg(statusEl, '✕ Email invalide.'); return; }
-  if(!password || password.length<6){ setStatusMsg(statusEl, '✕ Mot de passe trop court (6 caractères minimum).'); return; }
+  if(!password || password.length<10){ setStatusMsg(statusEl, '✕ Mot de passe trop court (10 caractères minimum).'); return; }
   if(authMode==='signin'){
     setStatusMsg(statusEl, '⏳ Connexion en cours...');
     const {error} = await getSb().auth.signInWithPassword({email, password});
@@ -573,7 +573,7 @@ async function submitNewPassword(){
   const p1 = document.getElementById('resetPassword1').value;
   const p2 = document.getElementById('resetPassword2').value;
   const statusEl = document.getElementById('resetStatus');
-  if(!p1 || p1.length<6){ setStatusMsg(statusEl, '✕ Mot de passe trop court (6 caractères minimum).'); return; }
+  if(!p1 || p1.length<10){ setStatusMsg(statusEl, '✕ Mot de passe trop court (10 caractères minimum).'); return; }
   if(p1!==p2){ setStatusMsg(statusEl, '✕ Les mots de passe ne correspondent pas.'); return; }
   setStatusMsg(statusEl, '⏳ Enregistrement...');
   const {error} = await getSb().auth.updateUser({password:p1});
@@ -649,7 +649,7 @@ async function submitChangePassword(){
   const p1 = document.getElementById('cpwNew').value;
   const p2 = document.getElementById('cpwConfirm').value;
   const statusEl = document.getElementById('cpwStatus');
-  if(!p1 || p1.length<6){ setStatusMsg(statusEl, '✕ Mot de passe trop court (6 caractères minimum).'); return; }
+  if(!p1 || p1.length<10){ setStatusMsg(statusEl, '✕ Mot de passe trop court (10 caractères minimum).'); return; }
   if(p1!==p2){ setStatusMsg(statusEl, '✕ Les mots de passe ne correspondent pas.'); return; }
   setStatusMsg(statusEl, '⏳…');
   const {error} = await getSb().auth.updateUser({password:p1});
@@ -1475,8 +1475,9 @@ async function sendInvoiceMobile(num){
   if(!c){ showToast('⚠ Client manquant.'); return; }
   if(!isValidEmail(c.email)){ showToast('⚠ Email client invalide : '+c.email); return; }
   try{
+    const { data:{session} } = await getSb().auth.getSession();
     const res = await fetch(SEND_INVOICE_URL, {
-      method:'POST', headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET},
+      method:'POST', headers:{'Content-Type':'application/json', 'x-app-secret':APP_RELAY_SECRET, 'Authorization':'Bearer '+session?.access_token},
       body: JSON.stringify({replyTo: resolveReplyTo(), to: c.email, subject:'Facture '+inv.num, html: inv.html, fromName: f.name})
     });
     showToast(res.ok ? '✔ Facture envoyée à '+c.email+'.' : '✕ Échec de l\'envoi.');
