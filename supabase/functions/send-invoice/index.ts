@@ -51,6 +51,18 @@ Deno.serve(async (req) => {
   const { data: userData, error: userError } = await supabase.auth.getUser(token);
   if (userError || !userData?.user) return new Response('Unauthorized', { status: 401, headers: CORS_HEADERS });
 
+  // Un compte inscrit mais non abonné pouvait sinon utiliser mail.ops-suite.fr (domaine
+  // authentifié SPF/DKIM/DMARC) comme relais email gratuit — même logique d'accès que check-access.
+  const { data: sub } = await supabase
+    .from('subscriptions')
+    .select('expires_at')
+    .eq('user_id', userData.user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const allowed = !!sub?.expires_at && new Date(sub.expires_at).getTime() > Date.now();
+  if (!allowed) return new Response('Abonnement requis.', { status: 403, headers: CORS_HEADERS });
+
   let body: any;
   try {
     body = await req.json();

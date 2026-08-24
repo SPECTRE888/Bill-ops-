@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://chlmqnrvnrgeaihryreb.supabase.co; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none';">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Helm Ops</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -190,6 +191,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     <div class="auth-divider-mobile">ou</div>
     <button class="btn-line action-btn" onclick="connectLoginMobile()">Se connecter avec Google</button>
     <div id="loginStatus" style="font-size:12px;margin-top:8px;text-align:center;color:var(--gold);"></div>
+    <button class="auth-switch-mobile" style="display:block;margin:14px auto 0;" onclick="openLegalModal()">Mentions légales &amp; confidentialité</button>
   </div>
 </div>
 
@@ -200,6 +202,23 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     <button class="btn-gold action-btn" onclick="subscribeNow()">S'abonner</button>
     <button class="btn-line action-btn" onclick="openBillingPortal()">Gérer mon abonnement</button>
     <div id="paywallStatus" style="font-size:12px;margin-top:8px;text-align:center;color:var(--gold);"></div>
+    <button class="auth-switch-mobile" style="display:block;margin:14px auto 0;" onclick="openLegalModal()">Mentions légales &amp; confidentialité</button>
+  </div>
+</div>
+
+<div id="legalModal" class="pair-gate" style="display:none;z-index:21000;" onclick="if(event.target===this) closeLegalModal()">
+  <div class="pair-box" style="max-height:80vh;overflow-y:auto;text-align:left;">
+    <div class="pair-title">HELM OPS</div>
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:14px;">Mentions légales</div>
+    <div style="font-size:12px;line-height:1.7;color:var(--text2);">
+      <p><b>Éditeur</b><br>Jérôme Jarrige, éditeur de l'application Helm Ops.</p>
+      <p><b>Hébergement et traitement des données (RGPD)</b><br>Les données saisies dans l'application sont :<br>• stockées localement sur cet appareil (localStorage)<br>• synchronisées et hébergées sur Supabase (UE), prestataire conforme RGPD<br>• transmises à Brevo (relais d'envoi email de l'éditeur, UE) uniquement lors de l'envoi d'une facture par email (adresse email du destinataire, contenu de la facture)<br>• transmises à Stripe (paiement de ton abonnement, société américaine adhérente au cadre EU-US Data Privacy Framework) : email et moyen de paiement</p>
+      <p>Concernant les données de ton compte (nom, entreprise, email de connexion) : l'éditeur est responsable de traitement. Tu disposes d'un droit d'accès, de rectification, de portabilité et de suppression ; pour l'exercer, contacte l'éditeur ou utilise « Exporter mes données » depuis l'app desktop (Mes données → Sauvegarde), ou « Supprimer mon compte » depuis Réglages.</p>
+      <p>Concernant les données de tes propres clients que tu saisis dans l'application (nom, adresse, email, téléphone, factures) : <b>tu es seul responsable de traitement</b> de ces données au sens du RGPD (information des personnes concernées, base légale, durée de conservation). L'éditeur agit uniquement en tant que sous-traitant (art. 28 RGPD) : il héberge et transmet ces données selon tes instructions, sans les utiliser à d'autres fins.</p>
+      <p><b>Archivage légal</b><br>Les factures émises sont conservées 10 ans (art. L.110-4 du Code de commerce).</p>
+      <p><b>Loi applicable</b><br>Les présentes mentions légales sont régies par le droit français. Tout litige relève de la compétence exclusive des tribunaux français.</p>
+    </div>
+    <button class="btn-gold action-btn" style="margin-top:16px;" onclick="closeLegalModal()">Fermer</button>
   </div>
 </div>
 
@@ -351,6 +370,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
         </div>
         <p style="font-size:11px;color:var(--text3);margin:6px 0 0;">Recharge tout de suite les données des autres appareils, sans attendre la synchro automatique (jusqu'à 60s).</p>
       </div>
+      <div class="mcard">
+        <b>Confidentialité</b><br>
+        <button class="btn-line action-btn" style="margin-top:8px;" onclick="openLegalModal()">Mentions légales &amp; RGPD</button>
+      </div>
     </section>
   </main>
   <nav class="bottom-nav">
@@ -453,7 +476,9 @@ function showToast(msg, duration){
   if(!stack) return;
   const card = document.createElement('div');
   card.className = 'toast-card';
-  card.innerHTML = `<b>Helm Ops</b>${msg}`;
+  const b = document.createElement('b'); b.textContent = 'Helm Ops';
+  card.appendChild(b);
+  card.appendChild(document.createTextNode(msg));
   stack.appendChild(card);
   setTimeout(()=>{ card.remove(); }, duration || 4000);
 }
@@ -934,6 +959,8 @@ function renderGroupInvoiceBarMobile(){
   btn.style.opacity = clients.length>1 ? .5 : 1;
   btn.style.cursor = clients.length>1 ? 'not-allowed' : 'pointer';
 }
+function openLegalModal(){ document.getElementById('legalModal').style.display = 'flex'; }
+function closeLegalModal(){ document.getElementById('legalModal').style.display = 'none'; }
 let settingsReturnTab = 'pointage';
 function toggleSettings(){
   if(activeTab==='parametres'){
@@ -1002,7 +1029,7 @@ function saveReplyTo(){
 function refreshFromViewMobile(){
   const f = store('from');
   document.getElementById('fromViewMobile').innerHTML = f.name
-    ? `${f.name}${f.addr?'<br><span style="color:var(--text2);">'+f.addr.replace(/\n/g,'<br>')+'</span>':''}`
+    ? `${esc(f.name)}${f.addr?'<br><span style="color:var(--text2);">'+esc(f.addr).replace(/\n/g,'<br>')+'</span>':''}`
     : `<span style="color:var(--text2);">Pas encore configuré — nécessaire pour que tes factures aient un en-tête valide.</span>`;
 }
 function toggleFromEditMobile(show){
