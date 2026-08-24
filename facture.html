@@ -1847,6 +1847,12 @@ const set = (k,v) => { localStorage.setItem(k, JSON.stringify(v)); queueCloudPus
 // Supabase (localStorage) — au simple affichage de la liste clients. Pas de RCE (Electron a
 // contextIsolation/nodeIntegration désactivés) mais vol de session possible.
 const esc = v => String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+// Pour interpoler une valeur à l'intérieur d'une chaîne JS entre apostrophes dans un attribut
+// onclick="fn('${...}')" : esc() seul ne suffit pas, le navigateur décode les entités HTML de
+// l'attribut *avant* que le JS ne soit évalué, donc &#39; redevient ' et permettrait quand même
+// de sortir de la chaîne JS. On échappe d'abord pour le contexte JS (backslash, apostrophe),
+// puis pour le contexte HTML de l'attribut.
+const escJsAttr = v => esc(String(v??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/[\r\n]/g,''));
 
 // --- Stockage cloud (remplace localStorage comme source de vérité) ---
 // store()/storeArr() ne changent pas : elles restent la lecture synchrone habituelle, localStorage
@@ -2865,19 +2871,19 @@ function renderHistory(){
     <tbody>${invoices.map(i=>`<tr>
       <td>${esc(i.num)}</td><td>${esc(i.client)}</td><td>${esc(i.date||'')}</td><td class="num">${esc(i.total)}</td>
       <td>
-        <select onchange="updateInvoiceStatus('${i.num}', this.value)" style="width:auto;padding:3px 6px;font-size:11px;font-weight:600;color:${(i.status==='Envoyée'||i.status==='Payée')?'var(--green)':'var(--gold)'};">
+        <select onchange="updateInvoiceStatus('${escJsAttr(i.num)}', this.value)" style="width:auto;padding:3px 6px;font-size:11px;font-weight:600;color:${(i.status==='Envoyée'||i.status==='Payée')?'var(--green)':'var(--gold)'};">
           <option value="À envoyer"${i.status==='À envoyer'?' selected':''}>${t('status_a_envoyer')}</option>
           <option value="Envoyée"${i.status==='Envoyée'?' selected':''}>${t('status_envoyee')}</option>
           <option value="Payée"${i.status==='Payée'?' selected':''}>${t('status_payee')}</option>
         </select>
       </td>
       <td>
-        <button class="btn-line" onclick="viewInvoice('${i.num}')">${t('btn_view')}</button>
-        <button class="btn-line" onclick="editInvoice('${i.num}')">${t('btn_edit')}</button>
-        <button class="btn-line" onclick="duplicateInvoice('${i.num}')">${t('btn_duplicate')}</button>
-        <button class="btn-line" onclick="downloadInvoicePdf('${i.num}')">PDF</button>
-        <button class="btn-line" onclick="resendInvoice('${i.num}')">${(i.status==='Envoyée'||i.status==='Payée')?t('btn_resend'):t('btn_send_short')}</button>
-        <button class="btn-line btn-danger" onclick="deleteInvoice('${i.num}')">${t('btn_delete')}</button>
+        <button class="btn-line" onclick="viewInvoice('${escJsAttr(i.num)}')">${t('btn_view')}</button>
+        <button class="btn-line" onclick="editInvoice('${escJsAttr(i.num)}')">${t('btn_edit')}</button>
+        <button class="btn-line" onclick="duplicateInvoice('${escJsAttr(i.num)}')">${t('btn_duplicate')}</button>
+        <button class="btn-line" onclick="downloadInvoicePdf('${escJsAttr(i.num)}')">PDF</button>
+        <button class="btn-line" onclick="resendInvoice('${escJsAttr(i.num)}')">${(i.status==='Envoyée'||i.status==='Payée')?t('btn_resend'):t('btn_send_short')}</button>
+        <button class="btn-line btn-danger" onclick="deleteInvoice('${escJsAttr(i.num)}')">${t('btn_delete')}</button>
       </td>
     </tr>`).join('')}</tbody></table>
   ` : `<p style="color:var(--text3);font-size:12px;">${t('empty_invoices')}</p>`;
@@ -3507,12 +3513,12 @@ function addItem(desc='',qty='',rate='',from='',to='',dates=[]){
   div.innerHTML = `<div class="row2">
       <div class="i-dates-chips"></div>
       <input type="hidden" class="i-dates" value="${JSON.stringify(dates).replace(/"/g,'&quot;')}">
-      <input type="hidden" class="i-qty" value="${qty}">
+      <input type="hidden" class="i-qty" value="${esc(qty)}">
       <div class="rline-compact">
         <input type="date" class="i-date-input" title="Ajoute une date de prestation" onchange="addDateChip(this)">
-        <input type="number" class="i-rate" placeholder="€/h" value="${rate}" oninput="render()">
-        <input type="time" class="i-from" title="${t('title_debut')}" value="${from}" onchange="calcRange(this)">
-        <input type="time" class="i-to" title="${t('title_fin')}" value="${to}" onchange="calcRange(this)">
+        <input type="number" class="i-rate" placeholder="€/h" value="${esc(rate)}" oninput="render()">
+        <input type="time" class="i-from" title="${t('title_debut')}" value="${esc(from)}" onchange="calcRange(this)">
+        <input type="time" class="i-to" title="${t('title_fin')}" value="${esc(to)}" onchange="calcRange(this)">
       </div>
       <textarea placeholder="Description" class="i-desc" oninput="render()">${esc(desc)}</textarea>
       <div class="rline rline-actions">
