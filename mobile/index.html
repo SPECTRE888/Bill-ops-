@@ -299,6 +299,64 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .dash-grp-h{display:flex;align-items:center;gap:8px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:4px}
 .dash-grp-n{font-size:10px;padding:1px 7px;border-radius:9px;background:var(--surface2);color:var(--text2);letter-spacing:0}
 .dash-row{display:flex;align-items:center;gap:10px;padding:7px 0}
+.stf-form{container-type:inline-size;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--gold);border-radius:var(--radius-lg);overflow:hidden}
+.stf-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.stf-kicker{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.stf-progress{display:flex;align-items:center;gap:10px;font-size:10px;letter-spacing:.06em;color:var(--text3)}
+.stf-progress-bar{width:160px;height:3px;border-radius:2px;background:var(--border2);overflow:hidden}
+.stf-progress-bar span{display:block;height:100%;background:var(--gold);transition:width .3s}
+.stf-grid{display:grid;grid-template-columns:240px minmax(0,1fr);gap:24px;padding:20px}
+.stf-preview{position:sticky;top:84px;align-self:start;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.stf-pv-body{width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.stf-pv-name{font-family:var(--font-display);font-size:24px;font-weight:400;color:var(--text);line-height:1.15;word-break:break-word}
+.stf-pv-role{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border:1px solid var(--gold-border);background:var(--gold-bg);color:var(--gold);border-radius:4px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.stf-pv-sub{font-size:11px;color:var(--text2)}
+.stf-pv-rates{width:100%;margin-top:6px;border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:5px}
+.stf-pv-rates div{display:flex;justify-content:space-between;font-size:11px}
+.stf-pv-rates span{color:var(--text3)}.stf-pv-rates b{font-weight:500;color:var(--text)}
+.stf-steps{display:flex;flex-direction:column;gap:12px;min-width:0}
+.stf-sec{border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px 4px;background:var(--surface)}
+.stf-sec-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.stf-num{width:22px;height:22px;border-radius:4px;border:1px solid var(--gold-border);color:var(--gold);font-size:11px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
+.stf-sec.done .stf-num{background:var(--gold);border-color:var(--gold);color:#111}
+.stf-sec-t{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
+.stf-opt{margin-left:auto;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
+.stf-row{display:grid;gap:0 12px}
+.stf-row-id{grid-template-columns:minmax(0,1fr) 110px}
+.stf-row-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.stf-row-auto{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+.stf-big{font-size:16px!important;padding:11px 13px!important}
+.stf-hint{font-size:11px;color:var(--text3);margin:-4px 0 12px}
+.stf-roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;margin-bottom:14px}
+.stf-role{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:12px;border:1px solid var(--border2);border-radius:var(--radius-lg);background:var(--surface2);color:var(--text2);cursor:pointer;text-align:left;font-family:var(--font-body);transition:.15s}
+.stf-role:hover{border-color:var(--gold-border);color:var(--text)}
+.stf-role.on{border-color:var(--gold);background:var(--gold-bg);color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.stf-role-ic{display:inline-flex}
+.stf-role-n{font-size:12px;font-weight:500;letter-spacing:.02em}
+.stf-role-r{font-size:10px;color:var(--text3)}
+.stf-role.on .stf-role-r{color:var(--gold)}
+.stf-role-x{position:absolute;top:6px;right:8px;font-size:13px;line-height:1;color:var(--text3);opacity:.7}
+.stf-role-x:hover{color:var(--red);opacity:1}
+.stf-role-add{border-style:dashed;color:var(--text3)}
+.stf-role-inp{align-self:stretch;min-height:68px;border-color:var(--gold-border)!important}
+.stf-money{position:relative}
+.stf-money input{font-size:18px!important;padding:10px 72px 10px 13px!important;font-weight:400!important}
+.stf-money span{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;letter-spacing:.06em;color:var(--text3);pointer-events:none}
+.stf-margin{margin:-2px 0 14px}
+.stf-margin-l{font-size:11px;color:var(--text3);margin-bottom:6px}
+.stf-margin-l b{font-weight:600;margin:0 6px}
+.stf-margin-track{height:4px;border-radius:2px;background:var(--border2);overflow:hidden}
+.stf-margin-track span{display:block;height:100%;transition:width .2s}
+.stf-foot{display:flex;justify-content:flex-end;padding-top:4px}
+.stf-pv-av{width:96px;height:96px;border-radius:8px;border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:300;color:var(--gold);background:var(--surface)}
+.stf-head-l{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.stf-head-l .stf-kicker{margin-bottom:0}
+.stf-row-idc{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.stf-row-rate{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.2fr);align-items:end}
+.stf-form .field{margin-bottom:12px}.stf-form .field label{display:block;font-size:9px;color:var(--text3);margin:0 0 5px;letter-spacing:.12em;text-transform:uppercase;font-weight:400}
+.stf-form input,.stf-form textarea{margin:0}
+.stf-role{flex-direction:row;align-items:center;gap:8px}
+@container (max-width:720px){.stf-grid{grid-template-columns:1fr;padding:12px;gap:12px}.stf-preview{position:static}.stf-row-idc,.stf-row-rate{grid-template-columns:1fr}.stf-head{flex-wrap:wrap}}
+
 .bo-empty{text-align:center;padding:48px 16px;color:var(--text3);font-size:11px;font-weight:300;letter-spacing:.04em}
 
 .prof-tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;color:var(--text3);font-family:inherit}
@@ -443,22 +501,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
         <input id="contactSearchInput" class="bo-input" oninput="renderContacts()" placeholder="Chercher..." style="flex:1;width:auto!important">
         <button class="bo-gold" onclick="openContactForm()">+ Ajouter</button>
       </div>
-      <div id="contactFormWrap" class="mcard" style="display:none;margin-bottom:16px;">
-        <div class="ctitle" id="contactFormTitle">Nouveau contact</div>
-        <input type="hidden" id="ctId">
-        <label>Prénom</label><input id="ctFirst">
-        <label>Nom</label><input id="ctLast">
-        <label>Fonction</label><input id="ctRole" placeholder="Directeur, Responsable événementiel...">
-        <label>Société / client</label><input id="ctCompany" list="ctCompanyList"><datalist id="ctCompanyList"></datalist>
-        <label>Email</label><input id="ctEmail" type="email">
-        <label>Téléphone</label><input id="ctPhone" type="tel" placeholder="06 12 34 56 78">
-        <label>Notes</label><textarea id="ctNotes" rows="2" placeholder="Infos utiles, préférences, historique..."></textarea>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-          <button class="bo-gold" onclick="saveContact()">Enregistrer</button>
-          <button class="bo-ghost" onclick="closeContactForm()">Annuler</button>
-          <button class="bo-del" id="ctDeleteBtn" onclick="deleteContact()" style="display:none;">Supprimer</button>
-        </div>
-      </div>
+      <div id="contactFormWrap" style="display:none;margin-bottom:16px;"></div>
       <div id="contactList"></div>
       </div>
     </section>
@@ -949,14 +992,14 @@ function toDbRow(k, obj, uid){
   // total est stocké localement comme une chaîne formatée ("2652.00 €"), mais la colonne cloud
   // est numeric — on la parse ici et on la reformate au retour (fromDbRow).
   if(k==='invoices') return { id:obj.id, user_id:uid, num:obj.num, client:obj.client, date:obj.date, work_date:obj.workDate, total:parseFloat(String(obj.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0, status:obj.status, state:obj.state, html:obj.html, booking_id:obj.bookingId||null, booking_ids:obj.bookingIds||null };
-  if(k==='contacts') return { id:obj.id, user_id:uid, first_name:obj.firstName, last_name:obj.lastName, role:obj.role, company:obj.company, email:obj.email, phone:obj.phone, notes:obj.notes };
+  if(k==='contacts') return { id:obj.id, user_id:uid, first_name:obj.firstName, last_name:obj.lastName, role:obj.role, company:obj.company, email:obj.email, phone:obj.phone, notes:obj.notes, cost_rate:obj.costRate??null, bill_rate:obj.billRate??null };
   if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, reply_to:obj.replyTo };
 }
 function fromDbRow(k, row){
   if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, tutoiement:row.tutoiement, siret:row.siret, billingAddr:row.billing_addr, defaultRate:row.default_rate, notes:row.notes, createdAt:row.created_at };
   if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
   if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:(typeof row.total==='number'?row.total.toFixed(2):row.total)+' €', status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
-  if(k==='contacts') return { id:row.id, firstName:row.first_name, lastName:row.last_name, role:row.role, company:row.company, email:row.email, phone:row.phone, notes:row.notes, createdAt:row.created_at };
+  if(k==='contacts') return { id:row.id, firstName:row.first_name, lastName:row.last_name, role:row.role, company:row.company, email:row.email, phone:row.phone, notes:row.notes, costRate:row.cost_rate, billRate:row.bill_rate, createdAt:row.created_at };
   if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, replyTo:row.reply_to };
 }
 const cloudPushTimers = {}, cloudPushBusy = {};
@@ -1223,7 +1266,7 @@ function renderContacts(){
           <div class="ct-av"></div>
           <div class="ct-main"><div class="ct-name"><span>${esc(contactName(c))}</span></div>${c.role?`<div class="ct-sub">${esc(c.role)}</div>`:''}</div>
           <div class="ct-meta">${meta.length?meta.join(''):'<span class="ct-none">Aucune coordonnée</span>'}</div>
-          <div class="ct-info">${c.notes?esc(c.notes):'<span style="color:var(--text3)">Aucune note</span>'}</div>
+          <div class="ct-info">${(c.costRate||c.billRate)?`<span><i>Coût</i>${(c.costRate||0).toFixed(2)} €</span><span><i>Facturé</i>${(c.billRate||0).toFixed(2)} €</span><span style="color:${(c.billRate||0)-(c.costRate||0)>=0?'var(--green)':'var(--red)'}"><i>Marge</i>${((c.billRate||0)-(c.costRate||0)).toFixed(2)} €/h</span>`:(c.notes?esc(c.notes):'<span style="color:var(--text3)">Aucun tarif</span>')}</div>
           <div class="ct-act" onclick="event.stopPropagation()"><button class="bo-edit" onclick="openContactForm('${id}')">Infos</button><button class="bo-del" onclick="deleteContact('${id}')">Supprimer</button></div>
         </div>`;}).join('')}</div></div>`;
   }).join('');
@@ -1232,24 +1275,109 @@ const CT_ICO={
   phone:'<path d="M4.5 2.5h2l1 3-1.5 1a8 8 0 0 0 3.5 3.5l1-1.5 3 1v2a1.5 1.5 0 0 1-1.6 1.5A11.5 11.5 0 0 1 3 4.1 1.5 1.5 0 0 1 4.5 2.5z"/>',
   mail:'<rect x="2" y="3.5" width="12" height="9" rx="1.5"/><path d="M2.5 4.5L8 9l5.5-4.5"/>'
 };
+const CT_ROLES = ['Barman','Serveur','Bar manager','Organisateur','Responsable','Prestataire'];
+function ctFormHTML(c){
+  const v = k => esc(c?.[k]??'');
+  const roles = [...CT_ROLES]; storeArr('contacts').forEach(x=>{ if(x.role && !roles.includes(x.role)) roles.push(x.role); });
+  if(c?.role && !roles.includes(c.role)) roles.push(c.role);
+  return `<div class="stf-form">
+  <div class="stf-head">
+    <div class="stf-head-l"><div class="stf-kicker">${c?'Modifier le contact':'Nouveau contact'}</div>
+      <div class="stf-progress"><div class="stf-progress-bar"><span id="ctProg" style="width:0"></span></div><span id="ctProgT"></span></div></div>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <button class="bo-ghost" onclick="closeContactForm()">Annuler</button>
+      ${c?`<button class="bo-del" style="height:auto;padding:8px 16px;font-size:10px" onclick="deleteContact()">Supprimer</button>`:''}
+      <button class="bo-gold" onclick="saveContact()">Terminé</button>
+    </div>
+  </div>
+  <input type="hidden" id="ctId" value="${v('id')}"><input type="hidden" id="ctRole" value="${v('role')}">
+  <div class="stf-grid">
+    <aside class="stf-preview">
+      <div class="stf-pv-av" id="ctPvAv">?</div>
+      <div class="stf-pv-body">
+        <div class="stf-pv-name" id="ctPvName">Sans nom</div>
+        <span class="stf-pv-role" id="ctPvRole" style="display:none"></span>
+        <div class="stf-pv-sub" id="ctPvSub"></div>
+        <div class="stf-pv-rates">
+          <div><span>Coût</span><b id="ctPvCost">—</b></div>
+          <div><span>Facturé</span><b id="ctPvBill">—</b></div>
+          <div><span>Marge</span><b id="ctPvMargin">—</b></div>
+        </div>
+      </div>
+    </aside>
+    <div class="stf-steps">
+      <section class="stf-sec" id="ctSec1"><div class="stf-sec-h"><span class="stf-num">1</span><span class="stf-sec-t">Identité &amp; coordonnées</span></div>
+        <div class="stf-row stf-row-idc">
+          <div class="field"><label>Prénom</label><input id="ctFirst" class="stf-big" value="${v('firstName')}" placeholder="Charles" oninput="ctLive()"></div>
+          <div class="field"><label>Nom</label><input id="ctLast" class="stf-big" value="${v('lastName')}" placeholder="Dupont" oninput="ctLive()"></div>
+          <div class="field"><label>Téléphone</label><input id="ctPhone" type="tel" value="${v('phone')}" placeholder="06 12 34 56 78"></div>
+          <div class="field"><label>Email</label><input id="ctEmail" type="email" value="${v('email')}" placeholder="charles@mail.com"></div>
+        </div>
+        <div class="field"><label>Société / client</label><input id="ctCompany" list="ctCompanyList" value="${v('company')}" placeholder="Rattaché à un client (facultatif)" oninput="ctLive()"><datalist id="ctCompanyList">${storeArr('clients').map(cl=>`<option value="${esc(cl.name)}">`).join('')}</datalist></div>
+      </section>
+      <section class="stf-sec" id="ctSec2"><div class="stf-sec-h"><span class="stf-num">2</span><span class="stf-sec-t">Rôle</span></div>
+        <div class="stf-roles" id="ctRoles">${roles.map(r=>`<button type="button" class="stf-role${r===c?.role?' on':''}" data-r="${esc(r)}" onclick="ctPickRole(this.dataset.r)"><span class="stf-role-n">${esc(r)}</span></button>`).join('')}
+          <input id="ctRoleNew" class="stf-role stf-role-add" placeholder="+ Nouveau rôle" style="cursor:text" onkeydown="if(event.key==='Enter'&&this.value.trim()){ctPickRole(this.value.trim());}" onblur="if(this.value.trim())ctPickRole(this.value.trim())">
+        </div>
+      </section>
+      <section class="stf-sec" id="ctSec3"><div class="stf-sec-h"><span class="stf-num">3</span><span class="stf-sec-t">Tarifs horaires</span><span class="stf-opt">Facultatif</span></div>
+        <div class="stf-row stf-row-rate">
+          <div class="field"><label>Ce qu'il vous coûte</label><div class="stf-money"><input type="number" id="ctCost" step="0.5" min="0" value="${c?.costRate??''}" placeholder="0" oninput="ctLive()"><span>€ HT / h</span></div></div>
+          <div class="field"><label>Ce que vous facturez</label><div class="stf-money"><input type="number" id="ctBill" step="0.5" min="0" value="${c?.billRate??''}" placeholder="0" oninput="ctLive()"><span>€ HT / h</span></div></div>
+          <div class="field stf-margin"><div class="stf-margin-l">Marge <b id="ctMargin">—</b> <span id="ctPct"></span></div><div class="stf-margin-track"><span id="ctBar" style="width:0"></span></div></div>
+        </div>
+      </section>
+      <section class="stf-sec" id="ctSec4"><div class="stf-sec-h"><span class="stf-num">4</span><span class="stf-sec-t">Notes</span><span class="stf-opt">Facultatif</span></div>
+        <div class="field"><textarea id="ctNotes" rows="2" placeholder="Disponibilités, véhiculé, spécialités, préférences..." oninput="ctLive()">${v('notes')}</textarea></div>
+      </section>
+    </div>
+  </div></div>`;
+}
+function ctPickRole(r){
+  ctRole.value = r;
+  const box = document.getElementById('ctRoles');
+  if(![...box.querySelectorAll('.stf-role[data-r]')].some(b=>b.dataset.r===r)){
+    const b = document.createElement('button'); b.type='button'; b.className='stf-role'; b.dataset.r=r; b.onclick=()=>ctPickRole(r); b.innerHTML=`<span class="stf-role-n">${esc(r)}</span>`;
+    box.insertBefore(b, document.getElementById('ctRoleNew'));
+  }
+  box.querySelectorAll('.stf-role[data-r]').forEach(b=>b.classList.toggle('on', b.dataset.r===r));
+  document.getElementById('ctRoleNew').value='';
+  ctLive();
+}
+function ctLive(){
+  const first=ctFirst.value.trim(), last=ctLast.value.trim(), comp=ctCompany.value.trim(), role=ctRole.value;
+  const name=[first,last].filter(Boolean).join(' ')||comp||'Sans nom';
+  ctPvName.textContent=name;
+  ctPvAv.textContent=([first,last].filter(Boolean).map(x=>x[0]).join('')||(comp||'?')[0]).slice(0,2).toUpperCase();
+  ctPvRole.style.display=role?'':'none'; ctPvRole.textContent=role;
+  ctPvSub.textContent=comp;
+  const cost=parseFloat(ctCost.value)||0, bill=parseFloat(ctBill.value)||0, m=bill-cost, pct=bill>0?Math.round(m/bill*100):0;
+  const col=m>0?'var(--green)':m<0?'var(--red)':'var(--text3)';
+  ctPvCost.textContent=cost?cost.toFixed(2)+' €':'—'; ctPvBill.textContent=bill?bill.toFixed(2)+' €':'—';
+  const mt=(cost||bill)?(m>0?'+':'')+m.toFixed(2)+' €/h':'—';
+  ctPvMargin.textContent=mt; ctPvMargin.style.color=col; ctMargin.textContent=mt; ctMargin.style.color=col;
+  ctPct.textContent=bill>0?pct+' %':''; ctBar.style.width=Math.max(0,Math.min(100,pct))+'%'; ctBar.style.background=col;
+  const done=[!!(first||last||comp), !!role, bill>0];
+  [ctSec1,ctSec2,ctSec3].forEach((s,i)=>{ s.classList.toggle('done',done[i]); s.querySelector('.stf-num').innerHTML=done[i]?'<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>':String(i+1); });
+  ctSec4.classList.toggle('done', !!ctNotes.value.trim()); ctSec4.querySelector('.stf-num').textContent='4';
+  const n=done.filter(Boolean).length; ctProg.style.width=Math.round(n/3*100)+'%'; ctProgT.textContent=n+' / 3 étapes essentielles';
+}
 function openContactForm(id){
   const c = id ? storeArr('contacts').find(x=>x.id===id) : null;
-  ctId.value = c ? c.id : '';
-  ctFirst.value = c?.firstName||''; ctLast.value = c?.lastName||''; ctRole.value = c?.role||''; ctCompany.value = c?.company||'';
-  ctEmail.value = c?.email||''; ctPhone.value = c?.phone||''; ctNotes.value = c?.notes||'';
-  contactFormTitle.textContent = c ? 'Modifier le contact' : 'Nouveau contact';
-  ctDeleteBtn.style.display = c ? '' : 'none';
-  ctCompanyList.innerHTML = storeArr('clients').map(cl=>`<option value="${esc(cl.name)}">`).join('');
+  contactFormWrap.innerHTML = ctFormHTML(c);
   contactFormWrap.style.display = 'block';
+  ctLive();
+  contactFormWrap.scrollIntoView({behavior:'smooth', block:'start'});
   ctFirst.focus();
 }
-function closeContactForm(){ contactFormWrap.style.display = 'none'; }
+function closeContactForm(){ contactFormWrap.style.display = 'none'; contactFormWrap.innerHTML = ''; }
 function saveContact(){
   const v = el => el.value.trim();
   if(!v(ctFirst) && !v(ctLast) && !v(ctCompany)){ showToast('⚠ Indique au moins un nom ou une société.'); return; }
   if(v(ctEmail) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v(ctEmail))){ showToast('⚠ Email invalide.'); return; }
+  const num = el => { const n=parseFloat(el.value); return isNaN(n)?null:n; };
   const all = storeArr('contacts');
-  const data = { firstName:v(ctFirst), lastName:v(ctLast), role:v(ctRole), company:v(ctCompany), email:v(ctEmail), phone:v(ctPhone), notes:v(ctNotes) };
+  const data = { firstName:v(ctFirst), lastName:v(ctLast), role:ctRole.value, company:v(ctCompany), email:v(ctEmail), phone:v(ctPhone), notes:v(ctNotes), costRate:num(ctCost), billRate:num(ctBill) };
   const i = all.findIndex(x=>x.id===ctId.value);
   if(i>=0) all[i] = {...all[i], ...data}; else all.push({ id:crypto.randomUUID(), createdAt:new Date().toISOString(), ...data });
   set('contacts', all);
