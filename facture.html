@@ -106,7 +106,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-size:14px;font-weight:
 .ctitle{font-size:8px;font-weight:500;text-transform:uppercase;letter-spacing:.2em;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .ctitle::after{content:'';flex:1;height:1px;background:var(--border)}
 .nav-section{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);padding:10px 12px 5px;font-weight:400;}
-.panel{background:var(--bg);padding:24px 28px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
+.panel{background:var(--bg);padding:0 28px 24px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
 .prof-tabs{display:flex;gap:22px;border-bottom:1px solid var(--border);margin-bottom:18px;overflow-x:auto}
 .prof-tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;color:var(--text3);font-family:var(--font-body)}
 .prof-tab.on{border-bottom-color:var(--gold);color:var(--gold)}
@@ -447,6 +447,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .dash-grp-n{font-size:10px;padding:1px 7px;border-radius:9px;background:var(--surface2);color:var(--text2);letter-spacing:0}
 .dash-row{display:flex;align-items:center;gap:10px;padding:7px 0}
 @media(max-width:900px){.dash-split,.dash-kpis{grid-template-columns:1fr!important}}
+.panel>.tab.active::before{content:'';display:block;flex-shrink:0;height:32px;margin:0 -28px 24px;border-bottom:1px solid var(--border);background:linear-gradient(to bottom,var(--bg),var(--surface))}
 .bo-empty{text-align:center;padding:48px 16px;color:var(--text3);font-size:11px;font-weight:300;letter-spacing:.04em}
 
 @media(max-width:900px){
@@ -873,7 +874,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       <div class="card evsec" style="--sec:var(--gold)">
         <div class="ctitle" data-i18n="data_compte_title">Compte</div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:38px;height:38px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-size:16px;color:var(--gold);flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.08);" id="compteAvatar">H</div>
+          <div style="width:34px;height:34px;border-radius:6px;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-size:13px;color:var(--gold);flex-shrink:0;" id="compteAvatar">H</div>
           <div style="min-width:0;">
             <div style="font-size:12px;color:var(--text);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="accountEmail">—</div>
             <div style="font-size:10px;color:var(--text3);" id="compteStatus"></div>
@@ -881,10 +882,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         </div>
         <div style="height:1px;background:var(--border);margin:10px 0;"></div>
         <div class="info-grid">
-          <div class="info-item"><div class="info-label">Plan</div><div class="info-value" id="accountPlan" style="font-weight:500;">—</div></div>
-          <div class="info-item"><div class="info-label">Renouvellement</div><div class="info-value" id="accountRenewal">—</div></div>
+          <div class="info-item"><div class="info-label" style="font-size:10px;letter-spacing:.08em">Plan</div><div class="info-value" id="accountPlan" style="font-weight:500;color:var(--gold);text-transform:uppercase">—</div></div>
+          <div class="info-item"><div class="info-label" style="font-size:10px;letter-spacing:.08em">Renouvellement</div><div class="info-value" id="accountRenewal" style="color:var(--text2)">—</div></div>
         </div>
-        <button class="btn-line" onclick="openBillingPortal()" style="margin-top:10px;width:100%;">Gérer mon abonnement</button>
+        <button class="bo-ghost" onclick="openBillingPortal()" style="margin-top:4px;width:100%;height:28px;padding:0 11px;font-size:9px;letter-spacing:.08em;border-color:var(--border2)">Gérer mon abonnement</button>
       </div>
       <div class="card evsec" style="--sec:var(--pink)">
         <div class="ctitle" data-i18n="data_gmail_title">Envoi de factures</div>
@@ -904,7 +905,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <div class="ctitle" style="margin:0" data-i18n="data_updates_title">Mises à jour</div>
         <div style="font-size:13px;color:var(--text2);">Version de l'app <b style="color:var(--text)" id="profAppVersion">—</b></div>
         <div id="updateCheckStatus" style="font-size:11px;color:var(--gold);flex:1;"></div>
-        <button class="btn-line" id="checkUpdatesBtn" onclick="manualCheckForUpdates()" data-i18n="nav_update_tooltip" style="margin:0;">Vérifier les mises à jour</button>
+        <button class="bo-ghost" id="checkUpdatesBtn" onclick="manualCheckForUpdates()" data-i18n="nav_update_tooltip" style="height:28px;padding:0 11px;font-size:9px;letter-spacing:.08em;border-color:var(--border2)">Vérifier les mises à jour</button>
       </div>
       </div>
       <div class="prof-pane" data-pt="securite"><div class="prof-grid">
@@ -1389,7 +1390,7 @@ compte_status_connected:'Connecté au cloud', compte_status_disconnected:'Non co
 time_just_now:"à l'instant", time_min_ago:'il y a {n} min', time_hour_ago:'il y a {n} h', time_day_ago:'il y a {n} j',
 lbl_nom:'Nom', lbl_soustitre:'Sous-titre (optionnel, ex. villes)', lbl_adresse:'Adresse', lbl_email_tel:'Email / Tel', lbl_siret:'SIRET',
 data_gmail_title:'Envoi de factures', gmail_intro:"Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent par défaut sur ton adresse de connexion, modifiable ici si tu préfères une autre adresse :",
-data_updates_title:'Mises à jour & synchro',
+data_updates_title:'Mises à jour',
 data_fiscal_title:'Fiscalité & objectifs', lbl_tax_rate:"Taux d'imposition (%)", lbl_ca_goal_year:'Objectif annuel (€)',
 lbl_tva_regime:'Régime TVA', hint_tva_regime:'(basculement automatique à 32 000 € de CA cumulé)',
 opt_tva_franchise:'Franchise en base (auto-entrepreneur)', opt_tva_applicable:'TVA applicable',
@@ -1505,7 +1506,7 @@ compte_status_connected:'Connected to cloud', compte_status_disconnected:'Not co
 time_just_now:'just now', time_min_ago:'{n} min ago', time_hour_ago:'{n} h ago', time_day_ago:'{n} d ago',
 lbl_nom:'Name', lbl_soustitre:'Subtitle (optional, e.g. cities)', lbl_adresse:'Address', lbl_email_tel:'Email / Phone', lbl_siret:'Company ID (SIRET)',
 data_gmail_title:'Sending invoices', gmail_intro:'Your invoices are sent automatically, nothing to configure. Replies from your clients land in your login address by default — editable here if you prefer another address:',
-data_updates_title:'Updates & sync',
+data_updates_title:'Updates',
 data_fiscal_title:'Tax & goals', lbl_tax_rate:'Tax rate (%)', lbl_ca_goal_year:'Yearly goal (€)',
 lbl_tva_regime:'VAT regime', hint_tva_regime:'(automatically switches at €32,000 cumulative revenue)',
 opt_tva_franchise:'VAT exemption (sole trader)', opt_tva_applicable:'VAT applicable',
@@ -1621,7 +1622,7 @@ compte_status_connected:'Conectado a la nube', compte_status_disconnected:'No co
 time_just_now:'justo ahora', time_min_ago:'hace {n} min', time_hour_ago:'hace {n} h', time_day_ago:'hace {n} d',
 lbl_nom:'Nombre', lbl_soustitre:'Subtítulo (opcional, ej. ciudades)', lbl_adresse:'Dirección', lbl_email_tel:'Email / Teléfono', lbl_siret:'N.º SIRET',
 data_gmail_title:'Envío de facturas', gmail_intro:'Tus facturas se envían automáticamente, sin nada que configurar. Las respuestas de tus clientes llegan por defecto a tu dirección de conexión, editable aquí si prefieres otra:',
-data_updates_title:'Actualizaciones y sincro',
+data_updates_title:'Actualizaciones',
 data_fiscal_title:'Fiscalidad y objetivos', lbl_tax_rate:'Tasa de impuesto (%)', lbl_ca_goal_year:'Objetivo anual (€)',
 lbl_tva_regime:'Régimen de IVA', hint_tva_regime:'(cambio automático a 32.000 € de facturación acumulada)',
 opt_tva_franchise:'Exención de IVA (autónomo)', opt_tva_applicable:'IVA aplicable',
@@ -1885,6 +1886,7 @@ async function initUpdateSystem(){
 // « Nouveautés » : notes écrites à la main, seulement pour les mises à jour qui comptent pour
 // l'utilisateur. Pas d'entrée = pas de popup. Ajouter la plus récente EN HAUT.
 const RELEASE_NOTES=[
+  {v:'1.1.197', fr:['Profil identique à BAR OPS : carte Compte (avatar carré, plan en doré, date de renouvellement), bandeau en haut des pages, bouton Compte surligné sur le Profil (Mac et iPhone).']},
   {v:'1.1.196', fr:['iPhone : Chiffre d\'affaires dans Factures › Analyses (chiffres clés, 12 derniers mois, CA par client, statut des paiements), au design BAR OPS.']},
   {v:'1.1.195', fr:['Chiffre d\'affaires au design BAR OPS : boutons Analyses / Factures en haut, grands chiffres centrés.']},
   {v:'1.1.194', fr:['Facture et Profil au design BAR OPS : sections avec liseré et titre colorés, comme dans BAR OPS.']},
@@ -2314,6 +2316,7 @@ function showTab(name){
   appRoot.classList.toggle('no-preview', !showPreview);
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-list button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-account')?.classList.toggle('active', name==='entreprise');
   document.getElementById('tab-'+name).classList.add('active');
   document.querySelectorAll('.acct .nav-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('nav-'+name).classList.add('active');
@@ -2702,10 +2705,10 @@ function renderAccountCard(access){
   const statusColors = {active:'var(--gold)', past_due:'var(--red)', cancelled:'var(--text3)'};
   if(emailEl) emailEl.textContent = access.session?.user?.email || '—';
   if(planEl){
-    planEl.textContent = access.plan ? (access.plan.charAt(0).toUpperCase()+access.plan.slice(1)+' — '+(periodLabels[access.period]||access.period)) : '—';
+    planEl.textContent = access.plan ? [access.plan, periodLabels[access.period]||access.period].filter(Boolean).join(' — ') : '—';
     planEl.style.color = statusColors[access.status] || 'var(--text)';
   }
-  if(renewalEl) renewalEl.textContent = access.expiresAt ? new Date(access.expiresAt).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+  if(renewalEl) renewalEl.textContent = access.expiresAt ? new Date(access.expiresAt).toLocaleDateString('fr-FR') : '—';
 }
 function toggleInfoEdit(show){
   infoView.style.display = show ? 'none' : 'grid';
