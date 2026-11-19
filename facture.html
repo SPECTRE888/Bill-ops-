@@ -409,7 +409,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .nav-update.ready .nav-update-dot{background:var(--green);animation:none;}
 @keyframes nav-update-pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(196,164,107,.45);}50%{opacity:.55;box-shadow:0 0 0 4px rgba(196,164,107,0);}}
 .nav-update-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-   redémarrage automatique de l'app). */
+/* Popup central de mise à jour — non fermable (le process principal pilote tout jusqu'au redémarrage). */
 .upd-overlay{position:fixed;inset:0;background:rgba(8,6,3,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px}
 .upd-overlay.show{display:flex;animation:upd-fade .25s ease}
 .upd-box{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:34px 34px 30px;max-width:380px;width:100%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.45),0 0 0 1px rgba(217,166,55,.06);overflow:hidden;animation:upd-rise .35s cubic-bezier(.2,.8,.2,1)}
