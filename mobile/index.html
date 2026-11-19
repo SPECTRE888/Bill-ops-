@@ -594,7 +594,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
         <div class="ctitle">Notifications</div>
         <span id="notifDiagStatus"></span>
         <div class="row" style="margin-top:10px;flex-wrap:wrap;">
-          <button class="btn-line" onclick="enableNotifications()">Activer</button>
+          <button class="bo-gold" onclick="enableNotifications()">Activer</button>
           <button class="btn-line" onclick="testLocalNotification()">Tester en local</button>
         </div>
       </div>
@@ -1001,20 +1001,33 @@ function notifSupported(){
   return 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
 }
 async function enableNotifications(){
-  if(!notifSupported()){ showToast('⚠ Notifications non supportées sur ce navigateur.'); return; }
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  const standalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  if(isIOS && !standalone){ await confirmDialog("Sur iPhone, les notifications ne marchent que depuis l'app installée : dans Safari, touche Partager › « Sur l'écran d'accueil », puis ouvre Helm Ops depuis son icône et réessaie.", 'Compris'); return; }
+  if(!notifSupported()){ showToast('⚠ Notifications non supportées ici (iOS 16.4 minimum, app ouverte depuis l\'écran d\'accueil).'); return; }
+  if(Notification.permission==='denied'){ await confirmDialog("Les notifications ont été refusées pour Helm Ops. Pour les réactiver : Réglages de l'iPhone › Notifications › Helm Ops › Autoriser les notifications. Puis reviens ici et touche Activer.", 'Compris'); return; }
   const perm = await Notification.requestPermission();
-  if(perm!=='granted'){ showToast('⚠ Notifications refusées.'); return; }
+  if(perm!=='granted'){ showToast('⚠ Notifications refusées.'); renderParametres(); return; }
   try{
-    const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
+    let reg = await navigator.serviceWorker.getRegistration();
+    if(!reg) reg = await navigator.serviceWorker.register('sw.js');
+    reg = await Promise.race([navigator.serviceWorker.ready, new Promise((_,rej)=>setTimeout(()=>rej(new Error("le service de notification ne répond pas, ferme et rouvre l'app")),8000))]);
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
     const subJson = sub.toJSON();
     const subs = storeArr('pushSubscriptions').filter(s=>s.endpoint!==subJson.endpoint);
     subs.push(subJson);
     localStorage.setItem('pushSubscriptions', JSON.stringify(subs));
     const { data:{session} } = await getSb().auth.getSession();
-    if(session) await getSb().from('push_subscriptions').upsert({ endpoint: subJson.endpoint, user_id: session.user.id, subscription: subJson });
+    if(session){
+      // Pas de policy UPDATE sur push_subscriptions : un upsert sur un endpoint déjà connu échouait en silence.
+      await getSb().from('push_subscriptions').delete().eq('endpoint', subJson.endpoint);
+      const { error } = await getSb().from('push_subscriptions').insert({ endpoint: subJson.endpoint, user_id: session.user.id, subscription: subJson });
+      if(error) throw new Error(error.message);
+    }
     showToast('✔ Notifications activées.');
-  }catch(e){ showToast('✕ Erreur : '+e.message); }
+  }catch(e){ showToast('✕ Activation impossible : '+e.message); }
+  renderParametres();
 }
 
 const store = k => JSON.parse(localStorage.getItem(k) || '{}');
