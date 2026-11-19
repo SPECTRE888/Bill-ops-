@@ -219,6 +219,12 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .oa-legal i{font-style:normal;margin:0 10px;opacity:.5}
 @media (max-width:480px){.oa-box h1{font-size:44px}.oa-rule{margin-bottom:52px}}
 @media (max-height:640px){.oa-legal{position:static;margin-top:40px}.oa-rule{margin-bottom:32px}}
+.prof-tabs{display:flex;gap:18px;border-bottom:1px solid var(--border);margin-bottom:14px;overflow-x:auto}
+.prof-tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;color:var(--text3);font-family:inherit}
+.prof-tab.on{border-bottom-color:var(--gold);color:var(--gold)}
+.prof-pane{display:none}.prof-pane.on{display:block}
+.mcard.evsec{border-top:2px solid var(--sec,var(--gold))}
+.mcard.evsec>.ctitle{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--sec,var(--gold));margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -359,8 +365,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     </section>
     <section id="tab-parametres" style="display:none;">
       <h2>Réglages</h2>
-      <div class="mcard">
-        <b>Mon compte</b><br>
+      <div class="prof-tabs"><button class="prof-tab on" data-pt="compte" onclick="profTab('compte')">Compte</button><button class="prof-tab" data-pt="entreprise" onclick="profTab('entreprise')">Entreprise</button><button class="prof-tab" data-pt="envoi" onclick="profTab('envoi')">Envoi &amp; synchro</button></div>
+      <div class="prof-pane on" data-pt="compte">
+      <div class="mcard evsec" style="--sec:var(--gold)">
+        <div class="ctitle">Mon compte</div>
         <p style="color:var(--text2);font-size:12px;margin:6px 0 2px;" id="accountEmail"></p>
         <p style="color:var(--text2);font-size:12px;margin:0 0 2px;" id="accountPlan"></p>
         <p style="color:var(--text2);font-size:12px;margin:0 0 10px;" id="accountRenewal"></p>
@@ -370,8 +378,14 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
           <button class="btn-line" style="color:var(--red);" onclick="logoutAccount()">Se déconnecter</button>
         </div>
       </div>
-      <div class="mcard">
-        <b>Mon entreprise</b><br>
+      <div class="mcard evsec" style="--sec:var(--pink)">
+        <div class="ctitle">Confidentialité</div>
+        <button class="btn-line action-btn" style="margin-top:8px;" onclick="openLegalModal()">Mentions légales &amp; RGPD</button>
+      </div>
+          </div>
+      <div class="prof-pane" data-pt="entreprise">
+      <div class="mcard evsec" style="--sec:var(--pink)">
+        <div class="ctitle">Mon entreprise</div>
         <div id="fromViewMobile"></div>
         <div style="margin-top:10px;">
           <button id="fromEditBtn" class="btn-line" onclick="toggleFromEditMobile(true)">Modifier</button>
@@ -397,32 +411,31 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
           <div id="fromStatusMobile" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
         </div>
       </div>
-      <div class="mcard">
-        <b>Envoi de factures</b><br>
+      </div>
+      <div class="prof-pane" data-pt="envoi">
+      <div class="mcard evsec" style="--sec:var(--teal)">
+        <div class="ctitle">Envoi de factures</div>
         <p style="color:var(--text2);font-size:12px;margin:6px 0 10px;">Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent par défaut sur ton adresse de connexion, modifiable ici :</p>
         <input id="replyToInput" type="email" placeholder="ton@email.com" disabled>
         <button class="btn-line action-btn" id="replyToBtn" onclick="toggleReplyToEdit(true)" style="margin-top:10px;">Modifier</button>
         <div id="replyToStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
       </div>
-      <div class="mcard">
-        <b>Notifications</b><br>
+      <div class="mcard evsec" style="--sec:var(--gold)">
+        <div class="ctitle">Notifications</div>
         <span id="notifDiagStatus"></span>
         <div class="row" style="margin-top:10px;flex-wrap:wrap;">
           <button class="btn-line" onclick="enableNotifications()">Activer</button>
           <button class="btn-line" onclick="testLocalNotification()">Tester en local</button>
         </div>
       </div>
-      <div class="mcard">
-        <b>Synchronisation</b><br>
+      <div class="mcard evsec" style="--sec:var(--blue)">
+        <div class="ctitle">Synchronisation</div>
         <span id="syncDiagStatus"></span>
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn-line" onclick="forceCloudRefresh()">Forcer la synchro</button>
         </div>
         <p style="font-size:11px;color:var(--text3);margin:6px 0 0;">Recharge tout de suite les données des autres appareils, sans attendre la synchro automatique (jusqu'à 60s).</p>
       </div>
-      <div class="mcard">
-        <b>Confidentialité</b><br>
-        <button class="btn-line action-btn" style="margin-top:8px;" onclick="openLegalModal()">Mentions légales &amp; RGPD</button>
       </div>
     </section>
   </main>
@@ -1021,6 +1034,7 @@ function renderGroupInvoiceBarMobile(){
 }
 function openLegalModal(){ document.getElementById('legalModal').style.display = 'flex'; }
 function closeLegalModal(){ document.getElementById('legalModal').style.display = 'none'; }
+function profTab(k){document.querySelectorAll('#tab-parametres .prof-tab,#tab-parametres .prof-pane').forEach(e=>e.classList.toggle('on',e.dataset.pt===k));}
 let settingsReturnTab = 'pointage';
 function toggleSettings(){
   if(activeTab==='parametres'){

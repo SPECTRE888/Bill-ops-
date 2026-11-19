@@ -107,7 +107,14 @@ body{margin:0;background:var(--bg);color:var(--text);font-size:14px;font-weight:
 .ctitle::after{content:'';flex:1;height:1px;background:var(--border)}
 .nav-section{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);padding:10px 12px 5px;font-weight:400;}
 .panel{background:var(--bg);padding:24px 28px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
-.profile-grid{display:flex;flex-direction:column;gap:12px;}
+.prof-tabs{display:flex;gap:22px;border-bottom:1px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.prof-tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;color:var(--text3);font-family:var(--font-body)}
+.prof-tab.on{border-bottom-color:var(--gold);color:var(--gold)}
+.prof-pane{display:none}.prof-pane.on{display:block}
+.prof-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;align-items:stretch}
+#tab-entreprise .card.evsec{border-top:2px solid var(--sec,var(--gold))}
+#tab-entreprise .evsec>.ctitle{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--sec,var(--gold))}
+#tab-entreprise .evsec>.ctitle::after{display:none}
 .profile-row1{display:grid;grid-template-columns:3fr 7fr;gap:12px;align-items:stretch;}
 .profile-row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:stretch;}
 #tab-entreprise .card{background:var(--surface);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:0;display:flex;flex-direction:column;}
@@ -705,15 +712,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <div class="topbar"><h1 id="topbarTitle"></h1></div>
 
     <div class="tab" id="tab-entreprise">
-      <div class="card"><div class="ctitle">Affichage</div>
-        <div class="disp-row" style="margin-bottom:10px;"><span>Thème</span><div class="seg-ctl"><button id="theme-dark" onclick="setTheme('dark')">Sombre</button><button id="theme-auto" onclick="setTheme('auto')">Auto</button><button id="theme-light" onclick="setTheme('light')">Clair</button></div></div>
-        <div class="disp-row"><span>Langue</span><div class="seg-ctl"><button id="lang-fr" onclick="setLang('fr')">FR</button><button id="lang-en" onclick="setLang('en')">EN</button><button id="lang-es" onclick="setLang('es')">ES</button></div></div>
-      </div>
       <h2 data-i18n="data_title">Profil</h2>
-
-      <div class="profile-grid">
-      <div class="profile-row1">
-      <div class="card">
+      <div class="prof-tabs"><button class="prof-tab on" data-pt="compte" onclick="profTab('compte')">Compte</button><button class="prof-tab" data-pt="entreprise" onclick="profTab('entreprise')">Entreprise</button><button class="prof-tab" data-pt="envoi" onclick="profTab('envoi')">Envoi &amp; synchro</button><button class="prof-tab" data-pt="fiscal" onclick="profTab('fiscal')">Fiscalité</button></div>
+      <div class="prof-pane on" data-pt="compte"><div class="prof-grid">
+      <div class="card evsec" style="--sec:var(--gold)">
         <div class="ctitle" data-i18n="data_compte_title">Compte</div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="width:38px;height:38px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-size:16px;color:var(--gold);flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.08);" id="compteAvatar">H</div>
@@ -735,8 +737,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div class="info-item"><div class="info-label" data-i18n="lbl_derniere_synchro">Dernière synchro</div><div class="info-value" id="viewLastSync">—</div></div>
         </div>
       </div>
-
-      <div class="card">
+      <div class="card evsec" style="--sec:var(--blue)"><div class="ctitle">Affichage</div>
+        <div class="disp-row" style="margin-bottom:10px;"><span>Thème</span><div class="seg-ctl"><button id="theme-dark" onclick="setTheme('dark')">Sombre</button><button id="theme-auto" onclick="setTheme('auto')">Auto</button><button id="theme-light" onclick="setTheme('light')">Clair</button></div></div>
+        <div class="disp-row"><span>Langue</span><div class="seg-ctl"><button id="lang-fr" onclick="setLang('fr')">FR</button><button id="lang-en" onclick="setLang('en')">EN</button><button id="lang-es" onclick="setLang('es')">ES</button></div></div>
+      </div>
+      </div></div>
+      <div class="prof-pane" data-pt="entreprise">
+      <div class="card evsec" style="--sec:var(--pink)">
         <div class="ctitle" data-i18n="data_info_title">Informations</div>
         <div id="infoView" class="info-grid">
           <div class="info-item"><div class="info-label" data-i18n="lbl_nom">Nom</div><div class="info-value" id="viewName"></div></div>
@@ -784,9 +791,8 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         </div>
       </div>
       </div>
-
-      <div class="profile-row2">
-      <div class="card">
+      <div class="prof-pane" data-pt="envoi"><div class="prof-grid">
+      <div class="card evsec" style="--sec:var(--teal)">
         <div class="ctitle" data-i18n="data_gmail_title">Envoi de factures</div>
         <p style="font-size:11px;color:var(--text2);" data-i18n="gmail_intro">Tes factures partent automatiquement, sans rien à configurer. Les réponses de tes clients arrivent par défaut sur ton adresse de connexion, modifiable ici si tu préfères une autre adresse :</p>
         <input id="replyToInput" type="email" placeholder="ton@email.com" disabled>
@@ -795,7 +801,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div id="replyToStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
         </div>
       </div>
-      <div class="card">
+      <div class="card evsec" style="--sec:var(--blue)">
         <div class="ctitle" data-i18n="data_updates_title">Mises à jour &amp; synchro</div>
         <button class="btn-line" id="checkUpdatesBtn" onclick="manualCheckForUpdates()" data-i18n="nav_update_tooltip" style="width:100%;">Vérifier les mises à jour</button>
         <div id="updateCheckStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
@@ -805,7 +811,9 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div id="syncStatus" style="font-size:11px;margin-top:8px;color:var(--gold);"></div>
         </div>
       </div>
-      <div class="card">
+      </div></div>
+      <div class="prof-pane" data-pt="fiscal"><div class="prof-grid">
+      <div class="card evsec" style="--sec:var(--gold)">
         <div class="ctitle" data-i18n="data_fiscal_title">Fiscalité &amp; objectifs</div>
         <div class="row">
           <div style="flex:1;"><label data-i18n="lbl_tax_rate">Taux d'imposition (%)</label><input id="taxRateInput" type="number" min="0" max="100" step="0.1" placeholder="11" disabled></div>
@@ -820,8 +828,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
           <div id="fiscalStatus" style="font-size:11px;margin-top:6px;color:var(--gold);"></div>
         </div>
       </div>
-      </div>
-      </div>
+      </div></div>
     </div>
 
     <div class="tab" id="tab-clients">
@@ -2064,6 +2071,7 @@ function invoiceEventMonth(inv){
   return (inv.date||'').slice(0,7);
 }
 
+function profTab(k){document.querySelectorAll('#tab-entreprise .prof-tab,#tab-entreprise .prof-pane').forEach(e=>e.classList.toggle('on',e.dataset.pt===k));}
 function showTab(name){
   const showPreview = name==='facture';
   previewWrap.classList.toggle('active', showPreview);
