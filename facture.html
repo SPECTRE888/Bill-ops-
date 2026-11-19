@@ -989,11 +989,9 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
 
     <div class="tab" id="tab-clients">
-      <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin:0 0 10px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <input id="clientSearchInput" oninput="renderClientList()" placeholder="Chercher..." data-i18n-ph="ph_client_list_search" style="width:auto;min-width:180px;height:32px;">
-          <button class="btn-gold" onclick="openNewClientForm()" style="margin:0;white-space:nowrap;height:32px;display:inline-flex;align-items:center;justify-content:center;" data-i18n="btn_new_client_header">+ Nouveau client</button>
-        </div>
+      <div class="bo-topbar">
+        <input id="clientSearchInput" class="bo-input" oninput="renderClientList()" placeholder="Chercher..." data-i18n-ph="ph_client_list_search">
+        <button class="bo-gold" onclick="openNewClientForm()" data-i18n="btn_new_client_header">+ Nouveau client</button>
       </div>
 
       <div id="clientFormWrap" style="display:none;margin-bottom:20px;">
@@ -1027,9 +1025,9 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <p style="font-size:10px;color:var(--text3);margin:-4px 0 8px;" data-i18n="hint_facturation_addr">Si différente de l'adresse ci-dessus. Utilisée sur la facture à la place.</p>
         <label data-i18n="lbl_notes_client">Notes (optionnel)</label><textarea id="cliNotes" rows="2"></textarea>
         <p style="font-size:10px;color:var(--text3);margin:-4px 0 8px;" data-i18n="hint_notes_client">Usage interne, n'apparaît jamais sur la facture.</p>
-        <button class="btn-gold" onclick="saveClient()" data-i18n="btn_save_client">Enregistrer le client</button>
-        <button class="btn-line" onclick="closeClientForm()" data-i18n="btn_cancel">Annuler</button>
-        <button class="btn-line btn-danger" id="cliDeleteBtn" style="display:none;" onclick="deleteClient(cliIdx.value)" data-i18n="btn_delete">Supprimer</button>
+        <button class="bo-gold" onclick="saveClient()" data-i18n="btn_save_client">Enregistrer le client</button>
+        <button class="bo-ghost" onclick="closeClientForm()" data-i18n="btn_cancel">Annuler</button>
+        <button class="bo-del" id="cliDeleteBtn" style="display:none;" onclick="deleteClient(cliIdx.value)" data-i18n="btn_delete">Supprimer</button>
       </div>
 
       <div class="client-list" id="clientList"></div>
@@ -1884,6 +1882,7 @@ async function initUpdateSystem(){
 // « Nouveautés » : notes écrites à la main, seulement pour les mises à jour qui comptent pour
 // l'utilisateur. Pas d'entrée = pas de popup. Ajouter la plus récente EN HAUT.
 const RELEASE_NOTES=[
+  {v:'1.1.189', fr:['Mes clients au design BAR OPS : rangées avec téléphone/email, nombre de prestas et dernière presta (Mac et iPhone).']},
   {v:'1.1.188', fr:['Contacts : boutons, recherche et rangées identiques à l\'Équipe de BAR OPS.','Contacts disponibles sur iPhone (onglet Clients › Contacts), synchronisés avec le Mac.']},
   {v:'1.1.187', fr:['Contacts au même design que l\'Équipe de BAR OPS : liste en rangées, regroupée par société.']},
   {v:'1.1.186', fr:['Onglet Chiffre d\'affaires : Analyses et Historique réunis, retour entre les deux toujours visible.','Analyses allégées : 4 indicateurs au lieu de 7.']},
@@ -2817,23 +2816,24 @@ function renderClientList(){
     if(!q) return true;
     return [c.name,c.prefix,c.email,c.phone,c.addr].filter(Boolean).join(' ').toLowerCase().includes(q);
   });
-  const header = `
-    <div class="client-grid-cols client-header">
-      <span>${t('cli_col_client')}</span><span>${t('cli_col_prefixe')}</span><span>${t('cli_col_adresse')}</span><span>${t('cli_col_email')}</span><span>${t('cli_col_telephone')}</span><span></span>
-    </div>`;
-  clientList.innerHTML = rows.length ? header + rows.map(({c,i})=>`
-    <div class="client-grid-cols client-row">
-      <span class="client-name">${esc(c.name)}</span>
-      <span>${c.prefix?`[${esc(c.prefix)}]`:''}</span>
-      ${c.addr?`<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.addr)}" onclick="event.stopPropagation()" title="${esc(c.addr)}">${esc(c.addr)}</a>`:'<span></span>'}
-      ${c.email?`<a href="mailto:${esc(c.email)}" onclick="event.stopPropagation()" title="${esc(c.email)}">${esc(c.email)}</a>`:'<span></span>'}
-      ${c.phone?`<a href="tel:${esc(c.phone)}" onclick="event.stopPropagation()" title="${esc(c.phone)}">${esc(c.phone)}</a>`:'<span></span>'}
-      <div class="client-actions">
-        <button class="btn-line" onclick="viewClientInfo(${i})">${t('btn_info')}</button>
-        <button class="btn-gold" onclick="clientNewBooking(${i})">${t('btn_new_presta_client')}</button>
-        <button class="btn-line btn-danger" onclick="deleteClientFromList(${i})">${t('btn_delete')}</button>
-      </div>
-    </div>`).join('') : `<p style="color:var(--text2);font-size:12px;">${q?t('empty_clients_search'):t('empty_clients')}</p>`;
+
+  const bks = storeArr('bookings');
+  const fmtD = d => { try{ return new Date(d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){ return d; } };
+  const ico = k => `<svg viewBox="0 0 16 16">${CT_ICO[k]}</svg>`;
+  const link = (k,val,href,extra='') => val ? `<a href="${href}" ${extra} onclick="event.stopPropagation()" title="${esc(val)}">${ico(k)}<em>${esc(val)}</em></a>` : '';
+  const html = rows.sort((a,b)=>(a.c.name||'').localeCompare(b.c.name||'','fr',{sensitivity:'base'})).map(({c,i})=>{
+    const evs = bks.filter(b=>(b.client||'').trim().toLowerCase()===(c.name||'').trim().toLowerCase());
+    const last = evs.map(b=>b.date).filter(Boolean).sort().pop();
+    const meta = [link('phone',c.phone,`https://wa.me/${waNumber(c.phone)}`,'target="_blank" rel="noopener"'), link('mail',c.email,`mailto:${esc(c.email||'')}`)].filter(Boolean);
+    const sub = [c.prefix?'['+c.prefix+']':'', c.addr].filter(Boolean).map(esc).join(' · ');
+    return `<div class="ct-row" onclick="viewClientInfo(${i})">
+      <div class="ct-av"></div>
+      <div class="ct-main"><div class="ct-name"><span>${esc(c.name||'Sans nom')}</span></div>${sub?`<div class="ct-sub">${sub}</div>`:''}</div>
+      <div class="ct-meta">${meta.length?meta.join(''):'<span class="ct-none">Aucune coordonnée</span>'}</div>
+      <div class="ct-stat">${evs.length?`<b>${evs.length} presta${evs.length>1?'s':''}</b><span>${last?'Dernière '+esc(fmtD(last)):''}</span>`:`<b>—</b><span>Aucune presta</span>`}</div>
+      <div class="ct-act" onclick="event.stopPropagation()"><button class="bo-gold" style="padding:0 11px;height:28px;font-size:9px" onclick="clientNewBooking(${i})">${t('btn_new_presta_client')}</button><button class="bo-del" onclick="deleteClientFromList(${i})">${t('btn_delete')}</button></div>
+    </div>`;}).join('');
+  clientList.innerHTML = rows.length ? `<div class="ct-list noav" style="--ct-act:190px">${html}</div>` : `<div class="bo-empty">${q?t('empty_clients_search'):t('empty_clients')}</div>`;
 }
 let clientInfoModalIdx = null;
 function viewClientInfo(i){
