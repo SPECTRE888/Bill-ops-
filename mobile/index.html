@@ -482,17 +482,63 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
         <input id="clientSearchM" class="bo-input" oninput="renderClientListMobile()" placeholder="Chercher..." style="flex:1;width:auto!important">
         <button class="bo-gold" onclick="resetClientFormMobile();cliFormM.style.display='block'">+ Ajouter</button>
       </div>
-      <div class="mcard" id="cliFormM" style="display:none">
-        <input type="hidden" id="cliIdx" value="">
-        <label>Nom société</label><input id="cliName">
-        <label>Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase">
-        <label>Email</label><input id="cliEmail">
-        <label>Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78">
-        <label>Adresse</label><input id="cliAddr">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-          <button class="bo-gold" onclick="saveClientMobile()">Enregistrer</button>
-          <button class="bo-ghost" onclick="resetClientFormMobile();cliFormM.style.display='none'">Annuler</button>
+      <div id="cliFormM" style="display:none;margin-bottom:12px">
+<div class="stf-form">
+  <div class="stf-head">
+    <div class="stf-head-l"><div class="stf-kicker" id="cliKicker">Nouveau client</div>
+      <div class="stf-progress"><div class="stf-progress-bar"><span id="cliProg" style="width:0"></span></div><span id="cliProgT"></span></div></div>
+    <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap">
+      <button class="bo-ghost" onclick="resetClientFormMobile();cliFormM.style.display='none'">Annuler</button>
+      <button class="bo-del" id="cliDeleteBtn" style="display:none;height:auto;padding:8px 16px;font-size:10px" onclick="deleteClientMobile(+cliIdx.value)">Supprimer</button>
+      <button class="bo-gold" onclick="saveClientMobile()">Terminé</button>
+    </div>
+  </div>
+  <input type="hidden" id="cliIdx" value="">
+  <div class="stf-grid">
+    <aside class="stf-preview">
+      <div class="stf-pv-av" id="cliPvAv">?</div>
+      <div class="stf-pv-body">
+        <div class="stf-pv-name" id="cliPvName">Sans nom</div>
+        <span class="stf-pv-role" id="cliPvPrefix" style="display:none"></span>
+        <div class="stf-pv-sub" id="cliPvEmail"></div>
+        <div class="stf-pv-sub" id="cliPvPhone"></div>
+        <div class="stf-pv-rates">
+          <div><span>Prestas</span><b id="cliPvN">0</b></div>
+          <div><span>Dernière presta</span><b id="cliPvLast">—</b></div>
+          <div><span>Tarif par défaut</span><b id="cliPvRate">—</b></div>
+          <div><span>Client depuis</span><b id="cliPvSince">—</b></div>
         </div>
+        <button class="bo-gold" id="cliPvNew" style="margin-top:8px;width:100%;display:none" onclick="switchTab('planning')">+ Nouvelle presta</button>
+      </div>
+    </aside>
+    <div class="stf-steps">
+      <section class="stf-sec" id="cliSec1"><div class="stf-sec-h"><span class="stf-num">1</span><span class="stf-sec-t">Identité</span></div>
+        <div class="stf-row stf-row-idc">
+          <div class="field"><label>Nom société / client</label><input id="cliName" class="stf-big" placeholder="Événements XYZ" oninput="if(typeof suggestPrefix==='function')suggestPrefix();cliLive()"></div>
+          <div class="field"><label>Préfixe facture</label><input id="cliPrefix" class="stf-big" maxlength="3" style="text-transform:uppercase;letter-spacing:.12em" placeholder="EX" oninput="cliLive()"></div>
+        </div>
+        <div class="stf-hint">Le préfixe sert à numéroter les factures de ce client (ex. EX2026-001).</div>
+      </section>
+      <section class="stf-sec" id="cliSec2"><div class="stf-sec-h"><span class="stf-num">2</span><span class="stf-sec-t">Coordonnées</span></div>
+        <div class="stf-row stf-row-idc">
+          <div class="field"><label>Email</label><input id="cliEmail" type="email" placeholder="contact@example.com" oninput="cliLive()"></div>
+          <div class="field"><label>Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78" oninput="cliLive()"></div>
+        </div>
+        <div class="field"><label>Adresse</label><input id="cliAddr" placeholder="Adresse habituelle des prestations"></div>
+      </section>
+      <section class="stf-sec" id="cliSec3"><div class="stf-sec-h"><span class="stf-num">3</span><span class="stf-sec-t">Facturation</span><span class="stf-opt">Facultatif</span></div>
+        <div class="stf-row stf-row-idc">
+          <div class="field"><label>Tarif horaire par défaut</label><div class="stf-money"><input id="cliDefaultRate" type="number" step="0.5" min="0" placeholder="0" oninput="cliLive()"><span>€ HT / h</span></div></div>
+          <div class="field"><label>SIRET / TVA client</label><input id="cliSiret"></div>
+        </div>
+        <div class="field"><label>Adresse de facturation (si différente)</label><input id="cliBillingAddr"></div>
+        <label class="chip-tu" style="display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);margin:0 0 12px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="cliTutoiement" style="width:auto;margin:0"> Tutoyer ce client dans l'email de facture</label>
+      </section>
+      <section class="stf-sec" id="cliSec4"><div class="stf-sec-h"><span class="stf-num">4</span><span class="stf-sec-t">Notes</span><span class="stf-opt">Facultatif</span></div>
+        <div class="field"><textarea id="cliNotes" rows="2" placeholder="Usage interne, n'apparaît jamais sur la facture" oninput="cliLive()"></textarea></div>
+      </section>
+    </div>
+  </div></div>
       </div>
       <div id="clientListMobile"></div>
       </div>
@@ -1721,8 +1767,31 @@ function populateClientNames(){
 function isValidEmailMobile(email){
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email||'').trim());
 }
+function cliLive(){
+  if(!document.getElementById('cliName')) return;
+  const name=cliName.value.trim(), pre=cliPrefix.value.trim().toUpperCase(), em=cliEmail.value.trim(), ph=cliPhone.value.trim(), rate=parseFloat(cliDefaultRate.value)||0;
+  cliPvName.textContent=name||'Sans nom';
+  cliPvAv.textContent=(name.split(/\s+/).filter(Boolean).map(w=>w[0]).join('')||'?').slice(0,2).toUpperCase();
+  cliPvPrefix.style.display=pre?'':'none'; cliPvPrefix.textContent='Préfixe '+pre;
+  cliPvEmail.textContent=em; cliPvPhone.textContent=ph;
+  const idx=cliIdx.value, c=idx!==''?storeArr('clients')[idx]:null;
+  const evs=c?storeArr('bookings').filter(b=>(b.client||'').trim().toLowerCase()===(c.name||'').trim().toLowerCase()):[];
+  const last=evs.map(b=>b.date).filter(Boolean).sort().pop();
+  const fd=d=>new Date(d.length>10?d:d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+  cliPvN.textContent=evs.length; cliPvLast.textContent=last?fd(last):'—'; cliPvRate.textContent=rate?rate.toFixed(2)+' €/h':'—';
+  cliPvSince.textContent=c?.createdAt?fd(c.createdAt):'—';
+  cliPvNew.style.display=c?'':'none';
+  cliKicker.textContent=c?'Modifier le client':'Nouveau client';
+  const done=[!!name,!!(em||ph)];
+  const chk='<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+  [cliSec1,cliSec2].forEach((s,i)=>{s.classList.toggle('done',done[i]);s.querySelector('.stf-num').innerHTML=done[i]?chk:String(i+1);});
+  cliSec3.classList.toggle('done',!!(rate||cliSiret.value.trim()||cliBillingAddr.value.trim()));
+  cliSec4.classList.toggle('done',!!cliNotes.value.trim());
+  const n=done.filter(Boolean).length; cliProg.style.width=(n*50)+'%'; cliProgT.textContent=n+' / 2 étapes essentielles';
+}
 function resetClientFormMobile(){
-  ['cliIdx','cliName','cliPrefix','cliEmail','cliPhone','cliAddr'].forEach(id=>document.getElementById(id).value='');
+  ['cliIdx','cliName','cliPrefix','cliEmail','cliPhone','cliAddr','cliDefaultRate','cliSiret','cliBillingAddr','cliNotes'].forEach(id=>document.getElementById(id).value='');
+  cliTutoiement.checked=false; cliDeleteBtn.style.display='none'; cliLive();
 }
 function saveClientMobile(){
   const email = document.getElementById('cliEmail').value;
@@ -1736,7 +1805,9 @@ function saveClientMobile(){
     prefix: document.getElementById('cliPrefix').value.toUpperCase(),
     email: email,
     phone: document.getElementById('cliPhone').value,
-    addr: document.getElementById('cliAddr').value
+    addr: document.getElementById('cliAddr').value,
+    defaultRate: parseFloat(cliDefaultRate.value)||null, siret: cliSiret.value, billingAddr: cliBillingAddr.value, notes: cliNotes.value, tutoiement: cliTutoiement.checked,
+    createdAt: existing?.createdAt || new Date().toISOString()
   };
   if(idx!==''){ c.id = existing?.id || crypto.randomUUID(); clients[idx]=c; } else { c.id = crypto.randomUUID(); clients.push(c); }
   set('clients', clients);
@@ -1754,7 +1825,10 @@ function editClientMobile(i){
   document.getElementById('cliEmail').value = c.email||'';
   document.getElementById('cliPhone').value = c.phone||'';
   document.getElementById('cliAddr').value = c.addr||'';
+  cliDefaultRate.value=c.defaultRate||''; cliSiret.value=c.siret||''; cliBillingAddr.value=c.billingAddr||''; cliNotes.value=c.notes||''; cliTutoiement.checked=!!c.tutoiement;
+  cliDeleteBtn.style.display='inline-flex';
   cliFormM.style.display='block';
+  cliLive();
   document.getElementById('tab-clients').scrollIntoView({behavior:'smooth', block:'start'});
 }
 async function deleteClientMobile(i){
@@ -1762,6 +1836,7 @@ async function deleteClientMobile(i){
   const clients = storeArr('clients');
   clients.splice(i,1);
   set('clients', clients);
+  resetClientFormMobile(); cliFormM.style.display='none';
   renderClientListMobile();
   populateClientNames();
 }

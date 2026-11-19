@@ -1071,39 +1071,62 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       </div>
 
       <div id="clientFormWrap" style="display:none;margin-bottom:20px;">
-        <h2 style="margin-top:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
-          <span data-i18n="clients_add_title">Ajouter / modifier un client</span>
-          <span id="cliCreatedLabel" style="font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3);"></span>
-        </h2>
-        <input type="hidden" id="cliIdx" value="">
-        <div class="row">
-          <div><label data-i18n="lbl_nom_societe">Nom société</label><input id="cliName" oninput="suggestPrefix()"></div>
-          <div><label data-i18n="lbl_prefixe">Préfixe facture (2-3 lettres)</label><input id="cliPrefix" maxlength="3" style="text-transform:uppercase"></div>
+<div class="stf-form">
+  <div class="stf-head">
+    <div class="stf-head-l"><div class="stf-kicker" id="cliKicker">Nouveau client</div>
+      <div class="stf-progress"><div class="stf-progress-bar"><span id="cliProg" style="width:0"></span></div><span id="cliProgT"></span></div></div>
+    <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap">
+      <button class="bo-ghost" onclick="closeClientForm()">Annuler</button>
+      <button class="bo-del" id="cliDeleteBtn" style="display:none;height:auto;padding:8px 16px;font-size:10px" onclick="deleteClientFromList(+cliIdx.value)">Supprimer</button>
+      <button class="bo-gold" onclick="saveClient()">Terminé</button>
+    </div>
+  </div>
+  <input type="hidden" id="cliIdx" value="">
+  <div class="stf-grid">
+    <aside class="stf-preview">
+      <div class="stf-pv-av" id="cliPvAv">?</div>
+      <div class="stf-pv-body">
+        <div class="stf-pv-name" id="cliPvName">Sans nom</div>
+        <span class="stf-pv-role" id="cliPvPrefix" style="display:none"></span>
+        <div class="stf-pv-sub" id="cliPvEmail"></div>
+        <div class="stf-pv-sub" id="cliPvPhone"></div>
+        <div class="stf-pv-rates">
+          <div><span>Prestas</span><b id="cliPvN">0</b></div>
+          <div><span>Dernière presta</span><b id="cliPvLast">—</b></div>
+          <div><span>Tarif par défaut</span><b id="cliPvRate">—</b></div>
+          <div><span>Client depuis</span><b id="cliPvSince">—</b></div>
         </div>
-        <div class="row">
-          <div><label data-i18n="lbl_email">Email</label><input id="cliEmail"></div>
-          <div><label data-i18n="lbl_telephone">Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78"></div>
+        <button class="bo-gold" id="cliPvNew" style="margin-top:8px;width:100%;display:none" onclick="clientNewBooking(+cliIdx.value)">+ Nouvelle presta</button>
+      </div>
+    </aside>
+    <div class="stf-steps">
+      <section class="stf-sec" id="cliSec1"><div class="stf-sec-h"><span class="stf-num">1</span><span class="stf-sec-t">Identité</span></div>
+        <div class="stf-row stf-row-idc">
+          <div class="field"><label>Nom société / client</label><input id="cliName" class="stf-big" placeholder="Événements XYZ" oninput="if(typeof suggestPrefix==='function')suggestPrefix();cliLive()"></div>
+          <div class="field"><label>Préfixe facture</label><input id="cliPrefix" class="stf-big" maxlength="3" style="text-transform:uppercase;letter-spacing:.12em" placeholder="EX" oninput="cliLive()"></div>
         </div>
-        <label data-i18n="lbl_adresse">Adresse</label><input id="cliAddr">
-        <div class="toggle-item" style="max-width:220px;margin-top:8px;">
-          <span data-i18n="toggle_tutoiement">Tutoiement (email facture)</span>
-          <label class="switch">
-            <input type="checkbox" id="cliTutoiement">
-            <span class="switch-track"></span>
-          </label>
+        <div class="stf-hint">Le préfixe sert à numéroter les factures de ce client (ex. EX2026-001).</div>
+      </section>
+      <section class="stf-sec" id="cliSec2"><div class="stf-sec-h"><span class="stf-num">2</span><span class="stf-sec-t">Coordonnées</span></div>
+        <div class="stf-row stf-row-idc">
+          <div class="field"><label>Email</label><input id="cliEmail" type="email" placeholder="contact@example.com" oninput="cliLive()"></div>
+          <div class="field"><label>Téléphone</label><input id="cliPhone" type="tel" placeholder="06 12 34 56 78" oninput="cliLive()"></div>
         </div>
-        <div class="row">
-          <div><label data-i18n="lbl_siret_client">SIRET / TVA client (optionnel)</label><input id="cliSiret"></div>
-          <div><label data-i18n="lbl_tarif_defaut">Tarif horaire par défaut (optionnel)</label><input id="cliDefaultRate" type="number" placeholder="€/h"></div>
+        <div class="field"><label>Adresse</label><input id="cliAddr" placeholder="Adresse habituelle des prestations"></div>
+      </section>
+      <section class="stf-sec" id="cliSec3"><div class="stf-sec-h"><span class="stf-num">3</span><span class="stf-sec-t">Facturation</span><span class="stf-opt">Facultatif</span></div>
+        <div class="stf-row stf-row-idc">
+          <div class="field"><label>Tarif horaire par défaut</label><div class="stf-money"><input id="cliDefaultRate" type="number" step="0.5" min="0" placeholder="0" oninput="cliLive()"><span>€ HT / h</span></div></div>
+          <div class="field"><label>SIRET / TVA client</label><input id="cliSiret"></div>
         </div>
-        <p style="font-size:10px;color:var(--text3);margin:-4px 0 8px;" data-i18n="hint_tarif_defaut">Pré-remplit le taux €/h sur les nouvelles prestas et lignes de facture pour ce client.</p>
-        <label data-i18n="lbl_facturation_addr">Adresse de facturation (optionnel)</label><input id="cliBillingAddr">
-        <p style="font-size:10px;color:var(--text3);margin:-4px 0 8px;" data-i18n="hint_facturation_addr">Si différente de l'adresse ci-dessus. Utilisée sur la facture à la place.</p>
-        <label data-i18n="lbl_notes_client">Notes (optionnel)</label><textarea id="cliNotes" rows="2"></textarea>
-        <p style="font-size:10px;color:var(--text3);margin:-4px 0 8px;" data-i18n="hint_notes_client">Usage interne, n'apparaît jamais sur la facture.</p>
-        <button class="bo-gold" onclick="saveClient()" data-i18n="btn_save_client">Enregistrer le client</button>
-        <button class="bo-ghost" onclick="closeClientForm()" data-i18n="btn_cancel">Annuler</button>
-        <button class="bo-del" id="cliDeleteBtn" style="display:none;" onclick="deleteClient(cliIdx.value)" data-i18n="btn_delete">Supprimer</button>
+        <div class="field"><label>Adresse de facturation (si différente)</label><input id="cliBillingAddr"></div>
+        <label class="chip-tu" style="display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);margin:0 0 12px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="cliTutoiement" style="width:auto;margin:0"> Tutoyer ce client dans l'email de facture</label>
+      </section>
+      <section class="stf-sec" id="cliSec4"><div class="stf-sec-h"><span class="stf-num">4</span><span class="stf-sec-t">Notes</span><span class="stf-opt">Facultatif</span></div>
+        <div class="field"><textarea id="cliNotes" rows="2" placeholder="Usage interne, n'apparaît jamais sur la facture" oninput="cliLive()"></textarea></div>
+      </section>
+    </div>
+  </div></div>
       </div>
 
       <div class="client-list" id="clientList"></div>
@@ -1923,6 +1946,7 @@ async function initUpdateSystem(){
 // « Nouveautés » : notes écrites à la main, seulement pour les mises à jour qui comptent pour
 // l'utilisateur. Pas d'entrée = pas de popup. Ajouter la plus récente EN HAUT.
 const RELEASE_NOTES=[
+  {v:'1.1.199', fr:['Fiche client façon BAR OPS : aperçu en direct (prestas, dernière presta, tarif, client depuis), sections Identité / Coordonnées / Facturation / Notes (Mac et iPhone).']},
   {v:'1.1.198', fr:['Nouvelle fiche contact façon BAR OPS : aperçu en direct, rôle (barman, serveur…), tarifs horaires avec calcul de marge (Mac et iPhone).']},
   {v:'1.1.197', fr:['Profil identique à BAR OPS : carte Compte (avatar carré, plan en doré, date de renouvellement), bandeau en haut des pages, bouton Compte surligné sur le Profil (Mac et iPhone).']},
   {v:'1.1.196', fr:['iPhone : Chiffre d\'affaires dans Factures › Analyses (chiffres clés, 12 derniers mois, CA par client, statut des paiements), au design BAR OPS.']},
@@ -2888,6 +2912,28 @@ function formatFrDatesGrouped(dates){
   }
   return parsed.map(dt=>formatFrDate(dt.toISOString().slice(0,10))).join(', ');
 }
+function cliLive(){
+  if(!document.getElementById('cliName')) return;
+  const name=cliName.value.trim(), pre=cliPrefix.value.trim().toUpperCase(), em=cliEmail.value.trim(), ph=cliPhone.value.trim(), rate=parseFloat(cliDefaultRate.value)||0;
+  cliPvName.textContent=name||'Sans nom';
+  cliPvAv.textContent=(name.split(/\s+/).filter(Boolean).map(w=>w[0]).join('')||'?').slice(0,2).toUpperCase();
+  cliPvPrefix.style.display=pre?'':'none'; cliPvPrefix.textContent='Préfixe '+pre;
+  cliPvEmail.textContent=em; cliPvPhone.textContent=ph;
+  const idx=cliIdx.value, c=idx!==''?storeArr('clients')[idx]:null;
+  const evs=c?storeArr('bookings').filter(b=>(b.client||'').trim().toLowerCase()===(c.name||'').trim().toLowerCase()):[];
+  const last=evs.map(b=>b.date).filter(Boolean).sort().pop();
+  const fd=d=>new Date(d.length>10?d:d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+  cliPvN.textContent=evs.length; cliPvLast.textContent=last?fd(last):'—'; cliPvRate.textContent=rate?rate.toFixed(2)+' €/h':'—';
+  cliPvSince.textContent=c?.createdAt?fd(c.createdAt):'—';
+  cliPvNew.style.display=c?'':'none';
+  cliKicker.textContent=c?'Modifier le client':'Nouveau client';
+  const done=[!!name,!!(em||ph)];
+  const chk='<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+  [cliSec1,cliSec2].forEach((s,i)=>{s.classList.toggle('done',done[i]);s.querySelector('.stf-num').innerHTML=done[i]?chk:String(i+1);});
+  cliSec3.classList.toggle('done',!!(rate||cliSiret.value.trim()||cliBillingAddr.value.trim()));
+  cliSec4.classList.toggle('done',!!cliNotes.value.trim());
+  const n=done.filter(Boolean).length; cliProg.style.width=(n*50)+'%'; cliProgT.textContent=n+' / 2 étapes essentielles';
+}
 function suggestPrefix(){
   if(cliPrefix.value) return;
   const words = cliName.value.trim().split(/\s+/).filter(Boolean);
@@ -2898,7 +2944,7 @@ function resetClientForm(){
   cliIdx.value=''; cliName.value=''; cliPrefix.value=''; cliEmail.value=''; cliPhone.value=''; cliAddr.value=''; cliTutoiement.checked=false;
   cliSiret.value=''; cliBillingAddr.value=''; cliDefaultRate.value=''; cliNotes.value='';
   cliDeleteBtn.style.display = 'none';
-  cliCreatedLabel.textContent = '';
+  cliLive();
 }
 function openNewClientForm(){
   resetClientForm();
@@ -2929,8 +2975,8 @@ function editClient(i){
   const c = storeArr('clients')[i];
   cliIdx.value=i; cliName.value=c.name; cliPrefix.value=c.prefix; cliEmail.value=c.email; cliPhone.value=c.phone||''; cliAddr.value=c.addr; cliTutoiement.checked=!!c.tutoiement;
   cliSiret.value=c.siret||''; cliBillingAddr.value=c.billingAddr||''; cliDefaultRate.value=c.defaultRate||''; cliNotes.value=c.notes||'';
-  cliCreatedLabel.textContent = c.createdAt ? t('lbl_client_depuis',{date:formatFrDate(c.createdAt.slice(0,10))}) : '';
   cliDeleteBtn.style.display = 'inline-flex';
+  cliLive();
   clientFormWrap.style.display = 'block';
   clientFormWrap.scrollIntoView({behavior:'smooth', block:'start'});
 }
@@ -2962,7 +3008,7 @@ function renderClientList(){
     const last = evs.map(b=>b.date).filter(Boolean).sort().pop();
     const meta = [link('phone',c.phone,`https://wa.me/${waNumber(c.phone)}`,'target="_blank" rel="noopener"'), link('mail',c.email,`mailto:${esc(c.email||'')}`)].filter(Boolean);
     const sub = [c.prefix?'['+c.prefix+']':'', c.addr].filter(Boolean).map(esc).join(' · ');
-    return `<div class="ct-row" onclick="viewClientInfo(${i})">
+    return `<div class="ct-row" onclick="editClient(${i})">
       <div class="ct-av"></div>
       <div class="ct-main"><div class="ct-name"><span>${esc(c.name||'Sans nom')}</span></div>${sub?`<div class="ct-sub">${sub}</div>`:''}</div>
       <div class="ct-meta">${meta.length?meta.join(''):'<span class="ct-none">Aucune coordonnée</span>'}</div>
