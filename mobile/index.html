@@ -28,34 +28,42 @@
   --font-display:'Cormorant Garamond',serif;--font-body:'Jost',sans-serif;
 }
 [data-theme="light"]{
-  --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
-  --border:#ddd9d2;--border2:#ccc8c0;
-  --text:#1a1814;--text2:#6b6560;--text3:#a09890;
-  --gold:#a97f2e;--gold2:#c2953a;--gold3:#8a6a20;
-  --gold-bg:rgba(169,127,46,0.10);--gold-border:rgba(169,127,46,0.28);
-  --red:#c23a3a;--red-bg:rgba(194,58,58,0.10);
-  --green:#2f8a5e;--green-bg:rgba(47,138,94,0.10);
-  --blue:#2f5aa6;--blue-bg:rgba(47,90,166,0.10);
-  --pink:#c23a7a;--pink-bg:rgba(194,58,122,0.10);
-  --teal:#2f9a82;--teal-bg:rgba(47,154,130,0.10);
+  --bg:#f7f5f1;--surface:#ffffff;--surface2:#f4f0e8;--surface3:#ece6da;
+  --border:#e6e0d4;--border2:#cfc5b2;
+  --text:#0e0c0a;--text2:#3d3730;--text3:#7a7064;
+  --gold:#b5821c;--gold2:#cc961f;--gold3:#8a6012;
+  --gold-bg:rgba(181,130,28,0.12);--gold-border:rgba(181,130,28,0.45);
+  --red:#cc2f27;--red-bg:rgba(204,47,39,0.09);
+  --green:#17905a;--green-bg:rgba(23,144,90,0.09);
+  --blue:#1f56d0;--blue-bg:rgba(31,86,208,0.09);
+  --pink:#c92a76;--pink-bg:rgba(201,42,118,0.09);
+  --teal:#13917a;--teal-bg:rgba(19,145,122,0.09);
 }
 @media(prefers-color-scheme:light){
   [data-theme="auto"]{
-    --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
-    --border:#ddd9d2;--border2:#ccc8c0;
-    --text:#1a1814;--text2:#6b6560;--text3:#a09890;
-    --gold:#a97f2e;--gold2:#c2953a;--gold3:#8a6a20;
-    --gold-bg:rgba(169,127,46,0.10);--gold-border:rgba(169,127,46,0.28);
-    --red:#c23a3a;--red-bg:rgba(194,58,58,0.10);
-    --green:#2f8a5e;--green-bg:rgba(47,138,94,0.10);
-    --blue:#2f5aa6;--blue-bg:rgba(47,90,166,0.10);
-    --pink:#c23a7a;--pink-bg:rgba(194,58,122,0.10);
-    --teal:#2f9a82;--teal-bg:rgba(47,154,130,0.10);
+  --bg:#f7f5f1;--surface:#ffffff;--surface2:#f4f0e8;--surface3:#ece6da;
+  --border:#e6e0d4;--border2:#cfc5b2;
+  --text:#0e0c0a;--text2:#3d3730;--text3:#7a7064;
+  --gold:#b5821c;--gold2:#cc961f;--gold3:#8a6012;
+  --gold-bg:rgba(181,130,28,0.12);--gold-border:rgba(181,130,28,0.45);
+  --red:#cc2f27;--red-bg:rgba(204,47,39,0.09);
+  --green:#17905a;--green-bg:rgba(23,144,90,0.09);
+  --blue:#1f56d0;--blue-bg:rgba(31,86,208,0.09);
+  --pink:#c92a76;--pink-bg:rgba(201,42,118,0.09);
+  --teal:#13917a;--teal-bg:rgba(19,145,122,0.09);
   }
+  [data-theme="auto"] .mcard,  [data-theme="auto"] .card{border:1px solid var(--border);box-shadow:0 2px 4px rgba(30,20,5,.04),0 12px 32px rgba(30,20,5,.07)}
+  [data-theme="auto"] .btn-gold{background:#b5821c;color:#fff;border-color:#b5821c}
+  [data-theme="auto"] .mheader{background:rgba(247,245,241,.9)}
 }
+[data-theme="light"] .mcard,[data-theme="light"] .card{border:1px solid var(--border);box-shadow:0 2px 4px rgba(30,20,5,.04),0 12px 32px rgba(30,20,5,.07)}
+[data-theme="light"] .btn-gold{background:#b5821c;color:#fff;border-color:#b5821c}
+[data-theme="light"] .mheader{background:rgba(247,245,241,.9)}
 *{box-sizing:border-box;font-family:var(--font-body);-webkit-tap-highlight-color:transparent;}
 body{margin:0;background:var(--bg);color:var(--text);font-weight:300;-webkit-font-smoothing:antialiased;}
-h2{font-family:var(--font-body);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;font-weight:400;}
+h2{font-family:var(--font-body);font-size:8px;font-weight:500;text-transform:uppercase;letter-spacing:.2em;color:var(--text3);margin:18px 0 14px;display:flex;align-items:center;gap:8px;}
+h2::after{content:'';flex:1;height:1px;background:var(--border);}
+.mobile-main>section>h2:first-child{display:none;}
 label{display:block;font-size:9px;color:var(--text3);margin:10px 0 5px;letter-spacing:.12em;text-transform:uppercase;font-weight:400;}
 input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-weight:300;font-family:var(--font-body);background:var(--surface2);color:var(--text);outline:none;transition:.2s;}
 input[type=checkbox]{width:auto;height:auto;padding:0;border:none;background:none;border-radius:0;accent-color:var(--gold);}
@@ -85,7 +93,8 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .auth-divider-mobile::before,.auth-divider-mobile::after{content:'';flex:1;height:1px;background:var(--border);}
 
 .mobile-app{min-height:100vh;display:flex;flex-direction:column;}
-.mheader{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;background:var(--surface);border-bottom:1px solid var(--border);}
+.mheader{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 20px 12px;background:linear-gradient(to bottom,var(--bg),var(--surface));border-bottom:1px solid var(--border);}
+.mheader-title{font-family:var(--font-body);font-size:28px;font-weight:300;letter-spacing:.08em;color:var(--gold);white-space:nowrap;margin:0;}
 .mheader-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-body);font-size:14px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);}
 .mheader-right{display:flex;align-items:center;gap:10px;}
 .mheader-sync{font-size:10.5px;color:var(--text3);}
@@ -93,11 +102,13 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .mheader-gear:hover{color:var(--gold);}
 .mheader-gear.active{color:var(--gold);}
 .mobile-main{flex:1;padding:16px 16px 100px;}
-.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:100;display:flex;background:var(--surface);border-top:1px solid var(--border);padding:0 6px calc(0px + env(safe-area-inset-bottom));}
-.bottom-nav button{all:unset;box-sizing:border-box;flex:1;text-align:center;cursor:pointer;color:var(--text3);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;padding:14px 0 12px;border-top:2px solid transparent;}
-.bottom-nav button.active{color:var(--gold);border-top:2px solid var(--gold);}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:100;display:flex;background:var(--surface);border-top:1px solid var(--border);padding:6px 8px calc(env(safe-area-inset-bottom) + 4px);}
+.bottom-nav button{all:unset;box-sizing:border-box;flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:var(--text3);font-size:8px;letter-spacing:.18em;text-transform:uppercase;font-weight:400;padding:8px 0 6px;border-radius:var(--radius);transition:color .2s,background .2s;}
+.bottom-nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;opacity:.6;}
+.bottom-nav button.active svg{opacity:1;}
+.bottom-nav button.active{color:var(--gold);background:var(--gold-bg);}
 
-.mcard{border:1px solid var(--border2);border-radius:6px;padding:12px;margin-bottom:10px;font-size:13px;background:var(--surface2);line-height:1.6;}
+.mcard{border:none;border-radius:var(--radius-lg);padding:16px;margin-bottom:10px;font-size:13px;background:var(--surface);line-height:1.6;}
 .mcard b{color:var(--text);}
 
 .mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;}
@@ -274,7 +285,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 
 <div id="appShell" class="mobile-app" style="display:none;">
   <div class="mheader">
-    <span class="mheader-brand"><svg viewBox="0 0 40 54" width="15" height="20" fill="none" stroke="var(--gold)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="27" r="12"/><circle cx="20" cy="27" r="3.5"/><path d="M20 23.5V9M20 30.5V45M16.5 27H2M23.5 27H38"/><path d="M17.5 24.5l-10-10M22.5 29.5l10 10M22.5 24.5l10-10M17.5 29.5l-10 10" opacity=".55"/></svg>HELM OPS</span>
+    <h1 class="mheader-title" id="mTitle">Pointage</h1>
     <div class="mheader-right">
       <button id="settingsGearBtn" class="mheader-gear" onclick="toggleSettings()" aria-label="Réglages">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -416,10 +427,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     </section>
   </main>
   <nav class="bottom-nav">
-    <button data-tab="pointage" class="active" onclick="switchTab('pointage')">Pointage</button>
-    <button data-tab="planning" onclick="switchTab('planning')">Planning</button>
-    <button data-tab="factures" onclick="switchTab('factures')">Factures</button>
-    <button data-tab="clients" onclick="switchTab('clients')">Clients</button>
+    <button data-tab="pointage" class="active" onclick="switchTab('pointage')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Pointage</button>
+    <button data-tab="planning" onclick="switchTab('planning')"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Planning</button>
+    <button data-tab="factures" onclick="switchTab('factures')"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7M9 7h4"/></svg>Factures</button>
+    <button data-tab="clients" onclick="switchTab('clients')"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><path d="M16 4.6a3.5 3.5 0 010 6.8M18.5 14c1.9.9 3 2.9 3 6"/></svg>Clients</button>
   </nav>
 </div>
 
@@ -509,6 +520,11 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>/* App iOS native : son login Google se termine ici dans une feuille Safari éphémère (aucun
+   localStorage, donc pas de drapeau helm_oauth_web posé par connectLoginMobile) → on renvoie les jetons
+   à l'app. Un login web normal a posé le drapeau et continue ici. Liens email (type=...) jamais concernés. */
+(function(){var h=location.hash,f=null;try{f=localStorage.getItem('helm_oauth_web');localStorage.removeItem('helm_oauth_web');}catch(e){}
+if(/access_token=/.test(h)&&!/type=/.test(h)&&!f&&!window.navigator.standalone&&!window.__helmNative)location.replace('helmops://callback'+h);})();</script>
 <script>
 function showToast(msg, duration){
   const stack = document.getElementById('toastStack');
@@ -586,6 +602,7 @@ async function handleLoginRedirect(){
 function connectLoginMobile(){
   const statusEl = document.getElementById('loginStatus');
   setStatusMsg(statusEl, '⏳ Redirection vers Google...');
+  try{ localStorage.setItem('helm_oauth_web','1'); }catch(e){}
   getSb().auth.signInWithOAuth({provider:'google', options:{redirectTo: location.origin+location.pathname, queryParams:{prompt:'select_account'}}});
 }
 
@@ -943,6 +960,7 @@ function switchTab(name){
   });
   document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
   document.getElementById('settingsGearBtn').classList.toggle('active', name==='parametres');
+  const h=document.querySelector('#tab-'+name+' > h2'); document.getElementById('mTitle').textContent = h ? h.textContent : '';
   renderActiveTab();
 }
 function renderActiveTab(){

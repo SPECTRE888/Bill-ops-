@@ -22,31 +22,50 @@
   --font-display:'Cormorant Garamond',serif;--font-body:'Jost',sans-serif;
 }
 [data-theme="light"]{
-  --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
-  --border:#ddd9d2;--border2:#ccc8c0;
-  --text:#1a1814;--text2:#6b6560;--text3:#a09890;
-  --gold:#a97f2e;--gold2:#c2953a;--gold3:#8a6a20;
-  --gold-bg:rgba(169,127,46,0.10);--gold-border:rgba(169,127,46,0.28);
-  --red:#c23a3a;--red-bg:rgba(194,58,58,0.10);
-  --green:#2f8a5e;--green-bg:rgba(47,138,94,0.10);
-  --blue:#2f5aa6;--blue-bg:rgba(47,90,166,0.10);
-  --pink:#c23a7a;--pink-bg:rgba(194,58,122,0.10);
-  --teal:#2f9a82;--teal-bg:rgba(47,154,130,0.10);
+  --bg:#f7f5f1;--surface:#ffffff;--surface2:#f4f0e8;--surface3:#ece6da;
+  --border:#e6e0d4;--border2:#cfc5b2;
+  --text:#0e0c0a;--text2:#3d3730;--text3:#7a7064;
+  --gold:#b5821c;--gold2:#cc961f;--gold3:#8a6012;
+  --gold-bg:rgba(181,130,28,0.12);--gold-border:rgba(181,130,28,0.45);
+  --red:#cc2f27;--red-bg:rgba(204,47,39,0.09);
+  --green:#17905a;--green-bg:rgba(23,144,90,0.09);
+  --blue:#1f56d0;--blue-bg:rgba(31,86,208,0.09);
+  --pink:#c92a76;--pink-bg:rgba(201,42,118,0.09);
+  --teal:#13917a;--teal-bg:rgba(19,145,122,0.09);
 }
 @media(prefers-color-scheme:light){
   [data-theme="auto"]{
-    --bg:#f5f3ef;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
-    --border:#ddd9d2;--border2:#ccc8c0;
-    --text:#1a1814;--text2:#6b6560;--text3:#a09890;
-    --gold:#a97f2e;--gold2:#c2953a;--gold3:#8a6a20;
-    --gold-bg:rgba(169,127,46,0.10);--gold-border:rgba(169,127,46,0.28);
-    --red:#c23a3a;--red-bg:rgba(194,58,58,0.10);
-    --green:#2f8a5e;--green-bg:rgba(47,138,94,0.10);
-    --blue:#2f5aa6;--blue-bg:rgba(47,90,166,0.10);
-    --pink:#c23a7a;--pink-bg:rgba(194,58,122,0.10);
-    --teal:#2f9a82;--teal-bg:rgba(47,154,130,0.10);
+  --bg:#f7f5f1;--surface:#ffffff;--surface2:#f4f0e8;--surface3:#ece6da;
+  --border:#e6e0d4;--border2:#cfc5b2;
+  --text:#0e0c0a;--text2:#3d3730;--text3:#7a7064;
+  --gold:#b5821c;--gold2:#cc961f;--gold3:#8a6012;
+  --gold-bg:rgba(181,130,28,0.12);--gold-border:rgba(181,130,28,0.45);
+  --red:#cc2f27;--red-bg:rgba(204,47,39,0.09);
+  --green:#17905a;--green-bg:rgba(23,144,90,0.09);
+  --blue:#1f56d0;--blue-bg:rgba(31,86,208,0.09);
+  --pink:#c92a76;--pink-bg:rgba(201,42,118,0.09);
+  --teal:#13917a;--teal-bg:rgba(19,145,122,0.09);
   }
+  [data-theme="auto"] body{background:radial-gradient(1200px 600px at 70% -10%,#fff8e8 0%,transparent 60%),var(--bg)}
+  [data-theme="auto"] .nav{background:#ffffff;box-shadow:4px 0 24px rgba(30,20,5,.05)}
+  [data-theme="auto"] .nav-logo .brand-rule{background:var(--gold);height:2px}
+  [data-theme="auto"] .nav-list button,  [data-theme="auto"] .acct .nav-item{color:var(--text2)}
+  [data-theme="auto"] .nav-icon{opacity:.75}
+  [data-theme="auto"] .nav-list button.active,  [data-theme="auto"] .acct .nav-item.active{color:var(--gold3);background:linear-gradient(90deg,rgba(181,130,28,.18),rgba(181,130,28,.04));border-left:2px solid var(--gold)}
+  [data-theme="auto"] .card{border:1px solid var(--border);box-shadow:0 2px 4px rgba(30,20,5,.04),0 12px 32px rgba(30,20,5,.07)}
+  [data-theme="auto"] .topbar{background:rgba(247,245,241,.9)}
+  [data-theme="auto"] .btn-gold{background:#b5821c;color:#fff;border-color:#b5821c;box-shadow:none}
 }
+/* Thème clair : repris de BAR OPS (contraste renforcé, cartes en relief) */
+[data-theme="light"] body{background:radial-gradient(1200px 600px at 70% -10%,#fff8e8 0%,transparent 60%),var(--bg)}
+[data-theme="light"] .nav{background:#ffffff;box-shadow:4px 0 24px rgba(30,20,5,.05)}
+[data-theme="light"] .nav-logo .brand-rule{background:var(--gold);height:2px}
+[data-theme="light"] .nav-list button,[data-theme="light"] .acct .nav-item{color:var(--text2)}
+[data-theme="light"] .nav-icon{opacity:.75}
+[data-theme="light"] .nav-list button.active,[data-theme="light"] .acct .nav-item.active{color:var(--gold3);background:linear-gradient(90deg,rgba(181,130,28,.18),rgba(181,130,28,.04));border-left:2px solid var(--gold)}
+[data-theme="light"] .card{border:1px solid var(--border);box-shadow:0 2px 4px rgba(30,20,5,.04),0 12px 32px rgba(30,20,5,.07)}
+[data-theme="light"] .topbar{background:rgba(247,245,241,.9)}
+[data-theme="light"] .btn-gold{background:#b5821c;color:#fff;border-color:#b5821c;box-shadow:none}
 *{box-sizing:border-box;font-family:var(--font-body);}
 body{margin:0;background:var(--bg);color:var(--text);font-size:14px;font-weight:300;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s;}
 .app{display:grid;grid-template-columns:260px 340px 1fr;grid-template-rows:100vh;height:100vh;overflow:hidden;}
@@ -63,8 +82,31 @@ body{margin:0;background:var(--bg);color:var(--text);font-size:14px;font-weight:
 .nav-list button.active{color:var(--gold);border-left:1px solid var(--gold-border);background:var(--gold-bg);}
 .nav-list button .nav-icon{width:14px;height:14px;flex-shrink:0;opacity:.5;}
 .nav-list button.active .nav-icon{opacity:1;}
+.acct{position:relative;border-top:1px solid var(--border);padding:8px}
+.acct .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius);cursor:pointer;color:var(--text3);font-size:12px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;transition:all .2s;margin-bottom:1px;border-left:1px solid transparent}
+.acct .nav-item:hover{color:var(--text2);background:var(--surface2)}
+.acct .nav-item.active{color:var(--gold);background:var(--gold-bg);border-left:1px solid var(--gold-border)}
+.acct .nav-item.active .nav-icon{opacity:1}
+.acct .nav-icon{width:14px;height:14px;flex-shrink:0;opacity:.5}
+.acct-chev{width:11px;height:11px;margin-left:auto;opacity:.55;transition:transform .2s}
+.acct.open .acct-chev{transform:rotate(180deg)}
+.acct-menu{display:none;position:absolute;left:8px;right:8px;bottom:calc(100% - 2px);background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.28);z-index:60}
+.acct.open .acct-menu{display:block}
+.acct-sep{height:1px;background:var(--border);margin:5px 8px}
+.acct-legal{display:block;width:100%;background:none;border:none;cursor:pointer;font-size:9px;letter-spacing:.08em;color:var(--text3);font-family:var(--font-body);padding:6px 0 2px;text-transform:none}
+.acct-legal:hover{color:var(--text2)}
+.seg-ctl{display:inline-flex;border:1px solid var(--border2);border-radius:4px;overflow:hidden}
+.seg-ctl button{background:none;border:none;border-left:1px solid var(--border2);border-radius:0;padding:6px 12px;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--font-body);letter-spacing:.03em;text-transform:none;font-weight:300}
+.seg-ctl button:first-child{border-left:none}
+.seg-ctl button.on{color:var(--gold);background:var(--gold-bg)}
+.disp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--text2)}
+.topbar{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;margin:-24px -28px 24px;background:linear-gradient(to bottom,var(--bg),var(--surface))}
+.topbar h1{font-family:var(--font-body);font-size:28px;font-weight:300;letter-spacing:.08em;color:var(--gold);margin:0;white-space:nowrap;text-transform:capitalize}
+.card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px}
+.ctitle{font-size:8px;font-weight:500;text-transform:uppercase;letter-spacing:.2em;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.ctitle::after{content:'';flex:1;height:1px;background:var(--border)}
 .nav-section{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);padding:10px 12px 5px;font-weight:400;}
-.panel{background:var(--bg);padding:24px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
+.panel{background:var(--bg);padding:24px 28px;border-right:1px solid var(--border);overflow-y:auto;height:100%;}
 .profile-grid{display:flex;flex-direction:column;gap:12px;}
 .profile-row1{display:grid;grid-template-columns:3fr 7fr;gap:12px;align-items:stretch;}
 .profile-row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:stretch;}
@@ -80,7 +122,9 @@ body{margin:0;background:var(--bg);color:var(--text);font-size:14px;font-weight:
 .info-value:empty::before{content:'—';color:var(--text3);}
 #histSearch{max-width:420px;}
 .tab{display:none;} .tab.active{display:block;}
-h2{font-family:var(--font-body);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;font-weight:400;}
+h2{font-family:var(--font-body);font-size:8px;font-weight:500;text-transform:uppercase;letter-spacing:.2em;color:var(--text3);margin:22px 0 14px;display:flex;align-items:center;gap:8px;}
+h2::after{content:'';flex:1;height:1px;background:var(--border);}
+.toggle-header h2::after{display:none;}
 h2:first-child{margin-top:0;}
 label{display:block;font-size:9px;color:var(--text3);margin:10px 0 5px;letter-spacing:.12em;text-transform:uppercase;font-weight:400;}
 .toggle-header{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px;}
@@ -641,35 +685,31 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <div class="nav-section" data-i18n="sec_clients">Clients</div>
     <button id="nav-clients" onclick="showTab('clients')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/><circle cx="11" cy="5" r="2.5"/><path d="M11 10c2.8 0 5 2.2 5 5"/></svg><span data-i18n="nav_clients">Mes clients</span></button>
 
-    <div class="nav-section" data-i18n="sec_compte">Compte</div>
-    <button id="nav-entreprise" onclick="showTab('entreprise')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span data-i18n="nav_donnees">Profil</span></button>
     <div class="nav-update" id="navUpdate" onclick="openUpdateModal()">
       <span class="nav-update-dot"></span>
       <span class="nav-update-text" id="navUpdateText">Helm Ops</span>
     </div>
     </div>
-    <div style="margin-top:auto;border-top:1px solid var(--border);padding:14px 18px;display:flex;flex-direction:column;gap:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;gap:1px;">
-          <button onclick="setTheme('dark')" id="theme-dark" title="Sombre" data-i18n-title="theme_dark_title" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-radius:3px 0 0 3px;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">●</button>
-          <button onclick="setTheme('auto')" id="theme-auto" title="Auto" data-i18n-title="theme_auto_title" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-left:none;border-radius:0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">A</button>
-          <button onclick="setTheme('light')" id="theme-light" title="Clair" data-i18n-title="theme_light_title" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-left:none;border-radius:0 3px 3px 0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">○</button>
-        </div>
-        <div style="display:flex;gap:1px;">
-          <button onclick="setLang('fr')" id="lang-fr" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-radius:3px 0 0 3px;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">FR</button>
-          <button onclick="setLang('en')" id="lang-en" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-right:none;border-left:none;border-radius:0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">EN</button>
-          <button onclick="setLang('es')" id="lang-es" style="font-size:9px;font-weight:400;padding:4px 8px;border:1px solid var(--border2);border-radius:0 3px 3px 0;background:none;cursor:pointer;color:var(--text3);font-family:var(--font-body);">ES</button>
-        </div>
+    <div class="acct" id="acctWrap">
+      <div class="acct-menu" id="acctMenu">
+        <div class="nav-item" id="nav-entreprise" onclick="toggleAcct();showTab('entreprise')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span data-i18n="nav_donnees">Mon entreprise</span></div>
+        <div class="acct-sep"></div>
+        <div class="nav-item" id="sidebarDisconnectBtn" onclick="toggleAcct();sidebarDisconnect()"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3M10.5 11L14 8l-3.5-3M14 8H6"/></svg><span data-i18n="btn_sidebar_disconnect">Déconnexion</span></div>
+        <button class="acct-legal" onclick="toggleAcct();openLegalModal()">© HELM OPS · Mentions légales</button>
       </div>
-      <button id="sidebarDisconnectBtn" onclick="sidebarDisconnect()" style="font-size:10px;font-weight:400;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:3px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;font-family:var(--font-body);padding:6px;width:100%;" data-i18n="btn_sidebar_disconnect">Déconnexion</button>
-      <button onclick="openLegalModal()" style="font-size:9px;font-weight:400;color:var(--text3);background:none;border:none;border-radius:0;padding:0;text-align:center;cursor:pointer;letter-spacing:.08em;font-family:var(--font-body);width:100%;margin-top:auto;">© HELM OPS</button>
+      <div class="nav-item" onclick="toggleAcct(event)" id="nav-account"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><circle cx="8" cy="6.5" r="2.3"/><path d="M3.8 13.5c.7-2 2.3-3 4.2-3s3.5 1 4.2 3"/></svg>Compte<svg class="acct-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l4-4 4 4"/></svg></div>
     </div>
   </div>
 
   <div class="panel">
+    <div class="topbar"><h1 id="topbarTitle"></h1></div>
 
     <div class="tab" id="tab-entreprise">
-      <h2 style="margin-top:0;" data-i18n="data_title">Profil</h2>
+      <div class="card"><div class="ctitle">Affichage</div>
+        <div class="disp-row" style="margin-bottom:10px;"><span>Thème</span><div class="seg-ctl"><button id="theme-dark" onclick="setTheme('dark')">Sombre</button><button id="theme-auto" onclick="setTheme('auto')">Auto</button><button id="theme-light" onclick="setTheme('light')">Clair</button></div></div>
+        <div class="disp-row"><span>Langue</span><div class="seg-ctl"><button id="lang-fr" onclick="setLang('fr')">FR</button><button id="lang-en" onclick="setLang('en')">EN</button><button id="lang-es" onclick="setLang('es')">ES</button></div></div>
+      </div>
+      <h2 data-i18n="data_title">Profil</h2>
 
       <div class="profile-grid">
       <div class="profile-row1">
@@ -1544,15 +1584,7 @@ function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.getAttribute('data-i18n')); });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder = t(el.getAttribute('data-i18n-ph')); });
   document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.title = t(el.getAttribute('data-i18n-title')); });
-  const langStyles = {
-    fr:{active:{borderTop:'1px solid var(--gold)',borderBottom:'1px solid var(--gold)',borderLeft:'1px solid var(--gold)',borderRight:'none',color:'var(--gold)',background:'var(--gold-bg)'},inactive:{borderTop:'1px solid var(--border2)',borderBottom:'1px solid var(--border2)',borderLeft:'1px solid var(--border2)',borderRight:'none',color:'var(--text3)',background:'none'}},
-    en:{active:{borderTop:'1px solid var(--gold)',borderBottom:'1px solid var(--gold)',borderLeft:'none',borderRight:'none',color:'var(--gold)',background:'var(--gold-bg)'},inactive:{borderTop:'1px solid var(--border2)',borderBottom:'1px solid var(--border2)',borderLeft:'none',borderRight:'none',color:'var(--text3)',background:'none'}},
-    es:{active:{borderTop:'1px solid var(--gold)',borderBottom:'1px solid var(--gold)',borderLeft:'none',borderRight:'1px solid var(--gold)',color:'var(--gold)',background:'var(--gold-bg)'},inactive:{borderTop:'1px solid var(--border2)',borderBottom:'1px solid var(--border2)',borderLeft:'none',borderRight:'1px solid var(--border2)',color:'var(--text3)',background:'none'}},
-  };
-  ['fr','en','es'].forEach(l=>{
-    const btn=document.getElementById('lang-'+l); if(!btn) return;
-    Object.assign(btn.style, langStyles[l][l===LANG?'active':'inactive']);
-  });
+  ['fr','en','es'].forEach(l=>document.getElementById('lang-'+l)?.classList.toggle('on', l===LANG));
 }
 function setLang(l){
   LANG = l;
@@ -1560,6 +1592,8 @@ function setLang(l){
   applyI18n();
   refreshAllViews();
 }
+function toggleAcct(e){ if(e) e.stopPropagation(); document.getElementById('acctWrap')?.classList.toggle('open'); }
+document.addEventListener('click',e=>{ const a=document.getElementById('acctWrap'); if(a&&a.classList.contains('open')&&!a.contains(e.target)) a.classList.remove('open'); });
 function sidebarDisconnect(){
   logoutAccount();
 }
@@ -1845,17 +1879,7 @@ function setTheme(mode){
 function applyTheme(){
   const theme = localStorage.getItem('inv_theme')||'auto';
   document.documentElement.setAttribute('data-theme', theme);
-  ['dark','auto','light'].forEach(m=>{
-    const btn = document.getElementById('theme-'+m);
-    if(!btn) return;
-    const active = m===theme;
-    btn.style.borderTopColor = active?'var(--gold)':'var(--border2)';
-    btn.style.borderBottomColor = active?'var(--gold)':'var(--border2)';
-    btn.style.color = active?'var(--gold)':'var(--text3)';
-    btn.style.background = active?'var(--gold-bg)':'none';
-    if(m==='dark') btn.style.borderLeftColor = active?'var(--gold)':'var(--border2)';
-    if(m==='auto') btn.style.borderRightColor = active?'var(--gold)':'var(--border2)';
-  });
+  ['dark','auto','light'].forEach(m=>document.getElementById('theme-'+m)?.classList.toggle('on', m===theme));
 }
 applyTheme();
 
@@ -2047,7 +2071,9 @@ function showTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-list button').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.acct .nav-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('nav-'+name).classList.add('active');
+  const tt=document.getElementById('topbarTitle'); if(tt) tt.textContent=(document.querySelector('#nav-'+name+' span')||{}).textContent||'';
   if(name==='clients') renderClientList();
   if(name==='facture') refreshClientSelect();
   if(name==='historique') renderHistory();

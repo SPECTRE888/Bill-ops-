@@ -20,6 +20,7 @@ struct WebHost: UIViewRepresentable {
     func makeUIView(context: Context) -> WKWebView {
         let cfg = WKWebViewConfiguration()
         cfg.websiteDataStore = .default()
+        cfg.userContentController.addUserScript(WKUserScript(source: "window.__helmNative=true;", injectionTime: .atDocumentStart, forMainFrameOnly: true))
         let w = WKWebView(frame: .zero, configuration: cfg)
         w.isOpaque = false
         w.backgroundColor = bg
@@ -61,7 +62,7 @@ final class Bridge: NSObject, WKUIDelegate, WKNavigationDelegate, ASWebAuthentic
     private func googleLogin(_ u: URL) {
         var c = URLComponents(url: u, resolvingAgainstBaseURL: false)!
         c.queryItems = (c.queryItems ?? []).map {
-            $0.name == "redirect_to" ? URLQueryItem(name: "redirect_to", value: appURL.absoluteString + "native.html") : $0
+            $0.name == "redirect_to" ? URLQueryItem(name: "redirect_to", value: appURL.absoluteString) : $0
         }
         let s = ASWebAuthenticationSession(url: c.url!, callbackURLScheme: "helmops") { [weak self] cb, _ in
             Task { @MainActor in
