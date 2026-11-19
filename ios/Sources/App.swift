@@ -30,7 +30,7 @@ struct WebHost: UIViewRepresentable {
         w.uiDelegate = context.coordinator
         w.navigationDelegate = context.coordinator
         context.coordinator.web = w
-        w.load(URLRequest(url: appURL))
+        w.load(URLRequest(url: appURL, cachePolicy: .reloadRevalidatingCacheData))
         return w
     }
     func updateUIView(_ v: WKWebView, context: Context) {}
