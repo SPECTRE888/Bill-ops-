@@ -1779,6 +1779,7 @@ async function initUpdateSystem(){
 // « Nouveautés » : notes écrites à la main, seulement pour les mises à jour qui comptent pour
 // l'utilisateur. Pas d'entrée = pas de popup. Ajouter la plus récente EN HAUT.
 const RELEASE_NOTES=[
+  {v:'1.1.183', fr:['Mise à jour test : vérification de l\'installation automatique.','Le texte « Mise à jour » qui apparaissait en haut à gauche au lancement a disparu.','Réglages iPhone réorganisés comme sur Mac : Compte, Sécurité, Entreprise.']},
   {v:'1.1.179', fr:['Nouvelle icône d\'app, identique à celle de l\'iPhone.','Profil réorganisé en onglets : Compte, Sécurité, Entreprise, Facturation.','Les mises à jour s\'installent désormais toutes seules, de façon sécurisée.']},
 ];
 function _verGt(a,b){const x=String(a).split('.').map(Number),y=String(b).split('.').map(Number);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return(x[i]||0)>(y[i]||0);}return false;}
