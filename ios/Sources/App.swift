@@ -72,8 +72,14 @@ final class Bridge: NSObject, WKUIDelegate, WKNavigationDelegate, ASWebAuthentic
         }
         s.presentationContextProvider = self
         s.prefersEphemeralWebBrowserSession = true
+        session?.cancel()
         session = s
-        s.start()
+        // iOS refuse parfois de présenter la feuille si l'app n'est pas encore active : on réessaie.
+        if !s.start() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+                if s.start() == false { self?.web?.evaluateJavaScript("document.getElementById('loginStatus').textContent='Impossible d\\'ouvrir Google, réessaie.'") }
+            }
+        }
     }
 
     // Liens target=_blank (PDF, mentions…) : Safari.
