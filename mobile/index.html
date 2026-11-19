@@ -524,7 +524,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
    localStorage, donc pas de drapeau helm_oauth_web posé par connectLoginMobile) → on renvoie les jetons
    à l'app. Un login web normal a posé le drapeau et continue ici. Liens email (type=...) jamais concernés. */
 (function(){var h=location.hash,f=null;try{f=localStorage.getItem('helm_oauth_web');localStorage.removeItem('helm_oauth_web');}catch(e){}
-if(/access_token=/.test(h)&&!/type=/.test(h)&&!f&&!window.navigator.standalone&&!window.__helmNative)location.replace('helmops://callback'+h);})();</script>
+if(/access_token=/.test(h)&&!/[#&]type=/.test(h)&&!f&&!window.navigator.standalone&&!window.__helmNative)location.replace('helmops://callback'+h);})();</script>
 <script>
 function showToast(msg, duration){
   const stack = document.getElementById('toastStack');
