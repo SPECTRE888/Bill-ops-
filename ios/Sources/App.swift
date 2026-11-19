@@ -27,7 +27,10 @@ struct WebHost: UIViewRepresentable {
         w.scrollView.backgroundColor = bg
         w.scrollView.contentInsetAdjustmentBehavior = .never
         w.allowsBackForwardNavigationGestures = false
+        #if DEBUG
+        // Inspecteur Safari réservé aux builds de développement : en production il exposerait la session et les données clients à qui branche le téléphone sur un Mac.
         if #available(iOS 16.4, *) { w.isInspectable = true }
+        #endif
         w.uiDelegate = context.coordinator
         w.navigationDelegate = context.coordinator
         context.coordinator.web = w
@@ -67,7 +70,8 @@ final class Bridge: NSObject, WKUIDelegate, WKNavigationDelegate, ASWebAuthentic
         let s = ASWebAuthenticationSession(url: c.url!, callbackURLScheme: "helmops") { [weak self] cb, _ in
             Task { @MainActor in
                 guard let self, let cb, let frag = cb.fragment else { return }
-                self.web?.load(URLRequest(url: URL(string: appURL.absoluteString + "#" + frag)!))
+                // URL différente de la page courante (paramètre ?login=…) sinon WebKit ne fait qu'un saut d'ancre sans recharger.
+                self.web?.load(URLRequest(url: URL(string: appURL.absoluteString + "?login=\(Int(Date().timeIntervalSince1970))#" + frag)!))
             }
         }
         s.presentationContextProvider = self
@@ -75,7 +79,8 @@ final class Bridge: NSObject, WKUIDelegate, WKNavigationDelegate, ASWebAuthentic
         session?.cancel()
         session = s
         // iOS refuse parfois de présenter la feuille si l'app n'est pas encore active : on réessaie.
-        if !s.start() {
+        let ok = s.start()
+        if !ok {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
                 if s.start() == false { self?.web?.evaluateJavaScript("document.getElementById('loginStatus').textContent='Impossible d\\'ouvrir Google, réessaie.'") }
             }

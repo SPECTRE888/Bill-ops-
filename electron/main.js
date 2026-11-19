@@ -66,7 +66,16 @@ function migrateLegacyUserData() {
   }
 }
 
-ipcMain.handle('open-external', (_e, u) => shell.openExternal(u))
+// N'ouvre que des liens web/mail/téléphone : shell.openExternal sur file://, smb://, etc. peut lancer
+// un programme local — vecteur classique d'exécution de code si une injection atteint le renderer.
+function safeOpenExternal(u) {
+  try {
+    const p = new URL(String(u)).protocol
+    if (['https:', 'http:', 'mailto:', 'tel:'].includes(p)) return shell.openExternal(String(u))
+  } catch (_) {}
+  return Promise.resolve()
+}
+ipcMain.handle('open-external', (_e, u) => safeOpenExternal(u))
 ipcMain.handle('get-version', () => app.getVersion())
 ipcMain.handle('check-for-updates', () => checkForUpdates())
 ipcMain.handle('download-update', () => downloadAndInstallUpdate())
@@ -168,8 +177,11 @@ ipcMain.handle('open-invoice-window', (_e, { html, title }) => {
     backgroundColor: '#f5f3ef',
     title: title || 'Facture',
     parent: mainWin || undefined,
-    webPreferences: { nodeIntegration: false, contextIsolation: true },
+    webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true },
   })
+  // Fenêtre d'aperçu : contenu de facture uniquement, aucune navigation ni popup.
+  win.webContents.setWindowOpenHandler(({ url: u }) => { safeOpenExternal(u); return { action: 'deny' } })
+  win.webContents.on('will-navigate', (event, u) => { if (u !== win.webContents.getURL()) { event.preventDefault(); safeOpenExternal(u) } })
   win.once('ready-to-show', () => win.show())
   win.on('closed', () => { fs.rm(tmpDir, { recursive: true, force: true }, () => {}) })
   win.loadFile(filePath)
@@ -196,14 +208,14 @@ function createWindow() {
 
   mainWin.webContents.setWindowOpenHandler(({ url: u }) => {
     if (u.startsWith('file://')) return { action: 'allow' }
-    shell.openExternal(u)
+    safeOpenExternal(u)
     return { action: 'deny' }
   })
 
   mainWin.webContents.on('will-navigate', (event, u) => {
     if (!u.startsWith('file://')) {
       event.preventDefault()
-      shell.openExternal(u)
+      safeOpenExternal(u)
     }
   })
 }
