@@ -112,6 +112,14 @@ body{margin:0;background:var(--bg);color:var(--text);font-size:14px;font-weight:
 .prof-tab.on{border-bottom-color:var(--gold);color:var(--gold)}
 .prof-pane{display:none}.prof-pane.on{display:block}
 .prof-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;align-items:stretch}
+/* Sections : style BAR OPS partout (liseré coloré + titre coloré) */
+.card.evsec{border-top:2px solid var(--sec,var(--gold));padding:14px 16px}
+.evsec>.ctitle{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--sec,var(--gold));margin-bottom:12px}
+.evsec>.ctitle::after{display:none}
+#tab-entreprise>div,#tab-historique{max-width:1200px}
+/* Formulaire Facture : titres de section comme les .evsec BAR OPS */
+#tab-facture h2{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--gold);border-top:2px solid var(--gold);padding-top:10px;margin:18px 0 8px}
+#tab-facture .facture-fixed-top>h2:first-child{margin-top:0}
 #tab-entreprise .card.evsec{border-top:2px solid var(--sec,var(--gold))}
 #tab-entreprise .evsec>.ctitle{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--sec,var(--gold))}
 #tab-entreprise .evsec>.ctitle::after{display:none}
@@ -1877,6 +1885,7 @@ async function initUpdateSystem(){
 // « Nouveautés » : notes écrites à la main, seulement pour les mises à jour qui comptent pour
 // l'utilisateur. Pas d'entrée = pas de popup. Ajouter la plus récente EN HAUT.
 const RELEASE_NOTES=[
+  {v:'1.1.194', fr:['Facture et Profil au design BAR OPS : sections avec liseré et titre colorés, comme dans BAR OPS.']},
   {v:'1.1.193', fr:['iPhone : nouvel onglet Accueil (tableau de bord BAR OPS : chiffres clés, Alertes, À faire) et calendrier aligné sur BAR OPS.']},
   {v:'1.1.192', fr:['Tableau de bord au design BAR OPS : 3 chiffres clés cliquables, puis Alertes (pointages en retard, prestas imminentes) et À faire (à facturer, à envoyer, à encaisser) avec action en un clic.','Calendrier aligné sur BAR OPS (cases, pastilles, survol).']},
   {v:'1.1.191', fr:['Historique des factures en lignes BAR OPS (couleur selon le statut), boutons harmonisés partout comme BAR OPS.','iPhone : cartes au style BAR OPS (bordure fine, liseré couleur client ou statut).']},
