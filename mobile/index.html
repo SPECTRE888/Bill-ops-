@@ -112,18 +112,18 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .mcard b{font-weight:600}
 .mcard b{color:var(--text);}
 
-.mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;}
-.mcal-weekday{font-size:9px;color:var(--text3);text-align:center;padding-bottom:2px;}
-.mcal-day{min-height:42px;border-radius:4px;font-size:9px;background:var(--surface2);color:var(--text3);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;line-height:1.2;}
+.mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px;}
+.mcal-weekday{font-size:10px;color:var(--text3);text-align:center;text-transform:uppercase;letter-spacing:.08em;padding:4px 0;}
+.mcal-day{min-height:50px;border-radius:4px;font-size:9px;background:var(--surface2);color:var(--text3);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;padding:4px 5px;line-height:1.25;border:1px solid transparent;box-sizing:border-box;transition:.15s;}
 .mcal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
-.mcal-day.selected{outline:2px solid var(--gold);}
+.mcal-day.selected{outline:2px solid var(--gold);outline-offset:-1px;}
 .mcal-day.empty{background:transparent;cursor:default;}
 .mcal-day.past{opacity:.5;}
 .mcal-day.past.has-booking{background:var(--surface3);border-color:var(--border2);}
-.mcal-day .mcal-daynum{font-size:11px;}
-.mcal-dots{display:flex;gap:2px;margin-top:3px;flex-wrap:wrap;justify-content:center;}
-.mcal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-.mcal-day .mcal-ca{font-size:8px;color:var(--gold);font-weight:700;margin-top:auto;}
+.mcal-day .mcal-daynum{font-size:12px;}
+.mcal-dots{display:flex;gap:2px;margin-top:3px;flex-wrap:wrap;justify-content:flex-start;}
+.mcal-dot{width:6px;height:6px;border-radius:1px;flex-shrink:0;}
+.mcal-day .mcal-ca{font-size:9px;color:var(--gold);font-weight:700;margin-top:auto;align-self:flex-end;}
 .mcal-day-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12.5px;}
 .mcal-day-header{font-family:var(--font-body);font-size:14px;color:var(--gold);margin-bottom:8px;text-transform:capitalize;}
 .mcal-b-row{padding:9px 0;border-bottom:1px solid var(--border);}
@@ -294,6 +294,11 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .ev-badge.ok{background:var(--green-bg,rgba(80,180,120,.14));color:var(--green);border:1px solid var(--green)}
 .ev-badge.wait{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold)}
 @media(max-width:1100px){.ev-hdr{display:none}.ev-r{grid-template-columns:1fr auto!important;row-gap:6px}.ev-r .ev-c.hide-s{display:none}.ev-c{border:none;padding:0}}
+.dash-grp{padding:4px 0}
+.dash-grp+.dash-grp{border-top:1px solid var(--border);padding-top:10px;margin-top:4px}
+.dash-grp-h{display:flex;align-items:center;gap:8px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:4px}
+.dash-grp-n{font-size:10px;padding:1px 7px;border-radius:9px;background:var(--surface2);color:var(--text2);letter-spacing:0}
+.dash-row{display:flex;align-items:center;gap:10px;padding:7px 0}
 .bo-empty{text-align:center;padding:48px 16px;color:var(--text3);font-size:11px;font-weight:300;letter-spacing:.04em}
 
 .prof-tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;color:var(--text3);font-family:inherit}
@@ -375,7 +380,10 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     </div>
   </div>
   <main class="mobile-main">
-    <section id="tab-pointage">
+    <section id="tab-accueil">
+      <div id="mDashContent"></div>
+    </section>
+    <section id="tab-pointage" style="display:none;">
       <div class="toggle-row" style="margin:0 0 14px;">
         <button id="pointViewTopoint" class="btn-line" style="flex:1;margin:0;" onclick="switchPointageView('topoint')">À pointer</button>
         <button id="pointViewPointed" class="btn-line" style="flex:1;margin:0;" onclick="switchPointageView('pointed')">Pointées</button>
@@ -543,7 +551,8 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
     </section>
   </main>
   <nav class="bottom-nav">
-    <button data-tab="pointage" class="active" onclick="switchTab('pointage')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Pointage</button>
+    <button data-tab="accueil" class="active" onclick="switchTab('accueil')"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Accueil</button>
+    <button data-tab="pointage" onclick="switchTab('pointage')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Pointage</button>
     <button data-tab="planning" onclick="switchTab('planning')"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Planning</button>
     <button data-tab="factures" onclick="switchTab('factures')"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7M9 7h4"/></svg>Factures</button>
     <button data-tab="clients" onclick="switchTab('clients')"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><path d="M16 4.6a3.5 3.5 0 010 6.8M18.5 14c1.9.9 3 2.9 3 6"/></svg>Clients</button>
@@ -1072,10 +1081,10 @@ function applyTheme(){
 }
 
 // --- Tabs ---
-let activeTab = 'pointage';
+let activeTab = 'accueil';
 function switchTab(name){
   activeTab = name;
-  ['pointage','planning','factures','clients','parametres'].forEach(t=>{
+  ['accueil','pointage','planning','factures','clients','parametres'].forEach(t=>{
     document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
   });
   document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
@@ -1083,8 +1092,48 @@ function switchTab(name){
   const h=document.querySelector('#tab-'+name+' > h2'); document.getElementById('mTitle').textContent = h ? h.textContent : '';
   renderActiveTab();
 }
+function renderDashboardMobile(){
+  const el = document.getElementById('mDashContent'); if(!el) return;
+  const bookings = storeArr('bookings'), invoices = storeArr('invoices');
+  const today = todayStr(), now = new Date();
+  const monthKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const num = v => parseFloat(String(v||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
+  const eur = v => v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const amt = b => (b.actualHours ?? b.hours ?? 0)*(b.rate||0);
+  const caMois = invoices.filter(i=>i.status==='Payée' && ((i.workDate||i.date||'').startsWith(monthKey))).reduce((s,i)=>s+num(i.total),0);
+  const upcoming = bookings.filter(b=>b.status==='à facturer' && b.date>=today && !b.checkedOutAt).sort((a,b)=>a.date.localeCompare(b.date)||(a.from||'').localeCompare(b.from||''));
+  const unpaid = invoices.filter(i=>i.status!=='Payée');
+  const kpi = (label,val,sub,onclick)=>`<div class="mcard" style="padding:14px 16px;cursor:pointer;margin:0" onclick="${onclick}">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3)">${label}</div>
+      <div style="font-size:26px;font-weight:300;color:var(--gold);margin-top:4px;line-height:1.1">${val}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:3px">${sub}</div></div>`;
+  let html = `<div style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:14px">
+    ${kpi('CA du mois',eur(caMois),now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}),"switchTab('factures')")}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    ${kpi('Prestas à venir',eur(upcoming.reduce((s,b)=>s+amt(b),0)),upcoming.length+' presta'+(upcoming.length>1?'s':''),"switchTab('planning')")}
+    ${kpi('À encaisser',eur(unpaid.reduce((s,i)=>s+num(i.total),0)),unpaid.length+' facture'+(unpaid.length>1?'s':''),"switchTab('factures')")}
+    </div></div>`;
+  const t0 = new Date(today+'T00:00:00');
+  const dd = d => Math.round((new Date(d+'T00:00:00')-t0)/86400000);
+  const badge=(txt,kind)=>{const c=kind==='red'?['var(--red-bg)','var(--red)']:kind==='gold'?['var(--gold-bg)','var(--gold)']:['var(--surface2)','var(--text2)'];return`<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:${c[0]};color:${c[1]};white-space:nowrap;letter-spacing:.04em">${txt}</span>`;};
+  const dLbl = d => d ? new Date(d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
+  const row = r => `<div class="dash-row">${r.b}<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div><div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.txt}</div></div><button class="bo-edit" onclick="${r.act}">${r.btn}</button></div>`;
+  const grp = (title,items) => items.length ? `<div class="dash-grp"><div class="dash-grp-h">${title} <span class="dash-grp-n">${items.length}</span></div>${items.slice(0,6).map(row).join('')}</div>` : '';
+  const late = bookings.filter(b=>b.status==='à facturer' && b.date && b.date<today && !b.checkedOutAt);
+  const soon = upcoming.filter(b=>dd(b.date)<=3);
+  const alertsHtml = grp('Pointages en retard', late.map(b=>({b:badge(dLbl(b.date),'red'),name:esc(b.client),txt:'pointage non fait',btn:'Pointer',act:"switchTab('pointage')"})))
+    + grp('Dans les 3 prochains jours', soon.map(b=>{const n=dd(b.date);return {b:badge(n===0?'Auj.':'J-'+n,n<=1?'red':'gold'),name:esc(b.client),txt:(b.from&&b.to?esc(b.from)+' – '+esc(b.to):'')+(b.addr?' · '+esc(b.addr):''),btn:'Voir',act:"switchTab('planning')"};}));
+  const toInvoice = bookings.filter(b=>b.status==='à facturer' && b.checkedOutAt);
+  const todoHtml = grp('Prestas à facturer', toInvoice.map(b=>({b:badge(dLbl(b.date)),name:esc(b.client),txt:eur(amt(b))+' à facturer',btn:'Facturer',act:`openInvoiceExtras('${escJsAttr(b.id)}')`})))
+    + grp('Factures à envoyer', invoices.filter(i=>i.status==='À envoyer').map(i=>({b:badge(esc(i.num)),name:esc(i.client),txt:esc(i.total),btn:'Envoyer',act:`sendInvoiceMobile('${escJsAttr(i.num)}')`})))
+    + grp('Paiements à encaisser', invoices.filter(i=>i.status==='Envoyée').map(i=>({b:badge(esc(i.num),'gold'),name:esc(i.client),txt:esc(i.total)+' · en attente',btn:'Payée',act:`updateInvoiceStatusMobile('${escJsAttr(i.num)}','Payée')`})));
+  const box = (title,sub,inner,none)=>`<div class="mcard" style="margin-bottom:10px"><div style="font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)">${title}</div><div style="font-size:11px;color:var(--text3);margin:2px 0 8px">${sub}</div>${inner||`<div style="font-size:12px;color:var(--text3);padding:4px 0">${none}</div>`}</div>`;
+  html += box('Alertes','Ce qui peut bloquer une prestation à venir',alertsHtml,'Aucune alerte') + box('À faire','Facturation et encaissements',todoHtml,'Rien d’urgent');
+  el.innerHTML = html;
+}
 function renderActiveTab(){
-  if(activeTab==='pointage') renderPointage();
+  if(activeTab==='accueil') renderDashboardMobile();
+  else if(activeTab==='pointage') renderPointage();
   else if(activeTab==='planning') renderPlanningTab();
   else if(activeTab==='parametres') renderParametres();
   else if(activeTab==='clients'){ renderClientListMobile(); renderContacts(); }
