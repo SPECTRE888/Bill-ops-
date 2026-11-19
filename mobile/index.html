@@ -75,8 +75,8 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .btn-gold{background:var(--gold);color:#080808;border:1px solid var(--gold);}
 .btn-gold:hover{background:var(--gold2);border-color:var(--gold2);}
 .btn-gold:active{transform:scale(.98);}
-.btn-line{background:transparent;border:1px solid var(--border);color:var(--text2);}
-.btn-line:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-bg);}
+.btn-line{background:transparent;border:1px solid var(--border2);color:var(--text2);font-weight:500;}
+.btn-line:hover{border-color:var(--text3);color:var(--text);background:var(--surface2);}
 /* Bouton "Annuler" du modal de confirmation : même gabarit que le contour standard, mais
    rempli pour peser visuellement autant que le bouton doré à côté. */
 #confirmModal .btn-line{background:var(--surface3);border-color:var(--border2);color:var(--text);}
@@ -108,7 +108,8 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .bottom-nav button.active svg{opacity:1;}
 .bottom-nav button.active{color:var(--gold);background:var(--gold-bg);}
 
-.mcard{border:none;border-radius:var(--radius-lg);padding:16px;margin-bottom:10px;font-size:13px;background:var(--surface);line-height:1.6;}
+.mcard{border:1px solid var(--border);border-left:3px solid var(--bl,var(--border));border-radius:6px;padding:12px 14px;margin-bottom:8px;font-size:13px;background:var(--surface);line-height:1.6;}
+.mcard b{font-weight:600}
 .mcard b{color:var(--text);}
 
 .mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;}
@@ -273,6 +274,26 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 .bo-edit:hover{border-color:var(--gold-border);color:var(--gold)}
 .bo-del{padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;border-radius:4px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:var(--font-body);line-height:1;display:inline-flex;align-items:center;white-space:nowrap;color:var(--red);border:1px solid var(--red);background:var(--red-bg);font-weight:500;transition:.2s;margin:0;width:auto}
 .bo-del:hover{color:#fff;background:var(--red)}
+/* Lignes Planning/Pointage : reprises de la liste Événements BAR OPS (evRowHTML) */
+.ev-hdr,.ev-r{display:grid;grid-template-columns:var(--cols);column-gap:12px;align-items:center}
+.ev-hdr{padding:8px 16px 8px 18px;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);margin-bottom:6px}
+.ev-hdr>div+div{padding-left:13px}
+.ev-list{display:flex;flex-direction:column;gap:6px}
+.ev-r{padding:11px 16px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--bl,var(--border));border-radius:6px;transition:.15s;cursor:pointer}
+.ev-r:hover{border-color:var(--gold-border);border-left-color:var(--bl,var(--gold-border))}
+.ev-c{border-left:1px solid var(--border);padding-left:12px;align-self:stretch;display:flex;flex-direction:column;justify-content:center;min-width:0;font-size:12px;color:var(--text2)}
+.ev-c .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-c.nm .t{font-size:13px;font-weight:600;color:var(--text)}
+.ev-c.amt{align-items:flex-end;font-size:13px;font-weight:600;color:var(--gold)}
+.ev-c.act{flex-direction:row;gap:5px;justify-content:flex-end;align-items:center}
+.ev-d{font-size:12px;color:var(--text);white-space:nowrap}
+.ev-x{height:30px;width:30px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;padding:0;background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:13px;cursor:pointer;transition:.15s;flex-shrink:0;margin:0}
+.ev-x:hover{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.ev-open{height:30px!important;padding:0 12px!important}
+.ev-badge{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;width:fit-content}
+.ev-badge.ok{background:var(--green-bg,rgba(80,180,120,.14));color:var(--green);border:1px solid var(--green)}
+.ev-badge.wait{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold)}
+@media(max-width:1100px){.ev-hdr{display:none}.ev-r{grid-template-columns:1fr auto!important;row-gap:6px}.ev-r .ev-c.hide-s{display:none}.ev-c{border:none;padding:0}}
 .bo-empty{text-align:center;padding:48px 16px;color:var(--text3);font-size:11px;font-weight:300;letter-spacing:.04em}
 
 .prof-tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;color:var(--text3);font-family:inherit}
@@ -1083,7 +1104,7 @@ function pointedBookingCardHtml(b){
     b.addr ? `📍 ${mapsLink(b.addr)}` : '',
     b.contact ? `☎ ${linkifyPhones(b.contact)}` : ''
   ].filter(Boolean).join('<br>');
-  return `<div class="mcard" style="display:flex;gap:10px;align-items:flex-start;">
+  return `<div class="mcard" style="display:flex;gap:10px;align-items:flex-start;--bl:${clientColor(b.client)}">
     <input type="checkbox" style="width:auto;margin-top:3px;flex-shrink:0;" ${groupSelectionMobile.has(b.id)?'checked':''} onchange="toggleGroupSelectMobile('${b.id}', this.checked)">
     <div style="flex:1;min-width:0;">
       <b>${esc(b.client)}</b>${b.label?' — '+esc(b.label):''}<br>
@@ -1344,7 +1365,7 @@ function renderPointage(){
     const btn = !b.checkedInAt
       ? `<button class="btn-gold action-btn" onclick="openClockModal('${b.id}','in')">Je suis arrivé(e)</button>`
       : `<button class="btn-gold action-btn" onclick="openClockModal('${b.id}','out')">Je termine</button>`;
-    return `<div class="mcard">${info}${alertLine}${details}${statusLine}${btn}</div>`;
+    return `<div class="mcard" style="--bl:${overdue?'var(--red)':clientColor(b.client)}">${info}${alertLine}${details}${statusLine}${btn}</div>`;
   }).join('') : '<p style="color:var(--text3);font-size:13px;">Aucune presta à pointer.</p>';
 }
 
@@ -1662,7 +1683,7 @@ async function deleteBookingMobile(id){
 // --- Factures ---
 function invoiceCardHtml(i){
   const color = (i.status==='Envoyée'||i.status==='Payée') ? 'var(--green)' : 'var(--gold)';
-  return `<div class="mcard">
+  return `<div class="mcard" style="--bl:${i.status==='Payée'?'var(--green)':i.status==='Envoyée'?'var(--gold)':'var(--red)'}">
     <b>${esc(i.num)}</b> — ${esc(i.client)}<br>
     <span style="color:var(--text2);font-size:12px;">${esc(i.date||'')}</span><br>
     <span style="font-weight:600;">${esc(i.total)}</span>
