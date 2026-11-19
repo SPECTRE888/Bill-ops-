@@ -224,15 +224,16 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .client-row a:hover{color:var(--gold);}
 .client-actions{display:flex;gap:5px;justify-content:flex-end;}
 .client-actions button{margin:0;padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;letter-spacing:.08em;}
-.cal-day{min-height:66px;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
+.cal-day{min-height:74px;border:1px solid transparent;transition:.15s;box-sizing:border-box;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border-radius:4px;font-size:11px;background:var(--surface2);color:var(--text3);cursor:pointer;position:relative;line-height:1.25;padding:5px 6px;text-align:left;}
 .cal-day.has-booking{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--text);font-weight:600;}
-.cal-day.selected{outline:2px solid var(--gold);}
+.cal-day.selected{outline:2px solid var(--gold);outline-offset:-1px;}
+.cal-day:hover{border-color:var(--border2);}
 .cal-day.empty{background:transparent;cursor:default;}
 .cal-day.past{opacity:.5;}
 .cal-day.past.has-booking{background:var(--surface3);border-color:var(--border2);}
 .cal-day .cal-daynum{font-size:13px;}
 .cal-day .cal-names{font-size:10px;font-weight:400;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
-.cal-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;flex-shrink:0;}
+.cal-dot{display:inline-block;width:6px;height:6px;border-radius:1px;margin-right:4px;flex-shrink:0;}
 .cal-day .cal-ca{font-size:10px;color:var(--gold);font-weight:700;margin-top:auto;align-self:flex-end;}
 .cal-day-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;margin-bottom:14px;font-size:12px;max-height:180px;overflow-y:auto;}
 .cal-day-panel .cal-b-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);gap:6px;}
@@ -430,6 +431,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .ev-badge.ok{background:var(--green-bg,rgba(80,180,120,.14));color:var(--green);border:1px solid var(--green)}
 .ev-badge.wait{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold)}
 @media(max-width:1100px){.ev-hdr{display:none}.ev-r{grid-template-columns:1fr auto!important;row-gap:6px}.ev-r .ev-c.hide-s{display:none}.ev-c{border:none;padding:0}}
+.dash-split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px;align-items:start}
+.dash-grp{padding:4px 0}
+.dash-grp+.dash-grp{border-top:1px solid var(--border);padding-top:10px;margin-top:4px}
+.dash-grp-h{display:flex;align-items:center;gap:8px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:4px}
+.dash-grp-n{font-size:10px;padding:1px 7px;border-radius:9px;background:var(--surface2);color:var(--text2);letter-spacing:0}
+.dash-row{display:flex;align-items:center;gap:10px;padding:7px 0}
+@media(max-width:900px){.dash-split,.dash-kpis{grid-template-columns:1fr!important}}
 .bo-empty{text-align:center;padding:48px 16px;color:var(--text3);font-size:11px;font-weight:300;letter-spacing:.04em}
 
 @media(max-width:900px){
@@ -1150,54 +1158,15 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
 
     <div class="tab active" id="tab-accueil">
-      <h2 data-i18n="home_title">Vue d'ensemble</h2>
-
-      <div class="dash-section-title" data-i18n="home_sec_mois">Ce mois-ci (réalisé)</div>
-      <div class="dash-card dash-card-hero">
-        <div class="dash-card-label" data-i18n="home_ca_mois">CA du mois (prestas effectuées)</div>
-        <div class="dash-card-value" id="dashCA">0 €</div>
-        <div class="dash-card-hero-rule"></div>
-        <div id="dashGoalBar" style="margin-top:10px;text-align:left;"></div>
-      </div>
-
-      <div class="dash-section-title" data-i18n="home_sec_apercu">Prévisionnel &amp; facturation</div>
-      <div class="dash-grid">
-        <div class="dash-card">
-          <div class="dash-card-label" data-i18n="home_prestas_venir">Prestations à venir</div>
-          <div class="dash-card-value" id="dashUpcoming">0</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-label" data-i18n="home_ca_prevu">CA prévu ce mois</div>
-          <div class="dash-card-value" id="dashForecastAmt">0 €</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-label" data-i18n="home_heures_prevues">Heures prévues ce mois</div>
-          <div class="dash-card-value" id="dashHours">0 h</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-label" data-i18n="home_factures_attente">Factures en attente</div>
-          <div class="dash-card-value" id="dashPending">0</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-label" data-i18n="home_montant_encaisser">Montant à encaisser</div>
-          <div class="dash-card-value" id="dashUnpaidAmt">0 €</div>
+      <div class="bo-topbar">
+        <span></span>
+        <div style="display:flex;gap:6px">
+          <button class="bo-gold" onclick="dashNewBooking()" data-i18n="btn_new_booking">+ Nouvelle prestation</button>
+          <button class="bo-ghost" onclick="dashNewInvoice()" data-i18n="btn_new_invoice">+ Nouvelle facture</button>
+          <button class="bo-ghost" onclick="dashNewClient()" data-i18n="btn_new_client">+ Ajouter un client</button>
         </div>
       </div>
-
-      <div class="dash-bottom-row">
-        <div>
-          <div class="dash-section-title" data-i18n="home_next_title">Prochaine prestation</div>
-          <div class="dash-next-box" id="dashNext"></div>
-        </div>
-        <div>
-          <div class="dash-section-title" data-i18n="home_actions_title">Actions rapides</div>
-          <div class="dash-actions dash-actions-col">
-            <button class="btn-gold" onclick="dashNewBooking()" data-i18n="btn_new_booking">+ Nouvelle prestation</button>
-            <button class="btn-gold" onclick="dashNewInvoice()" data-i18n="btn_new_invoice">+ Nouvelle facture</button>
-            <button class="btn-line" onclick="dashNewClient()" data-i18n="btn_new_client">+ Ajouter un client</button>
-          </div>
-        </div>
-      </div>
+      <div id="dashContent"></div>
     </div>
 
     <div class="tab" id="tab-planning">
@@ -1233,7 +1202,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
         <span id="bkCalLabel" style="font-family:var(--font-body);font-size:15px;color:var(--gold);"></span>
         <button class="btn-line" style="margin:0;padding:4px 10px;" onclick="calShift(1)">›</button>
       </div>
-      <div id="bkCal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;"></div>
+      <div id="bkCal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px;"></div>
       <div id="bkDayPanel"></div>
 
       <div id="bkFormWrap" style="display:none;">
@@ -1908,6 +1877,7 @@ async function initUpdateSystem(){
 // « Nouveautés » : notes écrites à la main, seulement pour les mises à jour qui comptent pour
 // l'utilisateur. Pas d'entrée = pas de popup. Ajouter la plus récente EN HAUT.
 const RELEASE_NOTES=[
+  {v:'1.1.192', fr:['Tableau de bord au design BAR OPS : 3 chiffres clés cliquables, puis Alertes (pointages en retard, prestas imminentes) et À faire (à facturer, à envoyer, à encaisser) avec action en un clic.','Calendrier aligné sur BAR OPS (cases, pastilles, survol).']},
   {v:'1.1.191', fr:['Historique des factures en lignes BAR OPS (couleur selon le statut), boutons harmonisés partout comme BAR OPS.','iPhone : cartes au style BAR OPS (bordure fine, liseré couleur client ou statut).']},
   {v:'1.1.190', fr:['Planning et Pointage au design BAR OPS : lignes en colonnes (date, client, prestation, horaires, montant), recherche et bouton + Nouvelle presta.']},
   {v:'1.1.189', fr:['Mes clients au design BAR OPS : rangées avec téléphone/email, nombre de prestas et dernière presta (Mac et iPhone).']},
@@ -3332,53 +3302,53 @@ function renderCA(){
 function renderDashboard(){
   const bookings = storeArr('bookings');
   const invoices = storeArr('invoices');
-  const clients = storeArr('clients');
   const today = todayStr();
   const now = new Date();
   const monthKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-
-  const caMois = invoices.filter(i=>i.status==='Payée' && invoiceEventMonth(i)===monthKey)
-    .reduce((s,i)=>s+invoiceAmt(i),0);
-  dashCA.textContent = caMois.toFixed(2)+' €';
-  const dashCaGoal = parseFloat(store('from').caGoal)||0;
-  if(dashCaGoal>0){
-    const dashGoalPct = (caMois/dashCaGoal)*100;
-    dashGoalBar.innerHTML = `
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-        <span class="ca-goal-label">${t('lbl_ca_goal_progress')}</span>
-        <span class="ca-goal-value">${caMois.toFixed(2)} € / ${dashCaGoal.toFixed(2)} € · ${Math.round(dashGoalPct)}%</span>
-      </div>
-      <div class="ca-goal-bar"><div class="ca-goal-bar-fill" style="width:${Math.min(100,dashGoalPct)}%;background:${dashGoalPct>=100?'var(--green)':'var(--gold)'};"></div></div>`;
-  } else {
-    dashGoalBar.innerHTML = '';
-  }
-
-  const upcoming = bookings.filter(b=>b.status==='à facturer' && b.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
-  dashUpcoming.textContent = upcoming.length;
-
-  const unpaidInvoices = invoices.filter(i=>i.status!=='Payée');
-  dashPending.textContent = unpaidInvoices.length;
-  const aEncaisser = unpaidInvoices.reduce((s,i)=>s+invoiceAmt(i),0);
-  dashUnpaidAmt.textContent = aEncaisser.toFixed(2)+' €';
-
-  const bookingsMois = bookings.filter(b=>b.status==='à facturer' && (b.date||'').startsWith(monthKey));
-  const heuresMois = bookingsMois.reduce((s,b)=>s+(b.actualHours ?? b.hours),0);
-  dashHours.textContent = heuresMois.toFixed(1)+' h';
-  const forecastMois = bookingsMois.reduce((s,b)=>s+(b.actualHours ?? b.hours)*b.rate,0);
-  dashForecastAmt.textContent = forecastMois.toFixed(2)+' €';
-
-  const next = upcoming[0];
-  if(next){
-    const c = clients.find(cl=>cl.name===next.client);
-    const lieu = next.addr || (c && c.addr) || '';
-    dashNext.innerHTML = `
-      <div class="dash-next-date">${new Date(next.date).toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'long'})}</div>
-      ${next.from&&next.to ? `<div class="dash-next-time">${esc(next.from)} – ${esc(next.to)}</div>` : ''}
-      <div class="dash-next-client">${esc(next.client)}${next.label?' — '+esc(next.label):''}</div>
-      ${lieu ? `<div class="dash-next-lieu">${esc(lieu)}</div>` : ''}`;
-  } else {
-    dashNext.innerHTML = `<p style="color:var(--text3);font-size:12px;">${t('empty_next')}</p>`;
-  }
+  const eur = v => v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const amt = b => (b.actualHours ?? b.hours ?? 0)*(b.rate||0);
+  const caMois = invoices.filter(i=>i.status==='Payée' && invoiceEventMonth(i)===monthKey).reduce((s,i)=>s+invoiceAmt(i),0);
+  const upcoming = bookings.filter(b=>b.status==='à facturer' && b.date>=today && !b.checkedOutAt).sort((a,b)=>a.date.localeCompare(b.date)||(a.from||'').localeCompare(b.from||''));
+  const unpaid = invoices.filter(i=>i.status!=='Payée');
+  const kpi = (label,val,sub,onclick)=>`<div class="card dash-kpi" style="padding:16px 20px;cursor:pointer;border:1px solid var(--border)" onclick="${onclick}" onmouseover="this.style.borderColor='var(--gold-border)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3)">${label}</div>
+      <div style="font-size:28px;font-weight:300;color:var(--gold);margin-top:6px;line-height:1.1">${val}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">${sub}</div>
+    </div>`;
+  let html = `<div class="dash-kpis" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px">
+    ${kpi('CA du mois',eur(caMois),now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}),"showTab('historique')")}
+    ${kpi('Prestas à venir',eur(upcoming.reduce((s,b)=>s+amt(b),0)),upcoming.length+' presta'+(upcoming.length>1?'s':''),"showTab('planning')")}
+    ${kpi('À encaisser',eur(unpaid.reduce((s,i)=>s+invoiceAmt(i),0)),unpaid.length+' facture'+(unpaid.length>1?'s':''),"showTab('historique');histTab('factures')")}
+  </div>`;
+  const t0 = new Date(today+'T00:00:00');
+  const dd = d => Math.round((new Date(d+'T00:00:00')-t0)/86400000);
+  const badge=(txt,kind)=>{const c=kind==='red'?['var(--red-bg)','var(--red)']:kind==='gold'?['var(--gold-bg)','var(--gold)']:['var(--surface2)','var(--text2)'];return`<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:${c[0]};color:${c[1]};white-space:nowrap;letter-spacing:.04em">${txt}</span>`;};
+  const dLbl = d => d ? new Date(d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
+  const row = r => `<div class="dash-row">${r.b}<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div><div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.txt}</div></div><button class="bo-edit" onclick="${r.act}">${r.btn}</button></div>`;
+  const grp = (title,items,icon) => items.length ? `<div class="dash-grp"><div class="dash-grp-h">${title} <span class="dash-grp-n">${items.length}</span></div>${items.slice(0,6).map(row).join('')}</div>` : '';
+  // Alertes : ce qui peut bloquer une presta (pointage en retard, prestas des 3 prochains jours)
+  const late = bookings.filter(b=>b.status==='à facturer' && b.date && b.date<today && !b.checkedOutAt);
+  const soon = upcoming.filter(b=>dd(b.date)<=3);
+  const A = {
+    late: late.map(b=>({b:badge(dLbl(b.date),'red'),name:esc(b.client),txt:'pointage non fait'+(b.label?' · '+esc(b.label):''),btn:t('btn_pointage'),act:`openPointageModal('${escJsAttr(b.id)}')`})),
+    soon: soon.map(b=>{const n=dd(b.date);return {b:badge(n===0?"Auj.":'J-'+n,n<=1?'red':'gold'),name:esc(b.client),txt:(b.from&&b.to?esc(b.from)+' – '+esc(b.to):'')+(b.addr?' · '+esc(b.addr):''),btn:t('btn_view'),act:`viewBooking('${escJsAttr(b.id)}')`};})
+  };
+  // À faire : facturation et encaissements
+  const toInvoice = bookings.filter(b=>b.status==='à facturer' && b.checkedOutAt);
+  const toSend = invoices.filter(i=>i.status==='À envoyer');
+  const toCash = invoices.filter(i=>i.status==='Envoyée');
+  const T = {
+    inv: toInvoice.map(b=>({b:badge(dLbl(b.date)),name:esc(b.client),txt:eur(amt(b))+' à facturer',btn:t('btn_invoice'),act:`invoiceBooking('${escJsAttr(b.id)}')`})),
+    send: toSend.map(i=>({b:badge(esc(i.num)),name:esc(i.client),txt:esc(i.total)+' · pas encore envoyée',btn:t('btn_send_short'),act:`resendInvoice('${escJsAttr(i.num)}')`})),
+    cash: toCash.map(i=>({b:badge(esc(i.num),'gold'),name:esc(i.client),txt:esc(i.total)+' · en attente de paiement',btn:t('status_payee'),act:`updateInvoiceStatus('${escJsAttr(i.num)}','Payée');renderDashboard()`}))
+  };
+  const alertsHtml = grp('Pointages en retard',A.late)+grp('Dans les 3 prochains jours',A.soon);
+  const todoHtml = grp('Prestas à facturer',T.inv)+grp('Factures à envoyer',T.send)+grp('Paiements à encaisser',T.cash);
+  const box = (title,sub,inner,none)=>`<div class="card" style="border:1px solid var(--border);margin:0"><div style="font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)">${title}</div><div style="font-size:11px;color:var(--text3);margin:2px 0 10px">${sub}</div>${inner||`<div style="font-size:12px;color:var(--text3);padding:6px 0">${none}</div>`}</div>`;
+  html += `<div class="dash-split">${box('Alertes','Ce qui peut bloquer une prestation à venir',alertsHtml,'Aucune alerte')}${box('À faire','Facturation et encaissements',todoHtml,'Rien d’urgent')}</div>`;
+  const goal = parseFloat(store('from').caGoal)||0;
+  if(goal>0){ const pct=(caMois/goal)*100; html += `<div class="card" style="border:1px solid var(--border)"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span class="ca-goal-label">${t('lbl_ca_goal_progress')}</span><span class="ca-goal-value">${eur(caMois)} / ${eur(goal)} · ${Math.round(pct)}%</span></div><div class="ca-goal-bar"><div class="ca-goal-bar-fill" style="width:${Math.min(100,pct)}%;background:${pct>=100?'var(--green)':'var(--gold)'};"></div></div></div>`; }
+  dashContent.innerHTML = html;
 }
 function dashNewBooking(){
   showTab('calendrier');
