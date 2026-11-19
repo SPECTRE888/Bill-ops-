@@ -509,8 +509,6 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script>/* App iOS native : le login Google se fait dans une feuille Safari (ASWebAuthenticationSession), on lui renvoie les jetons. */
-if(/[?&]native=1/.test(location.search)&&/access_token|error/.test(location.hash))location.replace('helmops://callback'+location.hash);</script>
 <script>
 function showToast(msg, duration){
   const stack = document.getElementById('toastStack');
