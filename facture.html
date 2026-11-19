@@ -319,7 +319,8 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .tab#tab-facture.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 .facture-scroll{flex:1;min-height:0;overflow-y:auto;}
 .tab#tab-historique.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
-#tab-historique>.prof-tabs{flex-shrink:0}
+.hist-tb.on{background:var(--gold)!important;color:#000!important;border-color:var(--gold)!important}
+@media(max-width:1000px){.ca-kpis{grid-template-columns:repeat(2,1fr)!important}}
 #tab-historique>.prof-pane.on{flex:1;min-height:0;overflow-y:auto}
 #tab-historique>.prof-pane[data-pt="factures"].on{display:flex;flex-direction:column;overflow:hidden}
 #tab-historique h2:first-child{margin-top:0;}
@@ -1152,9 +1153,8 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
 
     <div class="tab" id="tab-historique">
-      <div class="prof-tabs"><button class="prof-tab on" data-pt="analyses" onclick="histTab('analyses')">Analyses</button><button class="prof-tab" data-pt="factures" onclick="histTab('factures')">Historique</button></div>
+      <div class="bo-topbar" style="flex-shrink:0"><input id="histSearch" class="bo-input" style="width:200px!important;visibility:hidden" placeholder="Chercher..." oninput="renderHistory()"><div style="display:flex;gap:8px;align-items:center"><button class="bo-ghost hist-tb on" data-pt="analyses" onclick="histTab('analyses')">Analyses</button><button class="bo-ghost hist-tb" data-pt="factures" onclick="histTab('factures')">Factures</button><button class="bo-gold" onclick="showTab('facture')">+ Nouvelle facture</button></div></div>
       <div class="prof-pane" data-pt="factures">
-      <div class="bo-topbar" style="flex-shrink:0"><input id="histSearch" class="bo-input" style="width:260px!important" placeholder="Chercher..." oninput="renderHistory()"><button class="bo-gold" onclick="showTab('facture')">+ Nouvelle facture</button></div>
       <div id="histFilters" class="hist-filters"></div>
       <div id="histList"></div>
       </div>
@@ -1885,6 +1885,7 @@ async function initUpdateSystem(){
 // « Nouveautés » : notes écrites à la main, seulement pour les mises à jour qui comptent pour
 // l'utilisateur. Pas d'entrée = pas de popup. Ajouter la plus récente EN HAUT.
 const RELEASE_NOTES=[
+  {v:'1.1.195', fr:['Chiffre d\'affaires au design BAR OPS : boutons Analyses / Factures en haut, grands chiffres centrés.']},
   {v:'1.1.194', fr:['Facture et Profil au design BAR OPS : sections avec liseré et titre colorés, comme dans BAR OPS.']},
   {v:'1.1.193', fr:['iPhone : nouvel onglet Accueil (tableau de bord BAR OPS : chiffres clés, Alertes, À faire) et calendrier aligné sur BAR OPS.']},
   {v:'1.1.192', fr:['Tableau de bord au design BAR OPS : 3 chiffres clés cliquables, puis Alertes (pointages en retard, prestas imminentes) et À faire (à facturer, à envoyer, à encaisser) avec action en un clic.','Calendrier aligné sur BAR OPS (cases, pastilles, survol).']},
@@ -2303,7 +2304,7 @@ function deleteContact(cid){
   set('contacts', storeArr('contacts').filter(x=>x.id!==id));
   closeContactForm(); renderContacts();
 }
-function histTab(k){document.querySelectorAll('#tab-historique .prof-tab,#tab-historique .prof-pane').forEach(e=>e.classList.toggle('on',e.dataset.pt===k));if(k==='analyses')renderCA();}
+function histTab(k){document.querySelectorAll('#tab-historique .hist-tb,#tab-historique .prof-pane').forEach(e=>e.classList.toggle('on',e.dataset.pt===k));histSearch.style.visibility=k==='factures'?'visible':'hidden';if(k==='analyses')renderCA();}
 function profTab(k){document.querySelectorAll('#tab-entreprise .prof-tab,#tab-entreprise .prof-pane').forEach(e=>e.classList.toggle('on',e.dataset.pt===k));}
 function showTab(name){
   if(name==='ca'){ showTab('historique'); histTab('analyses'); return; }
@@ -3268,10 +3269,10 @@ function renderCA(){
   const goalPct = caGoal>0 ? (caMonth/caGoal)*100 : 0;
   const goalYearPct = caGoalYear>0 ? (caYear/caGoalYear)*100 : 0;
   const net = caMonth*(1-(chargesRate+taxRate)/100);
-  const kpi = (c,v,l,sub='') => `<div class="kpi" style="--sec:${c}"><div class="kpi-v">${v}</div><div class="kpi-l">${l}</div>${sub?`<div class="kpi-s">${sub}</div>`:''}</div>`;
+  const kpi = (c,v,l,sub='') => `<div class="card" style="text-align:center;padding:28px 20px;margin:0"><div style="font-size:32px;font-weight:300;color:${c==='var(--gold)'?'var(--gold)':c==='var(--red)'?'var(--red)':'var(--text)'};letter-spacing:-.01em">${v}</div><div style="font-size:11px;color:var(--text3);margin-top:6px;text-transform:uppercase;letter-spacing:.08em">${l}</div>${sub?`<div style="font-size:12px;color:var(--text3);margin-top:4px">${sub}</div>`:''}</div>`;
   const goal = (label,cur,tot,pct) => `<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span class="ca-goal-label">${label}</span><span class="ca-goal-value">${eur(cur)} / ${eur(tot)} · ${Math.round(pct)}%</span></div><div class="ca-goal-bar"><div class="ca-goal-bar-fill" style="width:${Math.min(100,pct)}%;background:${pct>=100?'var(--green)':'var(--gold)'};"></div></div></div>`;
   caStats.innerHTML = `
-    <div class="kpi-grid">
+    <div class="ca-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px">
       ${kpi('var(--gold)',eur(caMonth),t('stat_ce_mois'), evo===null?'':`<span style="color:${evo>=0?'var(--green)':'var(--red)'}">${evo>=0?'▲':'▼'} ${Math.abs(evo).toFixed(0)} %</span> vs mois précédent`)}
       ${kpi('var(--blue)',eur(caYear),t('stat_cette_annee'),`Moyenne ${eur(avgMonth)} / mois actif`)}
       ${kpi('var(--teal)',eur(totalCA),t('stat_total'),`${invoices.length} facture${invoices.length>1?'s':''} · panier moyen ${eur(avg)}`)}
