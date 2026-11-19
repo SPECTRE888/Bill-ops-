@@ -347,6 +347,33 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .dash-actions-col{display:flex;flex-direction:column;gap:6px;}
 .dash-actions-col button{width:100%;margin-top:0;}
 #tab-accueil h2{margin:0 0 10px;font-size:14px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--sec,var(--gold));border-radius:var(--radius-lg);padding:14px 16px}
+.kpi-v{font-size:24px;font-weight:300;color:var(--sec,var(--gold));letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.kpi-l{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+.kpi-s{font-size:11px;color:var(--text2);margin-top:6px}
+.an-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:14px}
+.an-bar-row{display:grid;grid-template-columns:minmax(90px,140px) 1fr auto;gap:10px;align-items:center;margin-bottom:9px;font-size:12px}
+.an-bar-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.an-bar{height:8px;border-radius:4px;background:var(--surface3);overflow:hidden}
+.an-bar i{display:block;height:100%;border-radius:4px}
+.an-bar-row .vl{color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.an-stack{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--surface3);margin:6px 0 10px}
+.an-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text2)}
+.an-legend b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.ct-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.ct-card{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--sec);border-radius:var(--radius-lg);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.ct-head{display:flex;align-items:center;gap:12px}
+.ct-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;color:var(--sec);background:color-mix(in srgb,var(--sec) 14%,transparent);border:1px solid color-mix(in srgb,var(--sec) 40%,transparent)}
+.ct-name{font-size:14px;font-weight:500;color:var(--text)}
+.ct-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.ct-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;color:var(--sec);background:color-mix(in srgb,var(--sec) 12%,transparent);margin-top:4px}
+.ct-lines{display:flex;flex-direction:column;gap:5px;font-size:12px}
+.ct-lines a{color:var(--text2);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-lines a:hover{color:var(--gold)}
+.ct-notes{font-size:11.5px;color:var(--text3);line-height:1.45;border-top:1px solid var(--border);padding-top:8px;white-space:pre-line}
+.ct-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.ct-actions .btn-line{margin:0;padding:5px 10px;font-size:10.5px}
 .stat-row{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
 .stat-mini{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;text-align:center;}
 .stat-mini-value{font-family:var(--font-body);font-size:20px;color:var(--gold);font-weight:300;}
@@ -732,10 +759,10 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <button id="nav-pointage" onclick="showTab('pointage')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8.5" r="6.5"/><path d="M8 5v3.5l2.5 1.5"/></svg><span data-i18n="nav_pointage">Pointage</span></button>
     <button id="nav-facture" onclick="showTab('facture')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="1" width="10" height="14" rx="1"/><path d="M6 5h4M6 8h4M6 11h2"/></svg><span data-i18n="nav_facture">Facture</span></button>
     <button id="nav-historique" onclick="showTab('historique')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="1,12 5,7 8,9 11,4 15,6"/><path d="M1 15h14"/></svg><span data-i18n="nav_historique">Historique</span></button>
-    <button id="nav-ca" onclick="showTab('ca')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="9" width="3" height="6" rx="0.5"/><rect x="6.5" y="5" width="3" height="10" rx="0.5"/><rect x="11" y="2" width="3" height="13" rx="0.5"/></svg><span data-i18n="nav_ca">Chiffre d'affaires</span></button>
 
     <div class="nav-section" data-i18n="sec_clients">Clients</div>
     <button id="nav-clients" onclick="showTab('clients')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/><circle cx="11" cy="5" r="2.5"/><path d="M11 10c2.8 0 5 2.2 5 5"/></svg><span data-i18n="nav_clients">Mes clients</span></button>
+    <button id="nav-contacts" onclick="showTab('contacts')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="1.5" width="11" height="13" rx="1.5"/><circle cx="8" cy="6.5" r="2"/><path d="M5 11.5c.5-1.4 1.6-2.2 3-2.2s2.5.8 3 2.2M1 4.5h2.5M1 8h2.5M1 11.5h2.5"/></svg><span>Contacts</span></button>
 
     <div class="nav-update" id="navUpdate">
       <span class="nav-update-dot"></span>
@@ -885,6 +912,37 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
       </div></div>
     </div>
 
+    <div class="tab" id="tab-contacts">
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:0 0 12px;">
+        <input id="contactSearchInput" oninput="renderContacts()" placeholder="Chercher un contact..." style="width:auto;min-width:220px;height:32px;margin:0;">
+        <button class="btn-gold" onclick="openContactForm()" style="margin:0;white-space:nowrap;height:32px;display:inline-flex;align-items:center;">+ Nouveau contact</button>
+      </div>
+      <div id="contactFormWrap" class="card evsec" style="--sec:var(--gold);display:none;margin-bottom:16px;">
+        <div class="ctitle" id="contactFormTitle">Nouveau contact</div>
+        <input type="hidden" id="ctId">
+        <div class="row">
+          <div><label>Prénom</label><input id="ctFirst"></div>
+          <div><label>Nom</label><input id="ctLast"></div>
+        </div>
+        <div class="row">
+          <div><label>Fonction</label><input id="ctRole" placeholder="Directeur, Responsable événementiel..."></div>
+          <div><label>Société / client</label><input id="ctCompany" list="ctCompanyList"><datalist id="ctCompanyList"></datalist></div>
+        </div>
+        <div class="row">
+          <div><label>Email</label><input id="ctEmail" type="email"></div>
+          <div><label>Téléphone</label><input id="ctPhone" type="tel" placeholder="06 12 34 56 78"></div>
+        </div>
+        <label>Notes</label><textarea id="ctNotes" rows="2" placeholder="Infos utiles, préférences, historique..."></textarea>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn-gold" onclick="saveContact()">Enregistrer</button>
+          <button class="btn-line" onclick="closeContactForm()" style="margin-top:0;">Annuler</button>
+          <button class="btn-line btn-danger" id="ctDeleteBtn" onclick="deleteContact()" style="margin-top:0;display:none;">Supprimer</button>
+        </div>
+      </div>
+      <div id="contactStats"></div>
+      <div id="contactList"></div>
+    </div>
+
     <div class="tab" id="tab-clients">
       <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin:0 0 10px;">
         <div style="display:flex;align-items:center;gap:8px;">
@@ -1014,15 +1072,17 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
 
     <div class="tab" id="tab-historique">
+      <div class="prof-tabs"><button class="prof-tab on" data-pt="factures" onclick="histTab('factures')">Factures</button><button class="prof-tab" data-pt="analyses" onclick="histTab('analyses')">Analyses</button></div>
+      <div class="prof-pane on" data-pt="factures">
       <input id="histSearch" placeholder="Rechercher (client, n° de facture, mot-clé d'une prestation)..." oninput="renderHistory()" style="margin-bottom:10px;" data-i18n-ph="ph_hist_search">
       <div id="histFilters" class="hist-filters"></div>
       <div id="histList"></div>
-    </div>
-
-    <div class="tab" id="tab-ca">
-      <div id="caChart"></div>
-      <div id="caStats"></div>
-      <div id="caList"></div>
+      </div>
+      <div class="prof-pane" data-pt="analyses">
+        <div id="caStats"></div>
+        <div class="card evsec" style="--sec:var(--blue);margin-bottom:14px"><div class="ctitle">CA des 12 derniers mois</div><div id="caChart"></div></div>
+        <div id="caList"></div>
+      </div>
     </div>
 
     <div class="tab active" id="tab-accueil">
@@ -1779,6 +1839,7 @@ async function initUpdateSystem(){
 // « Nouveautés » : notes écrites à la main, seulement pour les mises à jour qui comptent pour
 // l'utilisateur. Pas d'entrée = pas de popup. Ajouter la plus récente EN HAUT.
 const RELEASE_NOTES=[
+  {v:'1.1.185', fr:['Nouvel onglet Contacts sous Mes clients : toutes les infos de tes interlocuteurs, avec appel, email et WhatsApp en un clic.','Historique et Chiffre d\'affaires réunis : onglet Factures + onglet Analyses en couleurs (CA par client, statut des paiements, évolution, objectifs).']},
   {v:'1.1.184', fr:['Icône de l\'app : plus de contour blanc dans le Dock.']},
   {v:'1.1.183', fr:['Mise à jour test : vérification de l\'installation automatique.','Le texte « Mise à jour » qui apparaissait en haut à gauche au lancement a disparu.','Réglages iPhone réorganisés comme sur Mac : Compte, Sécurité, Entreprise.']},
   {v:'1.1.179', fr:['Nouvelle icône d\'app, identique à celle de l\'iPhone.','Profil réorganisé en onglets : Compte, Sécurité, Entreprise, Facturation.','Les mises à jour s\'installent désormais toutes seules, de façon sécurisée.']},
@@ -1816,7 +1877,7 @@ function getSb(){ if(!sb) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON
 
 // Sauvegarde manuelle (export/import fichier JSON local) — indépendante du cloud, garde une copie
 // hors-ligne des données métier + préférences.
-const BACKUP_KEYS = { from:'{}', clients:'[]', invoices:'[]', bookings:'[]', pushSubscriptions:'[]' };
+const BACKUP_KEYS = { from:'{}', clients:'[]', contacts:'[]', invoices:'[]', bookings:'[]', pushSubscriptions:'[]' };
 function collectBackupPayload(){
   const data = {};
   Object.keys(BACKUP_KEYS).forEach(k=>{ data[k] = JSON.parse(localStorage.getItem(k) || BACKUP_KEYS[k]); });
@@ -1947,19 +2008,21 @@ const escJsAttr = v => esc(String(v??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'
 // devient un cache hydraté depuis Supabase plutôt que la donnée elle-même. set() écrit toujours
 // immédiatement en local (UI instantanée), puis pousse en tâche de fond vers la table Supabase
 // correspondante (debounce, comme l'ancien queueSync() mais table par table).
-const CLOUD_TABLES = { clients:'clients', bookings:'bookings', invoices:'invoices' };
+const CLOUD_TABLES = { clients:'clients', bookings:'bookings', invoices:'invoices', contacts:'contacts' };
 function toDbRow(k, obj, uid){
   if(k==='clients') return { id:obj.id, user_id:uid, name:obj.name, prefix:obj.prefix, email:obj.email, phone:obj.phone, addr:obj.addr, tutoiement:!!obj.tutoiement, siret:obj.siret, billing_addr:obj.billingAddr, default_rate:obj.defaultRate||null, notes:obj.notes };
   if(k==='bookings') return { id:obj.id, user_id:uid, client:obj.client, label:obj.label, addr:obj.addr, contact:obj.contact, date:obj.date, time_from:obj.from, time_to:obj.to, hours:obj.hours, rate:obj.rate, status:obj.status, checked_in_at:obj.checkedInAt||null, checked_out_at:obj.checkedOutAt||null, actual_hours:obj.actualHours||null, notified_at:obj.notifiedAt||null };
   // total est stocké localement comme une chaîne formatée ("2652.00 €"), mais la colonne cloud
   // est numeric — on la parse ici (même logique que invoiceAmt()) et on la reformate au retour.
   if(k==='invoices') return { id:obj.id, user_id:uid, num:obj.num, client:obj.client, date:obj.date, work_date:obj.workDate, total:parseFloat(String(obj.total||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0, status:obj.status, state:obj.state, html:obj.html, booking_id:obj.bookingId||null, booking_ids:obj.bookingIds||null };
+  if(k==='contacts') return { id:obj.id, user_id:uid, first_name:obj.firstName, last_name:obj.lastName, role:obj.role, company:obj.company, email:obj.email, phone:obj.phone, notes:obj.notes };
   if(k==='from') return { user_id:uid, name:obj.name, tagline:obj.tagline, addr:obj.addr, contact:obj.contact, siret:obj.siret, tva:obj.tva, rcs:obj.rcs, pay:obj.pay, rib:obj.rib, bic:obj.bic, reply_to:obj.replyTo, tax_rate:obj.taxRate||null, charges_rate:obj.chargesRate||null, ca_goal:obj.caGoal||null, ca_goal_year:obj.caGoalYear||null };
 }
 function fromDbRow(k, row){
   if(k==='clients') return { id:row.id, name:row.name, prefix:row.prefix, email:row.email, phone:row.phone, addr:row.addr, tutoiement:row.tutoiement, siret:row.siret, billingAddr:row.billing_addr, defaultRate:row.default_rate, notes:row.notes, createdAt:row.created_at };
   if(k==='bookings') return { id:row.id, client:row.client, label:row.label, addr:row.addr, contact:row.contact, date:row.date, from:row.time_from, to:row.time_to, hours:row.hours, rate:row.rate, status:row.status, checkedInAt:row.checked_in_at, checkedOutAt:row.checked_out_at, actualHours:row.actual_hours, notifiedAt:row.notified_at };
   if(k==='invoices') return { id:row.id, num:row.num, client:row.client, date:row.date, workDate:row.work_date, total:(typeof row.total==='number'?row.total.toFixed(2):row.total)+' €', status:row.status, state:row.state, html:row.html, bookingId:row.booking_id, bookingIds:row.booking_ids };
+  if(k==='contacts') return { id:row.id, firstName:row.first_name, lastName:row.last_name, role:row.role, company:row.company, email:row.email, phone:row.phone, notes:row.notes, createdAt:row.created_at };
   if(k==='from') return { name:row.name, tagline:row.tagline, addr:row.addr, contact:row.contact, siret:row.siret, tva:row.tva, rcs:row.rcs, pay:row.pay, rib:row.rib, bic:row.bic, replyTo:row.reply_to, taxRate:row.tax_rate, chargesRate:row.charges_rate, caGoal:row.ca_goal, caGoalYear:row.ca_goal_year };
 }
 const cloudPushTimers = {}, cloudPushBusy = {};
@@ -2079,8 +2142,22 @@ async function hydrateFromCloud(isRetry){
   // hérite silencieusement du 'from' resté en cache local d'un compte précédemment connecté sur
   // le même appareil (nom, IBAN, SIRET d'un autre utilisateur affichés/utilisés sur ses factures).
   localStorage.setItem('from', companyRes.data ? JSON.stringify(fromDbRow('from', companyRes.data)) : '{}');
+  // Contacts : table ajoutée après coup — tolérant (si la table manque ou échoue, le cache local reste
+  // intact ; s'il y a des contacts locaux et rien côté cloud, ils sont poussés une fois).
+  let contactsChanged = false;
+  try{
+    const cRes = await getSb().from('contacts').select('*').eq('user_id',uid);
+    if(!cRes.error){
+      if(!(cRes.data||[]).length && storeArr('contacts').length){ queueCloudPush('contacts'); }
+      else {
+        const nextContacts = JSON.stringify((cRes.data||[]).map(r=>fromDbRow('contacts',r)));
+        contactsChanged = nextContacts!==(localStorage.getItem('contacts')||'[]');
+        localStorage.setItem('contacts', nextContacts);
+      }
+    }
+  }catch(e){}
   localStorage.setItem('lastCloudSyncAt', new Date().toISOString());
-  return changed;
+  return changed || contactsChanged;
 }
 async function refreshFromCloudIfIdle(){
   if(Object.values(cloudPushTimers).some(t=>t)) return; // écriture en attente, ne pas écraser
@@ -2105,8 +2182,73 @@ function invoiceEventMonth(inv){
   return (inv.date||'').slice(0,7);
 }
 
+// ─── Contacts (carnet de contacts, calque BAR OPS) ─────────────────────────
+function contactName(c){ return [c.firstName,c.lastName].filter(Boolean).join(' ') || c.company || 'Sans nom'; }
+function contactInitials(c){ const n=[c.firstName,c.lastName].filter(Boolean); return (n.length?n.map(x=>x[0]).join(''):(c.company||'?')[0]).slice(0,2).toUpperCase(); }
+function waNumber(p){ let n=String(p||'').replace(/[\s\-\.\(\)]/g,''); if(n.startsWith('+')) n=n.slice(1); if(n.startsWith('0')) n='33'+n.slice(1); return n; }
+function renderContacts(){
+  const list = document.getElementById('contactList'); if(!list) return;
+  const all = storeArr('contacts');
+  const q = (document.getElementById('contactSearchInput')?.value||'').trim().toLowerCase();
+  const rows = all.filter(c=>!q || [c.firstName,c.lastName,c.role,c.company,c.email,c.phone,c.notes].filter(Boolean).join(' ').toLowerCase().includes(q))
+    .sort((a,b)=>contactName(a).localeCompare(contactName(b),'fr'));
+  const companies = new Set(all.map(c=>c.company).filter(Boolean));
+  const stats = document.getElementById('contactStats');
+  if(stats) stats.innerHTML = all.length ? `<div class="kpi-grid"><div class="kpi" style="--sec:var(--gold)"><div class="kpi-v">${all.length}</div><div class="kpi-l">Contacts</div></div><div class="kpi" style="--sec:var(--blue)"><div class="kpi-v">${companies.size}</div><div class="kpi-l">Sociétés</div></div><div class="kpi" style="--sec:var(--teal)"><div class="kpi-v">${all.filter(c=>c.email).length}</div><div class="kpi-l">Avec email</div></div><div class="kpi" style="--sec:var(--pink)"><div class="kpi-v">${all.filter(c=>c.phone).length}</div><div class="kpi-l">Avec téléphone</div></div></div>` : '';
+  if(!rows.length){ list.innerHTML = `<p style="color:var(--text2);font-size:12px;">${q?'Aucun contact ne correspond à ta recherche.':'Aucun contact pour l\'instant. Ajoute les personnes avec qui tu travailles : responsables, organisateurs, prestataires…'}</p>`; return; }
+  list.innerHTML = `<div class="ct-grid">${rows.map(c=>{
+    const col = clientColor(c.company||contactName(c));
+    const id = escJsAttr(c.id);
+    return `<div class="ct-card" style="--sec:${col}">
+      <div class="ct-head"><div class="ct-av">${esc(contactInitials(c))}</div>
+        <div style="min-width:0"><div class="ct-name">${esc(contactName(c))}</div>${c.role?`<div class="ct-sub">${esc(c.role)}</div>`:''}${c.company?`<span class="ct-tag">${esc(c.company)}</span>`:''}</div></div>
+      <div class="ct-lines">
+        ${c.email?`<a href="mailto:${esc(c.email)}" title="${esc(c.email)}">✉&nbsp; ${esc(c.email)}</a>`:''}
+        ${c.phone?`<a href="tel:${esc(c.phone)}" title="${esc(c.phone)}">☏&nbsp; ${esc(c.phone)}</a>`:''}
+      </div>
+      ${c.notes?`<div class="ct-notes">${esc(c.notes)}</div>`:''}
+      <div class="ct-actions">
+        ${c.phone?`<a class="btn-line" href="https://wa.me/${waNumber(c.phone)}" target="_blank" rel="noopener" style="text-decoration:none;color:#25D366;border-color:#25D36655">WhatsApp</a>`:''}
+        ${c.email?`<a class="btn-line" href="mailto:${esc(c.email)}" style="text-decoration:none">Écrire</a>`:''}
+        <button class="btn-line" onclick="openContactForm('${id}')">Modifier</button>
+      </div>
+    </div>`;}).join('')}</div>`;
+}
+function openContactForm(id){
+  const c = id ? storeArr('contacts').find(x=>x.id===id) : null;
+  ctId.value = c ? c.id : '';
+  ctFirst.value = c?.firstName||''; ctLast.value = c?.lastName||''; ctRole.value = c?.role||''; ctCompany.value = c?.company||'';
+  ctEmail.value = c?.email||''; ctPhone.value = c?.phone||''; ctNotes.value = c?.notes||'';
+  contactFormTitle.textContent = c ? 'Modifier le contact' : 'Nouveau contact';
+  ctDeleteBtn.style.display = c ? '' : 'none';
+  ctCompanyList.innerHTML = storeArr('clients').map(cl=>`<option value="${esc(cl.name)}">`).join('');
+  contactFormWrap.style.display = 'block';
+  ctFirst.focus();
+}
+function closeContactForm(){ contactFormWrap.style.display = 'none'; }
+function saveContact(){
+  const v = el => el.value.trim();
+  if(!v(ctFirst) && !v(ctLast) && !v(ctCompany)){ showToast('⚠ Indique au moins un nom ou une société.'); return; }
+  if(v(ctEmail) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v(ctEmail))){ showToast('⚠ Email invalide.'); return; }
+  const all = storeArr('contacts');
+  const data = { firstName:v(ctFirst), lastName:v(ctLast), role:v(ctRole), company:v(ctCompany), email:v(ctEmail), phone:v(ctPhone), notes:v(ctNotes) };
+  const i = all.findIndex(x=>x.id===ctId.value);
+  if(i>=0) all[i] = {...all[i], ...data}; else all.push({ id:crypto.randomUUID(), createdAt:new Date().toISOString(), ...data });
+  set('contacts', all);
+  closeContactForm(); renderContacts();
+  showToast('✔ Contact enregistré.');
+}
+function deleteContact(){
+  const id = ctId.value; if(!id) return;
+  const c = storeArr('contacts').find(x=>x.id===id);
+  if(!confirm('Supprimer le contact « '+contactName(c||{})+' » ?')) return;
+  set('contacts', storeArr('contacts').filter(x=>x.id!==id));
+  closeContactForm(); renderContacts();
+}
+function histTab(k){document.querySelectorAll('#tab-historique .prof-tab,#tab-historique .prof-pane').forEach(e=>e.classList.toggle('on',e.dataset.pt===k));if(k==='analyses')renderCA();}
 function profTab(k){document.querySelectorAll('#tab-entreprise .prof-tab,#tab-entreprise .prof-pane').forEach(e=>e.classList.toggle('on',e.dataset.pt===k));}
 function showTab(name){
+  if(name==='ca'){ showTab('historique'); histTab('analyses'); return; }
   const showPreview = name==='facture';
   previewWrap.classList.toggle('active', showPreview);
   appRoot.classList.toggle('no-preview', !showPreview);
@@ -2118,8 +2260,8 @@ function showTab(name){
   const tt=document.getElementById('topbarTitle'); if(tt) tt.textContent=(document.querySelector('#nav-'+name+' span')||{}).textContent||'';
   if(name==='clients') renderClientList();
   if(name==='facture') refreshClientSelect();
-  if(name==='historique') renderHistory();
-  if(name==='ca'){ loadCaSettings(); renderCA(); }
+  if(name==='historique'){ renderHistory(); loadCaSettings(); renderCA(); }
+  if(name==='contacts') renderContacts();
   if(name==='planning') renderPlanning();
   if(name==='pointage') renderPlanning();
   if(name==='calendrier') renderCalendarTab();
@@ -3008,7 +3150,7 @@ function renderCaChart(invoices, amt){
   caChart.innerHTML = `<div class="ca-chart">${months.map((m,idx)=>`
     <div class="ca-chart-bar${m.current?' current':''}">
       <div class="ca-chart-val">${values[idx]>0?Math.round(values[idx])+'€':''}</div>
-      <div class="ca-chart-col" style="height:${Math.max(2,(values[idx]/max)*138)}px;"></div>
+      <div class="ca-chart-col" style="height:${Math.max(2,(values[idx]/max)*138)}px;background:${m.current?'var(--gold)':'linear-gradient(180deg,var(--blue),color-mix(in srgb,var(--blue) 35%,transparent))'};"></div>
       <div class="ca-chart-label">${m.label}</div>
     </div>`).join('')}</div>`;
 }
@@ -3043,57 +3185,72 @@ function renderCA(){
   const now = new Date();
   const yearKey = String(now.getFullYear());
   const monthKey = yearKey+'-'+String(now.getMonth()+1).padStart(2,'0');
-  const totalCA = invoices.reduce((s,i)=>s+invoiceAmt(i),0);
-  const caYear = invoices.filter(i=>invoiceEventMonth(i).startsWith(yearKey)).reduce((s,i)=>s+invoiceAmt(i),0);
-  const caMonth = invoices.filter(i=>invoiceEventMonth(i)===monthKey).reduce((s,i)=>s+invoiceAmt(i),0);
+  const pm = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const prevKey = pm.getFullYear()+'-'+String(pm.getMonth()+1).padStart(2,'0');
+  const sum = arr => arr.reduce((s,i)=>s+invoiceAmt(i),0);
+  const eur = v => v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const totalCA = sum(invoices);
+  const yearInv = invoices.filter(i=>invoiceEventMonth(i).startsWith(yearKey));
+  const caYear = sum(yearInv);
+  const caMonth = sum(invoices.filter(i=>invoiceEventMonth(i)===monthKey));
+  const caPrev = sum(invoices.filter(i=>invoiceEventMonth(i)===prevKey));
+  const evo = caPrev>0 ? ((caMonth-caPrev)/caPrev)*100 : null;
+  const paid = invoices.filter(i=>i.status==='Payée'), sent = invoices.filter(i=>i.status==='Envoyée'), todo = invoices.filter(i=>i.status!=='Payée'&&i.status!=='Envoyée');
+  const paidAmt = sum(paid), sentAmt = sum(sent), todoAmt = sum(todo);
+  const avg = invoices.length ? totalCA/invoices.length : 0;
+  const monthsActive = new Set(yearInv.map(i=>invoiceEventMonth(i))).size;
+  const avgMonth = monthsActive ? caYear/monthsActive : 0;
   const SEUIL_FRANCHISE_TVA = 32000;
   const franchiseDepassee = caYear > SEUIL_FRANCHISE_TVA;
   const f = store('from');
-  const caGoal = parseFloat(f.caGoal)||0;
-  const caGoalYear = parseFloat(f.caGoalYear)||0;
-  const chargesRate = parseFloat(f.chargesRate)||0;
-  const taxRate = parseFloat(f.taxRate)||0;
+  const caGoal = parseFloat(f.caGoal)||0, caGoalYear = parseFloat(f.caGoalYear)||0;
+  const chargesRate = parseFloat(f.chargesRate)||0, taxRate = parseFloat(f.taxRate)||0;
   const goalPct = caGoal>0 ? (caMonth/caGoal)*100 : 0;
   const goalYearPct = caGoalYear>0 ? (caYear/caGoalYear)*100 : 0;
-  const chargesMonth = caMonth*chargesRate/100;
-  const taxMonth = caMonth*taxRate/100;
+  const net = caMonth*(1-(chargesRate+taxRate)/100);
+  const kpi = (c,v,l,sub='') => `<div class="kpi" style="--sec:${c}"><div class="kpi-v">${v}</div><div class="kpi-l">${l}</div>${sub?`<div class="kpi-s">${sub}</div>`:''}</div>`;
+  const goal = (label,cur,tot,pct) => `<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span class="ca-goal-label">${label}</span><span class="ca-goal-value">${eur(cur)} / ${eur(tot)} · ${Math.round(pct)}%</span></div><div class="ca-goal-bar"><div class="ca-goal-bar-fill" style="width:${Math.min(100,pct)}%;background:${pct>=100?'var(--green)':'var(--gold)'};"></div></div></div>`;
   caStats.innerHTML = `
-    <div class="stat-row">
-      <div class="stat-mini"><div class="stat-mini-value">${caMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_ce_mois')}</div></div>
-      <div class="stat-mini"><div class="stat-mini-value">${caYear.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_cette_annee')}</div></div>
-      <div class="stat-mini"><div class="stat-mini-value">${totalCA.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_total')}</div></div>
-      ${chargesRate>0 ? `<div class="stat-mini"><div class="stat-mini-value">${chargesMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_charges_mois')}</div></div>` : ''}
-      ${taxRate>0 ? `<div class="stat-mini"><div class="stat-mini-value">${taxMonth.toFixed(2)} €</div><div class="stat-mini-label">${t('stat_impot_mois')}</div></div>` : ''}
-    </div>
-    ${(caGoal>0||caGoalYear>0) ? `<div class="dash-section-title" style="margin-top:4px;">${t('ca_sec_objectifs')}</div>` : ''}
-    ${caGoal>0 ? `
-    <div style="margin-bottom:20px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-        <span class="ca-goal-label">${t('lbl_ca_goal_progress')}</span>
-        <span class="ca-goal-value">${caMonth.toFixed(2)} € / ${caGoal.toFixed(2)} € · ${Math.round(goalPct)}%</span>
-      </div>
-      <div class="ca-goal-bar"><div class="ca-goal-bar-fill" style="width:${Math.min(100,goalPct)}%;background:${goalPct>=100?'var(--green)':'var(--gold)'};"></div></div>
-    </div>` : ''}
-    ${caGoalYear>0 ? `
-    <div style="margin-bottom:20px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-        <span class="ca-goal-label">${t('lbl_ca_goal_year_progress')}</span>
-        <span class="ca-goal-value">${caYear.toFixed(2)} € / ${caGoalYear.toFixed(2)} € · ${Math.round(goalYearPct)}%</span>
-      </div>
-      <div class="ca-goal-bar"><div class="ca-goal-bar-fill" style="width:${Math.min(100,goalYearPct)}%;background:${goalYearPct>=100?'var(--green)':'var(--gold)'};"></div></div>
-    </div>` : ''}
-    <div style="font-size:11px;margin-bottom:14px;color:${franchiseDepassee?'var(--red)':'var(--text2)'};">
-      ${franchiseDepassee ? '⚠' : ''} ${t('franchise_prefix',{year:yearKey, ca:caYear.toFixed(2), seuil:SEUIL_FRANCHISE_TVA})} ${franchiseDepassee ? t('franchise_over') : t('franchise_ok')}
+    <div class="kpi-grid">
+      ${kpi('var(--gold)',eur(caMonth),t('stat_ce_mois'), evo===null?'':`<span style="color:${evo>=0?'var(--green)':'var(--red)'}">${evo>=0?'▲':'▼'} ${Math.abs(evo).toFixed(0)} %</span> vs mois précédent`)}
+      ${kpi('var(--blue)',eur(caYear),t('stat_cette_annee'),`Moyenne ${eur(avgMonth)} / mois actif`)}
+      ${kpi('var(--teal)',eur(totalCA),t('stat_total'),`${invoices.length} facture${invoices.length>1?'s':''}`)}
+      ${kpi('var(--pink)',eur(avg),'Panier moyen','Montant moyen par facture')}
+      ${kpi('var(--green)',eur(paidAmt),'Encaissé',`${paid.length} facture${paid.length>1?'s':''} payée${paid.length>1?'s':''}`)}
+      ${kpi('var(--red)',eur(sentAmt+todoAmt),'À encaisser',`${sent.length+todo.length} en attente`)}
+      ${(chargesRate||taxRate)?kpi('var(--text2)',eur(net),'Net estimé du mois',`Charges ${eur(caMonth*chargesRate/100)} · Impôt ${eur(caMonth*taxRate/100)}`):''}
     </div>`;
   const byClient = {};
   invoices.forEach(i=>{ byClient[i.client] = (byClient[i.client]||0) + invoiceAmt(i); });
   const rows = Object.entries(byClient).sort((a,b)=>b[1]-a[1]);
+  const maxC = rows.length ? rows[0][1] : 1;
+  const pctOf = v => totalCA>0 ? (v/totalCA*100) : 0;
+  const stack = (totalCA>0) ? `<div class="an-stack"><i style="width:${pctOf(paidAmt)}%;background:var(--green)"></i><i style="width:${pctOf(sentAmt)}%;background:var(--gold)"></i><i style="width:${pctOf(todoAmt)}%;background:var(--red)"></i></div>` : '';
+  // Répartition par jour de la semaine (date de la prestation)
+  const dow = [0,0,0,0,0,0,0];
+  storeArr('bookings').forEach(bk=>{ if(bk.date){ const d=new Date(bk.date+'T00:00:00').getDay(); dow[(d+6)%7]+=(bk.actualHours ?? bk.hours ?? 0)*(bk.rate||0); } });
+  const maxD = Math.max(...dow,1), dn=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'], dc=['var(--blue)','var(--teal)','var(--green)','var(--gold)','var(--pink)','var(--red)','var(--text2)'];
   caList.innerHTML = `
-    <div class="dash-section-title">${t('ca_sec_par_client')}</div>
-    ${rows.length ? `
-    <table><thead><tr><th>${t('ca_col_client')}</th><th class="num">${t('ca_col_generated')}</th></tr></thead>
-    <tbody>${rows.map(([c,v])=>`<tr><td>${esc(c)}</td><td class="num">${v.toFixed(2)} €</td></tr>`).join('')}</tbody></table>
-  ` : `<p style="color:var(--text3);font-size:12px;">${t('empty_data')}</p>`}`;
+    <div class="an-grid">
+      <div class="card evsec" style="--sec:var(--gold)"><div class="ctitle">${t('ca_sec_par_client')}</div>
+        ${rows.length ? rows.slice(0,10).map(([c,v])=>`<div class="an-bar-row"><span class="nm" title="${esc(c)}">${esc(c)}</span><div class="an-bar"><i style="width:${(v/maxC*100).toFixed(1)}%;background:${clientColor(c)}"></i></div><span class="vl">${eur(v)} · ${pctOf(v).toFixed(0)}%</span></div>`).join('') : `<p style="color:var(--text3);font-size:12px;">${t('empty_data')}</p>`}
+      </div>
+      <div class="card evsec" style="--sec:var(--green)"><div class="ctitle">Statut des paiements</div>
+        ${stack}
+        <div class="an-legend"><span><b style="background:var(--green)"></b>Payées ${eur(paidAmt)}</span><span><b style="background:var(--gold)"></b>Envoyées ${eur(sentAmt)}</span><span><b style="background:var(--red)"></b>À envoyer ${eur(todoAmt)}</span></div>
+        <div class="ctitle" style="margin-top:20px">CA prévu par jour de la semaine</div>
+        ${dn.map((n,i)=>`<div class="an-bar-row" style="grid-template-columns:40px 1fr auto"><span class="nm">${n}</span><div class="an-bar"><i style="width:${(dow[i]/maxD*100).toFixed(1)}%;background:${dc[i]}"></i></div><span class="vl">${eur(dow[i])}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="card evsec" style="--sec:var(--teal)"><div class="ctitle">${t('ca_sec_objectifs')} &amp; TVA</div>
+      ${caGoal>0 ? goal(t('lbl_ca_goal_progress'),caMonth,caGoal,goalPct) : ''}
+      ${caGoalYear>0 ? goal(t('lbl_ca_goal_year_progress'),caYear,caGoalYear,goalYearPct) : ''}
+      ${!(caGoal>0||caGoalYear>0) ? `<p style="font-size:11px;color:var(--text3);margin:0 0 10px;">Définis tes objectifs dans Profil › Facturation pour suivre ta progression ici.</p>` : ''}
+      <div style="font-size:11px;color:${franchiseDepassee?'var(--red)':'var(--text2)'};">
+        ${franchiseDepassee ? '⚠' : ''} ${t('franchise_prefix',{year:yearKey, ca:caYear.toFixed(2), seuil:SEUIL_FRANCHISE_TVA})} ${franchiseDepassee ? t('franchise_over') : t('franchise_ok')}
+      </div>
+      <div class="ca-goal-bar" style="margin-top:8px"><div class="ca-goal-bar-fill" style="width:${Math.min(100,caYear/SEUIL_FRANCHISE_TVA*100)}%;background:${franchiseDepassee?'var(--red)':caYear>SEUIL_FRANCHISE_TVA*.8?'var(--gold)':'var(--teal)'};"></div></div>
+    </div>`;
 }
 function renderDashboard(){
   const bookings = storeArr('bookings');
