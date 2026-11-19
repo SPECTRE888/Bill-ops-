@@ -401,7 +401,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
    n'apparaît (.show) que pendant un
    événement réel (available/downloading/installing/ready), en évidence (fond + bordure dorés,
    dot pulsant) pour ne pas la manquer — important tant que l'app est en dev et met à jour souvent. */
-.nav-update{display:none;align-items:center;gap:8px;padding:10px 12px;margin:auto 4px 2px;border-radius:8px;border:1px solid var(--gold-border);background:var(--gold-bg);font-size:10.5px;color:var(--gold);font-weight:500;cursor:pointer;animation:nav-update-in .25s ease-out;}
+.nav-update{display:none;align-items:center;gap:8px;padding:10px 12px;margin:auto 4px 10px;border-radius:8px;border:1px solid var(--gold-border);background:var(--gold-bg);font-size:10.5px;color:var(--gold);font-weight:500;cursor:pointer;animation:nav-update-in .25s ease-out;}
 .nav-update.show{display:flex;}
 .nav-update.ready{border-color:var(--green);background:var(--green-bg);color:var(--green);}
 @keyframes nav-update-in{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
@@ -739,7 +739,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 
     <div class="nav-update" id="navUpdate">
       <span class="nav-update-dot"></span>
-      <span class="nav-update-text" id="navUpdateText">Helm Ops</span>
+      <span class="nav-update-text" id="navUpdateText"></span>
     </div>
     </div>
     <div class="acct" id="acctWrap">
@@ -1346,7 +1346,7 @@ empty_day:'Aucune prestation ce jour.', btn_add_service_day:'+ Ajouter une prest
 modal_booking_title:'Détail de la prestation', btn_close:'Fermer',
 row_client:'Client', row_prestation:'Prestation', row_date:'Date', row_horaires:'Horaires', row_reel:'Réel (pointé)', row_taux:'Taux', row_total:'Total', row_adresse:'Adresse', row_contact:'Contact',
 non_definie:'non définie',
-nav_update_checking:'Vérification…', nav_update_available:'Mise à jour disponible', nav_update_downloading:'Téléchargement… {pct}%', nav_update_installing:'Installation…', nav_update_ready:'Redémarrage…', nav_update_tooltip:'Vérifier les mises à jour', nav_update_uptodate:'Helm Ops est à jour · v{version}',
+nav_update_checking:'Vérification…', nav_update_available:'Mise à jour disponible', nav_update_downloading:'Téléchargement…', nav_update_installing:'Installation…', nav_update_ready:'Redémarrage…', nav_update_tooltip:'Vérifier les mises à jour', nav_update_uptodate:'Helm Ops est à jour · v{version}',
 upd_title:'Mise à jour disponible', upd_state_choice:'Une nouvelle version est prête à installer.', upd_state_available:'Préparation du téléchargement…', upd_state_downloading:'Téléchargement… {pct}%', upd_state_installing:'Installation en cours…', upd_state_ready:'Prêt — redémarrage dans {seconds}s…', btn_install_update:'Installer maintenant', btn_update_later:'Plus tard',
 wn_title:'Nouveautés installées', wn_text:"Helm Ops vient d'être mis à jour avec des améliorations et des correctifs importants.", wn_btn:'Parfait, on y va', wn_badge_version:'Version {version}',
 toast_client_email_invalid:'⚠ Email client invalide : {email}',
@@ -1462,7 +1462,7 @@ empty_day:'No service that day.', btn_add_service_day:'+ Add a service',
 modal_booking_title:'Service detail', btn_close:'Close',
 row_client:'Client', row_prestation:'Service', row_date:'Date', row_horaires:'Hours', row_reel:'Actual (clocked)', row_taux:'Rate', row_total:'Total', row_adresse:'Address', row_contact:'Contact',
 non_definie:'not set',
-nav_update_checking:'Checking…', nav_update_available:'Update available', nav_update_downloading:'Downloading… {pct}%', nav_update_installing:'Installing…', nav_update_ready:'Restarting…', nav_update_tooltip:'Check for updates', nav_update_uptodate:'Helm Ops is up to date · v{version}',
+nav_update_checking:'Checking…', nav_update_available:'Update available', nav_update_downloading:'Downloading…', nav_update_installing:'Installing…', nav_update_ready:'Restarting…', nav_update_tooltip:'Check for updates', nav_update_uptodate:'Helm Ops is up to date · v{version}',
 upd_title:'Update available', upd_state_choice:'A new version is ready to install.', upd_state_available:'Preparing download…', upd_state_downloading:'Downloading… {pct}%', upd_state_installing:'Installing…', upd_state_ready:'Ready — restarting in {seconds}s…', btn_install_update:'Install now', btn_update_later:'Later',
 wn_title:'Update installed', wn_text:'Helm Ops was just updated with important improvements and fixes.', wn_btn:"Great, let's go", wn_badge_version:'Version {version}',
 toast_client_email_invalid:'⚠ Invalid client email: {email}',
@@ -1578,7 +1578,7 @@ empty_day:'Ningún servicio ese día.', btn_add_service_day:'+ Añadir un servic
 modal_booking_title:'Detalle del servicio', btn_close:'Cerrar',
 row_client:'Cliente', row_prestation:'Servicio', row_date:'Fecha', row_horaires:'Horario', row_reel:'Real (fichado)', row_taux:'Tarifa', row_total:'Total', row_adresse:'Dirección', row_contact:'Contacto',
 non_definie:'sin definir',
-nav_update_checking:'Comprobando…', nav_update_available:'Actualización disponible', nav_update_downloading:'Descargando… {pct}%', nav_update_installing:'Instalando…', nav_update_ready:'Reiniciando…', nav_update_tooltip:'Buscar actualizaciones', nav_update_uptodate:'Helm Ops está actualizado · v{version}',
+nav_update_checking:'Comprobando…', nav_update_available:'Actualización disponible', nav_update_downloading:'Descargando…', nav_update_installing:'Instalando…', nav_update_ready:'Reiniciando…', nav_update_tooltip:'Buscar actualizaciones', nav_update_uptodate:'Helm Ops está actualizado · v{version}',
 upd_title:'Actualización disponible', upd_state_choice:'Una nueva versión está lista para instalar.', upd_state_available:'Preparando la descarga…', upd_state_downloading:'Descargando… {pct}%', upd_state_installing:'Instalando…', upd_state_ready:'Listo — reinicio en {seconds}s…', btn_install_update:'Instalar ahora', btn_update_later:'Más tarde',
 wn_title:'Actualización instalada', wn_text:'Helm Ops se acaba de actualizar con mejoras y correcciones importantes.', wn_btn:'Perfecto, vamos', wn_badge_version:'Versión {version}',
 toast_client_email_invalid:'⚠ Email de cliente no válido: {email}',
@@ -1737,7 +1737,7 @@ function handleUpdateStatus(payload){
     updSetRing('wait');updSetStep('dl');
     updateModal.classList.add('show');
   } else if(state==='downloading'){
-    setNavUpdateState('downloading',t('nav_update_downloading',{pct}));
+    setNavUpdateState('downloading',t('nav_update_downloading'));
     updSetRing('pct',pct);updSetStep(pct>=80?'inst':'dl');
   } else if(state==='installing'){
     setNavUpdateState('installing',t('nav_update_installing'));
@@ -1745,7 +1745,7 @@ function handleUpdateStatus(payload){
   } else if(state==='ready'){
     setNavUpdateState('ready',t('nav_update_ready'));
     updSetRing('done',100,seconds!=null?seconds+' s':'');updSetStep('go');
-    document.getElementById('updTitle').textContent='Redémarrage…';
+    document.getElementById('updTitle').textContent='Mise à jour prête';
   } else if(state==='uptodate'){
     updateModal.classList.remove('show');
     setNavUpdateState('','');
