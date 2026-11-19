@@ -409,6 +409,27 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .bo-edit:hover{border-color:var(--gold-border);color:var(--gold)}
 .bo-del{padding:0 11px;height:28px;box-sizing:border-box;font-size:9px;border-radius:4px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:var(--font-body);line-height:1;display:inline-flex;align-items:center;white-space:nowrap;color:var(--red);border:1px solid var(--red);background:var(--red-bg);font-weight:500;transition:.2s;margin:0;width:auto}
 .bo-del:hover{color:#fff;background:var(--red)}
+
+/* Lignes Planning/Pointage : reprises de la liste Événements BAR OPS (evRowHTML) */
+.ev-hdr,.ev-r{display:grid;grid-template-columns:var(--cols);column-gap:12px;align-items:center}
+.ev-hdr{padding:8px 16px 8px 18px;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);margin-bottom:6px}
+.ev-hdr>div+div{padding-left:13px}
+.ev-list{display:flex;flex-direction:column;gap:6px}
+.ev-r{padding:11px 16px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--bl,var(--border));border-radius:6px;transition:.15s;cursor:pointer}
+.ev-r:hover{border-color:var(--gold-border);border-left-color:var(--bl,var(--gold-border))}
+.ev-c{border-left:1px solid var(--border);padding-left:12px;align-self:stretch;display:flex;flex-direction:column;justify-content:center;min-width:0;font-size:12px;color:var(--text2)}
+.ev-c .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-c.nm .t{font-size:13px;font-weight:600;color:var(--text)}
+.ev-c.amt{align-items:flex-end;font-size:13px;font-weight:600;color:var(--gold)}
+.ev-c.act{flex-direction:row;gap:5px;justify-content:flex-end;align-items:center}
+.ev-d{font-size:12px;color:var(--text);white-space:nowrap}
+.ev-x{height:30px;width:30px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;padding:0;background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:13px;cursor:pointer;transition:.15s;flex-shrink:0;margin:0}
+.ev-x:hover{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.ev-open{height:30px!important;padding:0 12px!important}
+.ev-badge{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;width:fit-content}
+.ev-badge.ok{background:var(--green-bg,rgba(80,180,120,.14));color:var(--green);border:1px solid var(--green)}
+.ev-badge.wait{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold)}
+@media(max-width:1100px){.ev-hdr{display:none}.ev-r{grid-template-columns:1fr auto!important;row-gap:6px}.ev-r .ev-c.hide-s{display:none}.ev-c{border:none;padding:0}}
 .bo-empty{text-align:center;padding:48px 16px;color:var(--text3);font-size:11px;font-weight:300;letter-spacing:.04em}
 
 @media(max-width:900px){
@@ -1180,12 +1201,17 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
 
     <div class="tab" id="tab-planning">
+      <div class="bo-topbar">
+        <input id="planSearch" class="bo-input" oninput="renderAccueil()" placeholder="Chercher...">
+        <button class="bo-gold" onclick="showTab('calendrier');cancelEditBooking();bkFormWrap.style.display='block';bkClient.focus();">+ Nouvelle presta</button>
+      </div>
       <div id="accList"></div>
     </div>
 
     <div class="tab" id="tab-pointage">
-      <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin:0 0 10px;">
-        <select id="ptgSortSelect" onchange="setPointageSort(this.value)" style="width:auto;min-width:150px;">
+      <div class="bo-topbar">
+        <span></span>
+        <select id="ptgSortSelect" class="bo-input" onchange="setPointageSort(this.value)" style="width:170px!important;">
           <option value="date" data-i18n="sort_date">Trier : Date</option>
           <option value="client" data-i18n="sort_client">Trier : Client</option>
           <option value="amount" data-i18n="sort_amount">Trier : Montant</option>
@@ -1882,6 +1908,7 @@ async function initUpdateSystem(){
 // « Nouveautés » : notes écrites à la main, seulement pour les mises à jour qui comptent pour
 // l'utilisateur. Pas d'entrée = pas de popup. Ajouter la plus récente EN HAUT.
 const RELEASE_NOTES=[
+  {v:'1.1.190', fr:['Planning et Pointage au design BAR OPS : lignes en colonnes (date, client, prestation, horaires, montant), recherche et bouton + Nouvelle presta.']},
   {v:'1.1.189', fr:['Mes clients au design BAR OPS : rangées avec téléphone/email, nombre de prestas et dernière presta (Mac et iPhone).']},
   {v:'1.1.188', fr:['Contacts : boutons, recherche et rangées identiques à l\'Équipe de BAR OPS.','Contacts disponibles sur iPhone (onglet Clients › Contacts), synchronisés avec le Mac.']},
   {v:'1.1.187', fr:['Contacts au même design que l\'Équipe de BAR OPS : liste en rangées, regroupée par société.']},
@@ -3703,38 +3730,31 @@ function clearPointageEdit(){
 }
 function renderAccueil(){
   const today = todayStr();
+  const q = (document.getElementById('planSearch')?.value||'').trim().toLowerCase();
   const bookings = storeArr('bookings')
     .filter(b=>b.status==='à facturer' && b.date >= today && !b.checkedOutAt)
+    .filter(b=>!q || [b.client,b.label,b.addr,b.contact].filter(Boolean).join(' ').toLowerCase().includes(q))
     .sort((a,b)=>a.date.localeCompare(b.date) || (a.from||'').localeCompare(b.from||''));
-  if(!bookings.length){ accList.innerHTML = `<p style="color:var(--text3);font-size:12px;">${t('empty_venir')}</p>`; return; }
-  let html = `
-    <div class="acc-grid-cols acc-header">
-      <span></span><span>${t('row_client')}</span><span>${t('row_horaires')}</span><span>${t('row_total')}</span><span></span>
-    </div>`;
-  let lastDate = null;
-  bookings.forEach(b=>{
-    if(b.date !== lastDate){
-      lastDate = b.date;
-      const label = new Date(b.date+'T00:00:00').toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'long'});
-      html += `<div class="acc-day-header">${label.charAt(0).toUpperCase()+label.slice(1)}</div>`;
-    }
-    html += `
-    <div class="acc-grid-cols acc-row">
-      <span class="cal-dot" style="background:${clientColor(b.client)};"></span>
-      <div class="acc-client-block">
-        <div class="acc-client" title="${esc(b.client)}">${esc(b.client)}</div>
-        ${b.label ? `<div class="acc-presta" title="${esc(b.label)}">${esc(b.label)}</div>` : ''}
+  if(!bookings.length){ accList.innerHTML = `<div class="bo-empty">${q?'Aucune presta ne correspond.':t('empty_venir')}</div>`; return; }
+  const COLS = '110px minmax(0,1.4fr) minmax(0,1.2fr) 110px 110px 96px 112px';
+  const t0 = new Date(today+'T00:00:00');
+  accList.innerHTML = `<div class="ev-hdr" style="--cols:${COLS}"><div>Date</div><div>Client</div><div>Prestation</div><div>Horaires</div><div>Quand</div><div style="text-align:right">Montant</div><div></div></div>
+  <div class="ev-list">` + bookings.map(b=>{
+    const dd = Math.round((new Date(b.date+'T00:00:00')-t0)/86400000);
+    const when = dd===0?"aujourd'hui":dd===1?'demain':`dans ${dd} jours`;
+    const dl = new Date(b.date+'T00:00:00').toLocaleDateString(locale(),{weekday:'short',day:'2-digit',month:'short'});
+    return `<div class="ev-r" style="--cols:${COLS};--bl:${clientColor(b.client)}" onclick="viewBooking('${escJsAttr(b.id)}')">
+      <div class="ev-d">${esc(dl)}</div>
+      <div class="ev-c nm"><div class="t" title="${esc(b.client)}">${esc(b.client)}</div></div>
+      <div class="ev-c hide-s"><div class="t" title="${esc(b.label||'')}">${esc(b.label||'—')}</div></div>
+      <div class="ev-c hide-s">${b.from&&b.to?esc(b.from)+' – '+esc(b.to):'—'}</div>
+      <div class="ev-c hide-s" style="color:${dd<=7?'var(--gold)':'var(--text3)'}">${when}</div>
+      <div class="ev-c amt hide-s">${(b.hours*b.rate).toFixed(2)} €</div>
+      <div class="ev-c act" onclick="event.stopPropagation()">
+        <button class="bo-edit ev-open" onclick="editBooking('${escJsAttr(b.id)}')">${t('btn_edit')}</button>
+        <button class="ev-x" title="${t('btn_delete')}" onclick="deleteBooking('${escJsAttr(b.id)}')">×</button>
       </div>
-      <span class="acc-horaires">${b.from&&b.to?esc(b.from)+'-'+esc(b.to):''}</span>
-      <span class="acc-montant">${(b.hours*b.rate).toFixed(2)} €</span>
-      <div class="acc-actions">
-        <button class="btn-line" onclick="viewBooking('${b.id}')">${t('btn_view')}</button>
-        <button class="btn-line" onclick="editBooking('${b.id}')">${t('btn_edit')}</button>
-        <button class="btn-line btn-danger" onclick="deleteBooking('${b.id}')">${t('btn_delete_short')}</button>
-      </div>
-    </div>`;
-  });
-  accList.innerHTML = html;
+    </div>`;}).join('') + `</div>`;
 }
 function renderCalendarTab(){
   renderCalendar();
@@ -3764,28 +3784,28 @@ function renderPlanning(){
     pending.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   }
   if(ptgSortSelect) ptgSortSelect.value = pointageSortBy;
-  bkList.innerHTML = pending.length ? pending.map(b=>{
+  const COLS = '24px 110px minmax(0,1.4fr) minmax(0,1.2fr) 110px 90px 96px 250px';
+  bkList.innerHTML = pending.length ? `<div class="ev-hdr" style="--cols:${COLS}"><div></div><div>Date</div><div>Client</div><div>Prestation</div><div>Horaires</div><div>Statut</div><div style="text-align:right">Montant</div><div></div></div><div class="ev-list">` + pending.map(b=>{
     const h = b.actualHours ?? b.hours;
     const pointed = b.checkedInAt && b.checkedOutAt;
-    const timesLabel = pointed ? `${localHM(b.checkedInAt)}–${localHM(b.checkedOutAt)}` : (b.from&&b.to ? `${b.from}–${b.to}` : '');
-    return `
-    <div class="ptg-row">
-      <input type="checkbox" style="flex-shrink:0;" ${groupSelection.has(b.id)?'checked':''} onchange="toggleGroupSelect('${b.id}', this.checked)">
-      <div class="ptg-main">
-        <span class="ptg-name"><b>${esc(b.client)}</b>${b.label?' — '+esc(b.label):''}</span>
-        <span class="ptg-badge ${pointed?'done':'pending'}">${pointed?t('badge_pointe'):t('badge_prevu')}</span>
-        <span class="ptg-meta">${b.date?formatFrDate(b.date):t('sans_date')}${timesLabel?' · '+timesLabel:''}</span>
-      </div>
-      <div class="ptg-amount">${(h*b.rate).toFixed(2)} €</div>
-      <div class="ptg-actions">
-        <button class="btn-line" onclick="invoiceBooking('${b.id}')">${t('btn_invoice')}</button>
-        <button class="btn-line" onclick="viewBooking('${b.id}')">${t('btn_view')}</button>
-        <button class="btn-line" onclick="editBooking('${b.id}')">${t('btn_edit')}</button>
-        <button class="btn-line" onclick="openPointageModal('${b.id}')">${t('btn_pointage')}</button>
-        <button class="btn-line btn-danger" onclick="deleteBooking('${b.id}')">${t('btn_delete')}</button>
+    const timesLabel = pointed ? `${localHM(b.checkedInAt)}–${localHM(b.checkedOutAt)}` : (b.from&&b.to ? `${b.from}–${b.to}` : '—');
+    const id = escJsAttr(b.id);
+    return `<div class="ev-r" style="--cols:${COLS};--bl:${clientColor(b.client)}" onclick="viewBooking('${id}')">
+      <input type="checkbox" style="width:auto;margin:0" onclick="event.stopPropagation()" ${groupSelection.has(b.id)?'checked':''} onchange="toggleGroupSelect('${id}', this.checked)">
+      <div class="ev-d">${b.date?formatFrDate(b.date):t('sans_date')}</div>
+      <div class="ev-c nm"><div class="t" title="${esc(b.client)}">${esc(b.client)}</div></div>
+      <div class="ev-c hide-s"><div class="t">${esc(b.label||'—')}</div></div>
+      <div class="ev-c hide-s">${esc(timesLabel)}</div>
+      <div class="ev-c hide-s"><span class="ev-badge ${pointed?'ok':'wait'}">${pointed?t('badge_pointe'):t('badge_prevu')}</span></div>
+      <div class="ev-c amt hide-s">${(h*b.rate).toFixed(2)} €</div>
+      <div class="ev-c act" onclick="event.stopPropagation()">
+        <button class="bo-gold" style="height:30px;padding:0 12px;font-size:9px" onclick="invoiceBooking('${id}')">${t('btn_invoice')}</button>
+        <button class="bo-edit ev-open" onclick="openPointageModal('${id}')">${t('btn_pointage')}</button>
+        <button class="bo-edit ev-open" onclick="editBooking('${id}')">${t('btn_edit')}</button>
+        <button class="ev-x" title="${t('btn_delete')}" onclick="deleteBooking('${id}')">×</button>
       </div>
     </div>`;
-  }).join('') : `<p style="color:var(--text3);font-size:12px;">${t('empty_facturer')}</p>`;
+  }).join('') + `</div>` : `<div class="bo-empty">${t('empty_facturer')}</div>`;
   renderGroupInvoiceBar();
 }
 
