@@ -468,6 +468,7 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
         <button id="factViewCreees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('creees')">À envoyer</button>
         <button id="factViewEnvoyees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('envoyees')">Envoyées</button>
         <button id="factViewPayees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('payees')">Payées</button>
+        <button id="factViewCa" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('ca')">Analyses</button>
       </div>
       <div id="groupInvoiceBarMobile" style="display:none;margin-bottom:12px;padding:10px 12px;border:1px solid var(--gold-border);background:var(--gold-bg);border-radius:6px;font-size:12px;align-items:center;justify-content:space-between;gap:10px;">
         <span id="groupInvoiceInfoMobile"></span>
@@ -1108,7 +1109,7 @@ function renderDashboardMobile(){
       <div style="font-size:26px;font-weight:300;color:var(--gold);margin-top:4px;line-height:1.1">${val}</div>
       <div style="font-size:11px;color:var(--text3);margin-top:3px">${sub}</div></div>`;
   let html = `<div style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:14px">
-    ${kpi('CA du mois',eur(caMois),now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}),"switchTab('factures')")}
+    ${kpi('CA du mois',eur(caMois),now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}),"facturesView='ca';switchTab('factures')")}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     ${kpi('Prestas à venir',eur(upcoming.reduce((s,b)=>s+amt(b),0)),upcoming.length+' presta'+(upcoming.length>1?'s':''),"switchTab('planning')")}
     ${kpi('À encaisser',eur(unpaid.reduce((s,i)=>s+num(i.total),0)),unpaid.length+' facture'+(unpaid.length>1?'s':''),"switchTab('factures')")}
@@ -1749,6 +1750,33 @@ function invoiceCardHtml(i){
     </div>
   </div>`;
 }
+function renderCaMobile(){
+  const el = document.getElementById('facturesList');
+  const inv = storeArr('invoices');
+  const num = v => parseFloat(String(v||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
+  const eur = v => v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const mk = i => (i.workDate||i.date||'').slice(0,7);
+  const now = new Date(), key = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  const cur = key(now), year = String(now.getFullYear());
+  const sum = a => a.reduce((s,i)=>s+num(i.total),0);
+  const total = sum(inv), unpaid = inv.filter(i=>i.status!=='Payée');
+  const kpi = (v,l,c,sub='') => `<div class="mcard" style="text-align:center;padding:20px 12px;margin:0"><div style="font-size:24px;font-weight:300;color:${c};letter-spacing:-.01em">${v}</div><div style="font-size:10px;color:var(--text3);margin-top:6px;text-transform:uppercase;letter-spacing:.08em">${l}</div>${sub?`<div style="font-size:11px;color:var(--text3);margin-top:3px">${sub}</div>`:''}</div>`;
+  let h = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+    ${kpi(eur(sum(inv.filter(i=>mk(i)===cur))),'Ce mois','var(--gold)')}
+    ${kpi(eur(sum(inv.filter(i=>mk(i).startsWith(year)))),'Cette année','var(--text)')}
+    ${kpi(eur(total),'Total','var(--text)',inv.length+' facture'+(inv.length>1?'s':''))}
+    ${kpi(eur(sum(unpaid)),'À encaisser','var(--red)',unpaid.length+' en attente')}
+  </div>`;
+  const months=[]; for(let k=11;k>=0;k--){ const d=new Date(now.getFullYear(),now.getMonth()-k,1); months.push({k:key(d),l:d.toLocaleDateString('fr-FR',{month:'narrow'})}); }
+  const vals = months.map(x=>sum(inv.filter(i=>mk(i)===x.k))), mx=Math.max(...vals,1);
+  h += `<div class="mcard evsec" style="--sec:var(--blue)"><div class="ctitle">CA des 12 derniers mois</div><div style="display:flex;align-items:flex-end;gap:4px;height:110px">${vals.map((v,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="width:100%;height:${(v/mx*90).toFixed(0)}px;min-height:2px;border-radius:2px 2px 0 0;background:${i===11?'var(--gold)':'var(--gold-border)'}"></div><div style="font-size:9px;color:var(--text3);margin-top:4px;text-transform:uppercase">${months[i].l}</div></div>`).join('')}</div></div>`;
+  const by={}; inv.forEach(i=>{by[i.client]=(by[i.client]||0)+num(i.total);});
+  const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,10), top=rows.length?rows[0][1]:1;
+  h += `<div class="mcard evsec" style="--sec:var(--gold)"><div class="ctitle">CA par client</div>${rows.length?rows.map(([c,v])=>`<div style="display:grid;grid-template-columns:minmax(0,1fr) 1fr auto;gap:8px;align-items:center;padding:4px 0;font-size:12px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c)}</span><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:${(v/top*100).toFixed(0)}%;background:${clientColor(c)}"></div></div><span style="color:var(--text2)">${eur(v)}</span></div>`).join(''):'<div style="font-size:12px;color:var(--text3)">Aucune donnée.</div>'}</div>`;
+  const paid=sum(inv.filter(i=>i.status==='Payée')), sent=sum(inv.filter(i=>i.status==='Envoyée')), todo=sum(inv.filter(i=>i.status==='À envoyer')), p=v=>total>0?(v/total*100):0;
+  h += `<div class="mcard evsec" style="--sec:var(--green)"><div class="ctitle">Statut des paiements</div><div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--surface2)"><i style="width:${p(paid)}%;background:var(--green)"></i><i style="width:${p(sent)}%;background:var(--gold)"></i><i style="width:${p(todo)}%;background:var(--red)"></i></div><div style="display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:11px;color:var(--text2)"><span>● <span style="color:var(--green)">Payées</span> ${eur(paid)}</span><span>● <span style="color:var(--gold)">Envoyées</span> ${eur(sent)}</span><span>● <span style="color:var(--red)">À envoyer</span> ${eur(todo)}</span></div></div>`;
+  el.innerHTML = h;
+}
 let facturesView = 'afacturer';
 function switchFacturesView(view){
   facturesView = view;
@@ -1759,6 +1787,8 @@ function renderFacturesTab(){
   setSegActive('factViewCreees', facturesView==='creees');
   setSegActive('factViewEnvoyees', facturesView==='envoyees');
   setSegActive('factViewPayees', facturesView==='payees');
+  setSegActive('factViewCa', facturesView==='ca');
+  if(facturesView==='ca'){ document.getElementById('groupInvoiceBarMobile').style.display='none'; renderCaMobile(); return; }
   const el = document.getElementById('facturesList');
   if(facturesView==='afacturer'){
     const done = pointedBookings();
