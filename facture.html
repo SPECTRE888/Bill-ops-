@@ -1911,7 +1911,7 @@ function handleUpdateStatus(payload){
     updSetRing('done',100,'');updSetStep('inst');
   } else if(state==='ready'){
     setNavUpdateState('ready',t('nav_update_ready'));
-    updSetRing('done',100,seconds!=null?seconds+' s':'');updSetStep('go');
+    clearInterval(window._updCd);let _n=seconds!=null?seconds:null;const _tick=()=>{updSetRing('done',100,_n!=null?_n+' s':'');const st=document.getElementById('updState');if(st&&_n!=null&&typeof t==='function'){const s=t('upd_state_ready',{seconds:_n});if(s&&s!=='upd_state_ready')st.textContent=s;}};_tick();if(_n!=null)window._updCd=setInterval(()=>{if(_n>1){_n--;_tick();}else clearInterval(window._updCd);},1000);updSetStep('go');
     document.getElementById('updTitle').textContent='Mise à jour prête';
   } else if(state==='uptodate'){
     updateModal.classList.remove('show');
@@ -1946,6 +1946,7 @@ async function initUpdateSystem(){
 // « Nouveautés » : notes écrites à la main, seulement pour les mises à jour qui comptent pour
 // l'utilisateur. Pas d'entrée = pas de popup. Ajouter la plus récente EN HAUT.
 const RELEASE_NOTES=[
+  {v:'1.1.200', fr:['Mise à jour : le compte à rebours avant redémarrage défile (3, 2, 1).']},
   {v:'1.1.199', fr:['Fiche client façon BAR OPS : aperçu en direct (prestas, dernière presta, tarif, client depuis), sections Identité / Coordonnées / Facturation / Notes (Mac et iPhone).']},
   {v:'1.1.198', fr:['Nouvelle fiche contact façon BAR OPS : aperçu en direct, rôle (barman, serveur…), tarifs horaires avec calcul de marge (Mac et iPhone).']},
   {v:'1.1.197', fr:['Profil identique à BAR OPS : carte Compte (avatar carré, plan en doré, date de renouvellement), bandeau en haut des pages, bouton Compte surligné sur le Profil (Mac et iPhone).']},
