@@ -310,6 +310,9 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
 .tab#tab-facture.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 .facture-scroll{flex:1;min-height:0;overflow-y:auto;}
 .tab#tab-historique.active{display:flex;flex-direction:column;height:100%;overflow:hidden;}
+#tab-historique>.prof-tabs{flex-shrink:0}
+#tab-historique>.prof-pane.on{flex:1;min-height:0;overflow-y:auto}
+#tab-historique>.prof-pane[data-pt="factures"].on{display:flex;flex-direction:column;overflow:hidden}
 #tab-historique h2:first-child{margin-top:0;}
 #histList{flex:1;min-height:60px;overflow-y:auto;}
 /* Padding élargi propre à cette table (pas la règle globale th/td, réutilisée telle quelle par le
@@ -758,7 +761,7 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     <div class="nav-section" data-i18n="sec_facturation">Facturation</div>
     <button id="nav-pointage" onclick="showTab('pointage')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8.5" r="6.5"/><path d="M8 5v3.5l2.5 1.5"/></svg><span data-i18n="nav_pointage">Pointage</span></button>
     <button id="nav-facture" onclick="showTab('facture')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="1" width="10" height="14" rx="1"/><path d="M6 5h4M6 8h4M6 11h2"/></svg><span data-i18n="nav_facture">Facture</span></button>
-    <button id="nav-historique" onclick="showTab('historique')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="1,12 5,7 8,9 11,4 15,6"/><path d="M1 15h14"/></svg><span data-i18n="nav_historique">Historique</span></button>
+    <button id="nav-historique" onclick="showTab('historique')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="1,12 5,7 8,9 11,4 15,6"/><path d="M1 15h14"/></svg><span data-i18n="nav_historique">Chiffre d'affaires</span></button>
 
     <div class="nav-section" data-i18n="sec_clients">Clients</div>
     <button id="nav-clients" onclick="showTab('clients')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/><circle cx="11" cy="5" r="2.5"/><path d="M11 10c2.8 0 5 2.2 5 5"/></svg><span data-i18n="nav_clients">Mes clients</span></button>
@@ -1072,13 +1075,13 @@ tr,.totals,.inv-reglement,.inv-meta-row{page-break-inside:avoid;break-inside:avo
     </div>
 
     <div class="tab" id="tab-historique">
-      <div class="prof-tabs"><button class="prof-tab on" data-pt="factures" onclick="histTab('factures')">Factures</button><button class="prof-tab" data-pt="analyses" onclick="histTab('analyses')">Analyses</button></div>
-      <div class="prof-pane on" data-pt="factures">
+      <div class="prof-tabs"><button class="prof-tab on" data-pt="analyses" onclick="histTab('analyses')">Analyses</button><button class="prof-tab" data-pt="factures" onclick="histTab('factures')">Historique</button></div>
+      <div class="prof-pane" data-pt="factures">
       <input id="histSearch" placeholder="Rechercher (client, n° de facture, mot-clé d'une prestation)..." oninput="renderHistory()" style="margin-bottom:10px;" data-i18n-ph="ph_hist_search">
       <div id="histFilters" class="hist-filters"></div>
       <div id="histList"></div>
       </div>
-      <div class="prof-pane" data-pt="analyses">
+      <div class="prof-pane on" data-pt="analyses">
         <div id="caStats"></div>
         <div class="card evsec" style="--sec:var(--blue);margin-bottom:14px"><div class="ctitle">CA des 12 derniers mois</div><div id="caChart"></div></div>
         <div id="caList"></div>
@@ -1334,7 +1337,7 @@ const LOCALE_MAP = {fr:'fr-FR', en:'en-US', es:'es-ES'};
 const WEEKDAY_LETTERS = {fr:['L','M','M','J','V','S','D'], en:['M','T','W','T','F','S','S'], es:['L','M','X','J','V','S','D']};
 const I18N = {
 fr:{
-nav_accueil:'Tableau de bord', nav_planning:'Planning', nav_pointage:'Pointage', nav_calendrier:'Calendrier', nav_facture:'Facture', nav_historique:'Historique', nav_ca:"Chiffre d'affaires", nav_clients:'Mes clients', nav_donnees:'Profil',
+nav_accueil:'Tableau de bord', nav_planning:'Planning', nav_pointage:'Pointage', nav_calendrier:'Calendrier', nav_facture:'Facture', nav_historique:"Chiffre d'affaires", nav_ca:"Chiffre d'affaires", nav_clients:'Mes clients', nav_donnees:'Profil',
 sec_planning:'Planning', sec_facturation:'Facturation', sec_clients:'Clients', sec_compte:'Compte',
 theme_dark_title:'Sombre', theme_auto_title:'Auto', theme_light_title:'Clair', legal_link:'Mentions légales',
 data_title:'Profil', data_compte_title:'Compte', data_info_title:'Informations',
@@ -1450,7 +1453,7 @@ legal_droit_title:'Droit applicable', legal_droit_body:'Les présentes mentions 
 inv_paiement_reception:'Paiement à réception de facture, échéance :', inv_jours:'jours'
 },
 en:{
-nav_accueil:'Dashboard', nav_planning:'Schedule', nav_pointage:'Time tracking', nav_calendrier:'Calendar', nav_facture:'Invoice', nav_historique:'History', nav_ca:'Revenue', nav_clients:'My clients', nav_donnees:'Profile',
+nav_accueil:'Dashboard', nav_planning:'Schedule', nav_pointage:'Time tracking', nav_calendrier:'Calendar', nav_facture:'Invoice', nav_historique:'Revenue', nav_ca:'Revenue', nav_clients:'My clients', nav_donnees:'Profile',
 sec_planning:'Schedule', sec_facturation:'Billing', sec_clients:'Clients', sec_compte:'Account',
 theme_dark_title:'Dark', theme_auto_title:'Auto', theme_light_title:'Light', legal_link:'Legal notice',
 data_title:'Profile', data_compte_title:'Account', data_info_title:'Information',
@@ -1566,7 +1569,7 @@ legal_droit_title:'Governing law', legal_droit_body:'These legal notices are gov
 inv_paiement_reception:'Payment upon receipt of invoice, due within:', inv_jours:'days'
 },
 es:{
-nav_accueil:'Dashboard', nav_planning:'Planificación', nav_pointage:'Fichaje', nav_calendrier:'Calendario', nav_facture:'Factura', nav_historique:'Historial', nav_ca:'Facturación', nav_clients:'Mis clientes', nav_donnees:'Perfil',
+nav_accueil:'Dashboard', nav_planning:'Planificación', nav_pointage:'Fichaje', nav_calendrier:'Calendario', nav_facture:'Factura', nav_historique:'Facturación', nav_ca:'Facturación', nav_clients:'Mis clientes', nav_donnees:'Perfil',
 sec_planning:'Planificación', sec_facturation:'Facturación', sec_clients:'Clientes', sec_compte:'Cuenta',
 theme_dark_title:'Oscuro', theme_auto_title:'Auto', theme_light_title:'Claro', legal_link:'Aviso legal',
 data_title:'Perfil', data_compte_title:'Cuenta', data_info_title:'Información',
@@ -3214,11 +3217,8 @@ function renderCA(){
     <div class="kpi-grid">
       ${kpi('var(--gold)',eur(caMonth),t('stat_ce_mois'), evo===null?'':`<span style="color:${evo>=0?'var(--green)':'var(--red)'}">${evo>=0?'▲':'▼'} ${Math.abs(evo).toFixed(0)} %</span> vs mois précédent`)}
       ${kpi('var(--blue)',eur(caYear),t('stat_cette_annee'),`Moyenne ${eur(avgMonth)} / mois actif`)}
-      ${kpi('var(--teal)',eur(totalCA),t('stat_total'),`${invoices.length} facture${invoices.length>1?'s':''}`)}
-      ${kpi('var(--pink)',eur(avg),'Panier moyen','Montant moyen par facture')}
-      ${kpi('var(--green)',eur(paidAmt),'Encaissé',`${paid.length} facture${paid.length>1?'s':''} payée${paid.length>1?'s':''}`)}
-      ${kpi('var(--red)',eur(sentAmt+todoAmt),'À encaisser',`${sent.length+todo.length} en attente`)}
-      ${(chargesRate||taxRate)?kpi('var(--text2)',eur(net),'Net estimé du mois',`Charges ${eur(caMonth*chargesRate/100)} · Impôt ${eur(caMonth*taxRate/100)}`):''}
+      ${kpi('var(--teal)',eur(totalCA),t('stat_total'),`${invoices.length} facture${invoices.length>1?'s':''} · panier moyen ${eur(avg)}`)}
+      ${kpi('var(--red)',eur(sentAmt+todoAmt),'À encaisser',`${sent.length+todo.length} en attente${(chargesRate||taxRate)?` · net estimé du mois ${eur(net)}`:''}`)}
     </div>`;
   const byClient = {};
   invoices.forEach(i=>{ byClient[i.client] = (byClient[i.client]||0) + invoiceAmt(i); });
