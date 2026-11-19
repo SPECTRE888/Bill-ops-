@@ -300,7 +300,6 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
   </div>
   <main class="mobile-main">
     <section id="tab-pointage">
-      <h2>Pointage</h2>
       <div class="toggle-row" style="margin:0 0 14px;">
         <button id="pointViewTopoint" class="btn-line" style="flex:1;margin:0;" onclick="switchPointageView('topoint')">À pointer</button>
         <button id="pointViewPointed" class="btn-line" style="flex:1;margin:0;" onclick="switchPointageView('pointed')">Pointées</button>
@@ -308,7 +307,6 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <div id="pointageList"></div>
     </section>
     <section id="tab-planning" style="display:none;">
-      <h2>Planning</h2>
       <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);">Prévisionnel du mois</div>
       <div id="mCalForecast" style="font-family:var(--font-body);font-size:24px;color:var(--gold);margin-bottom:12px;"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -336,7 +334,6 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <datalist id="clientNames"></datalist>
     </section>
     <section id="tab-clients" style="display:none;">
-      <h2>Mes clients</h2>
       <div class="mcard">
         <input type="hidden" id="cliIdx" value="">
         <label>Nom société</label><input id="cliName">
@@ -350,7 +347,6 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <div id="clientListMobile"></div>
     </section>
     <section id="tab-factures" style="display:none;">
-      <h2>Factures</h2>
       <div class="toggle-row" style="margin:0 0 14px;flex-wrap:wrap;">
         <button id="factViewAfacturer" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('afacturer')">À facturer</button>
         <button id="factViewCreees" class="btn-line" style="flex:1;margin:0;min-width:80px;" onclick="switchFacturesView('creees')">À envoyer</button>
@@ -364,7 +360,6 @@ button{cursor:pointer;border:none;border-radius:4px;padding:8px 16px;font-size:1
       <div id="facturesList"></div>
     </section>
     <section id="tab-parametres" style="display:none;">
-      <h2>Réglages</h2>
       <div class="prof-tabs"><button class="prof-tab on" data-pt="compte" onclick="profTab('compte')">Compte</button><button class="prof-tab" data-pt="entreprise" onclick="profTab('entreprise')">Entreprise</button><button class="prof-tab" data-pt="envoi" onclick="profTab('envoi')">Envoi &amp; synchro</button></div>
       <div class="prof-pane on" data-pt="compte">
       <div class="mcard evsec" style="--sec:var(--gold)">

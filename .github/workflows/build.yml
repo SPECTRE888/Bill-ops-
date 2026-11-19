@@ -45,6 +45,11 @@ jobs:
       run: |
         codesign --force --deep --sign - --timestamp=none "dist/mac-arm64/Helm Ops.app"
 
+    - name: Sign update ZIP
+      run: node scripts/sign-update.js "dist/HelmOps-${GITHUB_REF_NAME#v}-arm64-mac.zip"
+      env:
+        UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+
     - name: Create release & upload assets
       run: |
         VERSION="${GITHUB_REF_NAME#v}"
@@ -56,6 +61,7 @@ jobs:
         FILES=()
         for f in \
           "dist/HelmOps-${VERSION}-arm64-mac.zip" \
+          "dist/HelmOps-${VERSION}-arm64-mac.zip.sig" \
           "dist/HelmOps-${VERSION}-arm64-mac.zip.blockmap" \
           "dist/HelmOps-${VERSION}-arm64-mac.dmg" \
           "dist/HelmOps-${VERSION}-arm64-mac.dmg.blockmap"

@@ -236,6 +236,22 @@ const fs       = require('fs')
 const os       = require('os')
 const { spawn } = require('child_process')
 
+// Clé publique de vérification des mises à jour (Ed25519). La clé privée correspondante signe le ZIP en CI
+// (scripts/sign-update.js, secret GitHub UPDATE_SIGNING_KEY). Sans signature valide → mise à jour refusée.
+// ⚠️ Ne jamais changer cette clé sans release de transition : les apps installées ne vérifient qu'avec elle.
+const UPDATE_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAoke+8NZtYJ7RmNgy65/h/EN721d3VL5zeisrBRsZLFA=
+-----END PUBLIC KEY-----`
+
+function verifyUpdateSignature(filePath, sigB64) {
+  try {
+    const sig = Buffer.from(String(sigB64).trim(), 'base64')
+    return sig.length === 64 && require('crypto').verify(null, fs.readFileSync(filePath), require('crypto').createPublicKey(UPDATE_PUBLIC_KEY), sig)
+  } catch (e) {
+    return false
+  }
+}
+
 const GH_OWNER = 'SPECTRE888'
 const GH_REPO  = 'Bill-ops-'
 
@@ -248,10 +264,17 @@ function sendUpdateStatus(payload) {
 
 function get(url) {
   return new Promise((resolve, reject) => {
-    const follow = (u) => {
+    const follow = (u, redirects = 0) => {
+      if (redirects > 10) return reject(new Error('Trop de redirections'))
       https.get(u, { headers: { 'User-Agent': 'Helm-Ops-Updater' } }, (res) => {
-        if (res.statusCode === 301 || res.statusCode === 302)
-          return follow(res.headers.location)
+        if ([301, 302, 303, 307, 308].includes(res.statusCode)) {
+          res.resume()
+          return follow(res.headers.location, redirects + 1)
+        }
+        if (res.statusCode !== 200) {
+          res.resume()
+          return reject(new Error(`HTTP ${res.statusCode}`))
+        }
         let d = ''
         res.on('data', c => d += c)
         res.on('end', () => resolve(d))
@@ -325,8 +348,13 @@ async function checkForUpdates() {
     const asset = release.assets.find(a => a.name.match(/arm64-mac\.zip$/) && !a.name.endsWith('.blockmap'))
     if (!asset) throw new Error('Asset ZIP introuvable dans la release')
 
-    pendingRelease = { version: latest, asset }
+    const sigAsset = release.assets.find(a => a.name === `${asset.name}.sig`)
+    if (!sigAsset) throw new Error('Signature de la mise à jour absente — mise à jour refusée')
+
+    pendingRelease = { version: latest, asset, sigUrl: sigAsset.browser_download_url }
     sendUpdateStatus({ state: 'available', version: latest })
+    // Comme BAR OPS : téléchargement + installation automatiques dès qu'une version est détectée
+    await downloadAndInstallUpdate()
   } catch (err) {
     console.error('[updater]', err?.message || err)
     sendUpdateStatus({ state: 'error', message: err?.message || String(err) })
@@ -335,14 +363,20 @@ async function checkForUpdates() {
 
 async function downloadAndInstallUpdate() {
   if (!pendingRelease) return
-  const { version: latest, asset } = pendingRelease
+  const { version: latest, asset, sigUrl } = pendingRelease
+  pendingRelease = null
   try {
+    const sigB64  = await get(sigUrl)
     const tmpDir  = fs.mkdtempSync(path.join(os.tmpdir(), 'helm-ops-upd-'))
     const zipPath = path.join(tmpDir, 'update.zip')
 
     await download(asset.browser_download_url, zipPath, (pct) => {
       sendUpdateStatus({ state: 'downloading', version: latest, pct })
     })
+    if (!verifyUpdateSignature(zipPath, sigB64)) {
+      try { fs.rmSync(tmpDir, { recursive: true, force: true }) } catch (e) {}
+      throw new Error('Signature de la mise à jour invalide — mise à jour refusée')
+    }
     sendUpdateStatus({ state: 'installing', version: latest })
 
     const appPath    = process.execPath.split('.app/Contents/')[0] + '.app'
