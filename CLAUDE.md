@@ -1,6 +1,6 @@
 # Helm Ops — Gestion complète d'activité (clients, planning, facturation)
 
-Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub (`Bill-ops-`) garde son nom technique historique, décorrélé de la marque affichée.
+Anciennement "Bill Ops" — renommé car l'app dépasse la simple facturation (CRM clients + planning/pointage + facturation). Le repo GitHub a été renommé `Bill-ops-` → `Helm-Ops` le 2026-11-20 (Pages : `spectre888.github.io/Helm-Ops/`).
 
 **Audit de sécurité du 2026-08-23** : une table `billops_sync` (ancien mécanisme de sync par code) avait une policy RLS grande ouverte (`anon read/write`, `qual:true`) — accès lecture/écriture sans authentification, exploitable avec la seule clé publique de l'app, contenait encore de vraies données. Table supprimée. Le flow OAuth desktop via relais Vercel (`helm-relay.vercel.app` + `auth-relay-deposit`/`auth-relay-poll` + table `login_relay`), documenté comme "mort côté app" depuis le passage au serveur loopback local le 2026-08-22, s'est révélé **toujours actif côté infra** (URL toujours whitelistée dans `uri_allow_list` Supabase Auth, secret partagé public) — exploitable à distance par phishing sans accès à la machine de la victime. Projet Vercel supprimé, Edge Functions `auth-relay-deposit`/`auth-relay-poll`/`oauth-google-callback`/`oauth-google-poll` supprimées, tables `login_relay`/`oauth_pending` supprimées, `oauth-relay-page/` retiré du repo, `uri_allow_list` nettoyée, `APP_RELAY_SECRET` tourné. Leçon retenue : "mort côté client" ne veut pas dire "mort côté infra" — un flow remplacé doit être désactivé à la source (whitelist, secrets, déploiement), pas seulement laissé sans appelant côté app.
 
@@ -266,7 +266,7 @@ système i18n (texte en dur en français, comme `loginGate`/`paywallGate` — ce
 sont jamais passés par `t()`).
 
 ## Repo cible
-https://github.com/SPECTRE888/Bill-ops-.git (branche main)
+https://github.com/SPECTRE888/Helm-Ops.git (branche main)
 
 ## Backlog fonctionnel en attente
 - Autonomie mobile complète (usage sans Mac) : se connecter avec un compte Google suffit désormais (plus de code à générer), onglet Clients et Mon entreprise faits côté mobile. Aucun point bloquant connu restant sur cet axe.

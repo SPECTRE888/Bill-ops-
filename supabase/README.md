@@ -95,7 +95,7 @@ ignore tout ce qui n'a pas ce marqueur (voir le commentaire en tête de
 `supabase/functions/stripe-webhook/index.ts`).
 
 Côté Supabase Dashboard (`chlmqnrvnrgeaihryreb`), Authentication → URL Configuration →
-`uri_allow_list` ne doit contenir que `https://spectre888.github.io/Bill-ops-/**` (PWA mobile) et
+`uri_allow_list` ne doit contenir que `https://spectre888.github.io/Helm-Ops/**` (PWA mobile) et
 `http://127.0.0.1:59877/callback**` (serveur loopback desktop, voir `CLAUDE.md`) — vérifié propre
 au 2026-08-24.
 

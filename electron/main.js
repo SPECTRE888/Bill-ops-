@@ -253,7 +253,7 @@ function verifyUpdateSignature(filePath, sigB64) {
 }
 
 const GH_OWNER = 'SPECTRE888'
-const GH_REPO  = 'Bill-ops-'
+const GH_REPO  = 'Helm-Ops'
 
 // Statut structuré (pas juste un message texte) envoyé au renderer, qui pilote le popup central
 // de mise à jour (#updateModal) + le badge de version dans la sidebar — voir handleUpdateStatus()

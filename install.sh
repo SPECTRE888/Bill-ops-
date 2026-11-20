@@ -1,12 +1,12 @@
 #!/bin/bash
 # Helm Ops — Installation automatique macOS
-# Usage: curl -sL https://raw.githubusercontent.com/SPECTRE888/Bill-ops-/main/install.sh | bash
+# Usage: curl -sL https://raw.githubusercontent.com/SPECTRE888/Helm-Ops/main/install.sh | bash
 
 set -e
 
 APP_NAME="Helm Ops"
 APP_DEST="/Applications/${APP_NAME}.app"
-REPO="SPECTRE888/Bill-ops-"
+REPO="SPECTRE888/Helm-Ops"
 TMP=$(mktemp -d)
 
 clear

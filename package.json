@@ -29,7 +29,7 @@
     "publish": {
       "provider": "github",
       "owner": "SPECTRE888",
-      "repo": "Bill-ops-",
+      "repo": "Helm-Ops",
       "releaseType": "release"
     },
     "artifactName": "HelmOps-${version}-${arch}-mac.${ext}",

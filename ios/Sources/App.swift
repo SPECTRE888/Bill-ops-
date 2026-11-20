@@ -6,7 +6,7 @@ import AuthenticationServices
 // Helm Ops iPhone : coque native autour de la PWA (mobile/index.html, servie par GitHub Pages).
 // Mises à jour de l'interface sans republier l'app ; seul le login Google passe par une feuille Safari.
 
-let appURL = URL(string: "https://spectre888.github.io/Bill-ops-/")!
+let appURL = URL(string: "https://spectre888.github.io/Helm-Ops/")!
 
 @main
 struct HelmOpsApp: App {
