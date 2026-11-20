@@ -106,7 +106,7 @@ Security) si/quand le projet passe sur un plan payant.
 ## Redéployer après une modification du code
 
 ```
-cd ~/VAULT/Jerome/1-PROJETS/helm-ops
+cd ~/Code/helm-ops
 npx supabase link --project-ref chlmqnrvnrgeaihryreb   # si pas déjà lié dans ce Terminal
 npx supabase functions deploy send-invoice --no-verify-jwt
 npx supabase functions deploy check-access --no-verify-jwt
